@@ -35,6 +35,9 @@ Right now, the only supported format is `Avro`:
 
 .. automethod:: TypeSystem.as_avro(self, name)
 
+There aren't any CLI tools yet, but you can see an example of this being
+exercised in the `tests/test_semantics.py` unit test.
+
 Indices and tables
 ==================
 
