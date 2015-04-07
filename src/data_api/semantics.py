@@ -37,16 +37,47 @@ class BaseTypeNotFoundError(Exception):
             base, derived))
 
 class Type(object):
+    """An object describing a single type.
+    """
     separator = '.'
     req_keywords = {'name', 'statements', 'properties'}
     all_keywords = set(list(req_keywords) + ['description'])
 
     def __init__(self, spec):
         """Create type from JSON spec.
-        """
-        self.parse(spec)
 
-    def parse(self, spec):
+        The JSON specification should be as follows:
+
+        .. code-block:: javascript
+
+            {
+            // Optional namespace for type name
+            "namespace": "kbase.us",
+            // Type name using UpperCamelCase convention
+            "name": "BananaBunch",
+             // Description of what these objects mean
+            "description": "A yellow fruit",
+            // List of properties, each with name and type.
+            // These are the value(s) for your type.
+            "properties": [
+                {"name": "num", "type": "int"},
+                {"name": "type", "type": "string"},
+            ],
+            // Zero or more statements about the relationship to
+            // other objects, which are pairs of the form
+            // ("relationship", "NameOfObject").
+            // The :class:`Statements` class defines constants for
+            // standard relationships.
+            "statements": [
+                (Statement.extends, "Fruit"),
+                (Statement.agg, "Banana"),
+                (Statement.derived_from, "BananaTree"),
+                ("inAFruitBasketWith", "GrapeBunch"),
+            }
+        """
+        self._parse(spec)
+
+    def _parse(self, spec):
         self._spec = spec.copy()  # save original
         keys = set(spec.keys())
         if (self.req_keywords - keys) or (keys - self.all_keywords):
@@ -73,6 +104,8 @@ class Type(object):
         self.properties = spec['properties']
 
     def as_json(self, indent=2):
+        """Return JSON string representation of this type.
+        """
         return json.dumps(self._spec, indent=indent)
 
     def __str__(self):
@@ -97,7 +130,7 @@ class TypeSystem(object):
     """Multiple types, that may refer to each other by name.
     """
     def __init__(self, namespace=''):
-        """Initialize empty container.
+        """Initialize an empty container.
 
         :param namespace: optional default namespace to prepend to the
                           referenced names, unless they are already qualified
@@ -112,8 +145,8 @@ class TypeSystem(object):
         """Add a type.
 
         :param type_: New type to add
-        :type type_: Type  # bit repeti-repeti-repeti .. boring.
-        :return:
+        :type type_: Type
+        :return: None
         """
         key = type_.full_name
         if key in self.types:
@@ -150,8 +183,8 @@ class TypeSystem(object):
     def as_avro(self, name):
         """Create and return avro schema.
 
-         :param name: Name of the schema to create, which should match the
-                      name of some type given to `add()`.
+        :param name: Name of the schema to create, which should match the
+                     name of some type given to `add()`.
         :return: The new avro schema.
         :rtype: dict
         """
