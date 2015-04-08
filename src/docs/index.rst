@@ -5,6 +5,7 @@ KBase Data API documentation
    :maxdepth: 2
 
    semantic
+   searchapi
    tools
 
 Indices and tables
