@@ -91,6 +91,7 @@ class Type(object):
                              keys_error(self.req_keywords - keys,
                                         keys - self.all_keywords))
 
+        self.version = None
         self.extends = None
         self.name = spec['name']
         self.namespace = spec.get('namespace', '')
@@ -107,7 +108,8 @@ class Type(object):
             if st.predicate == Statement.extends:
                 self.extends = st.object
 
-        self.properties = spec['properties']
+        # copy properties out of spec to avoid side-effects
+        self.properties = spec['properties'][:]
 
     def as_json(self, indent=2):
         """Return JSON string representation of this type.
@@ -134,12 +136,16 @@ class Statement(object):
 
 class TypeSystem(object):
     """Multiple types, that may refer to each other by name.
+
+    Importantly, versions are a property of this class, and not of
+    individual types.
     """
-    def __init__(self, namespace=''):
+    def __init__(self, namespace='', version=None):
         """Initialize an empty container.
 
         :param namespace: optional default namespace to prepend to the
                           referenced names, unless they are already qualified
+        :type namespace: str
         """
         self.types = {}
         if namespace:
@@ -160,8 +166,12 @@ class TypeSystem(object):
         self.types[key] = type_
 
     def _resolve(self, name):
-        """Prepare for serialization."""
+        """Prepare for serialization.
+        """
         t = self.types[self._ns(name)]
+        # avoid modifying shared lists
+        t.statements = t.statements[:]
+        t.properties = t.properties[:]
 
         # add all properties and statements from base classes
         # (assume single-inheritance)
