@@ -44,9 +44,14 @@ class Type(object):
     all_keywords = set(list(req_keywords) + ['description'])
 
     def __init__(self, spec):
-        """Create type from JSON spec.
+        """Create type from specification.
 
-        The JSON specification should be as follows:
+        :param spec: Specification, see below
+        :type spec: dict
+
+        The specification, a dict that could have been
+        parsed directly from a JSON string (so, a dict containing
+        only lists, dicts, and JSON scalars):
 
         .. code-block:: javascript
 
@@ -61,18 +66,19 @@ class Type(object):
             // These are the value(s) for your type.
             "properties": [
                 {"name": "num", "type": "int"},
-                {"name": "type", "type": "string"},
+                {"name": "color", "type": "string"},
             ],
             // Zero or more statements about the relationship to
-            // other objects, which are pairs of the form
-            // ("relationship", "NameOfObject").
-            // The :class:`Statements` class defines constants for
-            // standard relationships.
+            // other types, which are pairs of the form
+            // ["relationship", "NameOfType"].
+            // The Statements class defines constants, given
+            // in comments, for standard relationships.
+            // Arbitrary relationships are also possible.
             "statements": [
-                (Statement.extends, "Fruit"),
-                (Statement.agg, "Banana"),
-                (Statement.derived_from, "BananaTree"),
-                ("inAFruitBasketWith", "GrapeBunch"),
+                ["isSubclassOf", "Fruit"],     // .extends
+                ["aggregates", "Banana"],      // .agg
+                ["derivedFrom", "BananaTree"], // .derived_from
+                ["inAFruitBasketWith", "GrapeBunch"],
             }
         """
         self._parse(spec)
@@ -113,13 +119,13 @@ class Type(object):
 
 
 class Statement(object):
-    """Single statement of the form (subject, predicate, object), where
-    the subject and object are of :class:`Type` and the predicate is
-    a string desribing the association. Just like RDF.
+    """Single RDF-like triple of the form (subject, predicate, object), where
+    the 'subject' and 'object' are both :class:`Type` and the predicate is
+    a string desribing the nature of the association.
     """
-    derived_from = 'derivedFrom'
-    agg = 'aggregates'
-    extends = 'isSubclassOf'
+    derived_from = 'derivedFrom' #: The object is derived from the subject
+    agg = 'aggregates'           #: Multiple objects are aggregated in the subject
+    extends = 'isSubclassOf'     #: The subject is a sub-class of the object
 
     def __init__(self, class1, relationship, class2):
         self.subject = class1
