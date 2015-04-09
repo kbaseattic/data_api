@@ -4,6 +4,7 @@ KBase Data API documentation
 .. toctree::
    :maxdepth: 2
 
+   design
    semantic
    searchapi
    tools
