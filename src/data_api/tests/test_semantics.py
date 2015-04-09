@@ -45,6 +45,7 @@ class BaseTestCase(unittest.TestCase):
         cls.types = ts
 
     def _debug(self):
+        print("****************")
         print("Base\n====")
         print(self.base_type.as_json())
         print("----")
@@ -54,6 +55,7 @@ class BaseTestCase(unittest.TestCase):
         print(self.contig_type.as_json())
         print("----")
         print(json.dumps(self.types.as_avro('Contig'), indent=2))
+        print("****************")
 
     def _match_field(self, field_list, **kwargs):
         nope = "---"
