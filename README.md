@@ -3,3 +3,5 @@
 # data_api
 
 Towards a unified data api for KBase
+
+This repository is configured to use TravisCI
