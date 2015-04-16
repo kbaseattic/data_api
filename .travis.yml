@@ -2,13 +2,16 @@ language: python
 python:
   - "2.7"
   - "3.4"
+
 before_install: cd src
 install:
   - pip install coveralls
 after_install: cd ..
+
 before_script: cd src
 script: nosetests
 after_script: cd ..
+
 after_success:
   - cd src
   - coveralls
