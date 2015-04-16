@@ -10,7 +10,8 @@ install:
 
 script:
   - cd src
-  - nosetests
+  - touch .coverage
+  - nosetests --with-coverage --cover-package=data_api
   - cd ..
 
 after_success:
