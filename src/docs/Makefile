@@ -5,8 +5,8 @@
 SPHINXOPTS    =
 SPHINXBUILD   = sphinx-build
 PAPER         =
-#BUILDDIR      = _build
-BUILDDIR      = ../../../docs-ghpages/docs/data_api
+BUILDDIR      = _build
+KB_BUILDDIR   = ../../../docs-ghpages/docs/data_api
 
 # User-friendly check for sphinx-build
 ifeq ($(shell which $(SPHINXBUILD) >/dev/null 2>&1; echo $$?), 1)
@@ -17,6 +17,7 @@ endif
 PAPEROPT_a4     = -D latex_paper_size=a4
 PAPEROPT_letter = -D latex_paper_size=letter
 ALLSPHINXOPTS   = -d $(BUILDDIR)/doctrees $(PAPEROPT_$(PAPER)) $(SPHINXOPTS) .
+KB_ALLSPHINXOPTS   = -d $(KB_BUILDDIR)/doctrees $(PAPEROPT_$(PAPER)) $(SPHINXOPTS) .
 # the i18n builder cannot share the environment and doctrees with the others
 I18NSPHINXOPTS  = $(PAPEROPT_$(PAPER)) $(SPHINXOPTS) .
 
@@ -25,6 +26,7 @@ I18NSPHINXOPTS  = $(PAPEROPT_$(PAPER)) $(SPHINXOPTS) .
 help:
 	@echo "Please use \`make <target>' where <target> is one of"
 	@echo "  html       to make standalone HTML files"
+	@echo "  kbhtml     to make standalone HTML files, in KBase target directories"
 	@echo "  dirhtml    to make HTML files named index.html in directories"
 	@echo "  singlehtml to make a single large HTML file"
 	@echo "  pickle     to make pickle files"
@@ -56,6 +58,11 @@ html:
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)
 	@echo
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)."
+
+kbhtml:
+	$(SPHINXBUILD) -b html $(KB_ALLSPHINXOPTS) $(KB_BUILDDIR)
+	@echo
+	@echo "Build finished. The HTML pages are in $(KB_BUILDDIR)."
 
 dirhtml:
 	$(SPHINXBUILD) -b dirhtml $(ALLSPHINXOPTS) $(BUILDDIR)/dirhtml
