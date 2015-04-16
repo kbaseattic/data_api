@@ -3,14 +3,15 @@ python:
   - "2.7"
   - "3.4"
 
-before_install: cd src
 install:
+  - cd src
   - pip install coveralls
-after_install: cd ..
+  - cd ..
 
-before_script: cd src
-script: nosetests
-after_script: cd ..
+script:
+  - cd src
+  - nosetests
+  - cd ..
 
 after_success:
   - cd src
