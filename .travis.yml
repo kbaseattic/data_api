@@ -5,8 +5,11 @@ python:
 before_install: cd src
 install:
   - pip install coveralls
+after_install: cd ..
 before_script: cd src
 script: nosetests
-after_success: 
+after_script: cd ..
+after_success:
   - cd src
   - coveralls
+  - cd ..
