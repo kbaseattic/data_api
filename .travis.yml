@@ -7,4 +7,6 @@ install:
   - pip install coveralls
 before_script: cd src
 script: nosetests
-after_success: coveralls
+after_success: 
+  - cd src
+  - coveralls
