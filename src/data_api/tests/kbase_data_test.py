@@ -3,7 +3,7 @@ Unit tests for kbase_data module
 """
 __author__ = 'dang'
 
-from StringIO import StringIO
+from six import StringIO
 import unittest
 
 from .. import kbase_data
