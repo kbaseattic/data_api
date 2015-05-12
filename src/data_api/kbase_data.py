@@ -288,9 +288,3 @@ class FastaSource(Source):
         desc = self._infile.readline()
         # TODO: parse desc to a dict of info
         return {}
-
-############################################################
-
-
-if __name__ == '__main__':
-    __test(sys.argv[1])
