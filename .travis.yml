@@ -6,6 +6,7 @@ python:
 install:
   - cd src
   - pip install coveralls
+  - pip install -r requirements.txt
   - cd ..
 
 script:
