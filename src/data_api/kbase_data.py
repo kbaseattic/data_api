@@ -14,11 +14,18 @@ import uuid
 
 import six
 
+# Exceptions
+class AuthenticationRequired(Exception):
+    pass
+
 class DataClient:
     """Abstract client to KBase data store.
 
     Implemented by subclasses for different types
     of data stores, e.g. Titan vs. local graph DB vs. Spark GraphX etc.
+
+    Authentication may be a no-op, but subclasses should make this explicit
+    by setting self.authenticated to True.
     """
     __metaclass__ = ABCMeta
 
@@ -32,15 +39,20 @@ class DataClient:
         self._async = async
         if async:
             self._pool = Pool(processes=4)  #TODO: bigger pool size?
+        self.authenticated = False
 
     @abstractmethod
     def authenticate(self, user=None, role=None, **kw):
         """Authenticate, or re-authenticate to the data store.
 
+        Post:
+           self.authenticated is set to True, if successful
+
         Returns:
             bool: True if OK, False if not
         """
-        pass
+        return self.authenticated # subclasses should do something!
+
 
     def insert(self, obj, **kw):
         """Insert an object.
@@ -51,6 +63,8 @@ class DataClient:
         Returns:
             int: Number of objects actually inserted
         """
+        if not self.authenticated:
+            raise AuthenticationRequired()
         if self._async:
             return self._pool.apply_async(self.insert_sync, (obj,), kw)
         else:
@@ -69,6 +83,8 @@ class DataClient:
         Returns:
            list: Iterator over objects
         """
+        if not self.authenticated:
+            raise AuthenticationRequired()
         if self._async:
             return self._pool.apply_async(self.search_sync, (spec,), kw)
         else:
@@ -99,6 +115,7 @@ class MockDataClient(DataClient):
         super(MockDataClient, self).__init__()
 
     def authenticate(self, user=None, role=None, **kw):
+        self.authenticated = True
         return True
 
     def insert_sync(self, obj, **kw):
@@ -109,7 +126,8 @@ class MockDataClient(DataClient):
         result = []
         if spec and spec.has_key('oid'):
             oid = spec['oid']
-            result = filter(lambda o: o.oid == oid, map(itemgetter(0), self.objlist))
+            result = filter(lambda o: getattr(o, 'oid', None) == oid,
+                            map(itemgetter(0), self.objlist))
         return result
 
     def load_bytes(self, f):
@@ -273,20 +291,6 @@ class FastaSource(Source):
 
 ############################################################
 
-
-def __test(filename):
-    client = MockDataClient()
-    f = open(filename)
-    src = FastaSource(f)
-    oid = client.load(src)
-    # look for it
-    objects = client.search({'oid': oid})
-    print("Got back objects:")
-    for o in objects:
-        print('--')
-        print(o)
-    assert len(objects) == 1
-    assert objects[0].measurements['Bytes.FASTA']
 
 if __name__ == '__main__':
     __test(sys.argv[1])
