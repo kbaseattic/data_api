@@ -124,10 +124,10 @@ class MockDataClient(DataClient):
 
     def search_sync(self, spec, **kw):
         result = []
-        if spec and spec.has_key('oid'):
+        if spec and 'oid' in spec:
             oid = spec['oid']
-            result = filter(lambda o: getattr(o, 'oid', None) == oid,
-                            map(itemgetter(0), self.objlist))
+            result = [o for o in map(itemgetter(0), self.objlist) if
+                      getattr(o, 'oid', None) == oid]
         return result
 
     def load_bytes(self, f):
