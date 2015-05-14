@@ -7,7 +7,6 @@ alabaster==0.7.3
 avro==1.7.7
 docutils==0.12
 guzzle-sphinx-theme==0.7.2
-kbase-data-api==0.1
 nose
 protobuf==2.6.1
 pyprotobuf==0.8
@@ -17,4 +16,4 @@ six==1.9.0
 snowballstemmer==1.2.0
 sphinx-rtd-theme==0.1.7
 thrift==0.9.2
-wsgiref==0.1.2
+#wsgiref==0.1.2
