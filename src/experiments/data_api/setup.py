@@ -15,6 +15,6 @@ config = {
     "name": "genome_api"
 }
 
-setuptools.setup(package_dir = {'': 'lib', 'biokbase.workspace': 'lib/python_clients/biokbase/workspace'},
+setuptools.setup(package_dir = {'': 'lib'},
                  test_suite = "biokbase.data_api.tests.basic_suite",
                  **config)
