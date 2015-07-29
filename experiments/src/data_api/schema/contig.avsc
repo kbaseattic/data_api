@@ -1,0 +1,13 @@
+{
+    "type": "record",
+    "namespace": "us.kbase",
+    "name": "Contig",
+    "fields": [
+       {"name": "name", "type": "string" },
+       {"name": "length", "type": "long"},
+       {"name": "md5", "type": "string"},
+       {"name": "refURL", "type": "string"},
+       {"name": "assembly", "type": "string"},
+       {"name": "species", "type": "string"}
+    ]
+}
