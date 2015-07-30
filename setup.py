@@ -1,9 +1,9 @@
 import setuptools
 
 config = {
-    "description": "KBase Genome API",
+    "description": "KBase Data API",
     "author": "Matt Henderson",
-    "url": "https://github.com/kbase/data_api/experimental/data_api/",
+    "url": "https://github.com/kbase/data_api/",
     "download_url": "https://github.com/kbase/data_api/stuff?download",
     "author_email": "mhenderson@lbl.gov",
     "version": "0.1",

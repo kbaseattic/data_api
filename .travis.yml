@@ -4,18 +4,18 @@ python:
   - "3.4"
 
 install:
-  - cd src
+  - cd lib
   - pip install coveralls
   - pip install -r requirements.txt
   - cd ..
 
 script:
-  - cd src
+  - cd lib
   - touch .coverage
   - nosetests --with-coverage --cover-package=data_api
   - cd ..
 
 after_success:
-  - cd src
+  - cd lib
   - coveralls
   - cd ..
