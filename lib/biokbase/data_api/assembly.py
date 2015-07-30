@@ -32,8 +32,10 @@ class AssemblyAPI(ObjectAPI):
                                  "KBaseGenomes.ContigSet-d3262fe600c857ab28d45297fae38ed1",
                                  "KBaseGenomes.ContigSet-a5dafc82a37e8e354b39e705d3c03044",
                                  "KBaseGenomes.ContigSet-db7f518c9469d166a783d813c15d64e9"]
-        self._assembly_types = ["KBaseGenomesCondensedPrototypeV2.Assembly-ffd679cc5c9ce4a3b1bb1a5c3960b42e",
-                                "KBaseGenomesCondensedPrototypeV2.Assembly-ffd679cc5c9ce4a3b1bb1a5c3960b42e"]
+        self._assembly_types = ["KBaseGenomesCondensedPrototypeV2.Assembly-ffd679cc5c9ce4a3b1bb1a5c3960b42e"]
+        
+        self._is_assembly_type = self._typestring in self._assembly_types
+        self._is_contigset_type = self._typestring in self._contigset_types
 
     def get_assembly_id(self):
         """
@@ -46,9 +48,9 @@ class AssemblyAPI(ObjectAPI):
         """
         typestring = self.get_typestring()
 
-        if typestring in self._contigset_types:
+        if self._is_contigset_type:
             return self.get_data_subset(path_list=["id"])["id"]
-        elif typestring in self._assembly_types:
+        elif self._is_assembly_type:
             return self.get_data_subset(path_list=["assembly_id"])["assembly_id"]        
     
     def get_external_source_info(self):
@@ -59,15 +61,12 @@ class AssemblyAPI(ObjectAPI):
             None
         Returns:
             id: string identifier for the Assembly
-        """
-        
-        typestring = self.get_typestring()
-
-        if typestring in self._contigset_types:
+        """        
+        if self._is_assembly_type:
             return self.get_data_subset(path_list=["external_source",
                                                    "external_source_id",
                                                    "external_source_origination_date"])
-        elif typestring in self._assembly_types:
+        elif self._is_contigset_type:
             data = self.get_data_subset(path_list=["source","source_id"])
             
             output = dict()
@@ -86,10 +85,8 @@ class AssemblyAPI(ObjectAPI):
             gc_content: total guanine and cytosine content, counting all G and C only
             dna_size: total length of all dna sequence for this Assembly
             num_contigs: total number of contiguous sequences in this Assembly        
-        """
-        typestring = self.get_typestring()
-        
-        if typestring in self._contigset_types:
+        """        
+        if self._is_contigset_type:
             contigs = self.get_data()
             
             pattern = re.compile(r'g|G|c|C')
@@ -101,7 +98,7 @@ class AssemblyAPI(ObjectAPI):
             data["dna_size"] = total_length
             data["num_contigs"] = len(contigs)            
             return data
-        elif typestring in self._assembly_types:
+        elif self._is_assembly_type:
             return self.get_data_subset(path_list=["gc_content","dna_size","num_contigs"])            
 
     #def add_contigs(self, contig_map=None):
@@ -137,7 +134,10 @@ class AssemblyAPI(ObjectAPI):
         Returns:
             integer
         """
-        return self.get_data_subset(path_list=["num_contigs"])["num_contigs"]
+        if self._is_contigset_type:
+            return len(self.get_data()["contigs"])
+        elif self._is_assembly_type:
+            return self.get_data_subset(path_list=["num_contigs"])["num_contigs"]
 
     def get_contig_ids(self):
         """
@@ -150,10 +150,10 @@ class AssemblyAPI(ObjectAPI):
         """
         typestring = self.get_typestring()
 
-        if typestring in self._contigset_types:
+        if self._is_contigset_type:
             contigs = self.get_data()["contigs"]
             return [c["id"] for c in contigs]
-        elif typestring in self._assembly_types:
+        elif self._is_assembly_type:
             contigs = self.get_data()["contigs"]
             return [contigs[c]["contig_id"] for c in contigs]
         else:
@@ -179,9 +179,7 @@ class AssemblyAPI(ObjectAPI):
                 'sequence': string
             }
         """
-        typestring = self.get_typestring()
-
-        if typestring in self._contigset_types:
+        if self._is_contigset_type:
             contigs = self.get_data()["contigs"]
 
             if len(contig_id_list) == 0:
@@ -193,7 +191,7 @@ class AssemblyAPI(ObjectAPI):
                 outContigs[c["id"]] = c
             
             return outContigs            
-        elif typestring in self._assembly_types:
+        elif self._is_assembly_type:
             num_contigs = len(contig_id_list)
             obj_result = self.get_data_subset(path_list=["num_contigs","fasta_handle_ref"])
             total_contigs = obj_result["num_contigs"]
