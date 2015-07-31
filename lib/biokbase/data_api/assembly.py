@@ -1,3 +1,6 @@
+"""
+Operations on Assembly data type.
+"""
 import requests
 import sys
 import os
