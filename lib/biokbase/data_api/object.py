@@ -15,7 +15,7 @@ except ImportError:
 from biokbase.data_api import _get_token as get_token
 import biokbase.workspace.client
 
-REF_PATTERN = re.compile(".+/.+(/.+)?")
+REF_PATTERN = re.compile(".+/.+(/[0-9].+)?")
 
 class ObjectAPI(object):
     """
@@ -28,17 +28,24 @@ class ObjectAPI(object):
         elif not services.has_key("workspace_service_url"):
             raise KeyError("Expecting workspace_service_url key!")
         
-        if ref == None or type(ref) != type("") or re.match(REF_PATTERN, ref) == None:
+        if ref == None:
+            raise TypeError("Missing object reference!")
+        elif type(ref) != type("") and type(ref) != type(unicode()):
+            raise TypeError("Invalid reference given, expected string! Found {0}".format(type(ref)))
+        elif re.match(REF_PATTERN, ref) == None:
             raise TypeError("Invalid workspace reference string! Found {0}".format(ref))
         
         self.services = services
         self.ws_client = biokbase.workspace.client.Workspace(services["workspace_service_url"], token=get_token())
         self.ref = ref
         
-        self._typestring = None
-        self._info = None
-        self._id = None
-        self._name = None
+        self._info = self.ws_client.get_object_info_new({
+            "objects": [{"ref": self.ref}],
+            "includeMetadata": 0,
+            "ignoreErrors": 0})[0]
+        self._id = self._info[0]
+        self._name = self._info[1]
+        self._typestring = self.ws_client.translate_to_MD5_types([self._info[2]]).values()[0]
 
     def get_schema(self):
         """
@@ -57,10 +64,7 @@ class ObjectAPI(object):
         Returns:
             string
         """
-        
-        if self._typestring == None:
-            self._typestring = self.ws_client.translate_to_MD5_types([self.get_info()[2]]).values()[0]
-        
+                
         return self._typestring
 
     def get_info(self):
@@ -70,13 +74,7 @@ class ObjectAPI(object):
         Returns:
             dict
         """
-    
-        if self._info == None:
-            self._info = self.ws_client.get_object_info_new({
-                "objects": [{"ref": self.ref}],
-                "includeMetadata": 0,
-                "ignoreErrors": 0})[0]
-        
+            
         return self._info
 
     def get_history(self):
@@ -101,12 +99,6 @@ class ObjectAPI(object):
             string
         """
     
-        if self._id == None:
-            self._id = self.ws_client.get_object_info_new({
-                "objects": [{"ref": self.ref}],
-                "includeMetadata": 0,
-                "ignoreErrors": 0})[0][0]
-        
         return self._id
     
     def get_name(self):
@@ -117,12 +109,6 @@ class ObjectAPI(object):
             string
         """
     
-        if self._name == None:
-            self._name = self.ws_client.get_object_info_new({
-                "objects": [{"ref": self.ref}],
-                "includeMetadata": 0,
-                "ignoreErrors": 0})[0][1]
-        
         return self._name
     
     def get_stats(self):
@@ -130,7 +116,7 @@ class ObjectAPI(object):
         Retrieve any derived statistical information known about this object.
         """
     
-        return self.get_info()
+        return self._info
 
     def get_data(self):
         """

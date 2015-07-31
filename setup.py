@@ -11,7 +11,7 @@ config = {
     "tests_require": ["nose"],
     "install_requires": ["falcon", "requests", "six"],
     "packages": ["biokbase","biokbase.data_api","biokbase.data_api.tests","biokbase.workspace"],
-    "scripts": ["bin/data_api_test_basic.py"],
+    "scripts": ["bin/data_api_test_basic.py", "bin/data_api_demo.py"],
     "name": "genome_api"
 }
 
