@@ -1,21 +1,24 @@
-import requests
-import sys
-import json
-import datetime
+"""
+Module for base class for Data API objects.
+"""
+import os
 import re
-import tempfile
-import shutil
-import string
 
 try:
     import cStringIO as StringIO
 except ImportError:
     import StringIO as StringIO
 
-from biokbase.data_api import _get_token as get_token
 import biokbase.workspace.client
 
 REF_PATTERN = re.compile(".+/.+(/[0-9].+)?")
+
+def get_token():
+    try:
+        token = os.environ["KB_AUTH_TOKEN"]
+    except KeyError:
+        raise Exception(
+            "Missing authentication token!  Set KB_AUTH_TOKEN environment variable.")
 
 class ObjectAPI(object):
     """

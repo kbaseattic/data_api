@@ -37,13 +37,13 @@ class ObjectInfo(_ObjectInfo):
         self._conn = conn
 
     @property
-    def object(self):
-        """Get full, raw, object from its metadata.
+    def data(self):
+        """Get full, raw, data from its metadata.
         """
         return self._conn.get_object(self.objid)
 
     @property
-    def data(self):
+    def object(self):
         """Get wrapped KBase data object from the metadata.
         """
         clazz = get_object_class(self.type)
