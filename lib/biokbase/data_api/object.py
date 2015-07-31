@@ -1,11 +1,4 @@
-import requests
-import sys
-import json
-import datetime
 import re
-import tempfile
-import shutil
-import string
 
 try:
     import cStringIO as StringIO

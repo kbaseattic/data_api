@@ -2,12 +2,8 @@
 Operations on Assembly data type.
 """
 import requests
-import sys
 import os
-import json
-import datetime
 import re
-import shutil
 import string
 
 try:

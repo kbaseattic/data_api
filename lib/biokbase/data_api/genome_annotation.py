@@ -1,22 +1,6 @@
-import requests
 import sys
-import os
-import json
-import datetime
-import re
-import tempfile
-import shutil
-import string
-
-try:
-    import cStringIO as StringIO
-except ImportError:
-    import StringIO as StringIO
 
 from biokbase.data_api.object import ObjectAPI
-
-CHUNK_SIZE = 2**30
-
 
 class GenomeAnnotationAPI(ObjectAPI):
     def __init__(self, services, ref):
