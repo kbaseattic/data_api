@@ -9,15 +9,37 @@ The primary class is 'Finder'::
 __author__ = 'Dan Gunter <dkgunter@lbl.gov>'
 __date__ = '7/30/15'
 
-import biokbase
+# System
+import glob
 import os
-import biokbase.workspace.client
 from collections import namedtuple
 
+# Local
+import biokbase
+import biokbase.workspace.client
+
+def add_dicts(a, b):
+    """Add two dictionaries together and return a third."""
+    c = a.copy()
+    c.update(b)
+    return c
+
 ## Make a simply-accessed object for object_metadata from workspace API
-ObjectInfo = namedtuple('ObjectInfo',
+_ObjectInfo = namedtuple('ObjectInfo',
                         'objid,name,type,save_date,version,saved_by,wsid,'
                         'workspace,chsum,size,meta')
+
+class ObjectInfo(_ObjectInfo):
+    """Metadata about one object.
+    """
+    def set_conn(self, conn):
+        self.__conn = conn
+
+    @property
+    def object(self):
+        """Get full object from its metadata.
+        """
+        return self.__conn.get_object(self.objid)
 
 class DBConnection(object):
     """Database connection.
@@ -54,7 +76,21 @@ class DBConnection(object):
         Return:
           list of ObjectInfo
         """
-        return map(ObjectInfo._make, self.client.list_objects(self._ws_param))
+        raw_objlist = self.client.list_objects(self._ws_param)
+        obj_info_list = []
+        for o in raw_objlist:
+            oi = ObjectInfo._make(o)
+            oi.set_conn(self)
+            obj_info_list.append(oi)
+        return obj_info_list
+
+    def get_object(self, objid):
+        """Get an object in the workspace.
+        XXX: NOT DONE!
+        """
+        params = add_dicts({'obj_id': objid}, self._ws_param)
+        obj = self.client.get_object(params)
+        return obj
 
 class Finder(object):
     """Find objects.
@@ -66,6 +102,19 @@ class Finder(object):
     You can use indexing to look up objects by name:
 
       f['kb|contigset.12523']
+
+    The name can contain Unix glob characters (e.g. "*"):
+
+      f['Rhodobacter*']
+
+    You can also look up objects by position
+
+      f[0]
+
+    You can look up an object by arbitrary attributes by
+    passing a dict-like object (anything with an 'items' method) as the index
+
+       f[dict(type='KBaseGenomes.ContigSet-2.0')]
 
     Use list() to see all objects:
 
@@ -88,6 +137,7 @@ class Finder(object):
         self._objlist = None
         self._force_refresh = not cache
         self._ws_name = conn.get_workspace()
+        self._globmatch = glob.fnmatch.fnmatchcase
 
     def _set_objlist(self):
         if self._force_refresh or self._objlist is None:
@@ -97,17 +147,29 @@ class Finder(object):
         self._set_objlist()
         if isinstance(item, int):
             return self._objlist[item]
+        elif hasattr(item, 'items'): # dict-like
+            for o in self._objlist:
+                matched = True
+                for k, v in item.items():
+                    if getattr(o, k, None) != v:
+                        matched = False
+                        break
+                if matched:
+                    return o
+            raise KeyError('Object with attributes ({}) not found '
+                           'in workspace {}'.
+                           format(item, self._ws_name))
         else:
             for o in self._objlist:
                 if o.name == item:
                     return o
+                elif self._globmatch(o.name, item):
+                    return o
             raise KeyError('Object with name "{}" not found in workspace {}'.
-                           format(self._ws_name))
+                           format(item, self._ws_name))
 
     def list(self):
         """Get a list of metadata for all objects in the workspace.
-
-        XXX: HANGS! Not sure why...
         """
         self._set_objlist()
         for obj in self._objlist:
