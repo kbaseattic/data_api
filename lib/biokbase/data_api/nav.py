@@ -25,7 +25,7 @@ def add_dicts(a, b):
     return c
 
 ## Make a simply-accessed object for object_metadata from workspace API
-_ObjectInfo = namedtuple('ObjectInfo',
+_ObjectInfo = namedtuple('_ObjectInfo',
                         'objid,name,type,save_date,version,saved_by,wsid,'
                         'workspace,chsum,size,meta')
 
@@ -86,7 +86,8 @@ class DBConnection(object):
 
     def get_object(self, objid):
         """Get an object in the workspace.
-        XXX: NOT DONE!
+
+        TODO: Make this work!!
         """
         params = add_dicts({'obj_id': objid}, self._ws_param)
         obj = self.client.get_object(params)
