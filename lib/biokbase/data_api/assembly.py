@@ -1,24 +1,21 @@
 """
 Operations on Assembly data type.
 """
+# Stdlib
 import requests
-import sys
 import os
-import json
-import datetime
 import re
-import shutil
 import string
-
 try:
     import cStringIO as StringIO
 except ImportError:
     import StringIO as StringIO
 
+# Local
 from biokbase.data_api.object import ObjectAPI
+from biokbase.data_api import display
 
 CHUNK_SIZE = 2**30
-
 
 class AssemblyAPI(ObjectAPI):
     """
@@ -142,25 +139,31 @@ class AssemblyAPI(ObjectAPI):
         elif self._is_assembly_type:
             return self.get_data_subset(path_list=["num_contigs"])["num_contigs"]
 
-    def get_contig_ids(self):
+    def get_contig_ids(self, raw=False):
         """
         Retrieve the ids for every contiguous sequence in this Assembly.
         
         Args:
-            None
+          raw: If True, return result as a list of strings.
+               Otherwise return as a display.ContigSet object
+
         Returns:
-            list of string identifiers
+          list of string identifiers or display.Contigset
         """
         typestring = self.get_typestring()
 
         if self._is_contigset_type:
             contigs = self.get_data()["contigs"]
-            return [c["id"] for c in contigs]
+            raw_result = [c["id"] for c in contigs]
         elif self._is_assembly_type:
             contigs = self.get_data()["contigs"]
-            return [contigs[c]["contig_id"] for c in contigs]
+            raw_result = [contigs[c]["contig_id"] for c in contigs]
         else:
-            raise TypeError("Invalid type! Expected KBaseGenomes.ContigSet <= 3.0 or KBaseGenomesCondensedPrototype.Assembly <= 1.0, received " + info[2])
+            raise TypeError("Invalid type! Expected KBaseGenomes.ContigSet "
+                            "<= 3.0 or KBaseGenomesCondensedPrototype.Assembly "
+                            "<= 1.0, received {}".format(typestring))
+
+        return raw_result if raw else display.ContigSet(raw_result)
 
     def get_contigs_by_id(self, contig_id_list=list()):
         """
