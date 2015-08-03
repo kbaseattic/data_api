@@ -35,6 +35,10 @@ class AssemblyAPI(ObjectAPI):
         
         self._is_assembly_type = self._typestring in self._assembly_types
         self._is_contigset_type = self._typestring in self._contigset_types
+        
+        if not (self._is_assembly_type or self._is_contigset_type):
+            raise TypeError("Invalid type! Expected KBaseGenomes.ContigSet or KBaseGenomesCondensedPrototype.Assembly, received " + info[2])
+            
 
     def get_assembly_id(self):
         """
@@ -155,8 +159,6 @@ class AssemblyAPI(ObjectAPI):
         elif self._is_assembly_type:
             contigs = self.get_data()["contigs"]
             return [contigs[c]["contig_id"] for c in contigs]
-        else:
-            raise TypeError("Invalid type! Expected KBaseGenomes.ContigSet <= 3.0 or KBaseGenomesCondensedPrototype.Assembly <= 1.0, received " + info[2])
 
     def get_contigs_by_id(self, contig_id_list=list()):
         """
@@ -269,5 +271,3 @@ class AssemblyAPI(ObjectAPI):
                     outContigs[c]["sequence"] = fetch_contig(contigs[c]["start_position"],contigs[c]["num_bytes"])
 
             return outContigs
-        else:
-            raise TypeError("Invalid type! Expected KBaseGenomes.ContigSet <= 3.0 or KBaseGenomesCondensedPrototype.Assembly <= 1.0, received " + info[2])
