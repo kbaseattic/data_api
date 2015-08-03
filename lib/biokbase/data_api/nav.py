@@ -17,6 +17,7 @@ from collections import namedtuple
 # Local
 import biokbase
 import biokbase.workspace.client
+from biokbase.data_api.types import get_object_class
 
 def add_dicts(a, b):
     """Add two dictionaries together and return a third."""
@@ -33,13 +34,25 @@ class ObjectInfo(_ObjectInfo):
     """Metadata about one object.
     """
     def set_conn(self, conn):
-        self.__conn = conn
+        self._conn = conn
+        return self  # for chaining
+
+    @property
+    def data(self):
+        """Get full, raw, data from its metadata.
+        """
+        return self._conn.get_object(self.objid)
 
     @property
     def object(self):
-        """Get full object from its metadata.
+        """Get wrapped KBase data object from the metadata.
         """
-        return self.__conn.get_object(self.objid)
+        clazz = get_object_class(self.type)
+        if clazz is None:
+            raise RuntimeError('Internal error: Cannot get any class '
+                               'for type "{}"'.format(self.name))
+        kwparams = self._conn.get_objectapi_params(self.objid)
+        return clazz(**kwparams)
 
 class DBConnection(object):
     """Database connection.
@@ -64,8 +77,16 @@ class DBConnection(object):
                                  format(varname))
         if ws_url is None:
             ws_url = self.DEFAULT_WS_URL
+        self._ws_url = ws_url
         self.client = biokbase.workspace.client.Workspace(ws_url,
                                                           token=auth_token)
+
+    def get_objectapi_params(self, objid):
+        """Get back the params that the ObjectAPI ctor wants, as
+        a dictionary with the correct keyword arguments set.
+        """
+        return dict(services={'workspace_service_url': self._ws_url},
+                    ref='{}/{}'.format(self._ws, objid))
 
     def get_workspace(self):
         return str(self._ws)
@@ -76,21 +97,17 @@ class DBConnection(object):
         Return:
           list of ObjectInfo
         """
-        raw_objlist = self.client.list_objects(self._ws_param)
-        obj_info_list = []
-        for o in raw_objlist:
-            oi = ObjectInfo._make(o)
-            oi.set_conn(self)
-            obj_info_list.append(oi)
-        return obj_info_list
+        objlist = self.client.list_objects(self._ws_param)
+        return [ObjectInfo._make(o).set_conn(self) for o in objlist]
 
     def get_object(self, objid):
         """Get an object in the workspace.
 
         TODO: Make this work!!
         """
-        params = add_dicts({'obj_id': objid}, self._ws_param)
-        obj = self.client.get_object(params)
+        oid = {'wsid': self._ws, 'objid': objid}
+        params = [oid]
+        obj = self.client.get_objects(params)
         return obj
 
 class Finder(object):
@@ -144,6 +161,15 @@ class Finder(object):
         if self._force_refresh or self._objlist is None:
             self._objlist = self._client.list_objects()
 
+    def ls(self):
+        """List objects in the current container namespace.
+
+        Returns:
+          list of objects, each in the same form returned by the indexing
+          operations.
+        """
+        return list(self)
+
     def __getitem__(self, item):
         self._set_objlist()
         if isinstance(item, int):
@@ -168,11 +194,3 @@ class Finder(object):
                     return o
             raise KeyError('Object with name "{}" not found in workspace {}'.
                            format(item, self._ws_name))
-
-    def list(self):
-        """Get a list of metadata for all objects in the workspace.
-        """
-        self._set_objlist()
-        for obj in self._objlist:
-            print('@@ looking at object: {}'.format(obj))
-        return []
