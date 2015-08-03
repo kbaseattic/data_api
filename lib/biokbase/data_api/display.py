@@ -9,7 +9,7 @@ import qgrid
 
 _nbviewer = False
 def nbviewer_mode(value=None):
-    """Set the global nbviewer-friendly mode.
+    """Get/set the global nbviewer-friendly mode.
     This is currently used to tell qgrid where to get
     its JavaScript from (local or a CDN).
     """

@@ -35,6 +35,7 @@ class ObjectInfo(_ObjectInfo):
     """
     def set_conn(self, conn):
         self._conn = conn
+        return self  # for chaining
 
     @property
     def data(self):
@@ -96,13 +97,8 @@ class DBConnection(object):
         Return:
           list of ObjectInfo
         """
-        raw_objlist = self.client.list_objects(self._ws_param)
-        obj_info_list = []
-        for o in raw_objlist:
-            oi = ObjectInfo._make(o)
-            oi.set_conn(self)
-            obj_info_list.append(oi)
-        return obj_info_list
+        objlist = self.client.list_objects(self._ws_param)
+        return [ObjectInfo._make(o).set_conn(self) for o in objlist]
 
     def get_object(self, objid):
         """Get an object in the workspace.
@@ -164,6 +160,15 @@ class Finder(object):
     def _set_objlist(self):
         if self._force_refresh or self._objlist is None:
             self._objlist = self._client.list_objects()
+
+    def ls(self):
+        """List objects in the current container namespace.
+
+        Returns:
+          list of objects, each in the same form returned by the indexing
+          operations.
+        """
+        return list(self)
 
     def __getitem__(self, item):
         self._set_objlist()
