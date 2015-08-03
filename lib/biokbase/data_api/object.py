@@ -1,24 +1,21 @@
-"""
-Module for base class for Data API objects.
-"""
-import os
+import requests
+import sys
+import json
+import datetime
 import re
+import tempfile
+import shutil
+import string
 
 try:
     import cStringIO as StringIO
 except ImportError:
     import StringIO as StringIO
 
+from biokbase.data_api import _get_token as get_token
 import biokbase.workspace.client
 
-REF_PATTERN = re.compile("(.+/.+(/[0-9].+)?)|(ws\.[1-9][0-9]+\.[1-9][0-9]+)")
-
-def get_token():
-    try:
-        token = os.environ["KB_AUTH_TOKEN"]
-    except KeyError:
-        raise Exception(
-            "Missing authentication token!  Set KB_AUTH_TOKEN environment variable.")
+REF_PATTERN = re.compile(".+/.+(/[0-9].+)?")
 
 class ObjectAPI(object):
     """
@@ -42,53 +39,31 @@ class ObjectAPI(object):
         self.ws_client = biokbase.workspace.client.Workspace(services["workspace_service_url"], token=get_token())
         self.ref = ref
         
-        info_values = self.ws_client.get_object_info_new({
+        self._info = self.ws_client.get_object_info_new({
             "objects": [{"ref": self.ref}],
             "includeMetadata": 0,
-            "ignoreErrors": 0})[0]        
-        
-        self._info = {
-            "object_id": info_values[0],
-            "object_name": info_values[1],
-            "object_reference": "{0}/{1}".format(info_values[6],info_values[0]),
-            "object_reference_versioned": "{0}/{1}/{2}".format(info_values[6],info_values[0],info_values[4]),
-            "type_string": info_values[2],
-            "save_date": info_values[3],
-            "version": info_values[4],
-            "saved_by": info_values[5],
-            "workspace_id": info_values[6],
-            "workspace_name": info_values[7],
-            "object_checksum": info_values[8],
-            "object_size": info_values[9],
-            "object_metadata": info_values[10]
-        }
-        self._id = self._info["object_id"]
-        self._name = self._info["object_name"]
-        self._typestring = self.ws_client.translate_to_MD5_types([self._info["type_string"]]).values()[0]
-        self._version = self._info["version"]
-        self._schema = None
-        self._history = None
-        self._provenance = None
-        self._data = None
+            "ignoreErrors": 0})[0]
+        self._id = self._info[0]
+        self._name = self._info[1]
+        self._typestring = self.ws_client.translate_to_MD5_types([self._info[2]]).values()[0]
 
     def get_schema(self):
         """
         Retrieve the schema associated with this object.
         
         Returns:
-          string"""
+            string
+        """
     
-        if self._schema == None:
-            self._schema = self.ws_client.get_type_info(self.get_info()["type_string"])
-        
-        return self._schema
+        return self.ws_client.get_type_info(self.get_info()[2])
 
     def get_typestring(self):
         """
         Retrieve the type identifier string.
         
         Returns:
-          string"""
+            string
+        """
                 
         return self._typestring
 
@@ -97,7 +72,8 @@ class ObjectAPI(object):
         Retrieve basic properties about this object.
         
         Returns:
-          dict"""
+            dict
+        """
             
         return self._info
 
@@ -105,28 +81,23 @@ class ObjectAPI(object):
         """
         Retrieve the recorded history of this object describing how it has been modified.
         """
-        
-        if self._history == None:
-            self._history = self.ws_client.get_object_history({"ref": self.ref})
-        
-        return self._history
+    
+        return self.ws_client.get_object_history({"ref": self.ref})
     
     def get_provenance(self):
         """
         Retrieve the recorded provenance of this object describing how to recreate it.
         """
-        
-        if self._provenance == None:
-            self._provenance = self.ws_client.get_object_provenance([{"ref": self.ref}])
-        
-        return self._provenance
+    
+        return self.ws_client.get_object_provenance([{"ref": self.ref}])
     
     def get_id(self):
         """
         Retrieve the internal identifier for this object.
         
         Returns:
-          string"""
+            string
+        """
     
         return self._id
     
@@ -135,50 +106,38 @@ class ObjectAPI(object):
         Retrieve the name assigned to this object.
         
         Returns:
-          string"""
+            string
+        """
     
         return self._name
     
+    def get_stats(self):
+        """
+        Retrieve any derived statistical information known about this object.
+        """
+    
+        return self._info
+
     def get_data(self):
         """
         Retrieve object data.
         
         Returns:
-          dict"""
+            dict
+        """
         
-        if self._data == None:
-            self._data = self.ws_client.get_objects([{"ref": self.ref}])[0]["data"]
-        
-        return self._data
+        return self.ws_client.get_objects([{"ref": self.ref}])[0]["data"]
 
     def get_data_subset(self, path_list=None):
         """
         Retrieve a subset of data from this object, given a list of paths to the data elements.
         
         Returns:
-          dict"""
-
+            dict
+        """
+    
         return self.ws_client.get_object_subset([{"ref": self.ref, 
                         "included": path_list}])[0]["data"]
-    
-    def get_referrers(self):
-        """
-        Retrieve a dictionary that indicates by type what objects are referring to this object.
-        
-        Returns:
-          dict"""
-        
-        referrers = self.ws_client.list_referencing_objects([{"ref": self.ref}])[0]
-        
-        object_refs_by_type = dict()        
-        for x in referrers:
-            typestring = self.ws_client.translate_to_MD5_types([x[2]]).values()[0]
-            
-            if typestring not in object_refs_by_type:
-                object_refs_by_type[typestring] = list()
-            
-            object_refs_by_type[typestring].append(str(x[6]) + "/" + str(x[0]) + "/" + str(x[4]))
-        return object_refs_by_type
     
     def copy(self, to_ws=None):
         """
@@ -189,8 +148,9 @@ class ObjectAPI(object):
         or referenced objects.
         
         Args:
-          to_ws : the target workspace to copy the object to, which the user must have permission
-          to write to."""
+            to_ws : the target workspace to copy the object to, which the user must have permission
+            to write to.        
+        """
     
         name = self.get_name()
         
