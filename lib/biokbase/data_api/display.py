@@ -18,7 +18,7 @@ def nbviewer_mode(value=None):
         _nbviewer = bool(value)
     return _nbviewer
 
-class ContigSet(pd.DataFrame):
+class Contigs(pd.DataFrame):
 
     DEFAULT_SEP = '_'
 

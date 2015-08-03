@@ -143,27 +143,22 @@ class AssemblyAPI(ObjectAPI):
         elif self._is_assembly_type:
             return self.get_data_subset(path_list=["num_contigs"])["num_contigs"]
 
-    def get_contig_ids(self, raw=False):
+    def get_contig_ids(self):
         """
         Retrieve the ids for every contiguous sequence in this Assembly.
         
-        Args:
-          raw: If True, return result as a list of strings.
-               Otherwise return as a display.ContigSet object
-
         Returns:
-          list of string identifiers or display.Contigset
+          list of string identifiers
         """
         typestring = self.get_typestring()
 
         if self._is_contigset_type:
             contigs = self.get_data()["contigs"]
-            raw_result = [c["id"] for c in contigs]
+            result = [c["id"] for c in contigs]
         elif self._is_assembly_type:
             contigs = self.get_data()["contigs"]
-            raw_result = [contigs[c]["contig_id"] for c in contigs]
-
-        return raw_result if raw else display.ContigSet(raw_result)
+            result = [contigs[c]["contig_id"] for c in contigs]
+        return result
 
     def get_contigs_by_id(self, contig_id_list=list()):
         """
