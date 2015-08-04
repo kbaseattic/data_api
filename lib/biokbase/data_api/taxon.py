@@ -68,6 +68,8 @@ class TaxonAPI(ObjectAPI):
             
             if len(children) == 0:
                 return None
+            else:
+                return children
         elif self._is_genome_type:
             return None
         

@@ -33,3 +33,11 @@ You can run pip install data_api/ --upgrade if you have edited files
 locally and want to test them out without having to reset the virtualenv.
 
 You can get out of the virtualenv environment with "deactivate".
+
+# Examples
+
+Example IPython (Jupyter) notebooks are in examples/notebooks. To run, follow installation instructions above, then
+
+    ipython notebook examples/notebooks/data_api-display.ipynb 
+    
+You can also view these notebooks on github.
