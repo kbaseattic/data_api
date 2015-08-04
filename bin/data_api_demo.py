@@ -80,7 +80,7 @@ if __name__ == "__main__":
     print "contig_ids = assembly_api.get_contig_ids()"
     print "pprint.pprint(contig_ids)"
     
-    contig_ids = assembly_api.get_contig_ids(raw=True)
+    contig_ids = assembly_api.get_contig_ids()
     pprint.pprint(contig_ids)
 
     print "\nUse the contig ids to fetch the contig sequences and metadata:"
