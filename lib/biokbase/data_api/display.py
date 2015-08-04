@@ -75,16 +75,27 @@ class Contigs(Table):
         pd.DataFrame.__init__(self, contig_dict)
 
 class Classification(object):
+    """Taxonomic classification.
+    """
     __template = Template('''<h2>Classification</h2>
-    <ul>
+    <ul style="list-style-type: none">
     {% for name in classification %}
-    <li style="margin-left: {{ loop.iter0 * 10 }}">
-    {{ name }}
+    <li style="margin-left: {{ loop.index0 * 10 }}px">
+    <span style="font-size: 50%">&gt;</span>&nbsp;{{ name }}
     </li>
     {% endfor %}
     </ul>
     ''')
+
     def __init__(self, taxon):
+        """Create from a taxon.
+
+        Args:
+          taxon: TaxonAPI object.
+        """
+        if taxon is None:
+            self.classf = []
+            return
         children = taxon.get_children() or []
         tx, parents = taxon, []
         while tx:
