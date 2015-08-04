@@ -57,8 +57,13 @@ class TaxonAPI(ObjectAPI):
         
         if self._is_taxon_type:
             referrers = self.get_referrers()
-            children = [TaxonAPI(self.services, ref=y) for y in referrers[x] for x in referrers if x in self._taxon_types]
-            
+            children = []
+            for x in referrers:
+                if x in self._taxon_types:
+                    for y in referrers[x]:
+                        children.append(TaxonAPI(
+                            self.services, ref=y))
+
             if len(children) == 0:
                 return None
         elif self._is_genome_type:
