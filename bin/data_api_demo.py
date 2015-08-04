@@ -80,7 +80,7 @@ if __name__ == "__main__":
     print "contig_ids = assembly_api.get_contig_ids()"
     print "pprint.pprint(contig_ids)"
     
-    contig_ids = assembly_api.get_contig_ids()
+    contig_ids = assembly_api.get_contig_ids(raw=True)
     pprint.pprint(contig_ids)
 
     print "\nUse the contig ids to fetch the contig sequences and metadata:"
@@ -151,7 +151,7 @@ if __name__ == "__main__":
     
     print "taxon_api = biokbase.data_api.taxon.TaxonAPI(services, ref='Taxon3/83333_taxon')"
     taxon_api = biokbase.data_api.taxon.TaxonAPI(services, ref="Taxon3/83333_taxon")
-
+    
     print "\n\nPull back my taxonomy information:"        
     print "taxon_api.get_scientific_lineage()"
     pprint.pprint(taxon_api.get_scientific_lineage())
@@ -189,8 +189,10 @@ if __name__ == "__main__":
     print "pprint.pprint(sibling_info)\n"
     
     parent = taxon_api.get_parent()
-    sibling_info = [(s.get_scientific_name(), s.get_taxonomic_id()) for s in parent.get_children()]
-    pprint.pprint(sibling_info)
+    children = parent.get_children()
+    if children:
+        sibling_info = [(s.get_scientific_name(), s.get_taxonomic_id()) for s in children]
+        pprint.pprint(sibling_info)
 
     print "\nFind out what Genome Annotations reference my Taxon:"        
     print "taxon_api.get_genome_annotations()"

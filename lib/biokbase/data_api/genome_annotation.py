@@ -319,6 +319,8 @@ class GenomeAnnotationAPI(ObjectAPI):
                 if f.has_key("protein_translation") and len(f["protein_translation"]) > 0:
                     protein_id = f['id'] + ".protein"
                     proteins[protein_id] = dict()
+                
+                #TODO finish this
         elif self._is_annotation_type:
             protein_container = ObjectAPI(self.services, self.get_data()["protein_container_ref"])
             return protein_container.get_data()["proteins"]
