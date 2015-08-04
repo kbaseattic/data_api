@@ -113,7 +113,7 @@ class Organism(TemplateMixin):
     def _repr_html_(self):
         if self.taxon is None:
             return None
-        classf = Classification(self.taxon).classf
+        classf = Classification(self.taxon).classification
         return self.render(classification=classf, taxon=self.taxon)
 
 class AssemblyInfo(TemplateMixin):
@@ -142,11 +142,28 @@ class AssemblyInfo(TemplateMixin):
     def _repr_html_(self):
         return self.render(self.stats)
 
+class FeatureStats(Table):
+    """Feature information for genomes
+    """
+    def __init__(self, ga):
+        """Create from a genome.
+
+        Args:
+          ga: GenomeAnnotationAPI object
+        """
+        data = []
+        for feature in ga.get_feature_types(): # all feature types
+            count = 0
+            # get lists of positions for each feature_id
+            feature_id_lists = ga.get_feature_ids_by_type([feature])
+            for fi, values in feature_id_lists.items():
+                count += len(values)
+            data.append((feature, count))
+        Table.__init__(self, data, columns=('feature_type', 'count'))
 
 ###################################
 
-# def __rb_parsing(self):
-#     """Saved some parsing of what was found
+# def __rb_parsing(self)was found
 #     in a Rhodobacter genome.
 #         NODE_48_length_21448_cov_4.91263_ID_95
 #     """
