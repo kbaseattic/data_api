@@ -1,21 +1,21 @@
+"""
+Operations on Assembly data type.
+"""
+# Stdlib
 import requests
-import sys
 import os
-import json
-import datetime
 import re
-import shutil
 import string
-
 try:
     import cStringIO as StringIO
 except ImportError:
     import StringIO as StringIO
 
+# Local
 from biokbase.data_api.object import ObjectAPI
+from biokbase.data_api import display
 
 CHUNK_SIZE = 2**30
-
 
 class AssemblyAPI(ObjectAPI):
     """
@@ -36,6 +36,10 @@ class AssemblyAPI(ObjectAPI):
         
         self._is_assembly_type = self._typestring in self._assembly_types
         self._is_contigset_type = self._typestring in self._contigset_types
+        
+        if not (self._is_assembly_type or self._is_contigset_type):
+            raise TypeError("Invalid type! Expected KBaseGenomes.ContigSet or KBaseGenomesCondensedPrototype.Assembly, received " + info[2])
+            
 
     def get_assembly_id(self):
         """
@@ -143,21 +147,18 @@ class AssemblyAPI(ObjectAPI):
         """
         Retrieve the ids for every contiguous sequence in this Assembly.
         
-        Args:
-            None
         Returns:
-            list of string identifiers
+          list of string identifiers
         """
         typestring = self.get_typestring()
 
         if self._is_contigset_type:
             contigs = self.get_data()["contigs"]
-            return [c["id"] for c in contigs]
+            result = [c["id"] for c in contigs]
         elif self._is_assembly_type:
             contigs = self.get_data()["contigs"]
-            return [contigs[c]["contig_id"] for c in contigs]
-        else:
-            raise TypeError("Invalid type! Expected KBaseGenomes.ContigSet <= 3.0 or KBaseGenomesCondensedPrototype.Assembly <= 1.0, received " + info[2])
+            result = [contigs[c]["contig_id"] for c in contigs]
+        return result
 
     def get_contigs_by_id(self, contig_id_list=list()):
         """
@@ -270,5 +271,3 @@ class AssemblyAPI(ObjectAPI):
                     outContigs[c]["sequence"] = fetch_contig(contigs[c]["start_position"],contigs[c]["num_bytes"])
 
             return outContigs
-        else:
-            raise TypeError("Invalid type! Expected KBaseGenomes.ContigSet <= 3.0 or KBaseGenomesCondensedPrototype.Assembly <= 1.0, received " + info[2])
