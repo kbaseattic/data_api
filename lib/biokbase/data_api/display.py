@@ -42,38 +42,6 @@ class Contigs(Table):
         """
         Table.__init__(self, {'ids': contigs})
 
-    # def __rb_parsing(self):
-    #     """Saved some parsing of what was found
-    #     in a Rhodobacter genome.
-    #         NODE_48_length_21448_cov_4.91263_ID_95
-    #     """
-    #     c0 = contigs[0]
-    #     colnames = c0.split(sep)[::2]
-    #
-    #     # infer types for each column from 1st row
-    #     # if it can be made a float, assume it is numeric
-    #     coltypes = []
-    #     for colval in c0.split(sep)[1::2]:
-    #         try:
-    #             float(colval)
-    #             coltypes.append(float)
-    #         except ValueError:
-    #             coltypes.append(str)
-    #
-    #     # build a dict of the values
-    #     contig_dict = dict.fromkeys(colnames)
-    #     for k in contig_dict:
-    #         contig_dict[k] = []
-    #     n = len(contig_dict)
-    #     for contig in contigs:
-    #         values = contig.split(sep)[1::2]
-    #         for i in range(n):
-    #             value = coltypes[i](values[i])
-    #             contig_dict[colnames[i]].append(value)
-    #
-    #     # create DataFrame from the dict
-    #     pd.DataFrame.__init__(self, contig_dict)
-
 class TemplateMixin(object):
     template = ''
     def __init__(self):
@@ -84,36 +52,45 @@ class TemplateMixin(object):
 
 class Classification(TemplateMixin):
     """Taxonomic classification.
+
+    Attributes:
+      taxon (TaxonAPI): base taxon
+      name (str): Scientific name
+      children (list of TaxonAPI): List of TaxonAPI objects
+      parents (list of Taxon
     """
     template = '''{% for name in classification %}
     <span style="margin-left: {{ loop.index0 * 10 }}px">
     <span style="font-size: 50%">&gt;</span>&nbsp;{{ name }}
     </span><br>{% endfor %}'''
 
-    def __init__(self, taxon):
+    def __init__(self, obj):
         """Create from a taxon.
 
         Args:
-          taxon: TaxonAPI object.
+          obj: TaxonAPI object or object with `get_taxon`.
         """
         TemplateMixin.__init__(self)
-        if taxon is None:
-            self.classf = []
-            return
-        children = taxon.get_children() or []
-        tx, parents = taxon, []
+        self.taxon = obj.get_taxon() if hasattr(obj, 'get_taxon') else obj
+        self.name = self.taxon.get_scientific_name()
+        self.children = self.taxon.get_children() or []
+        tx, self.parents = self.taxon, []
         while tx:
             tx = tx.get_parent()
             if tx:
-                parents.insert(tx.get_scientific_name(), 0)
-        self.classf = parents + [taxon.get_scientific_name()] + children
+                self.parents.insert(tx.get_scientific_name(), 0)
+        self.classification = self.parents + [self.name] + [
+            child.get_scientific_name() for child in self.children]
 
     def _repr_html_(self):
-        return self.render(classification=self.classf)
+        return self.render(classification=self.classification)
 
 class Organism(TemplateMixin):
     """Summary of an organism as per ENSEMBL page, from
     a TaxonAPI.
+
+    Attributes:
+      taxon (TaxonAPI): Taxon with info for organism
     """
     template = '''<b>Taxonomy ID</b>: {{taxon.get_taxonomic_id()}}<br>
         <b>Name</b>: {{taxon.get_scientific_name()}}<br>
@@ -124,14 +101,14 @@ class Organism(TemplateMixin):
         <b>Classification</b>:<br>''' + \
         Classification.template
 
-    def __init__(self, taxon):
-        """Create from a taxon.
+    def __init__(self, obj):
+        """Create from an API object.
 
         Args:
-          taxon: TaxonAPI object.
+          obj: TaxonAPI object or object with `get_taxon`.
         """
         TemplateMixin.__init__(self)
-        self.taxon = taxon
+        self.taxon = obj.get_taxon() if hasattr(obj, 'get_taxon') else obj
 
     def _repr_html_(self):
         if self.taxon is None:
@@ -140,6 +117,11 @@ class Organism(TemplateMixin):
         return self.render(classification=classf, taxon=self.taxon)
 
 class AssemblyInfo(TemplateMixin):
+    """Get information about assembly.
+
+    Attributes:
+      stats (dict): Statistics from `AssemblyAPI.get_stats()`
+    """
     template = '''<b>GC content</b>: {{gc_content}}<br>
     <b>Total DNA sequence length</b>:{{dna_size}}<br>
     <b>Number of contigs</b>:{{num_contigs}}'''
@@ -159,3 +141,39 @@ class AssemblyInfo(TemplateMixin):
 
     def _repr_html_(self):
         return self.render(self.stats)
+
+
+###################################
+
+# def __rb_parsing(self):
+#     """Saved some parsing of what was found
+#     in a Rhodobacter genome.
+#         NODE_48_length_21448_cov_4.91263_ID_95
+#     """
+#     c0 = contigs[0]
+#     colnames = c0.split(sep)[::2]
+#
+#     # infer types for each column from 1st row
+#     # if it can be made a float, assume it is numeric
+#     coltypes = []
+#     for colval in c0.split(sep)[1::2]:
+#         try:
+#             float(colval)
+#             coltypes.append(float)
+#         except ValueError:
+#             coltypes.append(str)
+#
+#     # build a dict of the values
+#     contig_dict = dict.fromkeys(colnames)
+#     for k in contig_dict:
+#         contig_dict[k] = []
+#     n = len(contig_dict)
+#     for contig in contigs:
+#         values = contig.split(sep)[1::2]
+#         for i in range(n):
+#             value = coltypes[i](values[i])
+#             contig_dict[colnames[i]].append(value)
+#
+#     # create DataFrame from the dict
+#     pd.DataFrame.__init__(self, contig_dict)
+
