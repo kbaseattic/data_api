@@ -39,7 +39,10 @@ class TaxonAPI(ObjectAPI):
         
         if self._is_taxon_type:
             try:
+                parent_data = self.get_data()
+                print parent_data
                 parent_ref = self.get_data()["parent_taxon_ref"]
+                print parent_ref
             except KeyError:
                 return None
             
@@ -57,15 +60,16 @@ class TaxonAPI(ObjectAPI):
         
         if self._is_taxon_type:
             referrers = self.get_referrers()
-            children = []
+            children = list()
+            
             for x in referrers:
                 if x in self._taxon_types:
-                    for y in referrers[x]:
-                        children.append(TaxonAPI(
-                            self.services, ref=y))
-
+                    children.extend([TaxonAPI(self.services, ref=y) for y in referrers[x]])
+            
             if len(children) == 0:
                 return None
+            else:
+                return children
         elif self._is_genome_type:
             return None
         
