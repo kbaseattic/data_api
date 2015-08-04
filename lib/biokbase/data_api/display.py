@@ -74,7 +74,15 @@ class Contigs(Table):
     #     # create DataFrame from the dict
     #     pd.DataFrame.__init__(self, contig_dict)
 
-class Classification(object):
+class TemplateMixin(object):
+    template = ''
+    def __init__(self):
+        self._template = Template(self.template)
+
+    def render(self, *args, **kwargs):
+        return self._template.render(*args, **kwargs)
+
+class Classification(TemplateMixin):
     """Taxonomic classification.
     """
     template = '''{% for name in classification %}
@@ -88,6 +96,7 @@ class Classification(object):
         Args:
           taxon: TaxonAPI object.
         """
+        TemplateMixin.__init__(self)
         if taxon is None:
             self.classf = []
             return
@@ -98,12 +107,11 @@ class Classification(object):
             if tx:
                 parents.insert(tx.get_scientific_name(), 0)
         self.classf = parents + [taxon.get_scientific_name()] + children
-        self._template = Template(self.template)
 
     def _repr_html_(self):
-        return self._template.render(classification=self.classf)
+        return self.render(classification=self.classf)
 
-class Organism(object):
+class Organism(TemplateMixin):
     """Summary of an organism as per ENSEMBL page, from
     a TaxonAPI.
     """
@@ -122,12 +130,32 @@ class Organism(object):
         Args:
           taxon: TaxonAPI object.
         """
+        TemplateMixin.__init__(self)
         self.taxon = taxon
-        self._template = Template(self.template)
 
     def _repr_html_(self):
         if self.taxon is None:
             return None
         classf = Classification(self.taxon).classf
-        return self._template.render(classification=classf,
-                                     taxon=self.taxon)
+        return self.render(classification=classf, taxon=self.taxon)
+
+class AssemblyInfo(TemplateMixin):
+    template = '''<b>GC content</b>: {{gc_content}}<br>
+    <b>Total DNA sequence length</b>:{{dna_size}}<br>
+    <b>Number of contigs</b>:{{num_contigs}}'''
+
+    def __init__(self, obj):
+        """Create assembly info.
+
+        Args:
+          obj: AssemblyAPI or object with `get_assembly` method.
+        """
+        TemplateMixin.__init__(self)
+        if hasattr(obj, 'get_assembly'):
+            self.assembly = obj.get_assembly()
+        else:
+            self.assembly = obj
+        self.stats = self.assembly.get_stats()
+
+    def _repr_html_(self):
+        return self.render(self.stats)
