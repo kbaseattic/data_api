@@ -17,6 +17,10 @@ from biokbase.data_api import display
 
 CHUNK_SIZE = 2**30
 
+_CONTIGSET_TYPES = ['KBaseGenomes.ContigSet']
+_ASSEMBLY_TYPES = ['KBaseGenomesCondensedPrototypeV2.Assembly']
+TYPES = _CONTIGSET_TYPES + _ASSEMBLY_TYPES
+
 class AssemblyAPI(ObjectAPI):
     """
     API for the assembled sequences associated with a Genome Annotation.            
@@ -28,19 +32,12 @@ class AssemblyAPI(ObjectAPI):
         """
         super(AssemblyAPI, self).__init__(services, ref)
         
-        self._contigset_types = ["KBaseGenomes.ContigSet-e4511babc29d2d0428645ce8d2c0ad77",
-                                 "KBaseGenomes.ContigSet-d3262fe600c857ab28d45297fae38ed1",
-                                 "KBaseGenomes.ContigSet-a5dafc82a37e8e354b39e705d3c03044",
-                                 "KBaseGenomes.ContigSet-db7f518c9469d166a783d813c15d64e9"]
-        self._assembly_types = ["KBaseGenomesCondensedPrototypeV2.Assembly-ffd679cc5c9ce4a3b1bb1a5c3960b42e"]
-        
-        self._is_assembly_type = self._typestring in self._assembly_types
-        self._is_contigset_type = self._typestring in self._contigset_types
+        self._is_assembly_type = self._typestring.split('-')[0] in _ASSEMBLY_TYPES
+        self._is_contigset_type = self._typestring.split('-')[0] in _CONTIGSET_TYPES
         
         if not (self._is_assembly_type or self._is_contigset_type):
-            raise TypeError("Invalid type! Expected KBaseGenomes.ContigSet or KBaseGenomesCondensedPrototype.Assembly, received " + info[2])
-            
-
+            raise TypeError("Invalid type! Expected one of {0}, received {1}".format(TYPES, self._typestring))
+    
     def get_assembly_id(self):
         """
         Fetch the id for an Assembly.
