@@ -33,7 +33,7 @@ class TaxonAPI(ObjectAPI):
         
         if self._is_taxon_type:
             try:
-                parent_data = self.get_data()
+                parent_ref = self.get_data()["parent_taxon_ref"]
             except KeyError:
                 return None
             
