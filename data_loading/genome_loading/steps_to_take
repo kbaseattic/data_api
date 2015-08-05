@@ -1,0 +1,216 @@
+GENOME LIST:
+-----------------------------------------
+kb|g.207107
+kb|g.2735
+kb|g.2736
+kb|g.207108
+kb|g.31523
+kb|g.2981
+kb|g.207109
+kb|g.240423
+kb|g.207110
+kb|g.207111
+kb|g.207112
+kb|g.209332
+kb|g.207113
+kb|g.29593
+kb|g.207114
+kb|g.1974
+kb|g.357
+kb|g.240424
+kb|g.2596
+kb|g.207115
+kb|g.207116
+kb|g.24387
+kb|g.207117
+kb|g.207118
+kb|g.2435
+kb|g.25487
+kb|g.29594
+kb|g.32368
+kb|g.1359
+kb|g.207119
+kb|g.2048
+kb|g.1608
+kb|g.27130
+kb|g.26285
+kb|g.31865
+kb|g.2751
+kb|g.240425
+kb|g.2731
+kb|g.27016
+kb|g.216501
+kb|g.216024
+kb|g.1218
+kb|g.2423
+kb|g.2424
+kb|g.3574
+kb|g.3562
+kb|g.207120
+kb|g.1
+kb|g.1043
+kb|g.1085
+kb|g.1086
+kb|g.1164
+kb|g.1394
+kb|g.140055
+kb|g.140056
+kb|g.140057
+kb|g.140062
+kb|g.140065
+kb|g.140067
+kb|g.140073
+kb|g.140074
+kb|g.140081
+kb|g.140082
+kb|g.140084
+kb|g.140085
+kb|g.140089
+kb|g.140095
+kb|g.140096
+kb|g.140101
+kb|g.140104
+kb|g.140105
+kb|g.140106
+kb|g.140112
+kb|g.1442
+kb|g.1484
+kb|g.166802
+kb|g.166803
+kb|g.166804
+kb|g.166805
+kb|g.166806
+kb|g.166807
+kb|g.166808
+kb|g.166809
+kb|g.166810
+kb|g.166811
+kb|g.166813
+kb|g.166814
+kb|g.166815
+kb|g.166816
+kb|g.166817
+kb|g.166818
+kb|g.166819
+kb|g.166820
+kb|g.166821
+kb|g.166822
+kb|g.166823
+kb|g.166828
+kb|g.166832
+kb|g.174
+kb|g.178
+kb|g.1789
+kb|g.1800
+kb|g.1868
+kb|g.1869
+kb|g.1886
+kb|g.206496
+kb|g.217862
+kb|g.217863
+kb|g.217864
+kb|g.217865
+kb|g.217866
+kb|g.217867
+kb|g.217868
+kb|g.217869
+kb|g.217870
+kb|g.217871
+kb|g.217872
+kb|g.217873
+kb|g.217874
+kb|g.217875
+kb|g.2284
+kb|g.2311
+kb|g.2410
+kb|g.2438
+kb|g.2472
+kb|g.2473
+kb|g.2546
+kb|g.2624
+kb|g.2646
+kb|g.3030
+kb|g.3090
+kb|g.3115
+kb|g.3150
+kb|g.3157
+kb|g.3159
+kb|g.3282
+kb|g.3381
+kb|g.3899
+kb|g.3903
+kb|g.3907
+kb|g.440
+kb|g.453
+kb|g.475
+kb|g.48
+kb|g.736
+kb|g.920
+kb|g.938
+
+
+######################################################
+
+DOING THE OLD PRODUCTION GENOMES: (CREATES REFERENCE GENOMES TO BE MADE INTO PROTOTYPE GENOMES)
+--------------------------------------
+Making Search Genomes (this was done with the whole list of genomes, although there was a CDMI timeout, CI Url Open issue and memory error in the big run.  
+So I broke it out into many runs typically 10 Genomes per run.  Note the memory error was specific to kb|g.140106, as a result that genome was not done.  Example below
+
+python /mnt/search/jason_testing/search/src/dataExtraction/wsLoad/csFlatFiles_to_ws_ci.py --wsname SearchReferenceGenomes --sorted-file-dir /mnt/search/jason_testing/v5_files/ --contigseq-file-dir /mnt/search/v5/v5seqfiles/ --logging-file-dir  /homes/oakland/jkbaumohl/logging_dir --database_version V5 --search_version V0.4 --genomes  'kb|g.48' 'kb|g.736' 'kb|g.920' 'kb|g.938' --debug
+
+
+Making the old production genomes:
+python /mnt/search/jason_testing/search/src/dataExtraction/wsLoad/wsRichGenome_to_ModelGenome.py  --wsinput SearchReferenceGenomes --wsoutput OriginalReferenceGenomes --source-wsinstance https://ci.kbase.us/services/ws --target-wsinstance https://ci.kbase.us/services/ws
+
+
+######################################################
+
+MAKING THE TAXON OBJECTS:
+---------------------------------------
+Get the files from NCBI from
+ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxdump.tar.gz
+ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxdump_readme.txt
+The two files that we need are the following
+nodes.dmp (tax id relationships, genetic codes and other metadata)
+names.dmp (file for scientific names and aliases).
+
+The code to populate the WS is 
+python make_taxons.py --wsname ReferenceTaxons --wsurl https://ci.kbase.us/services/ws --taxon_files_dir Taxonomy > reference_taxon_saving_output
+
+Also need to generate an unknown taxon- used for Genomes that we are unable to map the scientific_name
+File is this:
+{ 
+    "taxonomy_id": -1, 
+    "scientific_name": "Unknown", 
+    "scientific_lineage": "Unknown", 
+    "domain":"Unknown", 
+    "genetic_code":0 
+} 
+ 
+python save_typed_object_json_to_ws.py --filename unknown_taxon --wsname ReferenceTaxons --wstype KBaseGenomesCondensedPrototypeV2.Taxon --wsurl https://ci.kbase.us/services/ws 
+
+ 
+#######################################################
+
+MAKING THE ASSEMBLIES:
+--------------------------------------
+The assemblies need to be created before the protoype genomes.  Also note that they draw the data from the fasta not the old contigset object.
+This is in part because the fasta file gets stored on Shock, but we also calculate metadata at the the time of object creation.
+Note I currently had to run this from the transformation upload directory to get some of the special libraries for parsing that Matt had made.
+
+python /mnt/search/transform/jason/transform/plugins/scripts/upload/upload_condensed_assembly_new.py  --wsname PrototypeReferenceGenomes --wsurl https://ci.kbase.us/services/ws --shock_service_url https://ci.kbase.us/services/shock-api/ --input_fasta_directory /mnt/search/v5/v5seqfiles --genome_list_file full_genomes_list
+
+renamed to upload_assemblies.py
+
+
+#########################################################
+MAKING THE PROTOTYPE GENOMES:
+---------------------------------------
+Assumes the production genomes, assemblies and taxons have all been previously loaded.
+
+python original_to_condensed_genome.py --source_wsname OriginalReferenceGenomes --destination_wsname PrototypeReferenceGenomes --source_wsurl https://ci.kbase.us/services/ws --destination_wsurl https://ci.kbase.us/services/ws --lineage_files_dir /mnt/search/v5/interfeature_relationships --taxon_wsname ReferenceTaxons --taxon_names_file Taxonomy/names.dmp > run_of_orig_to_prototype
+
+
+
+
+
