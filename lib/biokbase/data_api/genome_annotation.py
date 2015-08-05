@@ -2,10 +2,14 @@ import sys
 
 from biokbase.data_api.object import ObjectAPI
 
+_GENOME_TYPES = ['KBaseGenomes.Genome']
+_GENOME_ANNOTATION_TYPES = ['KBaseGenomesCondensedPrototypeV2.GenomeAnnotation']
+TYPES = _GENOME_TYPES + _GENOME_ANNOTATION_TYPES
+
 FEATURE_DESCRIPTIONS = {
     "CDS": "Coding Sequence",
     "PEG": "Protein Encoding Genes",
-    "rna": "RNA",
+    "rna": "Ribonucliec Acid (RNA)",
     "crispr": "Clustered Regularly Interspaced Short Palindromic Repeats",
     "crs": "Clustered Regularly Interspaced Short Palindromic Repeats",
     "mRNA": "Messenger RNA",
@@ -27,35 +31,22 @@ FEATURE_DESCRIPTIONS = {
 class GenomeAnnotationAPI(ObjectAPI):
     def __init__(self, services, ref):
         """
-        Defines which types and type versions that are legal.
-        """
+        Defines which types and type versions that are legal."""
+        
         super(GenomeAnnotationAPI, self).__init__(services, ref)
         
-        self._genome_types = ['KBaseGenomes.Genome-225de07e59f4fdc5d9b8bf0bcd12c498', 
-                              'KBaseGenomes.Genome-aafaaa7df90d03b33258f4fa7790dcbe', 
-                              'KBaseGenomes.Genome-93da9d2c8fb7836fb473dd9c1e4ca89e', 
-                              'KBaseGenomes.Genome-1e1fce431960397da77cb092d27a50cf', 
-                              'KBaseGenomes.Genome-c0526fae0ce1fd8d342ec94fc4dc510a', 
-                              'KBaseGenomes.Genome-c0526fae0ce1fd8d342ec94fc4dc510a', 
-                              'KBaseGenomes.Genome-51b05a5c27084ae56106e60df5b66df5']
-        self._annotation_types = ['KBaseGenomesCondensedPrototypeV2.GenomeAnnotation-d4301f53dab71e72d70ea5be6919696e', 
-                                  'KBaseGenomesCondensedPrototypeV2.GenomeAnnotation-97253a4ad440116a6421ede1fca50cad', 
-                                  'KBaseGenomesCondensedPrototypeV2.GenomeAnnotation-6935b73c720523e4541dd516bc13ef56', 
-                                  'KBaseGenomesCondensedPrototypeV2.GenomeAnnotation-e3de51478246422db519fd4cbc9eb4cd']
-        
-        self._is_annotation_type = self._typestring in self._annotation_types
-        self._is_genome_type = self._typestring in self._genome_types
+        self._is_annotation_type = self._typestring.split('-')[0] in _GENOME_ANNOTATION_TYPES
+        self._is_genome_type = self._typestring.split('-')[0] in _GENOME_TYPES
         
         if not (self._is_annotation_type or self._is_genome_type):
-            raise TypeError("Expecting KBaseGenomes.Genome or KBaseGenomesCondensedPrototypeV2.GenomeAnnotation, received {0}".format(self._typestring))
+            raise TypeError("Invalid type! Expected one of {0}, received {1}".format(TYPES, self._typestring))
 
     def get_taxon(self):
         """
         Retrieves the Taxon assigned to this Genome Annotation.
         
         Returns:
-            TaxonAPI
-        """
+          TaxonAPI"""
         
         import biokbase.data_api.taxon
         
@@ -69,8 +60,7 @@ class GenomeAnnotationAPI(ObjectAPI):
         Retrieves the Assembly used to create this Genome Annotation.
         
         Returns:
-            AssemblyAPI
-        """
+          AssemblyAPI"""
         
         import biokbase.data_api.assembly
         
@@ -80,6 +70,12 @@ class GenomeAnnotationAPI(ObjectAPI):
             return biokbase.data_api.assembly.AssemblyAPI(self.services, ref=self.get_data_subset(path_list=["assembly_ref"])["assembly_ref"])
     
     def get_feature_types(self):
+        """
+        Retrieves the Genome Feature type identifiers available from this Genome Annotation.
+        
+        Returns:
+          list<str>"""
+        
         if self._is_genome_type:
             features = self.get_data_subset(path_list=["features"])["features"]
             feature_types = set()
@@ -91,30 +87,27 @@ class GenomeAnnotationAPI(ObjectAPI):
             return self.get_data_subset(path_list=["feature_container_references"])["feature_container_references"].keys()
 
     def get_feature_type_descriptions(self, type_list=None):
+        """
+        Retrieves a descriptive string for each feature type identifier.
+        
+        Returns:
+          dict"""
+        
         if type_list == None:
             return FEATURE_DESCRIPTIONS
-        elif type(type_list) == type([]) and len(type_list) and \
+        elif type(type_list) == type([]) and len(type_list) > 0 and \
              (type(type_list[0]) == type(u"") or type(type_list[0]) == type("")):
             return {x: FEATURE_DESCRIPTIONS[x] for x in FEATURE_DESCRIPTIONS if x in type_list}
+        else:
+            raise TypeError()
 
-    def get_number_of_each_feature_type(self):
-        if self._is_genome_type:
-            features = self.get_data_subset(path_list=["features"])["features"]
-            feature_types = dict()
-            for x in features:
-                if x["type"] not in feature_types:
-                    feature_types[x["type"]] = 1
-                else:
-                    feature_types[x["type"]] += 1
-            return feature_types
-        elif self._is_annotation_type:            
-            feature_container_refs = self.get_data_subset(path_list=["feature_container_references"])["feature_container_references"]
-            feature_types = dict()
-            for x in feature_container_refs:
-                feature_types[x] = len(ObjectAPI(self.services, ref=feature_container_refs[x]).get_data()["features"])
-            return feature_types            
-
-    def get_feature_ids(self):
+    def get_feature_ids(self, type_list=None, region_list=None, function_list=None, alias_list=None):
+        """
+        Retrieves feature ids based on filters such as feature types, regions, functional descriptions, aliases.
+        
+        Returns:
+          list<str>"""
+        
         if self._is_genome_type:
             features = self.get_data_subset(path_list=["features"])["features"]
             return [x['id'] for x in features]
@@ -128,9 +121,13 @@ class GenomeAnnotationAPI(ObjectAPI):
             return out_ids
 
     def _genome_get_features_by_type(self, type_list=None, test=lambda x: True):
+        """
+        Retrieves Genome Features from a KBaseGenomes.Genome object, filtering on Feature type.
+        
+        Returns:
+          dict"""
+        
         features = self.get_data()["features"]
-        print features
-        #["features"]
         
         out_features = dict()            
         for x in features:
@@ -143,6 +140,12 @@ class GenomeAnnotationAPI(ObjectAPI):
         return out_features
 
     def _annotation_get_features_by_type(self, type_list=None, test=lambda x: True):
+        """
+        Retrieves Genome Features from a KBaseGenomesCondensedPrototypeV2.GenomeAnnotation object, filtering on Feature type.
+
+        Returns:
+          dict"""
+        
         feature_container_references = self.get_data_subset(path_list=["feature_container_references"])["feature_container_references"]
         
         out_ids = dict()                        
@@ -152,6 +155,12 @@ class GenomeAnnotationAPI(ObjectAPI):
         return out_features
 
     def _genome_get_feature_ids_by_type(self, type_list=None, test=lambda x: True):
+        """
+        Retrieves Genome Features from a KBaseGenomes.Genome object, filtering on Feature type.
+
+        Returns:
+          dict"""
+
         features = self.get_data_subset(path_list=["features"])["features"]
         
         out_ids = dict()            
@@ -162,6 +171,12 @@ class GenomeAnnotationAPI(ObjectAPI):
         return out_ids
 
     def _annotation_get_feature_ids_by_type(self, type_list=None, test=lambda x: True):
+        """
+        Retrieves Genome Features from a KBaseGenomesCondensedPrototypeV2.GenomeAnnotation object, filtering on Feature type.
+
+        Returns:
+          dict<str>:<list<str>>"""
+
         feature_container_references = self.get_data_subset(path_list=["feature_container_references"])["feature_container_references"]
         
         out_ids = dict()                        
@@ -174,7 +189,72 @@ class GenomeAnnotationAPI(ObjectAPI):
                     out_ids[x].append(features[f]['feature_id'])
         return out_ids
 
+    def _genome_get_feature_type_counts(self, type_list=None):
+        """
+        Retrieves Genome Features from a KBaseGenomes.Genome object, filtering on Feature type.
+
+        Returns:
+          dict"""
+
+        features = self.get_data_subset(path_list=["features"])["features"]
+        
+        counts = dict()          
+        
+        for t in type_list:
+            counts[t] = 0        
+        
+        for x in features:
+            if x['type'] in type_list:
+                counts[x['type']] += 1            
+        
+        return counts
+
+    def _annotation_get_feature_type_counts(self, type_list=None):
+        """
+        Retrieves number of Genome Features from a KBaseGenomesCondensedPrototypeV2.GenomeAnnotation object, filtering on Feature type.
+
+        Returns:
+          dict<str>:<list<str>>"""
+
+        feature_container_references = self.get_data_subset(path_list=["feature_container_references"])["feature_container_references"]
+        
+        counts = dict()
+        
+        for t in type_list:
+            counts[t] = 0
+        
+        for x in [k for k in feature_container_references if k in type_list]:
+            feature_container = ObjectAPI(services=self.services, ref=feature_container_references[x])
+            counts[x] = feature_container.get_data()["feature_count"]
+        return counts
+
+    def get_feature_type_counts(self, type_list=None):
+        """
+        Retrieve the number of Genome Features contained in this Genome Annotation by Feature type identifier.
+        
+        Returns:
+          dict<str>:<int>"""        
+        
+        if type(type_list) != type([]):
+            raise TypeError("A list of strings indicating feature types is required.")
+        elif len(type_list) == 0:
+            raise TypeError("A list of strings indicating feature types is required, received an empty list.")
+        
+        if self._is_genome_type:
+            counts = self._genome_get_feature_type_counts(type_list)            
+        elif self._is_annotation_type:
+            counts = self._annotation_get_feature_type_counts(type_list)
+            
+        return counts
+        
+
     def get_feature_ids_by_type(self, type_list=None):
+        """
+        Retrieves Genome Feature identifiers from this Genome Annotation by Feature type identifier.
+        
+        Returns:
+          dict<str>:list<str>"""        
+        
         if type(type_list) != type([]):
             raise TypeError("A list of strings indicating feature types is required.")
         elif len(type_list) == 0:
@@ -256,7 +336,13 @@ class GenomeAnnotationAPI(ObjectAPI):
                         out_ids[feature_type].extend([x['feature_id'] for x in features[feature_type]])
             return out_ids
 
-    def get_feature_ids_by_alias(self, alias_list=None, type=None):
+    def get_feature_ids_by_alias(self, alias_list=None, type_list=None):
+        """
+        Retrieve Genome Feature identifiers based on a list of Genome Feature alias strings.
+        
+        Returns:
+          dict<str>: list<str>"""
+        
         if self._is_genome_type:
             features = self.get_data_subset(path_list=["features"])["features"]
             
@@ -268,27 +354,112 @@ class GenomeAnnotationAPI(ObjectAPI):
                 
             return out_ids
         elif self._is_annotation_type:
-            feature_container_references = self.get_data_subset(path_list=["feature_container_references"])["feature_container_references"]
+            feature_lookup = self.get_data_subset(path_list=["feature_lookup"])["feature_lookup"]
+            feature_containers = dict()
             
-            out_ids = dict()                        
-            for x in [k for k in feature_container_references if k in type_list]:
-                feature_container = ObjectAPI(self.services, feature_container_references[x])
+            out_ids = dict()            
+            for alias in alias_list:
+                out_ids[alias] = list()           
+                ref = feature_lookup[alias][0]
+                
+                if ref not in feature_containers:
+                    feature_containers[ref] = list()
+                
+                feature_containers[ref].append(feature_lookup[alias][1])
+            
+            for alias in alias_list:
+                for ref in out_ids[alias]:
+                    container = ObjectAPI(self.services, ref)
+                    
+                    if container.get_data_subset(["type"])["type"] in type_list:
+                        out_ids[alias] = feature_containers[alias]
+                    
                 out_ids[x] = feature_container.get_data()["features"].keys()
             return out_ids
 
     def get_associated_feature_ids(self, from_type=None, to_type=None, feature_id_list=None):
         raise NotImplementedError
 
-    def get_child_feature_ids(self, from_type=None, to_type=None, feature_id_list=None):
+    def get_child_feature_ids(self, from_type=None, to_type=None, from_feature_id_list=None):
         raise NotImplementedError
 
-    def get_parent_feature_ids(self, from_type=None, to_type=None, feature_id_list=None):
+    def get_parent_feature_ids(self, from_type=None, to_type=None, from_feature_id_list=None):
         raise NotImplementedError
 
     def get_protein_ids_by_cds(self, cds_id_list=None):
         raise NotImplementedError
 
+    def get_feature_locations(self):
+        if type(feature_id_list) != type([]):
+            raise TypeError("A list of strings indicating feature identifiers is required.")
+        elif len(feature_id_list) == 0:
+            raise TypeError("A list of strings indicating feature identifiers is required, received an empty list.")        
+        
+        if self._is_genome_type:
+            features = self.get_data_subset(path_list=["features"])["features"]
+            
+            locations = dict()            
+            for x in features:
+                if x['id'] in feature_id_list:
+                    locations[x['id']] = list()
+                    
+                    for loc in x['location']:
+                        locations[x['id']].append({
+                            "contig_id": loc[0],
+                            "strand": loc[2],
+                            "start": loc[1],
+                            "length": loc[3]
+                        })                            
+            return locations
+        elif self._is_annotation_type:
+            feature_lookup = self.get_data_subset(path_list=["feature_lookup"])["feature_lookup"]
+
+            feature_containers = dict()
+            
+            for x in feature_id_list:
+                for feature_ref in feature_lookup[x]:
+                    if feature_ref[0] not in feature_containers:
+                        feature_containers[feature_ref[0]] = list()
+                    
+                    feature_containers[feature_ref[0]].append(feature_ref[1])
+            
+            locations = dict()
+            for ref in feature_containers:
+                features = ObjectAPI(self.services, ref).get_data_subset(path_list=["features/" + x for x in feature_id_list])["features"]
+                
+                for feature_id in feature_id_list:
+                    locations[feature_id] = list()
+                    for loc in features[feature_id]["location"]:
+                        locations[feature_id].append({
+                            "contig_id": loc[0],
+                            "strand": loc[2],
+                            "start": loc[1],
+                            "length": loc[3]
+                        })
+            
+            return locations
+    
+    def get_feature_dna(self):
+        pass
+
+    def get_feature_functions(self):
+        pass
+
+    def get_feature_aliases(self):
+        pass
+    
+    def get_feature_publications(self):
+        pass
+
+    def get_feature_quality(self):
+        pass
+
     def get_features_by_id(self, feature_id_list=None):
+        if type(feature_id_list) != type([]):
+            raise TypeError("A list of strings indicating feature identifiers is required.")
+        elif len(feature_id_list) == 0:
+            raise TypeError("A list of strings indicating feature identifiers is required, received an empty list.")        
+        
         if self._is_genome_type:
             features = self.get_data_subset(path_list=["features"])["features"]
             
@@ -299,15 +470,22 @@ class GenomeAnnotationAPI(ObjectAPI):
                 
             return out_features
         elif self._is_annotation_type:
-            feature_container_references = self.get_data_subset(path_list=["feature_container_references"])["feature_container_references"]
+            feature_lookup = self.get_data_subset(path_list=["feature_lookup"])["feature_lookup"]
+
+            feature_containers = dict()
             
-            out_features = dict()                        
-            for x in feature_container_references:
-                feature_container = ObjectAPI(self.services, feature_container_references[x])
-                features = feature_container.get_data()["features"]
-                for f in features:
-                    if f in feature_id_list:
-                        out_features[f] = features[f]
+            for x in feature_id_list:
+                for feature_ref in feature_lookup[x]:
+                    if feature_ref[0] not in feature_containers:
+                        feature_containers[feature_ref[0]] = list()
+                    
+                    feature_containers[feature_ref[0]].append(feature_ref[1])
+            
+            out_features = dict()
+            for ref in feature_containers:
+                features = ObjectAPI(self.services, ref).get_data_subset(path_list=["features/" + x for x in feature_id_list])["features"]
+                out_features.update(features)
+            
             return out_features
 
     def get_proteins(self):
@@ -347,15 +525,15 @@ class GenomeAnnotationAPI(ObjectAPI):
     def get_children_mrna_by_gene(self, gene_id_list=None):
         raise NotImplementedError
     
-    def add_features(self, feature_id_list=None):
-        raise NotImplementedError
+    #def add_features(self, feature_id_list=None):
+    #    raise NotImplementedError
 
-    def remove_features(self, feature_id_list=None):
-        raise NotImplementedError
+    #def remove_features(self, feature_id_list=None):
+    #    raise NotImplementedError
         
-    def replace_features(self, feature_id_list=None):
-        raise NotImplementedError
+    #def replace_features(self, feature_id_list=None):
+    #    raise NotImplementedError
 
-    def replace_assembly(self, ws_id, assembly_id):
-        raise NotImplementedError
+    #def replace_assembly(self, ws_id, assembly_id):
+    #    raise NotImplementedError
 
