@@ -124,7 +124,7 @@ class GenomeAnnotationAPI(ObjectAPI):
             out_ids = list()
             for x in feature_container_references:
                 feature_container = ObjectAPI(self.services, feature_container_references[x])
-                out_ids[x].extend(feature_container.get_data()["features"].keys())
+                out_ids.extend(feature_container.get_data()["features"].keys())
             return out_ids
 
     def _genome_get_features_by_type(self, type_list=None, test=lambda x: True):
