@@ -1,3 +1,16 @@
 --index-url https://pypi.python.org/simple/
 
+Jinja2==2.7.3
+Sphinx==1.3.1
+guzzle-sphinx-theme==0.7.2
+nose
+python-coveralls
+six==1.9.0
+enum34
+pandas==0.16.2
+qgrid==0.1.1
+matplotlib==1.4.3
+requests==2.7.0
+notebook==4.0.1
+
 -e .
