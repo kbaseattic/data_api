@@ -17,17 +17,28 @@ The Taxon object holds the data associated with a taxon.  This taxon could be a 
 
 We lost reference_genome_annotation_id 
 
-@optional aliases genetic_code scientific_lineage children_taxon_set_ref
+@optional aliases genetic_code scientific_lineage parent_taxon_ref kingdom rank embl_code inherited_div_flag inherited_GC_flag mitochondrial_genetic_code inherited_MGC_flag GenBank_hidden_flag hidden_subtree_flag division_id comments
 
 */
 typedef structure {
   int taxonomy_id;
   string scientific_name;
   string scientific_lineage;
+  string rank;
+  string kingdom;
   string domain;
   list<string> aliases;
   int genetic_code;
-  taxon_set_ref children_taxon_set_ref;
+  taxon_ref parent_taxon_ref;
+  string embl_code;
+  int inherited_div_flag;
+  int inherited_GC_flag;
+  int mitochondrial_genetic_code;
+  int inherited_MGC_flag;
+  int GenBank_hidden_flag;
+  int hidden_subtree_flag;
+  int division_id;
+  string comments;
 } Taxon;
 
 
@@ -109,7 +120,7 @@ reads_handle_ref and fasta_handle_ref are handle service references to shock.
 
 assembly_stats assembly_stats; - should be in there, but needs to be flushed out by Fang Fang
 
-@optional name external_source external_source_id external_source_origination_date reads_handle_ref notes
+@optional name external_source external_source_id external_source_origination_date reads_handle_ref notes taxon_ref
 
 */
 typedef structure {
@@ -127,6 +138,7 @@ typedef structure {
   int dna_size;
   int num_contigs;
   string notes;
+  taxon_ref taxon_ref;
 } Assembly;
 
 /*
@@ -217,6 +229,7 @@ typedef structure {
   string name;
   string description;
   string notes;
+  int protein_count;
   mapping<string protein_id, protein protein> proteins;
 } ProteinContainer;
 
@@ -336,6 +349,7 @@ typedef structure {
   string description;
   string notes;
   assembly_ref assembly_ref;
+  int feature_count;
   mapping<string feature_id, feature feature> features;
 } FeatureContainer;
 
@@ -411,4 +425,3 @@ typedef structure {
 } GenomeAnnotation; 
 
 };
-
