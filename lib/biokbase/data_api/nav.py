@@ -58,7 +58,8 @@ class DBConnection(object):
     """Database connection.
     """
     DEFAULT_WS_URL = 'https://ci.kbase.us/services/ws/'
-    def __init__(self, workspace=None, auth_token=None, ws_url=None):
+    DEFAULT_SHOCK_URL = 'https://ci.kbase.us/services/shock-api/'
+    def __init__(self, workspace=None, auth_token=None, ws_url=None, shock_url=None):
         if workspace is None:
             raise ValueError("Workspace id, e.g. 1003, required")
         try:
@@ -77,7 +78,12 @@ class DBConnection(object):
                                  format(varname))
         if ws_url is None:
             ws_url = self.DEFAULT_WS_URL
-        self._ws_url = ws_url
+            
+        if shock_url is None:
+            shock_url = self.DEFAULT_SHOCK_URL
+        
+        self._ws_url = ws_url        
+        self._shock_url = shock_url
         self.client = biokbase.workspace.client.Workspace(ws_url,
                                                           token=auth_token)
 
@@ -85,7 +91,8 @@ class DBConnection(object):
         """Get back the params that the ObjectAPI ctor wants, as
         a dictionary with the correct keyword arguments set.
         """
-        return dict(services={'workspace_service_url': self._ws_url},
+        return dict(services={'workspace_service_url': self._ws_url, 
+                              'shock_service_url': self._shock_url},
                     ref='{}/{}'.format(self._ws, objid))
 
     def get_workspace(self):

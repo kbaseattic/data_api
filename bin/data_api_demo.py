@@ -47,9 +47,9 @@ if __name__ == "__main__":
     print "\n\nobject_api.get_schema()"
     pprint.pprint(object_api.get_schema())
             
-    print "\n\nFetch the full JSON document for this object:"
-    print "object_api.get_data()"
-    pprint.pprint(object_api.get_data())
+    print "\n\nFetch the full JSON document for this object and tell me how big it is:"
+    print "len(object_api.get_data())"
+    pprint.pprint(len(object_api.get_data()))
     
     print "\n\nFetch specific pieces of an object by path strings:"
     print "object_api.get_data_subset([\"domain\"])"
@@ -72,8 +72,7 @@ if __name__ == "__main__":
     pprint.pprint(assembly_api.get_number_contigs())
 
     print "\nFetch the information telling me about where this Assembly came from:"
-    print "assembly_api.get_external_source_info()"
-    
+    print "assembly_api.get_external_source_info()"    
     pprint.pprint(assembly_api.get_external_source_info())
 
     print "\nFetch the contig ids:"    
@@ -96,7 +95,6 @@ if __name__ == "__main__":
     
     print "\n\nGet my connected Taxon:"
     print "genome_annotation_api.get_taxon()"
-    print "# there is a data reference error here, the taxon ref for this genome annotation is incorrect and points to wheat"
     taxon_api = genome_annotation_api.get_taxon()
     pprint.pprint(taxon_api)
     
@@ -119,13 +117,9 @@ if __name__ == "__main__":
     counts = genome_annotation_api.get_feature_type_counts(feature_types)
     pprint.pprint(counts)
     
-    print "genome_annotation_api.get_feature_ids_by_type(['{0}'])".format(feature_types[0])
-    feature_ids = genome_annotation_api.get_feature_ids_by_type([feature_types[0]])
+    print "\ngenome_annotation_api.get_feature_ids_by_type(['{0}'])".format(feature_types[0])
+    feature_ids = genome_annotation_api.get_feature_ids_by_type([feature_types[0]])[feature_types[0]][0:10]
     pprint.pprint(feature_ids)
-
-    print "\nHow many features of each type are there?"
-    print "pprint.pprint(genome_annotation_api.get_feature_type_counts(feature_types))"
-    pprint.pprint(genome_annotation_api.get_feature_type_counts(feature_types))
     
     #print "genome_annotation_api.get_feature_ids_by_region(contig_id_list=['{0}'],type_list=['{1}'])".format(contig_ids[0],feature_types[0])
     #pprint.pprint(genome_annotation_api.get_feature_ids_by_region(contig_id_list=[contig_ids[0]], type_list=[feature_types[0]]))
@@ -149,16 +143,13 @@ if __name__ == "__main__":
     #pprint.pprint(genome_annotation_api.get_protein_ids_by_cds())
     
     print "\ngenome_annotation_api.get_features_by_id(feature_ids)"
-    pprint.pprint(genome_annotation_api.get_features_by_id(feature_ids[feature_types[0]]))
+    pprint.pprint(genome_annotation_api.get_features_by_id(feature_ids))
     
     #print "\n\ngenome_annotation_api.get_proteins()"
     #pprint.pprint(genome_annotation_api.get_proteins())
     
     
     print "\n\nTaxon API methods for "
-    
-    #print "taxon_api = biokbase.data_api.taxon.TaxonAPI(services, ref='Taxon3/83333_taxon')"
-    #taxon_api = biokbase.data_api.taxon.TaxonAPI(services, ref="Taxon3/83333_taxon")
     
     print "\n\nPull back my taxonomy information:"        
     print "taxon_api.get_scientific_lineage()"
@@ -202,6 +193,13 @@ if __name__ == "__main__":
         sibling_info = [(s.get_scientific_name(), s.get_taxonomic_id()) for s in children]
         pprint.pprint(sibling_info)
 
-    #print "\nFind out what Genome Annotations reference my Taxon:"        
-    #print "taxon_api.get_genome_annotations()"
-    #pprint.pprint(taxon_api.get_genome_annotations())
+    print "\nFind out what Genome Annotations reference my Taxon:"        
+    print """
+    annotations = taxon_api.get_genome_annotations()
+    for g in annotations:
+        pprint.pprint(g.get_name())
+    """
+    
+    annotations = taxon_api.get_genome_annotations()
+    for g in annotations:
+        pprint.pprint(g.get_info())

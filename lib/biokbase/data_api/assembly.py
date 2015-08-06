@@ -13,7 +13,6 @@ except ImportError:
 
 # Local
 from biokbase.data_api.object import ObjectAPI
-from biokbase.data_api import display
 
 CHUNK_SIZE = 2**30
 
@@ -40,29 +39,45 @@ class AssemblyAPI(ObjectAPI):
     
     def get_assembly_id(self):
         """
-        Fetch the id for an Assembly.
+        Retrieve the id for an Assembly.
 
-        Args:
-            None        
         Returns:
-            id: string identifier for the Assembly
-        """
-        typestring = self.get_typestring()
+          id: string identifier for the Assembly"""
 
         if self._is_contigset_type:
             return self.get_data_subset(path_list=["id"])["id"]
         elif self._is_assembly_type:
             return self.get_data_subset(path_list=["assembly_id"])["assembly_id"]        
+
+    def get_genome_annotations(self):
+        """
+        Retrieve the GenomeAnnotations that refer to this Assembly.
+        
+        Returns:
+          list<GenomeAnnotationAPI>"""
+        
+        import biokbase.data_api.genome_annotation            
+        
+        referrers = self.get_referrers()
+        
+        annotations = list()
+        for object_type in referrers:
+            if object_type.split('-')[0] in biokbase.data_api.genome_annotation.TYPES:
+                for x in referrers[object_type]:
+                    annotations.append(GenomeAnnotationAPI(self.services, ref=x))
+        
+        if len(annotations) == 0:
+            return None
+        else:
+            return annotations
     
     def get_external_source_info(self):
         """
-        Fetch the external source information associated with this Assembly.
+        Retrieve the external source information associated with this Assembly.
         
-        Args:
-            None
         Returns:
-            id: string identifier for the Assembly
-        """        
+          id: string identifier for the Assembly"""        
+        
         if self._is_assembly_type:
             return self.get_data_subset(path_list=["external_source",
                                                    "external_source_id",
@@ -78,20 +93,22 @@ class AssemblyAPI(ObjectAPI):
 
     def get_stats(self):
         """
-        Fetch the derived statistical information about this Assembly.
+        Retrieve the derived statistical information about this Assembly.
         
-        Args:
-            None
         Returns:
-            gc_content: total guanine and cytosine content, counting all G and C only
-            dna_size: total length of all dna sequence for this Assembly
-            num_contigs: total number of contiguous sequences in this Assembly        
-        """        
+          gc_content: total guanine and cytosine content, counting all G and C only
+          dna_size: total length of all dna sequence for this Assembly
+          num_contigs: total number of contiguous sequences in this Assembly"""        
+        
         if self._is_contigset_type:
-            contigs = self.get_data()
+            contigs = self.get_data()["contigs"]
             
             pattern = re.compile(r'g|G|c|C')
-            total_gc = sum([len(enumerate(re.finditer(pattern, x.sequence))) for x in contigs])
+            
+            total_gc = 0
+            for c in contigs:
+                total_gc += len([s for s in re.finditer(pattern, c["sequence"])])
+            
             total_length = sum([x.length in contigs])
 
             data = dict()
@@ -102,53 +119,112 @@ class AssemblyAPI(ObjectAPI):
         elif self._is_assembly_type:
             return self.get_data_subset(path_list=["gc_content","dna_size","num_contigs"])            
 
-    #def add_contigs(self, contig_map=None):
-    #    """
-    #    Add contigs to this assembly.
-    #    
-    #    Args:
-    #        contig_map: a dictionary of contig ids to
-    #            {
-    #              'contig_id': string,
-    #              'name': string,
-    #              'description': string,
-    #              'is_complete': 0 or 1,
-    #              'is_circular': 0 or 1
-    #            }
-    #    Returns:
-    #                          
-    #    """
-    #    returns None
-    
-    #def remove_contigs(self):
-    #    raise NotImplementedError
-    
-    #def replace_contigs(self):
-    #    raise NotImplementedError
-
     def get_number_contigs(self):
         """
         Retrieve the number of contiguous sequences in this Assembly.
         
-        Args:
-            None
         Returns:
-            integer
-        """
+          int"""
+        
         if self._is_contigset_type:
             return len(self.get_data()["contigs"])
         elif self._is_assembly_type:
             return self.get_data_subset(path_list=["num_contigs"])["num_contigs"]
+
+    def get_gc_content(self):
+        """
+        Retrieve the total GC content for this Assembly.
+        
+        Returns:
+          float"""
+        
+        if self._is_contigset_type:
+            contigs = self.get_data()["contigs"]
+            
+            pattern = re.compile(r'g|G|c|C')
+            
+            total_gc = 0
+            total_length = 0
+            for c in contigs:
+                total_length += c["length"]
+                total_gc += len([s for s in re.finditer(pattern, c["sequence"])])
+            
+            return total_gc/(total_length*1.0)
+        elif self._is_assembly_type:
+            return self.get_data_subset(path_list=["gc_content"])["gc_content"]
+
+    def get_dna_size(self):
+        """
+        Retrieve the total DNA size for this Assembly.
+        
+        Returns:
+          int"""
+        
+        if self._is_contigset_type:
+            contigs = self.get_data()["contigs"]
+            return sum([c["length"] for c in contigs])
+        elif self._is_assembly_type:
+            return self.get_data_subset(path_list=["dna_size"])["dna_size"]
+
+    def get_contig_lengths(self, contig_id_list=None):
+        """
+        Retrieve the ids for every contiguous sequence in this Assembly.
+        
+        Returns:
+          dict<str>: <int>"""
+        
+        contigs = self.get_data()["contigs"]        
+                
+        if self._is_contigset_type:
+            if contig_id_list == None:        
+                contig_id_list = [c["id"] for c in contigs]
+
+            result = {c["id"]: c["length"] for c in contigs if c["id"] in contig_id_list}
+        elif self._is_assembly_type:
+            if contig_id_list == None:        
+                contig_id_list = [contigs[c]["contig_id"] for c in contigs]
+            
+            result = {c: contigs[c]["length"] for c in contig_id_list}
+        return result
+
+    def get_contig_gc_content(self, contig_id_list=None):
+        """
+        Retrieve the total GC content for each contiguous sequence of this Assembly.
+        
+        Returns:
+          dict<str>: float"""
+        contigs = self.get_data()["contigs"]
+        
+        pattern = re.compile(r'g|G|c|C')
+        contigs_gc = dict()
+        
+        if self._is_contigset_type:
+            if contig_id_list == None:
+                contig_id_list = [c["id"] for c in contigs]
+                        
+            for c in contigs:
+                contigs_gc[c["id"]] = len([s for s in re.finditer(pattern, c["sequence"])])/(c["length"] * 1.0)
+            
+            return contigs_gc
+        elif self._is_assembly_type:
+            if contig_id_list == None:
+                contig_id_list = [contigs[c]["contig_id"] for c in contigs]
+            
+            #fetch with sequence data
+            contigs = self.get_contigs_by_id(contig_id_list)            
+            
+            for c in contigs:
+                contigs_gc[c] = len([s for s in re.finditer(pattern, contigs[c]["sequence"])])/(contigs[c]["length"] * 1.0)
+            
+        return contigs_gc
 
     def get_contig_ids(self):
         """
         Retrieve the ids for every contiguous sequence in this Assembly.
         
         Returns:
-          list of string identifiers
-        """
-        typestring = self.get_typestring()
-
+          list<str>"""
+        
         if self._is_contigset_type:
             contigs = self.get_data()["contigs"]
             result = [c["id"] for c in contigs]
@@ -157,26 +233,32 @@ class AssemblyAPI(ObjectAPI):
             result = [contigs[c]["contig_id"] for c in contigs]
         return result
 
-    def get_contigs_by_id(self, contig_id_list=list()):
+    def get_contigs_by_id(self, contig_id_list=None):
         """
         Retrieve contiguous sequences from this Assembly by id.
         
         Args:
-            contig_id_list: list of string identifiers
+          contig_id_list: list<str>
         Returns:
-            dictionary of contigs, with contig id as key
-            contig value structure
-            {
-                'contig_id': string,
-                'length': integer,
-                'md5': string,
-                'name': string,
-                'description': string,
-                'is_complete': 0 or 1,
-                'is_circular': 0 or 1,
-                'sequence': string
-            }
+          dict
+          
+          dictionary of contigs, with contig id as key
+          contig value structure
+          {
+              'contig_id': string,
+              'length': integer,
+              'md5': string,
+              'name': string,
+              'description': string,
+              'is_complete': 0 or 1,
+              'is_circular': 0 or 1,
+              'sequence': string
+          }
         """
+        
+        if contig_id_list == None:
+            contig_id_list = self.get_data()["contigs"]
+        
         if self._is_contigset_type:
             contigs = self.get_data()["contigs"]
 
@@ -204,10 +286,10 @@ class AssemblyAPI(ObjectAPI):
                 assembly = self.get_data()
                 contigs = assembly["contigs"]
 
-                fetch_url = self.services["shock_service_url"] + "node/" + fasta_ref + "?download_raw"
+                Retrieve_url = self.services["shock_service_url"] + "node/" + fasta_ref + "?download_raw"
 
-                #fetch all sequence
-                data = requests.get(fetch_url, headers=header, stream=True)                
+                #Retrieve all sequence
+                data = requests.get(Retrieve_url, headers=header, stream=True)                
                 buffer = StringIO.StringIO()
                 for chunk in data.iter_content(CHUNK_SIZE):
                     if chunk:
@@ -230,7 +312,7 @@ class AssemblyAPI(ObjectAPI):
 
                     outContigs[c]["sequence"] = sequence_data[contigs[c]["start_position"]:contigs[c]["start_position"] + contigs[c]["num_bytes"]].translate(None, string.whitespace)
             else:                
-                assembly = self.get_data_subset(path_list=["contigs/" + x for x in contig_id_list])
+                assembly = self.get_data_subset(path_list=["contigs/" + c for c in contig_id_list])
                  
                 contigs = assembly["contigs"]
                 
@@ -239,7 +321,7 @@ class AssemblyAPI(ObjectAPI):
                                 "?download&seek=" + str(start) + \
                                 "&length=" + str(length)
 
-                    #fetch individual sequences
+                    #Retrieve individual sequences
                     data = requests.get(fetch_url, headers=header, stream=True)                
                     buffer = StringIO.StringIO()
                     try:
