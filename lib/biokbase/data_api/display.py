@@ -9,6 +9,7 @@ import pandas as pd
 # Qgrid table display
 try:
     import qgrid
+    qgrid.nbinstall()
 except ImportError:
     qgrid = None
 from jinja2 import Template
