@@ -391,6 +391,7 @@ def convert_original_genome_object_to_prototype(source_wsname=None,destination_w
                     protein_container_not_saved = True
                     protein_container['protein_container_id'] = protein_container_object_name 
                     protein_container['name'] = protein_container_object_name 
+                    protein_container['protein_count'] = len(protein_container['proteins']) 
                     while protein_container_not_saved:
                         try:
                             protein_container_info =  destination_ws_client.save_objects({"workspace": destination_workspace_name,"objects":[ { "type":"KBaseGenomesCondensedPrototypeV2.ProteinContainer","data":protein_container,"name": protein_container_object_name,"provenance":protein_container_provenance}]})
@@ -415,12 +416,11 @@ def convert_original_genome_object_to_prototype(source_wsname=None,destination_w
                     feature_container['type']= type
                     feature_container['features'] = feature_type_containers[type]
                     feature_container['assembly_ref'] = assembly_reference 
-
+                    feature_container['feature_count'] = len(feature_type_containers[type])
                     feature_container_provenance = [{"script": __file__, "script_ver": "0.1", "description": "proteins generated from old genome object %s in workspace %s " % (original_genome['data']['id'],source_wsname)}]
                     feature_container_not_saved = True
                     while feature_container_not_saved: 
                         try: 
-#                            protein_container_info =  destination_ws_client.save_objects({"workspace": destination_workspace_name,"objects":[ { "type":"KBaseGenomesCondensedPrototypeV2.ProteinContainer","data":protein_container,"name": protein_container_object_name,"provenance":protein_container_provenance}]})
                             feature_container_info =  destination_ws_client.save_objects({"workspace":destination_workspace_name,"objects":[ { "type":"KBaseGenomesCondensedPrototypeV2.FeatureContainer","data":feature_container,"name": feature_container_object_name,"provenance":feature_container_provenance}]}) 
                             feature_container_not_saved = False 
                             print "Feature Container saved for %s" % (feature_container_object_name)
