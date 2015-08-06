@@ -80,15 +80,16 @@ class Classification(TemplateMixin):
         """
         TemplateMixin.__init__(self)
         self.taxon = obj.get_taxon() if hasattr(obj, 'get_taxon') else obj
+        self.classification = self.taxon.get_scientific_lineage().split(';')
         self.name = self.taxon.get_scientific_name()
-        self.children = self.taxon.get_children() or []
-        tx, self.parents = self.taxon, []
-        while tx:
-            tx = tx.get_parent()
-            if tx:
-                self.parents.insert(tx.get_scientific_name(), 0)
-        self.classification = self.parents + [self.name] + [
-            child.get_scientific_name() for child in self.children]
+        # self.children = self.taxon.get_children() or []
+        # tx, self.parents = self.taxon, []
+        # while tx:
+        #     tx = tx.get_parent()
+        #     if tx:
+        #         self.parents.insert(tx.get_scientific_name(), 0)
+        # self.classification = self.parents + [self.name] + [
+        #     child.get_scientific_name() for child in self.children]
 
     def _repr_html_(self):
         return self.render(classification=self.classification)
