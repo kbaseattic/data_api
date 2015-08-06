@@ -54,7 +54,7 @@ class TaxonAPI(ObjectAPI):
             children = list()
             
             for x in referrers:
-                if x in _TAXON_TYPES:
+                if x.split('-')[0] in _TAXON_TYPES:
                     children.extend([TaxonAPI(self.services, ref=y) for y in referrers[x]])
             
             if len(children) == 0:
