@@ -20,10 +20,10 @@ if __name__ == "__main__":
         "shock_service_url": "https://ci.kbase.us/services/shock-api/",
     }
     
-    print "general object API methods using E.coli K12 Genome Annotation"
+    print "general object API methods using  Genome Annotation"
     
     print "object_api = biokbase.data_api.object.ObjectAPI()"
-    object_api = biokbase.data_api.object.ObjectAPI(services, ref="testCondensedGenomeV2/GENOME_ANNOTATION_Escherichia_coli_K12")
+    object_api = biokbase.data_api.object.ObjectAPI(services, ref="PrototypeReferenceGenomes/kb|g.3157")
 
     print "Pull back basic object info for any object type:"
     print "\n\nobject_api.get_typestring()"
@@ -47,19 +47,19 @@ if __name__ == "__main__":
     print "\n\nobject_api.get_schema()"
     pprint.pprint(object_api.get_schema())
             
-    print "\n\nFetch the full JSON document for this object:"
-    print "object_api.get_data()"
-    pprint.pprint(object_api.get_data())
+    print "\n\nFetch the full JSON document for this object and tell me how big it is:"
+    print "len(object_api.get_data())"
+    pprint.pprint(len(object_api.get_data()))
     
     print "\n\nFetch specific pieces of an object by path strings:"
     print "object_api.get_data_subset([\"domain\"])"
     pprint.pprint(object_api.get_data_subset(["domain"]))
     
 
-    print "\n\nAssembly API methods using E.coli K12"
+    print "\n\nAssembly API methods using "
     
     print "assembly_api = biokbase.data_api.assembly.AssemblyAPI()"
-    assembly_api = biokbase.data_api.assembly.AssemblyAPI(services, ref="testCondensedGenomeV2/kb|g.0_assembly")
+    assembly_api = biokbase.data_api.assembly.AssemblyAPI(services, ref="PrototypeReferenceGenomes/kb|g.3157_assembly")
     
     print "\n\nFetch basic info for an Assembly:"
     print "assembly_api.get_assembly_id()"
@@ -72,8 +72,7 @@ if __name__ == "__main__":
     pprint.pprint(assembly_api.get_number_contigs())
 
     print "\nFetch the information telling me about where this Assembly came from:"
-    print "assembly_api.get_external_source_info()"
-    
+    print "assembly_api.get_external_source_info()"    
     pprint.pprint(assembly_api.get_external_source_info())
 
     print "\nFetch the contig ids:"    
@@ -89,14 +88,13 @@ if __name__ == "__main__":
     pprint.pprint(contigs)
 
         
-    print "\n\nGenome Annotation API methods using E.coli K12"
+    print "\n\nGenome Annotation API methods using "
     
     print "genome_annotation_api = biokbase.data_api.genome_annotation.GenomeAnnotationAPI()"
-    genome_annotation_api = biokbase.data_api.genome_annotation.GenomeAnnotationAPI(services, ref="testCondensedGenomeV2/GENOME_ANNOTATION_Escherichia_coli_K12")
+    genome_annotation_api = biokbase.data_api.genome_annotation.GenomeAnnotationAPI(services, ref="PrototypeReferenceGenomes/kb|g.3157")
     
     print "\n\nGet my connected Taxon:"
     print "genome_annotation_api.get_taxon()"
-    print "# there is a data reference error here, the taxon ref for this genome annotation is incorrect and points to wheat"
     taxon_api = genome_annotation_api.get_taxon()
     pprint.pprint(taxon_api)
     
@@ -114,9 +112,13 @@ if __name__ == "__main__":
     print "pprint.pprint(genome_annotation_api.get_feature_type_descriptions(feature_types))"
     pprint.pprint(genome_annotation_api.get_feature_type_descriptions(feature_types))
     
-    print "\nHmm, Terminators...let's see more about those:"
-    print "genome_annotation_api.get_feature_ids_by_type(['{0}'])".format(feature_types[0])
-    feature_ids = genome_annotation_api.get_feature_ids_by_type([feature_types[0]])
+    print "\nHmm, how many features are there of each type?"
+    print "genome_annotation_api.get_feature_type_counts()"
+    counts = genome_annotation_api.get_feature_type_counts(feature_types)
+    pprint.pprint(counts)
+    
+    print "\ngenome_annotation_api.get_feature_ids_by_type(['{0}'])".format(feature_types[0])
+    feature_ids = genome_annotation_api.get_feature_ids_by_type([feature_types[0]])[feature_types[0]][0:10]
     pprint.pprint(feature_ids)
     
     #print "genome_annotation_api.get_feature_ids_by_region(contig_id_list=['{0}'],type_list=['{1}'])".format(contig_ids[0],feature_types[0])
@@ -147,10 +149,7 @@ if __name__ == "__main__":
     #pprint.pprint(genome_annotation_api.get_proteins())
     
     
-    print "\n\nTaxon API methods for E.coli K12"
-    
-    print "taxon_api = biokbase.data_api.taxon.TaxonAPI(services, ref='Taxon3/83333_taxon')"
-    taxon_api = biokbase.data_api.taxon.TaxonAPI(services, ref="Taxon3/83333_taxon")
+    print "\n\nTaxon API methods for "
     
     print "\n\nPull back my taxonomy information:"        
     print "taxon_api.get_scientific_lineage()"
@@ -195,5 +194,12 @@ if __name__ == "__main__":
         pprint.pprint(sibling_info)
 
     print "\nFind out what Genome Annotations reference my Taxon:"        
-    print "taxon_api.get_genome_annotations()"
-    pprint.pprint(taxon_api.get_genome_annotations())
+    print """
+    annotations = taxon_api.get_genome_annotations()
+    for g in annotations:
+        pprint.pprint(g.get_name())
+    """
+    
+    annotations = taxon_api.get_genome_annotations()
+    for g in annotations:
+        pprint.pprint(g.get_info())

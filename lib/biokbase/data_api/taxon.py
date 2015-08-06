@@ -1,4 +1,9 @@
 from biokbase.data_api.object import ObjectAPI
+from biokbase.data_api.genome_annotation import GenomeAnnotationAPI
+
+_GENOME_TYPES = ['KBaseGenomes.Genome']
+_TAXON_TYPES = ['KBaseGenomesCondensedPrototypeV2.Taxon']
+TYPES = _GENOME_TYPES + _TAXON_TYPES
 
 class TaxonAPI(ObjectAPI):
     """
@@ -12,22 +17,12 @@ class TaxonAPI(ObjectAPI):
         """
         
         super(TaxonAPI, self).__init__(services, ref)
-        
-        self._genome_types = ['KBaseGenomes.Genome-225de07e59f4fdc5d9b8bf0bcd12c498', 
-                              'KBaseGenomes.Genome-aafaaa7df90d03b33258f4fa7790dcbe', 
-                              'KBaseGenomes.Genome-93da9d2c8fb7836fb473dd9c1e4ca89e', 
-                              'KBaseGenomes.Genome-1e1fce431960397da77cb092d27a50cf', 
-                              'KBaseGenomes.Genome-c0526fae0ce1fd8d342ec94fc4dc510a', 
-                              'KBaseGenomes.Genome-c0526fae0ce1fd8d342ec94fc4dc510a', 
-                              'KBaseGenomes.Genome-51b05a5c27084ae56106e60df5b66df5']
-        self._taxon_types = ['KBaseGenomesCondensedPrototypeV2.Taxon-ba7d1e3c906dba5b760e22f5d3bba2a2', 
-                             'KBaseGenomesCondensedPrototypeV2.Taxon-f569f539547dd1eea6a59eb9aa0b2eda']
 
-        self._is_genome_type = self._typestring in self._genome_types
-        self._is_taxon_type = self._typestring in self._taxon_types
+        self._is_genome_type = self._typestring.split('-')[0] in _GENOME_TYPES
+        self._is_taxon_type = self._typestring.split('-')[0] in _TAXON_TYPES
         
         if not (self._is_genome_type or self._is_taxon_type):
-            raise TypeError("Invalid type! Expected KBaseGenomes.Genome or KBaseGenomesCondensedPrototypeV2.Taxon, received {0}".format(self._typestring))
+            raise TypeError("Invalid type! Expected one of {0}, received {1}".format(TYPES, self._typestring))
     
     def get_parent(self):
         """
@@ -39,10 +34,7 @@ class TaxonAPI(ObjectAPI):
         
         if self._is_taxon_type:
             try:
-                parent_data = self.get_data()
-                print parent_data
                 parent_ref = self.get_data()["parent_taxon_ref"]
-                print parent_ref
             except KeyError:
                 return None
             
@@ -63,7 +55,7 @@ class TaxonAPI(ObjectAPI):
             children = list()
             
             for x in referrers:
-                if x in self._taxon_types:
+                if x.split('-')[0] in _TAXON_TYPES:
                     children.extend([TaxonAPI(self.services, ref=y) for y in referrers[x]])
             
             if len(children) == 0:
@@ -85,11 +77,18 @@ class TaxonAPI(ObjectAPI):
             import biokbase.data_api.genome_annotation            
             
             referrers = self.get_referrers()
-            annotations = [biokbase.data_api.genome_annotation.GenomeAPI(self.services, ref=referrers[x]) \
-                           for x in referrers if x.startswith("KBaseGenomesCondensedPrototypeV2.GenomeAnnotation")]
+            print referrers
+            
+            annotations = list()
+            for object_type in referrers:
+                if object_type.split('-')[0] in biokbase.data_api.genome_annotation.TYPES:
+                    for x in referrers[object_type]:
+                        annotations.append(GenomeAnnotationAPI(self.services, ref=x))
             
             if len(annotations) == 0:
                 return None
+            else:
+                return annotations
         elif self._is_genome_type:
             return None
 
@@ -139,6 +138,18 @@ class TaxonAPI(ObjectAPI):
         elif self._is_taxon_type:
             return self.get_data()["taxonomy_id"]
 
+    def get_kingdom(self):
+        """
+        Retrieve the kingdom associated with this Taxonomic Unit.
+        
+        Returns:
+          str"""
+        
+        if self._is_genome_type:
+            return None
+        elif self._is_taxon_type:
+            return self.get_data()["kingdom"]
+
     def get_domain(self):
         """
         Retrieve the domain associated with this Taxonomic Unit.
@@ -161,7 +172,11 @@ class TaxonAPI(ObjectAPI):
         if self._is_genome_type:
             return list()
         elif self._is_taxon_type:
-            return self.get_data()["aliases"]
+            data = self.get_data()
+            if "aliases" in data:
+                return self.get_data()["aliases"]
+            else:
+                return list()
 
     def get_genetic_code(self):
         """
