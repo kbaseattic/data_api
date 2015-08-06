@@ -1,4 +1,5 @@
 from biokbase.data_api.object import ObjectAPI
+from biokbase.data_api.genome_annotation import GenomeAnnotationAPI
 
 _GENOME_TYPES = ['KBaseGenomes.Genome']
 _TAXON_TYPES = ['KBaseGenomesCondensedPrototypeV2.Taxon']
@@ -76,11 +77,18 @@ class TaxonAPI(ObjectAPI):
             import biokbase.data_api.genome_annotation            
             
             referrers = self.get_referrers()
-            annotations = [biokbase.data_api.genome_annotation.GenomeAPI(self.services, ref=referrers[x]) \
-                           for x in referrers if x.startswith("KBaseGenomesCondensedPrototypeV2.GenomeAnnotation")]
+            print referrers
+            
+            annotations = list()
+            for object_type in referrers:
+                if object_type.split('-')[0] in biokbase.data_api.genome_annotation.TYPES:
+                    for x in referrers[object_type]:
+                        annotations.append(GenomeAnnotationAPI(self.services, ref=x))
             
             if len(annotations) == 0:
                 return None
+            else:
+                return annotations
         elif self._is_genome_type:
             return None
 
@@ -130,6 +138,18 @@ class TaxonAPI(ObjectAPI):
         elif self._is_taxon_type:
             return self.get_data()["taxonomy_id"]
 
+    def get_kingdom(self):
+        """
+        Retrieve the kingdom associated with this Taxonomic Unit.
+        
+        Returns:
+          str"""
+        
+        if self._is_genome_type:
+            return None
+        elif self._is_taxon_type:
+            return self.get_data()["kingdom"]
+
     def get_domain(self):
         """
         Retrieve the domain associated with this Taxonomic Unit.
@@ -152,7 +172,11 @@ class TaxonAPI(ObjectAPI):
         if self._is_genome_type:
             return list()
         elif self._is_taxon_type:
-            return self.get_data()["aliases"]
+            data = self.get_data()
+            if "aliases" in data:
+                return self.get_data()["aliases"]
+            else:
+                return list()
 
     def get_genetic_code(self):
         """
