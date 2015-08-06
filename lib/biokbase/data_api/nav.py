@@ -10,9 +10,10 @@ __author__ = 'Dan Gunter <dkgunter@lbl.gov>'
 __date__ = '7/30/15'
 
 # System
+from collections import namedtuple
 import glob
 import os
-from collections import namedtuple
+import re
 
 # Local
 import biokbase
@@ -177,7 +178,56 @@ class Finder(object):
         """
         return list(self)
 
+    def filter(self, objid=None, name=None, name_re=None, type_=None,
+               type_re=None, type_ver=None, **kw):
+        """Return a filtered subset of the contained objects.
+
+        Args:
+            objid (int): Object identifier
+            name (str): Exact match name
+            name_re (str): Regular expression match name
+            type_ (str): Exact match type
+            type_re (str): Regular expression match type
+            type_ver (tuple): Match on string type and str version comparator
+            kw (dict): Names and values, matched as exact strings. If the
+                       name is not in the record, it is ignored.
+        """
+        if name_re is not None and name is not None:
+            raise ValueError('keywords "name_re" and "name" cannot both be given')
+        if sum(map(bool, (type_re, type_, type_ver))) > 1:
+            raise ValueError(
+                'keywords "type_re", "type", and "type_ver" are exclusive')
+        result = []
+        for o in list(self):
+            if objid is not None:
+                if o.objid != objid:
+                    continue
+            if name_re is not None:
+                if not re.match(name_re, o.name):
+                    continue
+            elif name is not None:
+                if name != o.name:
+                    continue
+            if type_re is not None:
+                if not re.match(type_re, o.type):
+                    continue
+            elif type_ is not None:
+                if type_ != o.type:
+                    continue
+            kwmatch = True
+            for k, v in kw:
+                if k in o:
+                    if o[k] != v:
+                        kwmatch = False
+                        break
+            if not kwmatch:
+                continue
+            result.append(o)
+        return result
+
     def __getitem__(self, item):
+        """Indexing.
+        """
         self._set_objlist()
         if isinstance(item, int):
             return self._objlist[item]

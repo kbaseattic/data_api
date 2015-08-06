@@ -6,11 +6,19 @@ __date__ = '8/1/15'
 
 from IPython.display import display
 import pandas as pd
+# Qgrid table display
 try:
     import qgrid
+    qgrid.nbinstall()
 except ImportError:
     qgrid = None
 from jinja2 import Template
+# Seaborn graphing
+try:
+    import seaborn as sns
+    sns.set_style("whitegrid")
+except ImportError:
+    sns = None
 
 _nbviewer = False
 def nbviewer_mode(value=None):
@@ -31,6 +39,7 @@ class Table(pd.DataFrame):
         if qgrid:
             return qgrid.show_grid(self, remote_js=nbviewer_mode())
         else:
+            print
             return display(self)
 
 class Contigs(Table):
@@ -72,15 +81,16 @@ class Classification(TemplateMixin):
         """
         TemplateMixin.__init__(self)
         self.taxon = obj.get_taxon() if hasattr(obj, 'get_taxon') else obj
+        self.classification = self.taxon.get_scientific_lineage().split(';')
         self.name = self.taxon.get_scientific_name()
-        self.children = self.taxon.get_children() or []
-        tx, self.parents = self.taxon, []
-        while tx:
-            tx = tx.get_parent()
-            if tx:
-                self.parents.insert(tx.get_scientific_name(), 0)
-        self.classification = self.parents + [self.name] + [
-            child.get_scientific_name() for child in self.children]
+        # self.children = self.taxon.get_children() or []
+        # tx, self.parents = self.taxon, []
+        # while tx:
+        #     tx = tx.get_parent()
+        #     if tx:
+        #         self.parents.insert(tx.get_scientific_name(), 0)
+        # self.classification = self.parents + [self.name] + [
+        #     child.get_scientific_name() for child in self.children]
 
     def _repr_html_(self):
         return self.render(classification=self.classification)
@@ -160,6 +170,72 @@ class FeatureStats(Table):
                 count += len(values)
             data.append((feature, count))
         Table.__init__(self, data, columns=('feature_type', 'count'))
+
+class FeaturePositions(Table):
+    """The position (and ID and type) of features in the genome.
+    """
+
+    def __init__(self, ga):
+        """Create from a genome.
+
+        Args:
+          ga: GenomeAnnotationAPI object
+        """
+        data = self._get_features(ga)
+        Table.__init__(self, data, columns=('type', 'id', 'start', 'len', 'dir'))
+
+    def _get_features(self, ga):
+        "This should probably move into genome_annotation module"
+        from biokbase.data_api.object import ObjectAPI
+        fcr = 'feature_container_references'
+        refs = ga.get_data_subset(path_list=[fcr])[fcr]
+        result = []
+        for ref in refs.values():
+            obj = ObjectAPI(ga.services, ref) # fetch data
+            features = obj.get_data()['features']
+            for feat_id in features.keys():  # iterate features
+                ftype = features[feat_id]['type']
+                for loc in features[feat_id]['locations']:
+                    # biuld an output row and add to result
+                    row = (ftype, feat_id, loc[1], loc[3], loc[2])
+                    result.append(row)
+        return result
+
+    def stripplot(self):
+        """Make a 'stripplot' of all feature positions.
+
+        Requires the 'seaborn' library
+        """
+        if sns is None:
+            raise NotImplementedError('Requires the "seaborn" library. See: '
+                             'https://github.com/mwaskom/seaborn')
+        ax = sns.stripplot(x='start', y='type', data=self)
+        # get rid of spurious negative tick
+        ax.set_xlim(0, ax.get_xlim()[1])
+        return ax
+
+
+class ProteinStats(Table):
+    """Various statistics for proteins.
+    """
+    STATS_LENGTH = 'length'
+
+    def __init__(self, ga, stats=[STATS_LENGTH]):
+        """Create from a genome.
+
+        Args:
+          ga: GenomeAnnotationAPI object
+        """
+        proteins = ga.get_proteins()
+        data = {}
+        if self.STATS_LENGTH in stats:
+            data[self.STATS_LENGTH] = [
+                len(v['amino_acid_sequence'])
+                for v in proteins.values()]
+        Table.__init__(self, data)
+
+    def plot_protein_lengths(self):
+        return self.plot(x=self.STATS_LENGTH, kind='hist')
 
 ###################################
 
