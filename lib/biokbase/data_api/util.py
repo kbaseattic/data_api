@@ -35,7 +35,7 @@ class logged(object):
         - kvp: User-provided key/value pairs, formatted as
           "key=value" separated by commas
 
-    Basic usage:
+    Usage:
 
        @logged
        def func_one(args):
