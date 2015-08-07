@@ -624,7 +624,7 @@ class GenomeAnnotationAPI(ObjectAPI):
             for mRNA_feature_key in mRNA_features: 
                 mRNA_id = mRNA_features[mRNA_feature_key]["feature_id"] 
                 if "mRNA_properties" in  mRNA_features[mRNA_feature_key]:
-                    if "parent_gene" in   mRNA_features[mRNA_feature_key]["mRNA_properties"]: 
+                    if "parent_gene" in  mRNA_features[mRNA_feature_key]["mRNA_properties"]: 
                         return_dict[mRNA_id] =  mRNA_features[mRNA_feature_key]["mRNA_properties"]["parent_gene"][1] 
                     else:
                         return_dict[mRNA_id] = None
@@ -633,11 +633,76 @@ class GenomeAnnotationAPI(ObjectAPI):
  
             return return_dict
 
-    def get_children_cds_by_gene(self, gene_id_list=None):
-        raise NotImplementedError
+    def get_children_cds_by_gene(self, gene_feature_id_list=None):
+        if type(gene_feature_id_list) != type([]): 
+            raise TypeError("A list of strings indicating gene feature identifiers is required.") 
+        elif len(gene_feature_id_list) == 0: 
+            raise TypeError("A list of strings indicating gene feature identifiers is required, received an empty list.") 
+
+        return_dict = dict() 
+
+        if self._is_genome_type: 
+            #This type of genome object does not support this call.
+            return return_dict 
+        elif self._is_annotation_type: 
+            data = self.get_data_subset(path_list=["feature_lookup", "feature_container_references"]) 
+            feature_lookup = data["feature_lookup"] 
+            feature_container_references = data["feature_container_references"] 
+ 
+            mRNA_feature_container_ref = None; 
+            if "gene" in feature_container_references: 
+                gene_feature_container_ref = feature_container_references["gene"] 
+            else: 
+                #Does not have gene annotations in this genome
+                return return_dict 
+ 
+            gene_features = ObjectAPI(self.services, gene_feature_container_ref).get_data_subset(path_list=["features/" + x for x in gene_feature_id_list])["features"] 
+
+            for gene_feature_key in gene_features: 
+                gene_id = gene_features[gene_feature_key]["feature_id"] 
+                return_dict[gene_id] = [] 
+                if "gene_properties" in  gene_features[gene_feature_key]: 
+                    if "children_CDS" in  gene_features[gene_feature_key]["gene_properties"]: 
+                        cds_tuple_list = gene_features[gene_feature_key]["gene_properties"]["children_CDS"]
+                        for cds_tuple in cds_tuple_list:
+                            return_dict[gene_id].append(cds_tuple[1])
+            return return_dict
+
     
-    def get_children_mrna_by_gene(self, gene_id_list=None):
-        raise NotImplementedError
+    def get_children_mrna_by_gene(self, gene_feature_id_list=None):
+        if type(gene_feature_id_list) != type([]):
+            raise TypeError("A list of strings indicating gene feature identifiers is required.")
+        elif len(gene_feature_id_list) == 0:
+            raise TypeError("A list of strings indicating gene feature identifiers is required, received an empty list.")
+ 
+        return_dict = dict()
+ 
+        if self._is_genome_type: 
+            #This type of genome object does not support this call. 
+            return return_dict 
+        elif self._is_annotation_type: 
+            data = self.get_data_subset(path_list=["feature_lookup", "feature_container_references"]) 
+            feature_lookup = data["feature_lookup"] 
+            feature_container_references = data["feature_container_references"] 
+ 
+            mRNA_feature_container_ref = None; 
+            if "gene" in feature_container_references:
+                gene_feature_container_ref = feature_container_references["gene"]
+            else: 
+                #Does not have gene annotations in this genome    
+                return return_dict
+ 
+            gene_features = ObjectAPI(self.services, gene_feature_container_ref).get_data_subset(path_list=["features/" + x for x in gene_feature_id_list])["features"]
+ 
+            for gene_feature_key in gene_features:
+                gene_id = gene_features[gene_feature_key]["feature_id"]
+                return_dict[gene_id] = [] 
+                if "gene_properties" in  gene_features[gene_feature_key]:
+                    if "children_mRNA" in  gene_features[gene_feature_key]["gene_properties"]:
+                        mrna_tuple_list = gene_features[gene_feature_key]["gene_properties"]["children_mRNA"]
+                        for mrna_tuple in mrna_tuple_list:
+                            return_dict[gene_id].append(mrna_tuple[1])
+            return return_dict 
 
     def _genome_get_features_by_type(self, type_list=None, test=lambda x: True):
         """
