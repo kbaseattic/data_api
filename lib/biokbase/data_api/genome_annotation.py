@@ -652,7 +652,6 @@ class GenomeAnnotationAPI(ObjectAPI):
           dict"""
         
         features = self.get_data()["features"]
-        
         out_features = dict()            
         for x in features:
             out_features[x] = list()
@@ -751,3 +750,4 @@ class GenomeAnnotationAPI(ObjectAPI):
             feature_container = ObjectAPI(services=self.services, ref=feature_container_references[x])
             counts[x] = feature_container.get_data()["feature_count"]
         return counts
+
