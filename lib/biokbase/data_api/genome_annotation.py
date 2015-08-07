@@ -688,23 +688,218 @@ class GenomeAnnotationAPI(ObjectAPI):
             protein_container = ObjectAPI(self.services, self.get_data()["protein_container_ref"])
             return protein_container.get_data()["proteins"]
 
-    def get_cds_by_mrna(self, mrna_id_list=None):
-        raise NotImplementedError
-    
-    def get_mrna_by_cds(self, cds_id_list=None):
-        raise NotImplementedError
-    
-    def get_gene_by_cds(self, cds_id_list=None):
-        raise NotImplementedError
-    
-    def get_gene_by_mrna(self, mrna_id_list=None):
-        raise NotImplementedError
+    def get_cds_by_mrna(self, mRNA_feature_id_list=None):
+        if type(mRNA_feature_id_list) != type([]): 
+            raise TypeError("A list of strings indicating mRNA feature identifiers is required.")
+        elif len(mRNA_feature_id_list) == 0: 
+            raise TypeError("A list of strings indicating mRNA feature identifiers is required, received an empty list.")
+ 
+        return_dict = dict()
+        if self._is_genome_type: 
+            #This type of genome object does not support this call.
+            return return_dict 
+        elif self._is_annotation_type: 
+            data = self.get_data_subset(path_list=["feature_lookup", "feature_container_references"])
+            feature_lookup = data["feature_lookup"] 
+            feature_container_references = data["feature_container_references"]
+ 
+            mRNA_feature_container_ref = None; 
+            if "mRNA" in feature_container_references: 
+                mRNA_feature_container_ref = feature_container_references["mRNA"] 
+            else:
+                #Does not have mRNA annotations in this genome
+                return return_dict 
+ 
+            mRNA_features = ObjectAPI(self.services, mRNA_feature_container_ref).get_data_subset(path_list=["features/" + x for x in mRNA_feature_id_list])["features"]
+ 
+            for mRNA_feature_key in mRNA_features: 
+                mRNA_id = mRNA_features[mRNA_feature_key]["feature_id"] 
+                if "mRNA_properties" in  mRNA_features[mRNA_feature_key]:
+                    if "associated_CDS" in   mRNA_features[mRNA_feature_key]["mRNA_properties"]:
+                        return_dict[mRNA_id] =  mRNA_features[mRNA_feature_key]["mRNA_properties"]["associated_CDS"][1]
+                    else: 
+                        return_dict[mRNA_id] = None 
+                else: 
+                    return_dict[mRNA_id] = None 
+ 
+            return return_dict 
 
-    def get_cds_by_gene(self, gene_id_list=None):
-        raise NotImplementedError
+    def get_mrna_by_cds(self, cds_feature_id_list=None): 
+        if type(cds_feature_id_list) != type([]): 
+            raise TypeError("A list of strings indicating CDS feature identifiers is required.") 
+        elif len(cds_feature_id_list) == 0: 
+            raise TypeError("A list of strings indicating CDS feature identifiers is required, received an empty list.") 
+ 
+        return_dict = dict() 
+        if self._is_genome_type: 
+            #This type of genome object does not support this call. 
+            return return_dict 
+        elif self._is_annotation_type: 
+            data = self.get_data_subset(path_list=["feature_lookup", "feature_container_references"]) 
+            feature_lookup = data["feature_lookup"] 
+            feature_container_references = data["feature_container_references"] 
+ 
+            cds_feature_container_ref = None; 
+            if "CDS" in feature_container_references: 
+                cds_feature_container_ref = feature_container_references["CDS"] 
+            else: 
+                #Does not have CDS annotations in this genome 
+                return return_dict 
+ 
+            cds_features = ObjectAPI(self.services, cds_feature_container_ref).get_data_subset(path_list=["features/" + x for x in cds_feature_id_list])["features"] 
+ 
+            for cds_feature_key in cds_features: 
+                cds_id = cds_features[cds_feature_key]["feature_id"] 
+                if "CDS_properties" in  cds_features[cds_feature_key]: 
+                    if "associated_mRNA" in   cds_features[cds_feature_key]["CDS_properties"]: 
+                        return_dict[cds_id] =  cds_features[cds_feature_key]["CDS_properties"]["associated_mRNA"][1] 
+                    else: 
+                        return_dict[cds_id] = None 
+                else: 
+                    return_dict[cds_id] = None 
+ 
+            return return_dict 
+
+    def get_gene_by_cds(self, cds_feature_id_list=None):
+        if type(cds_feature_id_list) != type([]): 
+            raise TypeError("A list of strings indicating CDS feature identifiers is required.")
+        elif len(cds_feature_id_list) == 0: 
+            raise TypeError("A list of strings indicating CDS feature identifiers is required, received an empty list.")
+ 
+        return_dict = dict()
+        if self._is_genome_type: 
+            #This type of genome object does not support this call.
+            return return_dict
+        elif self._is_annotation_type: 
+            data = self.get_data_subset(path_list=["feature_lookup", "feature_container_references"])
+            feature_lookup = data["feature_lookup"]
+            feature_container_references = data["feature_container_references"]
+ 
+            cds_feature_container_ref = None;
+            if "CDS" in feature_container_references: 
+                cds_feature_container_ref = feature_container_references["CDS"] 
+            else:
+                #Does not have CDS annotations in this genome
+                return return_dict 
+ 
+            cds_features = ObjectAPI(self.services, cds_feature_container_ref).get_data_subset(path_list=["features/" + x for x in cds_feature_id_list])["features"] 
+ 
+            for cds_feature_key in cds_features:
+                cds_id = cds_features[cds_feature_key]["feature_id"] 
+                if "CDS_properties" in  cds_features[cds_feature_key]: 
+                    if "associated_mRNA" in   cds_features[cds_feature_key]["CDS_properties"]:
+                        return_dict[cds_id] =  cds_features[cds_feature_key]["CDS_properties"]["parent_gene"][1]
+                    else:
+                        return_dict[cds_id] = None
+                else:
+                    return_dict[cds_id] = None
+ 
+            return return_dict
+  
+    def get_gene_by_mrna(self, mRNA_feature_id_list=None):
+        if type(mRNA_feature_id_list) != type([]):
+            raise TypeError("A list of strings indicating mRNA feature identifiers is required.")
+        elif len(mRNA_feature_id_list) == 0:
+            raise TypeError("A list of strings indicating mRNA feature identifiers is required, received an empty list.")
+ 
+        return_dict = dict() 
+        if self._is_genome_type: 
+            #This type of genome object does not support this call.   
+            return return_dict 
+        elif self._is_annotation_type:
+            data = self.get_data_subset(path_list=["feature_lookup", "feature_container_references"])
+            feature_lookup = data["feature_lookup"] 
+            feature_container_references = data["feature_container_references"]
+ 
+            mRNA_feature_container_ref = None; 
+            if "mRNA" in feature_container_references:
+                mRNA_feature_container_ref = feature_container_references["mRNA"]
+            else: 
+                #Does not have mRNA annotations in this genome  
+                return return_dict
+            mRNA_features = ObjectAPI(self.services, mRNA_feature_container_ref).get_data_subset(path_list=["features/" + x for x in mRNA_feature_id_list])["features"] 
+ 
+            for mRNA_feature_key in mRNA_features: 
+                mRNA_id = mRNA_features[mRNA_feature_key]["feature_id"] 
+                if "mRNA_properties" in  mRNA_features[mRNA_feature_key]:
+                    if "parent_gene" in  mRNA_features[mRNA_feature_key]["mRNA_properties"]: 
+                        return_dict[mRNA_id] =  mRNA_features[mRNA_feature_key]["mRNA_properties"]["parent_gene"][1] 
+                    else:
+                        return_dict[mRNA_id] = None
+                else:
+                    return_dict[mRNA_id] = None
+ 
+            return return_dict
+
+    def get_children_cds_by_gene(self, gene_feature_id_list=None):
+        if type(gene_feature_id_list) != type([]): 
+            raise TypeError("A list of strings indicating gene feature identifiers is required.") 
+        elif len(gene_feature_id_list) == 0: 
+            raise TypeError("A list of strings indicating gene feature identifiers is required, received an empty list.") 
+
+        return_dict = dict() 
+
+        if self._is_genome_type: 
+            #This type of genome object does not support this call.
+            return return_dict 
+        elif self._is_annotation_type: 
+            data = self.get_data_subset(path_list=["feature_lookup", "feature_container_references"]) 
+            feature_lookup = data["feature_lookup"] 
+            feature_container_references = data["feature_container_references"] 
+ 
+            mRNA_feature_container_ref = None; 
+            if "gene" in feature_container_references: 
+                gene_feature_container_ref = feature_container_references["gene"] 
+            else: 
+                #Does not have gene annotations in this genome
+                return return_dict 
+ 
+            gene_features = ObjectAPI(self.services, gene_feature_container_ref).get_data_subset(path_list=["features/" + x for x in gene_feature_id_list])["features"] 
+
+            for gene_feature_key in gene_features: 
+                gene_id = gene_features[gene_feature_key]["feature_id"] 
+                return_dict[gene_id] = [] 
+                if "gene_properties" in  gene_features[gene_feature_key]: 
+                    if "children_CDS" in  gene_features[gene_feature_key]["gene_properties"]: 
+                        cds_tuple_list = gene_features[gene_feature_key]["gene_properties"]["children_CDS"]
+                        for cds_tuple in cds_tuple_list:
+                            return_dict[gene_id].append(cds_tuple[1])
+            return return_dict
     
-    def get_mrna_by_gene(self, gene_id_list=None):
-        raise NotImplementedError
+    def get_children_mrna_by_gene(self, gene_feature_id_list=None):
+        if type(gene_feature_id_list) != type([]):
+            raise TypeError("A list of strings indicating gene feature identifiers is required.")
+        elif len(gene_feature_id_list) == 0:
+            raise TypeError("A list of strings indicating gene feature identifiers is required, received an empty list.")
+ 
+        return_dict = dict()
+ 
+        if self._is_genome_type: 
+            #This type of genome object does not support this call. 
+            return return_dict 
+        elif self._is_annotation_type: 
+            data = self.get_data_subset(path_list=["feature_lookup", "feature_container_references"]) 
+            feature_lookup = data["feature_lookup"] 
+            feature_container_references = data["feature_container_references"] 
+ 
+            mRNA_feature_container_ref = None; 
+            if "gene" in feature_container_references:
+                gene_feature_container_ref = feature_container_references["gene"]
+            else: 
+                #Does not have gene annotations in this genome    
+                return return_dict
+ 
+            gene_features = ObjectAPI(self.services, gene_feature_container_ref).get_data_subset(path_list=["features/" + x for x in gene_feature_id_list])["features"]
+ 
+            for gene_feature_key in gene_features:
+                gene_id = gene_features[gene_feature_key]["feature_id"]
+                return_dict[gene_id] = [] 
+                if "gene_properties" in  gene_features[gene_feature_key]:
+                    if "children_mRNA" in  gene_features[gene_feature_key]["gene_properties"]:
+                        mrna_tuple_list = gene_features[gene_feature_key]["gene_properties"]["children_mRNA"]
+                        for mrna_tuple in mrna_tuple_list:
+                            return_dict[gene_id].append(mrna_tuple[1])
+            return return_dict 
 
     def _genome_get_features_by_type(self, type_list=None, test=lambda x: True):
         """
