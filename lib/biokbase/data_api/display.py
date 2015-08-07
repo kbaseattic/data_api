@@ -4,6 +4,10 @@ Objects for displaying the results in the IPython notebook.
 __author__ = 'Dan Gunter <dkgunter@lbl.gov>'
 __date__ = '8/1/15'
 
+# Stdlib
+import logging
+
+# Third-party
 from IPython.display import display
 import pandas as pd
 # Qgrid table display
@@ -19,6 +23,13 @@ try:
     sns.set_style("whitegrid")
 except ImportError:
     sns = None
+
+# Local
+from biokbase.data_api.util import log_start, log_end, stdout_config
+
+_logger = stdout_config(logging.getLogger(__name__))
+_logger.setLevel(logging.DEBUG)
+_logger.propagate = False
 
 _nbviewer = False
 def nbviewer_mode(value=None):
@@ -255,34 +266,10 @@ class GenomeSummary(object):
             raise TypeError('{} is not a recognized GenomeAnnotation type.'
                 .format(type(ga)))
 
-        taxon, assembly = None, None
-        try:
-            taxon = ga.get_taxon()
-            assembly = ga.get_assembly()
-        except Exception as err:
-            t = 'taxon' if taxon is None else 'assembly'
-            raise RuntimeError('Cannot get "{}": {}'.format(
-                t, err))
-
         self.data = {
-            'taxon': {
-                k: getattr(taxon, 'get_' + k)()
-                for k in ('taxonomic_id', 'kingdom', 'domain',
-                          'genetic_code', 'scientific_name', 'aliases',
-                          'scientific_lineage')},
-            'assembly': {
-                k1: getattr(assembly, 'get_' + k2)()
-                for k1, k2 in (
-                    ('number_of_contigs', 'number_contigs'),
-                    ('total_length','dna_size'),
-                    ('total_gc_content', 'gc_content'),
-                    ('contig_length', 'contig_lengths'),
-                    ('contig_gc_content', 'contig_gc_content')
-                )},
-            'annotation': {
-                'feature_' + k: getattr(ga, 'get_feature_' + k)()
-                for k in ('types', 'type_descriptions', 'type_counts')
-            }
+            'taxon': self._get_taxon(ga),
+            'assembly': self._get_assembly(ga),
+            'annotation': self._get_annotation(ga)
         }
 
         # Set attributes for top-level keys
@@ -292,36 +279,50 @@ class GenomeSummary(object):
             # dataframe with suffix `_df`
             #setattr(self, key + '_df', pd.DataFrame(value))
 
-###################################
 
-# def __rb_parsing(self)was found
-#     in a Rhodobacter genome.
-#         NODE_48_length_21448_cov_4.91263_ID_95
-#     """
-#     c0 = contigs[0]
-#     colnames = c0.split(sep)[::2]
-#
-#     # infer types for each column from 1st row
-#     # if it can be made a float, assume it is numeric
-#     coltypes = []
-#     for colval in c0.split(sep)[1::2]:
-#         try:
-#             float(colval)
-#             coltypes.append(float)
-#         except ValueError:
-#             coltypes.append(str)
-#
-#     # build a dict of the values
-#     contig_dict = dict.fromkeys(colnames)
-#     for k in contig_dict:
-#         contig_dict[k] = []
-#     n = len(contig_dict)
-#     for contig in contigs:
-#         values = contig.split(sep)[1::2]
-#         for i in range(n):
-#             value = coltypes[i](values[i])
-#             contig_dict[colnames[i]].append(value)
-#
-#     # create DataFrame from the dict
-#     pd.DataFrame.__init__(self, contig_dict)
+    @staticmethod
+    def _get_taxon(ga):
+        t0 = log_start(_logger, 'get_taxon')
+        try:
+            taxon = ga.get_taxon()
+        except Exception as err:
+            raise RuntimeError('Cannot get taxon: {}'.format(err))
+        txn = { k: getattr(taxon, 'get_' + k)()
+                 for k in ('taxonomic_id', 'kingdom', 'domain',
+                           'genetic_code', 'scientific_name', 'aliases',
+                           'scientific_lineage')}
+        txn['lineage_list'] = txn['scientific_lineage'].split(';')
+        log_end(_logger, t0, 'get_taxon')
+        return txn
 
+    @staticmethod
+    def _get_assembly(ga):
+        t0 = log_start(_logger, 'get_assembly')
+        try:
+            assembly = ga.get_assembly()
+        except Exception as err:
+            raise RuntimeError('Cannot get assembly: {}'.format(err))
+        asy = {
+            k1: getattr(assembly, 'get_' + k2)()
+            for k1, k2 in (
+                ('number_of_contigs', 'number_contigs'),
+                ('total_length', 'dna_size'),
+                ('total_gc_content', 'gc_content'),
+                ('contig_length', 'contig_lengths'),
+                ('contig_gc_content', 'contig_gc_content')
+            )}
+        log_end(_logger, t0, 'get_assembly')
+        return asy
+
+    @staticmethod
+    def _get_annotation(ga):
+        t0 = log_start(_logger, 'get_annotation')
+        try:
+            feature_types = ga.get_feature_types()
+        except Exception as err:
+            raise RuntimeError('Cannot get feature_types: {}'.format(err))
+        ann = { 'feature_' + k: getattr(ga, 'get_feature_' + k)(feature_types)
+                for k in ('type_descriptions', 'type_counts')}
+        ann['feature_types'] = feature_types
+        log_end(_logger, t0, 'get_annotation')
+        return ann
