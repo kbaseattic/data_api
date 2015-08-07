@@ -237,6 +237,61 @@ class ProteinStats(Table):
     def plot_protein_lengths(self):
         return self.plot(x=self.STATS_LENGTH, kind='hist')
 
+class GenomeSummary(object):
+    """Summary of a GenomeAnnotation.
+
+    Attributes:
+       taxon (dict): Information about the taxonomic type
+       taxon_df (DataFrame): Taxon dict as a Pandas DataFrame
+       assembly (dict): Infomration about the contigs in the assembly
+       assembly_df (DataFrame): Assembly dict as a Pandas DataFrame
+       annotation (dict): Information about the assembly
+       annotation_df (DataFrame): Annotation dict as a Pandas DataFrame
+       data (dict): All the information as a single dict with the attributes
+                    listed above as top-level keys.
+    """
+    def __init__(self, ga):
+        if not hasattr(ga, 'get_taxon') or not hasattr(ga, 'get_assembly'):
+            raise TypeError('{} is not a recognized GenomeAnnotation type.'
+                .format(type(ga)))
+
+        taxon, assembly = None, None
+        try:
+            taxon = ga.get_taxon()
+            assembly = ga.get_assembly()
+        except Exception as err:
+            t = 'taxon' if taxon is None else 'assembly'
+            raise RuntimeError('Cannot get "{}": {}'.format(
+                t, err))
+
+        self.data = {
+            'taxon': {
+                k: getattr(taxon, 'get_' + k)()
+                for k in ('taxonomic_id', 'kingdom', 'domain',
+                          'genetic_code', 'scientific_name', 'aliases',
+                          'scientific_lineage')},
+            'assembly': {
+                k1: getattr(assembly, 'get_' + k2)()
+                for k1, k2 in (
+                    ('number_of_contigs', 'number_contigs'),
+                    ('total_length','dna_size'),
+                    ('total_gc_content', 'gc_content'),
+                    ('contig_length', 'contig_lengths'),
+                    ('contig_gc_content', 'contig_gc_content')
+                )},
+            'annotation': {
+                k: getattr(ga, 'feature_' + k, 'get_feature_' + k)()
+                for k in ('types', 'type_descriptions', 'type_counts')
+            }
+        }
+
+        # Set attributes for top-level keys
+        for key, value in self.data.items():
+            # dict
+            setattr(self, key, value)
+            # dataframe with suffix `_df`
+            #setattr(self, key + '_df', pd.DataFrame(value))
+
 ###################################
 
 # def __rb_parsing(self)was found
