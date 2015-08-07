@@ -117,36 +117,60 @@ if __name__ == "__main__":
     counts = genome_annotation_api.get_feature_type_counts(feature_types)
     pprint.pprint(counts)
     
-    print "\ngenome_annotation_api.get_feature_ids_by_type(['{0}'])".format(feature_types[0])
-    feature_ids = genome_annotation_api.get_feature_ids_by_type([feature_types[0]])[feature_types[0]][0:10]
-    pprint.pprint(feature_ids)
+    target_types = [feature_types[0]]    
     
-    #print "genome_annotation_api.get_feature_ids_by_region(contig_id_list=['{0}'],type_list=['{1}'])".format(contig_ids[0],feature_types[0])
-    #pprint.pprint(genome_annotation_api.get_feature_ids_by_region(contig_id_list=[contig_ids[0]], type_list=[feature_types[0]]))
+    print "\ngenome_annotation_api.get_feature_ids(type_list={0})".format(target_types)
+    feature_ids_by_type = genome_annotation_api.get_feature_ids(type_list=target_types)
+    pprint.pprint(len(feature_ids_by_type.values()))
+
+    target_regions = [{"contig_id": "kb|g.3157.c.0", "strand": "?", "start": 0, "stop": 1000}]
+
+    print "\ngenome_annotation_api.get_feature_ids(region_list={0})".format(target_regions)
+    feature_ids_by_region = genome_annotation_api.get_feature_ids(region_list=target_regions)
+    pprint.pprint(feature_ids_by_region)
+
+    target_functions = ["polymerase"]
+
+    print "\ngenome_annotation_api.get_feature_ids(function_list={0})".format(target_functions)
+    feature_ids_by_function = genome_annotation_api.get_feature_ids(function_list=target_functions)
+    pprint.pprint(feature_ids_by_function)
+
+    target_aliases = ["dnaA"]
+
+    print "\ngenome_annotation_api.get_feature_ids(alias_list={0})".format(target_aliases)
+    feature_ids_by_alias = genome_annotation_api.get_feature_ids(alias_list=target_aliases)
+    pprint.pprint(feature_ids_by_alias)
+
+    print "\ngenome_annotation_api.get_feature_ids(type_list={0}, region_list={1}, function_list={2}, alias_list={3})".format(target_types,target_regions,target_functions,target_aliases)
+    feature_ids_intersection = genome_annotation_api.get_feature_ids(type_list=target_types, 
+                                                                     region_list=target_regions,
+                                                                     function_list=target_functions,
+                                                                     alias_list=target_aliases)
+    pprint.pprint(feature_ids_intersection)
+    feature_ids = feature_ids_intersection.values().join()
     
-    #print "\n\ngenome_annotation_api.get_feature_ids_by_function(['gene'])"
-    #pprint.pprint(genome_annotation_api.get_feature_ids_by_function(['gene']))
-    
-    #print "\n\ngenome_annotation_api.get_feature_ids_by_alias()"
-    #pprint.pprint(genome_annotation_api.get_feature_ids_by_alias())
-    
-    #print "\n\ngenome_annotation_api.get_associated_feature_ids()"
-    #pprint.pprint(genome_annotation_api.get_associated_feature_ids())
-    
-    #print "\n\ngenome_annotation_api.get_child_feature_ids()"
-    #pprint.pprint(genome_annotation_api.get_child_feature_ids())
-    
-    #print "\n\ngenome_annotation_api.get_parent_feature_ids()"
-    #pprint.pprint(genome_annotation_api.get_parent_feature_ids())
+    print feature_ids
     
     #print "\n\ngenome_annotation_api.get_protein_ids_by_cds()"
     #pprint.pprint(genome_annotation_api.get_protein_ids_by_cds())
     
     print "\ngenome_annotation_api.get_features_by_id(feature_ids)"
     pprint.pprint(genome_annotation_api.get_features_by_id(feature_ids))
-    
-    #print "\n\ngenome_annotation_api.get_proteins()"
-    #pprint.pprint(genome_annotation_api.get_proteins())
+
+    print "\ngenome_annotation_api.get_feature_dna(feature_ids)"
+    pprint.pprint(genome_annotation_api.get_feature_dna(feature_ids))
+
+    print "\ngenome_annotation_api.get_feature_locations(feature_ids)"
+    pprint.pprint(genome_annotation_api.get_feature_locations(feature_ids))
+
+    print "\ngenome_annotation_api.get_feature_functions(feature_ids)"
+    pprint.pprint(genome_annotation_api.get_feature_functions(feature_ids))
+
+    print "\ngenome_annotation_api.get_feature_aliases(feature_ids)"
+    pprint.pprint(genome_annotation_api.get_feature_aliases(feature_ids))
+
+    print "\n\ngenome_annotation_api.get_proteins()"
+    pprint.pprint(len(genome_annotation_api.get_proteins()))
     
     
     print "\n\nTaxon API methods for "
