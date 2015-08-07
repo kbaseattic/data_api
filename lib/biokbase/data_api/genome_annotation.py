@@ -244,19 +244,21 @@ class GenomeAnnotationAPI(ObjectAPI):
                         
                         if ref not in feature_containers:
                             feature_containers[ref] = list()
+                            for type_key in feature_container_references:
+                                if ref in feature_container_references[type_key]:
+                                    out_ids[type_key] = list()
                         
-                        feature_containers[ref].append(feature_lookup[alias][1])
+                        feature_containers[ref].append(feature_lookup[alias][1])                                                
                 
-                for alias in alias_list:
-                    for ref in out_ids[alias]:
-                        type_key = None
-                        for k in feature_container_references:
-                            if ref in feature_container_references[k]:
-                                type_key = k
-                                break
-                        
-                        if type_key in type_list:
-                            out_ids[alias] = feature_containers[ref]
+                for ref in feature_containers:
+                    for type_key in feature_container_references:
+                        for alias in alias_list:
+                            if alias in feature_container_references[type_key]:
+                                out_ids[type_key] = feature_containers[ref]
+                            
+                
+                if type_key in type_list:
+                    out_ids[alias] = feature_containers[ref]
                 alias_ids = out_ids
         
         # find the intersection
