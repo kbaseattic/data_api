@@ -528,7 +528,6 @@ class GenomeAnnotationAPI(ObjectAPI):
 
             return return_dict
 
-    
     def get_mrna_by_cds(self, cds_feature_id_list=None):
         if type(cds_feature_id_list) != type([]): 
             raise TypeError("A list of strings indicating CDS feature identifiers is required.") 
@@ -652,6 +651,7 @@ class GenomeAnnotationAPI(ObjectAPI):
           dict"""
         
         features = self.get_data()["features"]
+        
         out_features = dict()            
         for x in features:
             out_features[x] = list()
@@ -750,4 +750,3 @@ class GenomeAnnotationAPI(ObjectAPI):
             feature_container = ObjectAPI(services=self.services, ref=feature_container_references[x])
             counts[x] = feature_container.get_data()["feature_count"]
         return counts
-
