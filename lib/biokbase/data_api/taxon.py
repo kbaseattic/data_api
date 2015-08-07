@@ -1,3 +1,9 @@
+"""
+Data API for Taxon entities.  This API provides methods for traversing
+taxonomic parent/child relationships, and accessing information such as
+NCBI taxonomic id, scientific name, scientific lineage, etc.
+"""
+
 from biokbase.data_api.object import ObjectAPI
 from biokbase.data_api.genome_annotation import GenomeAnnotationAPI
 
