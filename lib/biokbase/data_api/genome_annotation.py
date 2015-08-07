@@ -1,3 +1,8 @@
+"""
+Data API for Genome Annotation entities.  This API provides methods for retrieving the
+Assembly and Taxon associated with an annotation, as well as retrieving individual features.
+"""
+
 import sys
 
 from biokbase.data_api.object import ObjectAPI

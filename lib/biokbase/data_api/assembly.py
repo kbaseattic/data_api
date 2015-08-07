@@ -1,6 +1,9 @@
 """
-Operations on Assembly data type.
+Data API for Assembly entities.  This API provides methods for retrieving
+summary information such as GC content, total length, external source information
+as well as methods for retrieving individual contig sequences and gathering contig lengths and contig GC.
 """
+
 # Stdlib
 import requests
 import os
