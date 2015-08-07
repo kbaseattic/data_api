@@ -280,7 +280,7 @@ class GenomeSummary(object):
                     ('contig_gc_content', 'contig_gc_content')
                 )},
             'annotation': {
-                k: getattr(ga, 'feature_' + k, 'get_feature_' + k)()
+                'feature_' + k: getattr(ga, 'get_feature_' + k)()
                 for k in ('types', 'type_descriptions', 'type_counts')
             }
         }
