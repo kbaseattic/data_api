@@ -9,6 +9,7 @@ import logging
 
 # Third-party
 from IPython.display import display
+import matplotlib.pyplot as plt
 import pandas as pd
 # Qgrid table display
 try:
@@ -248,37 +249,48 @@ class ProteinStats(Table):
     def plot_protein_lengths(self):
         return self.plot(x=self.STATS_LENGTH, kind='hist')
 
-class GenomeSummary(object):
+class GenomeSummary(TemplateMixin):
     """Summary of a GenomeAnnotation.
 
     Attributes:
        taxon (dict): Information about the taxonomic type
-       taxon_df (DataFrame): Taxon dict as a Pandas DataFrame
        assembly (dict): Infomration about the contigs in the assembly
-       assembly_df (DataFrame): Assembly dict as a Pandas DataFrame
        annotation (dict): Information about the assembly
-       annotation_df (DataFrame): Annotation dict as a Pandas DataFrame
        data (dict): All the information as a single dict with the attributes
                     listed above as top-level keys.
     """
-    def __init__(self, ga):
+    template = '<h3>Genome Summary</h3>'+ Organism.template
+
+    def __init__(self, ga, taxons=True, assembly=True, annotation=True):
+        """Create new summary from GenomeAnnotationAPI.
+
+        Args:
+          ga (GenomeAnnotationAPI): input object
+          taxons: If False, do not retrieve taxons
+          assembly: If False, do not retrieve assembly
+          annotation: If False, do not retrieve annotation
+        """
         if not hasattr(ga, 'get_taxon') or not hasattr(ga, 'get_assembly'):
             raise TypeError('{} is not a recognized GenomeAnnotation type.'
                 .format(type(ga)))
 
-        self.data = {
-            'taxon': self._get_taxon(ga),
-            'assembly': self._get_assembly(ga),
-            'annotation': self._get_annotation(ga)
-        }
+        self.data = { 'taxon': {}, 'assembly': {}, 'annotation': {}}
+        if taxons:
+            self.data['taxon'] = self._get_taxon(ga)
+        if assembly:
+            self.data['assembly'] = self._get_assembly(ga)
+        if annotation:
+            self.data['annotation'] = self._get_annotation(ga)
 
-        # Set attributes for top-level keys
+        self.ga = ga
+        self._set_attrs()
+
+    def _set_attrs(self):
+        """Set attributes for top-level keys"""
         for key, value in self.data.items():
-            # dict
             setattr(self, key, value)
-            # dataframe with suffix `_df`
-            #setattr(self, key + '_df', pd.DataFrame(value))
 
+        TemplateMixin.__init__(self)
 
     @staticmethod
     def _get_taxon(ga):
@@ -326,3 +338,56 @@ class GenomeSummary(object):
         ann['feature_types'] = feature_types
         log_end(_logger, t0, 'get_annotation')
         return ann
+
+    def summary_plots(self):
+        """Show some plots summarizing the information in the Genome.
+        """
+        # First plot: feature types and counts
+        n = sum(map(bool, self.data.keys()))
+        i = 1
+        plt.close()
+        if self.annotation:
+            plt.subplot(n, 1, i)
+            self._plot_feature_counts()
+            i += 1
+        # Second plot
+        if self.assembly:
+            plt.subplot(n, 1, i)
+            self._plot_contig_lengths()
+            i += 1
+        # Third plot
+        if self.assembly:
+            plt.subplot(n, 1, i)
+            self._plot_contig_gc()
+            i += 1
+        plt.show()
+
+    def _plot_feature_counts(self):
+        d = pd.DataFrame({'Feature Type': self.annotation['feature_types'],
+                          'Count': self.annotation['feature_type_counts']})
+        ax = sns.barplot(x='Count', y='Feature Type', orient='h', data=d)
+        ax.set_title('Feature type counts from {} to{}'.format(min(d['Count']),
+                                                               max(d['Count'])))
+
+    def _plot_contig_lengths(self):
+        vals = pd.Series(self.assembly['contig_length'].values(),
+                         name='Sequence length (bp)')
+        ax = sns.distplot(vals)
+        ax.set_title('Contig lengths from {} to {}'.format(
+            vals.min(), vals.max()))
+
+    def _plot_contig_gc(self):
+        gc = self.assembly['contig_gc_content'].values()
+        gcp, ctg = 'GC percent', 'Contigs'
+        d = pd.DataFrame({gcp: [x*100.0 for x in sorted(gc)],
+                          ctg: range(1, len(gc) + 1)})
+        ax = sns.factorplot(x=gcp, y=ctg, data=d)
+        #ax.set_title("Contig {} from {.2f} to {.2f}"
+        #             .format(gcp, min(gc), max(gc)))
+        return ax
+
+    def _repr_html_(self):
+        self.summary_plots()
+        classf = Classification(self.taxon).classification
+        return self.render(classification=classf, taxon=self.taxon)
+
