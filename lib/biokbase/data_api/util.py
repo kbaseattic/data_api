@@ -3,12 +3,12 @@ Utility functions.
 
 Includes:
     - Logging decorators
+    - Logging functions log_start() and log_end()
 """
 __author__ = 'Dan Gunter <dkgunter@lbl.gov>'
 __date__ = '8/4/15'
 
 from datetime import datetime
-import functools
 import logging
 import six
 import sys
@@ -16,9 +16,15 @@ import time
 
 # Create a default logger to stdout
 default_logger = logging.getLogger('default')
-_hdlr = logging.StreamHandler(stream=sys.stdout)
-_hdlr.setFormatter(logging.Formatter("%(message)s"))
-default_logger.addHandler(_hdlr)
+default_level = logging.INFO
+
+def stdout_config(logobj):
+    _hdlr = logging.StreamHandler(stream=sys.stdout)
+    _hdlr.setFormatter(logging.Formatter("%(message)s"))
+    logobj.addHandler(_hdlr)
+    return logobj
+
+stdout_config(default_logger)
 
 class logged(object):
     """Logging decorator.
@@ -57,7 +63,6 @@ class logged(object):
     """
     ENTRY_MESSAGE = '{timestamp} {func_name}.begin/{kvp}'
     EXIT_MESSAGE = '{timestamp} {func_name}.end {dur}/{kvp}'
-
     def __init__(self, logger=None, **kvp):
         self.logger = default_logger if logger is None else logger
         if kvp:
@@ -71,21 +76,38 @@ class logged(object):
         The wrapper will log the entry and exit points of the function
          with logging.INFO level.
         """
-        @functools.wraps(func)
+        try:
+            func_name = func.__name__
+        except AttributeError:
+            func_name = 'unknown'
         def wrapper(*args, **kwds):
-            t0 = time.time()
-            d = dict(timestamp=format_timestamp(t0),
-                     func_name=func.__name__,
-                     kvp=self.kvp_str)
-            msg = self.ENTRY_MESSAGE.format(**d)
-            self.logger.log(self.level, msg)
-            f_result = func(*args, **kwds)
-            t1 = time.time()
-            d['timestamp'] = format_timestamp(t1)
-            d['dur'] = t1 - t0
-            self.logger.log(self.level, self.EXIT_MESSAGE.format(**d))
-            return f_result
+            t0 = log_start(self.logger, self.level, func_name, kvp=self.kvp_str)
+            func_result = func(*args, **kwds)
+            log_end(self.logger, self.level, t0, func_name, kvp=self.kvp_str)
+            return func_result
         return wrapper
+
+def log_start(logger, func_name, level=None, fmt=None, kvp=''):
+    t0 = time.time()
+    d = dict(timestamp=format_timestamp(t0),
+             func_name=func_name, kvp=kvp)
+    fmt = fmt or logged.ENTRY_MESSAGE
+    msg = fmt.format(**d)
+    if level is None:
+        level = default_level
+    logger.log(level, msg)
+    return t0
+
+def log_end(logger, t0, func_name, level=None, fmt=None, status_code=0, kvp=''):
+    t1 = time.time()
+    d = dict(timestamp=format_timestamp(t1),
+             func_name=func_name,
+             kvp=kvp, dur=(t1 - t0),
+             status=status_code)
+    fmt = fmt or logged.EXIT_MESSAGE
+    if level is None:
+        level = default_level
+    logger.log(level, fmt.format(**d))
 
 def format_kvp(d, sep):
     """Format key-value pairs as a string."""
