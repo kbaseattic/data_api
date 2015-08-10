@@ -32,22 +32,19 @@ _ObjectInfo = namedtuple('_ObjectInfo',
                         'workspace,chsum,size,meta')
 
 class ObjectInfo(_ObjectInfo):
-    """Metadata about one object.
-    """
+    """Metadata about one object."""
     def set_conn(self, conn):
         self._conn = conn
         return self  # for chaining
 
     @property
     def data(self):
-        """Get full, raw, data from its metadata.
-        """
+        """Get full, raw, data from its metadata."""
         return self._conn.get_object(self.objid)
 
     @property
     def object(self):
-        """Get wrapped KBase data object from the metadata.
-        """
+        """Get wrapped KBase data object from the metadata."""
         clazz = get_object_class(self.type)
         if clazz is None:
             raise RuntimeError('Internal error: Cannot get any class '
@@ -56,8 +53,7 @@ class ObjectInfo(_ObjectInfo):
         return clazz(**kwparams)
 
 class DBConnection(object):
-    """Database connection.
-    """
+    """Database connection."""
     DEFAULT_WS_URL = 'https://ci.kbase.us/services/ws/'
     DEFAULT_SHOCK_URL = 'https://ci.kbase.us/services/shock-api/'
     def __init__(self, workspace=None, auth_token=None, ws_url=None, shock_url=None):
@@ -226,8 +222,7 @@ class Finder(object):
         return result
 
     def __getitem__(self, item):
-        """Indexing.
-        """
+        """Indexing."""
         self._set_objlist()
         if isinstance(item, int):
             return self._objlist[item]
