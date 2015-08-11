@@ -13,14 +13,15 @@ On this page
 ------------
 
 .. contents::
-:depth: 1
+
+    :depth: 1
 
 API Reference
 -------------
 .. toctree::
-:maxdepth: 2
+    :maxdepth: 2
 
-       biokbase
+    biokbase.data_api
 
 Using the Data API
 ==================

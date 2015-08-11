@@ -21,21 +21,33 @@ def get_token():
             "Missing authentication token!  Set KB_AUTH_TOKEN environment variable.")
 
 class ObjectAPI(object):
-    """
-    Generic Object API for basic properties and actions of a KBase Data Object.
+    """Generic Object API for basic properties and actions
+       of a KBase Data Object.
     """
 
     def __init__(self, services=None, ref=None):
-        if services == None or type(services) != type({}):
+        """Create new object.
+
+        Args:
+          services (dict): Service configuration dictionary. Required keys:
+              * workspace_service_url: URL for Workspace, such as
+                                       `https://ci.kbase.us/services/ws/`
+          ref (str): Object reference, which can be the name of the object
+             (although this is not unique), or a numeric identifier in the
+             format `A/B[/C]` where A is the number of the workspace, B is the
+             number identifying the object, and C is the "version" number of
+             the object.
+        """
+        if services is None or type(services) != type({}):
             raise TypeError("You must provide a service configuration dictionary! Found {0}".format(type(services)))
         elif not services.has_key("workspace_service_url"):
             raise KeyError("Expecting workspace_service_url key!")
         
-        if ref == None:
+        if ref is None:
             raise TypeError("Missing object reference!")
         elif type(ref) != type("") and type(ref) != type(unicode()):
             raise TypeError("Invalid reference given, expected string! Found {0}".format(type(ref)))
-        elif re.match(REF_PATTERN, ref) == None:
+        elif re.match(REF_PATTERN, ref) is None:
             raise TypeError("Invalid workspace reference string! Found {0}".format(ref))
         
         self.services = services
@@ -97,7 +109,8 @@ class ObjectAPI(object):
         Retrieve basic properties about this object.
         
         Returns:
-          dict"""
+          dict
+          """
             
         return self._info
 
