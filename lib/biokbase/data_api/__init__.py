@@ -1,3 +1,7 @@
+"""
+KBase Data API package.
+"""
+
 import os
 from biokbase.data_api.nav import DBConnection, Finder
 

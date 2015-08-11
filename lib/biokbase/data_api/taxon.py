@@ -154,7 +154,12 @@ class TaxonAPI(ObjectAPI):
         if self._is_genome_type:
             return None
         elif self._is_taxon_type:
-            return self.get_data()["kingdom"]
+            data = self.get_data()
+            
+            if data.has_key("kingdom"):
+                return self.get_data()["kingdom"]
+            else:
+                return None
 
     def get_domain(self):
         """

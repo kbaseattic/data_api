@@ -154,7 +154,14 @@ class GenomeAnnotationAPI(ObjectAPI):
                 type_list = self.get_feature_types()
     
             def is_feature_in_regions(f, regions):
-                for loc in f["locations"]:
+                location_key = None                
+                
+                if f.has_key("location"):
+                    location_key = "location"
+                elif f.has_key("locations"):
+                    location_key = "locations"
+                    
+                for loc in f[location_key]:
                     for r in regions:
                         if (r["contig_id"] == loc[0]) and \
                            (loc[2] == r["strand"] or r["strand"] == "?") and \
@@ -586,9 +593,13 @@ class GenomeAnnotationAPI(ObjectAPI):
                     out_features[x['id']]["feature_id"] = x['id']
                     out_features[x['id']]["feature_type"] = x['type']
                     out_features[x['id']]["feature_function"] = x['function']
-                    out_features[x['id']]["feature_locations"] = x['locations']
+                    out_features[x['id']]["feature_locations"] = x['location']
                     out_features[x['id']]["feature_md5"] = x['md5']
-                    out_features[x['id']]["feature_dna_sequence"] = x['dna_sequence']
+                    
+                    if x.has_key('dna_sequence'):
+                        out_features[x['id']]["feature_dna_sequence"] = x['dna_sequence']
+                    else:
+                        out_features[x['id']]["feature_dna_sequence"] = None
                     
                     if x.has_key('dna_sequence_length'):
                         out_features[x['id']]["feature_dna_sequence_length"] = x['dna_sequence_length']
@@ -608,7 +619,7 @@ class GenomeAnnotationAPI(ObjectAPI):
                     out_features[x['id']]["feature_notes"] = None
                     out_features[x['id']]["feature_inference"] = None
                     
-                    if x.has_key():
+                    if x.has_key("feature_quality_score"):
                         out_features[x['id']]["feature_quality_score"] = x['quality']
                     else:
                         out_features[x['id']]["feature_quality_score"] = -1
@@ -984,9 +995,12 @@ class GenomeAnnotationAPI(ObjectAPI):
         
         out_ids = dict()            
         for x in features:
-            out_ids[x] = list()
-            if x['type'] in type_list and test(x):
-                out_ids[x['type']].append(x['id'])            
+            feature_type = x['type']
+            if feature_type in type_list and test(x):
+                if feature_type not in out_ids:
+                    out_ids[feature_type] = list()
+
+                out_ids[feature_type].append(x['id'])            
         return out_ids
 
     def _annotation_get_feature_ids_by_type(self, type_list=None, test=lambda x: True):

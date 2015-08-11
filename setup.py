@@ -23,8 +23,15 @@ config = {
     "setup_requires": ["six"],
     "tests_require": ["nose"],
     "install_requires": parse_requirements(),
-    "packages": ["biokbase","biokbase.data_api","biokbase.data_api.tests","biokbase.workspace"],
-    "scripts": ["bin/data_api_test_basic.py", "bin/data_api_demo.py", "bin/data_api_test_genome_annotation_api.py"],
+    "packages": ["biokbase",
+                 "biokbase.data_api",
+                 "biokbase.data_api.tests",
+                 "biokbase.data_api.tests.performance",
+                 "biokbase.workspace"],
+    "scripts": ["bin/data_api_test_basic.py", 
+                "bin/data_api_demo.py", 
+                "bin/data_api_benchmark.py" , 
+                "bin/data_api_test_genome_annotation_api.py"],
     "name": "genome_api"
 }
 
