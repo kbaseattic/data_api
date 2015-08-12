@@ -11,7 +11,7 @@ script:
   - nosetests --with-coverage --cover-package=data_api
   - cd ..
 
-after_success:
-  - cd lib
-  - coveralls
-  - cd ..
+#after_success:
+#  - cd lib
+#  - coveralls
+#  - cd ..
