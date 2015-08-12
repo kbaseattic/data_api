@@ -1,6 +1,19 @@
 """
 Module for base class for Data API objects.
 
+===
+
+Potential re-naming scheme (--dang 8/12/2015):
+    biokbase.data_api.object.ObjectAPI -> biokbase.data_api.base.Data
+
+    biokbase.data_api.some_thing.<SomeThing>API
+    -> biokbase.data_api.some_thing_data.<SomeThing>(Data)
+
+So, e.g.
+
+  biokbase.data_api.genome_annotation.GenomeAnnotationAPI
+  -> biokbase.data_api.genome_annotation_data.GenomeAnnotation
+
 
 """
 import os
