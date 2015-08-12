@@ -4,10 +4,7 @@ python:
   - "3.4"
 
 install:
-  - cd lib
-  - pip install coveralls
   - pip install -r requirements.txt
-  - cd ..
 
 script:
   - cd lib
