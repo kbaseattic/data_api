@@ -7,6 +7,11 @@ __date__ = '8/3/15'
 import unittest
 from biokbase.data_api import nav
 
+from . import shared
+
+def setup():
+    shared.setup()
+
 class MockConn(nav.DBConnection):
     """Mock database connection.
     """
@@ -20,16 +25,8 @@ class MockConn(nav.DBConnection):
     def get_object(self, objid):
         return None
 
-class NavTests(unittest.TestCase):
-    def setUp(self):
-        conn = MockConn('myWorkspace')
-        self.finder = nav.Finder(conn)
-
-    def testLs(self):
-        self.failUnless(False)  # Fail
-
-def main():
-    unittest.main()
-
-if __name__ == '__main__':
-    main()
+@unittest.skipUnless(shared.can_connect, 'Cannot connect to workspace')
+def test_list():
+    """Test the 'ls' functions."""
+    conn = MockConn('myWorkspace')
+    finder = nav.Finder(conn)
