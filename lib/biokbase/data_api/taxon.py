@@ -77,7 +77,8 @@ class TaxonAPI(ObjectAPI):
         If this is accessing a Genome object, returns None.
         
         Returns:
-          list<GenomeAnnotationAPI>"""
+          list<GenomeAnnotation>
+        """
         
         if self._is_taxon_type:
             import biokbase.data_api.genome_annotation            

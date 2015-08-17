@@ -71,7 +71,7 @@ class logged(object):
             self.kvp_str = ''
         self.level = logging.INFO
 
-    def __call__(self, func):
+    def __call__(self, func, *args, **kwds):
         """Returns a wrapper that wraps func.
         The wrapper will log the entry and exit points of the function
          with logging.INFO level.
@@ -86,6 +86,25 @@ class logged(object):
             log_end(self.logger, self.level, t0, func_name, kvp=self.kvp_str)
             return func_result
         return wrapper
+
+def logmethod(logger, log_level=logging.INFO,
+              log_name=None, **kw):
+    def real_decorator(method):
+        # choose name for logged event
+        func_name = log_name or method.__name__
+        # format any key/value pairs
+        kvp_str = format_kvp(kw, ',') if kw else ''
+
+        # create wrapper
+        def method_wrapper(self, *args, **kwds):
+            t0 = log_start(logger, log_level, func_name, kvp=kvp_str)
+            returnval = method(self, *args, **kwds)
+            log_end(logger, log_level, t0, func_name, kvp=kvp_str)
+            return returnval
+        # return wrapper
+        return method_wrapper
+
+    return real_decorator
 
 def log_start(logger, func_name, level=None, fmt=None, kvp=''):
     t0 = time.time()
