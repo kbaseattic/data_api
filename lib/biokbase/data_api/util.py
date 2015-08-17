@@ -10,96 +10,90 @@ __date__ = '8/4/15'
 
 from datetime import datetime
 import logging
+import logging.config
 import six
 import sys
 import time
 
-# Create a default logger to stdout
-default_logger = logging.getLogger('default')
-default_level = logging.INFO
+ENTRY_MESSAGE = '{timestamp} {func_name}.begin {kvp}'
+EXIT_MESSAGE = '{timestamp} {func_name}.end {dur} {kvp}'
+DEFAULT_LEVEL = logging.INFO
+DEFAULT_LEVEL_NAME = logging.getLevelName(DEFAULT_LEVEL)
+DEFAULT_CONFIG = {
+    'version': 1,
+    'formatters': {
+        'basic': { 'format': '%(message)s' }
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'basic',
+            'level': DEFAULT_LEVEL_NAME,
+            'stream': 'ext://sys.stdout'
+        }
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': DEFAULT_LEVEL_NAME
+    }
+}
 
-def stdout_config(logobj):
-    _hdlr = logging.StreamHandler(stream=sys.stdout)
-    _hdlr.setFormatter(logging.Formatter("%(message)s"))
-    logobj.addHandler(_hdlr)
-    return logobj
+_configuration = None
 
-stdout_config(default_logger)
-
-class logged(object):
-    """Logging decorator.
-
-    The format of the output for function entry and exit
-    is controlled by the class variables, `ENTRY_MESSAGE` and
-    `EXIT_MESSAGE`. These are pre-processed by `.format()`
-    with a dictionary including per-function key/value
-    pairs and some provided values:
-        - timestamp: ISO8601 UTC timestamp, to microseconds
-        - func_name: Name of function
-        - dur: Duration between the ENTRY and EXIT
-               as a floating point #seconds
-        - kvp: User-provided key/value pairs, formatted as
-          "key=value" separated by commas
-
-    Usage:
-
-       @logged
-       def func_one(args):
-          print("I am logged")
-
-        @logged(name='joe')
-        def func_two(args):
-          print("I am also logged")
-
-        # Output:
-
-        2015-08-04T11:08:10.046121 func_one.begin/
-        I am logged
-        2015-08-04T11:08:10.046320 func_one.end 0.00019907951355/
-        2015-08-04T11:08:10.046465 func_two.begin/name=joe
-        I am also logged
-        2015-08-04T11:08:10.046575 func_two.end 0.000110149383545/name=joe
-
+def get_logger(name, config=DEFAULT_CONFIG):
+    """Called by other modules to get a logger,
+    and set or change the configuration.
     """
-    ENTRY_MESSAGE = '{timestamp} {func_name}.begin/{kvp}'
-    EXIT_MESSAGE = '{timestamp} {func_name}.end {dur}/{kvp}'
-    def __init__(self, logger=None, **kvp):
-        self.logger = default_logger if logger is None else logger
-        if kvp:
-            self.kvp_str = format_kvp(kvp, ',')
-        else:
-            self.kvp_str = ''
-        self.level = logging.INFO
+    global _configuration
 
-    def __call__(self, func, *args, **kwds):
-        """Returns a wrapper that wraps func.
-        The wrapper will log the entry and exit points of the function
-         with logging.INFO level.
-        """
-        try:
-            func_name = func.__name__
-        except AttributeError:
-            func_name = 'unknown'
-        def wrapper(*args, **kwds):
-            t0 = log_start(self.logger, self.level, func_name, kvp=self.kvp_str)
-            func_result = func(*args, **kwds)
-            log_end(self.logger, self.level, t0, func_name, kvp=self.kvp_str)
-            return func_result
-        return wrapper
+    # Perform configuration/reconfiguration if necessary.
+    # Usually none of this is done.
+    if _configuration is None:
+        assert config is not None  # need something!
+        logging.config.dictConfig(config)
+        _configuration = config  # first time
+    elif config is DEFAULT_CONFIG and _configuration is DEFAULT_CONFIG:
+        pass  # quickly check the common case
+    elif config != _configuration:
+        assert config is not None
+        logging.config.dictConfig(config)  # reconfigure
+        _configuration = config
 
-def logmethod(logger, log_level=logging.INFO,
-              log_name=None, **kw):
-    def real_decorator(method):
+    # Get the logger, given the current configuration.
+    return logging.getLogger(name)
+
+
+class Timer(object):
+    def __init__(self):
+        self._timings = []
+        self._start = time.time()
+
+    def __enter__(self):
+        self._start = time.time()
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        t = time.time()
+        dt, self._start = t - self._start, t
+        self._timings.append(dt)
+
+    def pop(self):
+        return self._timings.pop()
+
+def logged(logger, log_level=logging.INFO, log_name=None, **kw):
+    """Wrap a method/function in a log start/end message.
+    """
+    def real_decorator(method, logger_name=logger.name):
         # choose name for logged event
         func_name = log_name or method.__name__
+        full_name = logger_name + '.' + func_name
         # format any key/value pairs
         kvp_str = format_kvp(kw, ',') if kw else ''
 
         # create wrapper
         def method_wrapper(self, *args, **kwds):
-            t0 = log_start(logger, log_level, func_name, kvp=kvp_str)
+            t0 = log_start(logger, full_name, level=log_level, kvp=kvp_str)
             returnval = method(self, *args, **kwds)
-            log_end(logger, log_level, t0, func_name, kvp=kvp_str)
+            log_end(logger, t0, full_name, level=log_level, kvp=kvp_str)
             return returnval
         # return wrapper
         return method_wrapper
@@ -110,10 +104,10 @@ def log_start(logger, func_name, level=None, fmt=None, kvp=''):
     t0 = time.time()
     d = dict(timestamp=format_timestamp(t0),
              func_name=func_name, kvp=kvp)
-    fmt = fmt or logged.ENTRY_MESSAGE
+    fmt = fmt or ENTRY_MESSAGE
     msg = fmt.format(**d)
     if level is None:
-        level = default_level
+        level = DEFAULT_LEVEL
     logger.log(level, msg)
     return t0
 
@@ -123,9 +117,9 @@ def log_end(logger, t0, func_name, level=None, fmt=None, status_code=0, kvp=''):
              func_name=func_name,
              kvp=kvp, dur=(t1 - t0),
              status=status_code)
-    fmt = fmt or logged.EXIT_MESSAGE
+    fmt = fmt or EXIT_MESSAGE
     if level is None:
-        level = default_level
+        level = DEFAULT_LEVEL
     logger.log(level, fmt.format(**d))
 
 def format_kvp(d, sep):
@@ -144,17 +138,22 @@ format_timestamp = lambda t: datetime.fromtimestamp(t).isoformat()
 
 ## Examples
 
-@logged()
-def func_one(*args):
-    print("I am logged")
+_example_logger = None
 
-@logged(name='joe')
-def func_two(*args):
-    print("I am also logged")
+def run_examples():
+    @logged(_example_logger)
+    def func_one(*args):
+        print("I am logged")
 
+    @logged(_example_logger, name='joe')
+    def func_two(*args):
+        print("I am also logged")
 
-if __name__ == '__main__':
-    print("In Main")
-    default_logger.setLevel(logging.INFO)
     func_one()
     func_two()
+
+if __name__ == '__main__':
+    global _example_logger
+    _example_logger = get_logger('example')
+    print("In Main")
+    run_examples()

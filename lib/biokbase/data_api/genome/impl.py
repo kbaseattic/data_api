@@ -54,7 +54,7 @@ class KBaseDataAPI(object):
             "objects": [{"ref": ref}],
             "includeMetadata": 0,
             "ignoreErrors": 0})[0]
-        md5_type = cursor.translate_to_MD5_types([v[2].values()[0]])
+        md5_type = cursor.translate_to_MD5_types([v[2]]).values()[0]
         kdo = object_class(v, md5_type)
         return kdo
 

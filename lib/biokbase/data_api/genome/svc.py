@@ -4,17 +4,16 @@ Service implementation.
 __author__ = 'Dan Gunter <dkgunter@lbl.gov>'
 __date__ = '8/14/15'
 
-import logging
 import time
 
 import spec_pb2 as pb
 import impl
-from biokbase.data_api import workspace_db, util
+from biokbase.data_api import workspace_db
+from biokbase.data_api.util import get_logger, logged, log_start, log_end
 
 _version = pb.SemVer(version='1.0.0b', major=1, minor=0, other='0b')
 
-_log = logging.getLogger(__name__)
-util.stdout_config(_log)
+_log = get_logger('genome.svc')
 
 _ONE_DAY_IN_SECONDS = 60*60*24
 
@@ -25,14 +24,14 @@ class GenomeAnnotationServicer(pb.EarlyAdopterGenomeAnnotationAPIServicer):
         # initialize the API
         self._api = impl.GenomeAnnotationAPI(conn)
 
-    @util.logmethod(_log)
+    @logged(_log)
     def get(self, request, context):
         """Get one genome annotation."""
         obj = self._api.get(request.ref)
-        response = pb.GenomeAnnotation(version=_version, ident=obj.objid)
+        response = pb.GenomeAnnotation(version=_version, ident=str(obj.objid))
         return response
 
-    @util.logmethod(_log)
+    @logged(_log)
     def get_taxon(self, request, context):
         """Get a taxon in an annotation."""
         ga_obj = self._api.get(request.ref)
@@ -47,7 +46,7 @@ def main():
     server.start()
     try:
         while True:
-            time.sleep(_ONE_DAY_IN_SECONDS)
+            time.sleep(10)
     except KeyboardInterrupt:
         server.stop()
 
