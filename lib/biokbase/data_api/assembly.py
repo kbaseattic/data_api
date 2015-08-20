@@ -24,13 +24,11 @@ _ASSEMBLY_TYPES = ['KBaseGenomesCondensedPrototypeV2.Assembly']
 TYPES = _CONTIGSET_TYPES + _ASSEMBLY_TYPES
 
 class AssemblyAPI(ObjectAPI):
-    """
-    API for the assembled sequences associated with a Genome Annotation.            
+    """API for the assembled sequences associated with a Genome Annotation.
     """
     
     def __init__(self, services, ref):
-        """
-        Defines which types and type versions that are legal.
+        """Defines which types and type versions that are legal.
         """
         super(AssemblyAPI, self).__init__(services, ref)
         
@@ -41,8 +39,7 @@ class AssemblyAPI(ObjectAPI):
             raise TypeError("Invalid type! Expected one of {0}, received {1}".format(TYPES, self._typestring))
     
     def get_assembly_id(self):
-        """
-        Retrieve the id for an Assembly.
+        """Retrieve the id for an Assembly.
 
         Returns:
           id: string identifier for the Assembly"""
@@ -53,11 +50,11 @@ class AssemblyAPI(ObjectAPI):
             return self.get_data_subset(path_list=["assembly_id"])["assembly_id"]        
 
     def get_genome_annotations(self):
-        """
-        Retrieve the GenomeAnnotations that refer to this Assembly.
+        """Retrieve the GenomeAnnotations that refer to this Assembly.
         
         Returns:
-          list<GenomeAnnotationAPI>"""
+          list<GenomeAnnotationAPI>
+        """
         
         import biokbase.data_api.genome_annotation            
         
@@ -67,7 +64,9 @@ class AssemblyAPI(ObjectAPI):
         for object_type in referrers:
             if object_type.split('-')[0] in biokbase.data_api.genome_annotation.TYPES:
                 for x in referrers[object_type]:
-                    annotations.append(GenomeAnnotationAPI(self.services, ref=x))
+                    annotations.append(
+                        biokbase.data_api.genome_annotation.GenomeAnnotationAPI(
+                            self.services, ref=x))
         
         if len(annotations) == 0:
             return None
@@ -75,8 +74,7 @@ class AssemblyAPI(ObjectAPI):
             return annotations
     
     def get_external_source_info(self):
-        """
-        Retrieve the external source information associated with this Assembly.
+        """Retrieve the external source information associated with this Assembly.
         
         Returns:
           id: string identifier for the Assembly"""        
@@ -95,8 +93,7 @@ class AssemblyAPI(ObjectAPI):
             return output
 
     def get_stats(self):
-        """
-        Retrieve the derived statistical information about this Assembly.
+        """Retrieve the derived statistical information about this Assembly.
         
         Returns:
           gc_content: total guanine and cytosine content, counting all G and C only
@@ -112,7 +109,7 @@ class AssemblyAPI(ObjectAPI):
             for c in contigs:
                 total_gc += len([s for s in re.finditer(pattern, c["sequence"])])
             
-            total_length = sum([x.length in contigs])
+            total_length = sum([x.length for x in contigs])
 
             data = dict()
             data["gc_content"] = total_gc/(total_length*1.0)
@@ -123,8 +120,7 @@ class AssemblyAPI(ObjectAPI):
             return self.get_data_subset(path_list=["gc_content","dna_size","num_contigs"])            
 
     def get_number_contigs(self):
-        """
-        Retrieve the number of contiguous sequences in this Assembly.
+        """Retrieve the number of contiguous sequences in this Assembly.
         
         Returns:
           int"""
@@ -135,8 +131,7 @@ class AssemblyAPI(ObjectAPI):
             return self.get_data_subset(path_list=["num_contigs"])["num_contigs"]
 
     def get_gc_content(self):
-        """
-        Retrieve the total GC content for this Assembly.
+        """Retrieve the total GC content for this Assembly.
         
         Returns:
           float"""
@@ -157,8 +152,7 @@ class AssemblyAPI(ObjectAPI):
             return self.get_data_subset(path_list=["gc_content"])["gc_content"]
 
     def get_dna_size(self):
-        """
-        Retrieve the total DNA size for this Assembly.
+        """Retrieve the total DNA size for this Assembly.
         
         Returns:
           int"""
@@ -170,8 +164,7 @@ class AssemblyAPI(ObjectAPI):
             return self.get_data_subset(path_list=["dna_size"])["dna_size"]
 
     def get_contig_lengths(self, contig_id_list=None):
-        """
-        Retrieve the ids for every contiguous sequence in this Assembly.
+        """Retrieve the ids for every contiguous sequence in this Assembly.
         
         Returns:
           dict<str>: <int>"""
@@ -191,8 +184,7 @@ class AssemblyAPI(ObjectAPI):
         return result
 
     def get_contig_gc_content(self, contig_id_list=None):
-        """
-        Retrieve the total GC content for each contiguous sequence of this Assembly.
+        """Retrieve the total GC content for each contiguous sequence of this Assembly.
         
         Returns:
           dict<str>: float"""
@@ -222,8 +214,7 @@ class AssemblyAPI(ObjectAPI):
         return contigs_gc
 
     def get_contig_ids(self):
-        """
-        Retrieve the ids for every contiguous sequence in this Assembly.
+        """Retrieve the ids for every contiguous sequence in this Assembly.
         
         Returns:
           list<str>"""
@@ -237,8 +228,7 @@ class AssemblyAPI(ObjectAPI):
         return result
 
     def get_contigs_by_id(self, contig_id_list=None):
-        """
-        Retrieve contiguous sequences from this Assembly by id.
+        """Retrieve contiguous sequences from this Assembly by id.
         
         Args:
           contig_id_list: list<str>
@@ -246,20 +236,20 @@ class AssemblyAPI(ObjectAPI):
           dict
           
           dictionary of contigs, with contig id as key
-          contig value structure
-          {
-              'contig_id': string,
-              'length': integer,
-              'md5': string,
-              'name': string,
-              'description': string,
-              'is_complete': 0 or 1,
-              'is_circular': 0 or 1,
-              'sequence': string
-          }
+          contig value structure::
+
+              {
+                  'contig_id': string,
+                  'length': integer,
+                  'md5': string,
+                  'name': string,
+                  'description': string,
+                  'is_complete': 0 or 1,
+                  'is_circular': 0 or 1,
+                  'sequence': string
+              }
         """
-        
-        if contig_id_list == None:
+        if contig_id_list is None:
             contig_id_list = self.get_data()["contigs"]
         
         if self._is_contigset_type:

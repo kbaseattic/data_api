@@ -1,0 +1,5 @@
+nose
+python-coveralls
+six==1.9.0
+enum34
+requests==2.7.0
