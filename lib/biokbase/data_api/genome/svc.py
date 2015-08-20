@@ -29,6 +29,7 @@ class GenomeAnnotationServicer(pb.EarlyAdopterGenomeAnnotationAPIServicer):
         """Get one genome annotation."""
         obj = self._api.get(request.ref)
         response = pb.GenomeAnnotation(version=_version, ident=str(obj.objid))
+        print("sending response: {}".format(response))
         return response
 
     @logged(_log)
