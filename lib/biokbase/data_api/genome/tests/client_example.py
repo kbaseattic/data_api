@@ -23,9 +23,8 @@ def get_objects(ref):
     """
     client = clients.get_client(api.CLIENT_TYPE_AVRO)
     gen_ann = client.get(ref)
-    print('got annotation')
     print('Got genome annotation id={} version={}'.format(
-        gen_ann.ident, gen_ann.version.version
+        gen_ann['ident'], gen_ann['version']['version']
     ))
 
 def main():

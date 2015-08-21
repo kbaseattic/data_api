@@ -23,7 +23,7 @@ proto = """
         { "type":"string", "name": "version" },
         { "type": "int", "name": "major"},
         { "type": "int", "name": "minor"},
-        { "type": "string", "name": "suffix"}
+        { "type": ["string", "null"], "name": "suffix"}
        ]
     },
     {"name": "LineageItem", "type": "record",

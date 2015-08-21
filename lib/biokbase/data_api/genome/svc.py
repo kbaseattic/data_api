@@ -26,7 +26,7 @@ _log = get_logger('genome.api.server')
 
 # Constants
 
-VERSION = dict(version='1.0.0b', major=1, minor=0, other='0b')
+VERSION = dict(version='1.0.0b', major=1, minor=0, suffix='0b')
 PROTOCOL = protocol.parse(avro_spec.proto)
 VALID_METHOD = re.compile(r'[a-zA-Z][a-zA-Z0-9_]*')
 
@@ -67,8 +67,8 @@ class GenomeAnnotationService(ipc.Responder):
         objid = req['ref']['objid']
         t0 = log_start(_log, 'get.genome_annotation', kvp={'objid':objid})
         obj = self._api.get(objid)
-        result = {'ver': VERSION, 'ident': str(obj.objid)}
-        log_end(_log, t0, 'get.genome_annotation')
+        result = {'version': VERSION, 'ident': str(obj.objid)}
+        log_end(_log, t0, 'get.genome_annotation', kvp={'result': result})
         return result
 
     def get_taxon(self, req):
@@ -76,7 +76,7 @@ class GenomeAnnotationService(ipc.Responder):
         t0 = log_start(_log, 'get.taxon')
         obj = self._api.get(objid)
         tx_obj = self._api.get_taxon(obj)
-        result = {'ver': VERSION, 'ident': str(obj.objid)}
+        result = {'version': VERSION, 'ident': str(obj.objid)}
         log_end(_log, t0, 'get.taxon')
         return result
 

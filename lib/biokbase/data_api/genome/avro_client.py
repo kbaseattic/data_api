@@ -5,15 +5,16 @@ __author__ = 'Dan Gunter <dkgunter@lbl.gov>'
 __date__ = '8/20/15'
 
 # Imports
-import sys
+
 # Stdlib
+import logging
 # Third-party
 import avro.ipc as ipc
 import avro.protocol as protocol
 # Local
 from biokbase.data_api import avro_rpc
 from biokbase.data_api.util import get_logger
-from biokbase.data_api.util import log_start, log_end
+from biokbase.data_api.util import log_start, log_end, log_event
 from biokbase.data_api.genome import api
 from biokbase.data_api.genome import avro_spec
 
@@ -36,6 +37,7 @@ class GenomeAnnotationAvro(api.GenomeAnnotationClient):
     def get(self, ref):
         params = {'ref': {'objid': ref}}
         r = self._requestor.request('get', params)
+        log_event(_log, 'get.result', level=logging.DEBUG)
         return r
 
     def get_taxon(self, ref):
