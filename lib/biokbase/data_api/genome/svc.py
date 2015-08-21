@@ -7,6 +7,7 @@ __date__ = '8/14/15'
 # Imports
 
 # Stdlib
+import json
 import re
 # Third-party
 import avro.ipc as ipc
@@ -49,6 +50,7 @@ class GenomeAnnotationService(ipc.Responder):
         ipc.Responder.__init__(self, PROTOCOL)
         self._conn = workspace_db.connect()
         self._api = impl.GenomeAnnotationAPI(self._conn)
+        self._cache = Cache()
 
     def invoke(self, msg, req):
         t0 = log_start(_log, 'genome.service.invoke')
@@ -63,11 +65,21 @@ class GenomeAnnotationService(ipc.Responder):
         log_end(_log, t0, 'genome.service.invoke')
         return result
 
-    def get(self, req):
+    def get_info(self, req):
         objid = req['ref']['objid']
+        method = 'info'
         t0 = log_start(_log, 'get.genome_annotation', kvp={'objid':objid})
-        obj = self._api.get(objid)
-        result = {'version': VERSION, 'ident': str(obj.objid)}
+        result = self._cache.get((method, objid), None)
+        if result is None:
+            print("@@ getting new object")
+            obj = self._api.get_info(objid)
+            info = obj.info
+            info_str = json.dumps(info)
+            result = {'version': VERSION, 'ident': str(obj.objid),
+                      'info': info_str}
+            self._cache.add(result, objid, method)
+        else:
+            print("@@ using cached object")
         log_end(_log, t0, 'get.genome_annotation', kvp={'result': result})
         return result
 
@@ -80,6 +92,50 @@ class GenomeAnnotationService(ipc.Responder):
         log_end(_log, t0, 'get.taxon')
         return result
 
+class Cache(object):
+    """Simple in-memory cache.
+
+    Uses object identity combined with methods that have been invoked
+    on the object to determine whether the data is already available.
+    """
+    def __init__(self):
+        # key = object identifier
+        # value = ([set,of,method,names], datum)
+        self._data = {}
+
+    def get(self, key, default=None):
+        try:
+            value = self[key]
+        except KeyError:
+            value = default
+        return value
+
+    def __getitem__(self, method_and_id):
+        if not len(method_and_id) == 2:
+            raise ValueError('expected tuple ("method_name", <id>)')
+        method, id_ = method_and_id
+        try:
+            item = self._data[id_]
+        except KeyError:
+            raise KeyError('identifier {id} not found'.format(id=id_))
+        if not self._has_methods(item, {method}):
+            raise KeyError('method {m} not invoked on data'.format(m=method))
+        return item[1]
+
+    @staticmethod
+    def _has_methods(item, methods):
+        return methods.issubset(item[0])
+
+    def add(self, datum, ident, method):
+        item = self._data.get(ident, None)
+        methods = {method}
+        if item and self._has_methods(item, methods):
+            return False
+        elif item is None:
+            self._data[ident] = [methods, datum]
+        else:
+            self._data[ident][0] = self._data[ident][0].union(methods)
+        return True
 
 if __name__ == '__main__':
     avro_rpc.run_service(GenomeAnnotationService)

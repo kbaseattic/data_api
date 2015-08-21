@@ -7,6 +7,7 @@ __date__ = '8/20/15'
 # Imports
 
 # Stdlib
+import json
 import logging
 # Third-party
 import avro.ipc as ipc
@@ -34,10 +35,12 @@ class GenomeAnnotationAvro(api.GenomeAnnotationClient):
         self._requestor = ipc.Requestor(PROTOCOL, client)
         log_end(_log, t0, 'avro_connect')
 
-    def get(self, ref):
+    def get_info(self, ref):
         params = {'ref': {'objid': ref}}
-        r = self._requestor.request('get', params)
-        log_event(_log, 'get.result', level=logging.DEBUG)
+        t0 = log_start(_log, 'get_info')
+        r = self._requestor.request('get_info', params)
+        r['info'] = json.loads(r['info'])
+        log_end(_log, t0, 'get_info')
         return r
 
     def get_taxon(self, ref):

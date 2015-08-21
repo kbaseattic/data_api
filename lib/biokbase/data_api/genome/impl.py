@@ -102,6 +102,10 @@ class KBaseDataObject(object):
         self.check_type()
 
     @property
+    def info(self):
+        return self._info
+
+    @property
     def objid(self):
         return self._id
 
@@ -123,8 +127,8 @@ class KBaseDataObject(object):
 
 class GenomeAnnotationAPI(KBaseDataAPI):
 
-    def get(self, ref):
-        """Retrieve a GenomeAnnotation object.
+    def get_info(self, ref):
+        """Retrieve basic info about a GenomeAnnotation object.
 
         Args:
           ref (str): Reference identifier for object to retrieve.

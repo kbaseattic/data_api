@@ -41,7 +41,8 @@ proto = """
      "doc": "Genome annotation",
       "fields": [
        {"type": "SemVer", "name": "version"},
-       {"type": "string", "name": "ident"}
+       {"type": "string", "name": "ident"},
+       {"type": "string", "name": "info"}
        ]
     },
     {"name": "Taxon", "type": "record",
@@ -62,7 +63,7 @@ proto = """
   ],
 
   "messages": {
-    "get": {
+    "get_info": {
         "request": [{"name": "ref", "type": "ObjRef"}],
         "response": "GenomeAnnotation"
     },

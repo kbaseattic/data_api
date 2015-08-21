@@ -41,7 +41,7 @@ class GenomeAnnotationClient:
     __metaclass__ = abc.ABCMeta
 
     @abc.abstractmethod
-    def get(self, ref):
+    def get_info(self, ref):
         pass
 
     @abc.abstractmethod
