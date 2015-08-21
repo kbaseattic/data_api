@@ -1,3 +1,4 @@
+avro
 Jinja2==2.7.3
 Sphinx<=1.2.99
 sphinxcontrib-napoleon>=0.3.0

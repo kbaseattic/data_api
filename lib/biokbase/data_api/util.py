@@ -17,6 +17,8 @@ import time
 
 ENTRY_MESSAGE = '{timestamp} {func_name}.begin {kvp}'
 EXIT_MESSAGE = '{timestamp} {func_name}.end {dur} {kvp}'
+EVENT_MESSAGE = '{timestamp} {func_name} {kvp}'
+
 DEFAULT_LEVEL = logging.INFO
 DEFAULT_LEVEL_NAME = logging.getLevelName(DEFAULT_LEVEL)
 DEFAULT_CONFIG = {
@@ -100,10 +102,11 @@ def logged(logger, log_level=logging.INFO, log_name=None, **kw):
 
     return real_decorator
 
-def log_start(logger, func_name, level=None, fmt=None, kvp=''):
+def log_start(logger, func_name, level=None, fmt=None, kvp=None):
     t0 = time.time()
+    kvp_str = format_kvp(kvp, ',') if kvp else ''
     d = dict(timestamp=format_timestamp(t0),
-             func_name=func_name, kvp=kvp)
+             func_name=func_name, kvp=kvp_str)
     fmt = fmt or ENTRY_MESSAGE
     msg = fmt.format(**d)
     if level is None:
@@ -111,11 +114,25 @@ def log_start(logger, func_name, level=None, fmt=None, kvp=''):
     logger.log(level, msg)
     return t0
 
-def log_end(logger, t0, func_name, level=None, fmt=None, status_code=0, kvp=''):
+def log_event(logger, func_name, level=None, fmt=None, kvp=None):
+    t0 = time.time()
+    kvp_str = format_kvp(kvp, ',') if kvp else ''
+    d = dict(timestamp=format_timestamp(t0),
+             func_name=func_name, kvp=kvp_str)
+    fmt = fmt or EVENT_MESSAGE
+    msg = fmt.format(**d)
+    if level is None:
+        level = DEFAULT_LEVEL
+    logger.log(level, msg)
+    return t0
+
+def log_end(logger, t0, func_name, level=None, fmt=None, status_code=0, kvp=None):
     t1 = time.time()
+    kvp_str = format_kvp(kvp, ',') if kvp else ''
     d = dict(timestamp=format_timestamp(t1),
              func_name=func_name,
-             kvp=kvp, dur=(t1 - t0),
+             kvp=kvp_str,
+             dur=(t1 - t0),
              status=status_code)
     fmt = fmt or EXIT_MESSAGE
     if level is None:

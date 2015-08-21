@@ -60,10 +60,12 @@ class ClientRegistry(object):
         return self._clients.keys()
 
     def register(self, client_type, client_class):
+        t0 = log_start(_log, 'register_client')
         assert issubclass(client_class, GenomeAnnotationClient)
         if client_type not in self._allowed_types:
             raise ClientTypeNotAllowed(str(client_type))
         self._clients[client_type] = client_class
+        log_end(_log, t0, 'register_client')
 
     def get_client(self, client_type, *args, **kwargs):
         if client_type not in self._clients:

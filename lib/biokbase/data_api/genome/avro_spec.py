@@ -1,4 +1,12 @@
-proto = {
+"""
+Avro protocol specification.
+
+By putting this in a Python module, it is trivial to find and
+load the protocol within the client and server:
+  from biokbase.data_api.genome import avro_spec
+"""
+proto = """
+{
     "namespace": "biokbase.data_api",
     "protocol": "GenomeAnnotation",
 
@@ -41,12 +49,14 @@ proto = {
      "fields": [
        {"type": "SemVer", "name": "version"},
        {"type": "string", "name": "ident"},
-       {"type": "array",  "name": "lineage",
-        "items": "LineageItem"},
+       {"name": "lineage", "type": {
+            "type": "array", "items": "LineageItem"}
+        },
        {"type": "string", "name": "taxid",
         "doc": "Taxonomic ID"},
-       {"type": "array", "name": "aliases",
-        "item": "string"}
+       {"name": "aliases", "type": {
+           "type": "array", "items": "string"}
+        }
       ]
     }
   ],
@@ -54,13 +64,12 @@ proto = {
   "messages": {
     "get": {
         "request": [{"name": "ref", "type": "ObjRef"}],
-        "response": "GenomeAnnotation",
+        "response": "GenomeAnnotation"
     },
     "get_taxon": {
         "request": [{"name": "ref", "type": "ObjRef"}],
-        "response": "Taxon",
+        "response": "Taxon"
     }
   }
-}
-
+}"""
 
