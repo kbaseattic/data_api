@@ -10,19 +10,21 @@ __date__ = '8/20/15'
 import sys
 # Local
 from biokbase.data_api.genome import api
-from biokbase.data_api.genome import avro_client
+from biokbase.data_api.genome import avro_client  # keep!
+from biokbase.data_api import registry
+
 
 # Constants and globals
 
-clients = api.genome_annotation_clients
+genome_api = registry.g_registry.get_client(api.NAMESPACE,
+                                            registry.AVRO)
 
 # Classes and functions
 
 def get_objects(ref):
     """Test simple Avro client.
     """
-    client = clients.get_client(api.CLIENT_TYPE_AVRO)
-    gen_ann = client.get_info(ref)
+    gen_ann = genome_api.get_info(ref)
     print('Got genome annotation id={} version={}'.format(
         gen_ann['ident'], gen_ann['version']['version']
     ))

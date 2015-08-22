@@ -49,7 +49,7 @@ class GenomeAnnotationService(ipc.Responder):
     def __init__(self):
         ipc.Responder.__init__(self, PROTOCOL)
         self._conn = workspace_db.connect()
-        self._api = impl.GenomeAnnotationAPI(self._conn)
+        self._api = impl.GenomeAnnotationImpl(self._conn)
         self._cache = Cache()
 
     def invoke(self, msg, req):

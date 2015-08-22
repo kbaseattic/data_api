@@ -42,7 +42,7 @@ FEATURE_DESCRIPTIONS = {
 # Bsae data object
 ##################
 
-class KBaseDataAPI(object):
+class KBaseDataImpl(object):
     def __init__(self, conn):
         self._conn = conn
 
@@ -125,7 +125,7 @@ class KBaseDataObject(object):
 
 ###########
 
-class GenomeAnnotationAPI(KBaseDataAPI):
+class GenomeAnnotationImpl(KBaseDataImpl):
 
     def get_info(self, ref):
         """Retrieve basic info about a GenomeAnnotation object.
