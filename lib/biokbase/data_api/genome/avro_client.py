@@ -31,7 +31,8 @@ class GenomeAnnotationAvro(api.GenomeAnnotationAPI):
     def __init__(self, host='localhost',
                  port=avro_rpc.AVRO_DEFAULT_PORT):
         super(GenomeAnnotationAvro, self).__init__()
-        t0 = log_start(_log, 'avro_connect')
+        t0 = log_start(_log, 'avro_connect',
+                       kvp={'host': host, 'port': port})
         client = ipc.HTTPTransceiver(host, port)
         self._requestor = ipc.Requestor(PROTOCOL, client)
         log_end(_log, t0, 'avro_connect')

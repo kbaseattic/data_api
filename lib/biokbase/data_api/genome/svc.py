@@ -7,6 +7,7 @@ __date__ = '8/14/15'
 # Imports
 
 # Stdlib
+import argparse
 import json
 import re
 # Third-party
@@ -138,4 +139,14 @@ class Cache(object):
         return True
 
 if __name__ == '__main__':
-    avro_rpc.run_service(GenomeAnnotationService)
+    ap = argparse.ArgumentParser()
+    ap.add_argument('--host', dest='host', default='localhost',
+                    metavar='ADDR', help='Listening host interface. '
+                                         'Use 0.0.0.0 for "all". '
+                                         '(default=%(default)s)')
+    ap.add_argument('--port', dest='port', default=avro_rpc.AVRO_DEFAULT_PORT,
+                    metavar='PORT', help='Listening port '
+                                         '(default=%(default)d)')
+    args = ap.parse_args()
+    kw = {'host': args.host, 'port': args.port}
+    avro_rpc.run_service(GenomeAnnotationService, **kw)
