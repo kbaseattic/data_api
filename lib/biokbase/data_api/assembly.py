@@ -53,7 +53,7 @@ class AssemblyAPI(ObjectAPI):
         """Retrieve the GenomeAnnotations that refer to this Assembly.
         
         Returns:
-          list<GenomeAnnotationAPI>
+          list<GenomeAnnotation>
         """
         
         import biokbase.data_api.genome_annotation            

@@ -3,8 +3,6 @@ Data API for Genome Annotation entities.  This API provides methods for retrievi
 Assembly and Taxon associated with an annotation, as well as retrieving individual features.
 """
 
-import sys
-
 from biokbase.data_api.object import ObjectAPI
 
 _GENOME_TYPES = ['KBaseGenomes.Genome']
@@ -314,7 +312,7 @@ class GenomeAnnotationAPI(ObjectAPI):
         #elif self._is_annotation_type:
             #feature_lookup = self.get_data_subset(path_list=["feature_lookup"])["feature_lookup"]            
             
-            #cds_feature_container = ObjectAPI(self.services, ref=feature_lookup)            
+            #cds_feature_container = Data(self.services, ref=feature_lookup)
             
             #for x in cds_id_list:
                 #for feature_ref in feature_lookup[x]:
@@ -325,7 +323,7 @@ class GenomeAnnotationAPI(ObjectAPI):
             
             #locations = dict()
             #for ref in feature_containers:
-                #features = ObjectAPI(self.services, ref).get_data_subset(path_list=["features/" + x for x in feature_id_list])["features"]
+                #features = Data(self.services, ref).get_data_subset(path_list=["features/" + x for x in feature_id_list])["features"]
                 
                 #for feature_id in feature_id_list:
                     #locations[feature_id] = list()
@@ -510,7 +508,7 @@ class GenomeAnnotationAPI(ObjectAPI):
                         aliases[x['id']] = x["aliases"]
                     else:
                         aliases[x['id']] = list()
-            return sequences
+            return aliases
         elif self._is_annotation_type:
             feature_lookup = self.get_data_subset(path_list=["feature_lookup"])["feature_lookup"]
 
@@ -577,7 +575,7 @@ class GenomeAnnotationAPI(ObjectAPI):
                     else:
                         publications[feature_id] = list()
             
-            return sequences
+            return publications
 
     def get_features_by_id(self, feature_id_list=None):
         if feature_id_list == None:

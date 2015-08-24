@@ -22,7 +22,7 @@ if __name__ == "__main__":
     
     print "general object API methods using  Genome Annotation"
     
-    print "object_api = biokbase.data_api.object.ObjectAPI()"
+    print "object_api = biokbase.data_api.object.Data()"
     object_api = biokbase.data_api.object.ObjectAPI(services, ref="PrototypeReferenceGenomes/kb|g.3157")
 
     print "Pull back basic object info for any object type:"
@@ -90,7 +90,7 @@ if __name__ == "__main__":
         
     print "\n\nGenome Annotation API methods using "
     
-    print "genome_annotation_api = biokbase.data_api.genome_annotation.GenomeAnnotationAPI()"
+    print "genome_annotation_api = biokbase.data_api.genome_annotation.GenomeAnnotation()"
     genome_annotation_api = biokbase.data_api.genome_annotation.GenomeAnnotationAPI(services, ref="PrototypeReferenceGenomes/kb|g.3157")
     
     print "\n\nGet my connected Taxon:"

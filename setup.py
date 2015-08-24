@@ -25,6 +25,7 @@ config = {
     "install_requires": parse_requirements(),
     "packages": ["biokbase",
                  "biokbase.data_api",
+                 "biokbase.data_api.genome",
                  "biokbase.data_api.tests",
                  "biokbase.data_api.tests.performance",
                  "biokbase.workspace"],

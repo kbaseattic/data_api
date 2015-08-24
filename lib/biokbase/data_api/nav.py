@@ -85,7 +85,7 @@ class DBConnection(object):
                                                           token=auth_token)
 
     def get_objectapi_params(self, objid):
-        """Get back the params that the ObjectAPI ctor wants, as
+        """Get back the params that the Data ctor wants, as
         a dictionary with the correct keyword arguments set.
         """
         return dict(services={'workspace_service_url': self._ws_url, 
