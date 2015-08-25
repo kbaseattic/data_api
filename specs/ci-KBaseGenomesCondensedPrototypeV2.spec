@@ -107,6 +107,7 @@ typedef structure {
   string is_circular; 
   int start_position;
   int num_bytes;
+  float gc_content;
 } contig;
 
 
@@ -229,7 +230,6 @@ typedef structure {
   string name;
   string description;
   string notes;
-  int protein_count;
   mapping<string protein_id, protein protein> proteins;
 } ProteinContainer;
 
@@ -349,7 +349,6 @@ typedef structure {
   string description;
   string notes;
   assembly_ref assembly_ref;
-  int feature_count;
   mapping<string feature_id, feature feature> features;
 } FeatureContainer;
 
@@ -366,6 +365,12 @@ The feature type is a controlled vocabulary perhaps derived from http://www.insd
 typedef mapping<string feature_type, feature_container_ref feature_container_ref> feature_containers_map;
 
 
+
+/*
+The type is either a feature type or "protein". 
+This is designed for fast count lookup of all the types instead of having to drill down into the containers
+*/
+typedef mapping<string type, int count> counts_map;
   
 /*
 Feature lookup is way to look up a feature within a GenomeAnnotation.
@@ -422,6 +427,7 @@ typedef structure {
   evidence_container_ref evidence_container_ref;
   feature_lookup feature_lookup;
   string methodology; 
+  counts_map counts_map;
 } GenomeAnnotation; 
 
 };
