@@ -173,9 +173,11 @@ def transform(shock_service_url=None,
                             raise Exception("This FASTA file has non nucleic acid characters : {0}".format(character))
                     length = len(total_sequence)
                     total_length = total_length + length
-                    gc_length = gc_length + len(re.findall('G|g|C|c',total_sequence))
-                    fasta_key = fasta_header.strip()
+                    contig_gc_length = len(re.findall('G|g|C|c',total_sequence))
                     contig_dict = dict() 
+                    contig_dict["gc_content"] = float(contig_gc_length)/float(length) 
+                    gc_length = gc_length + contig_gc_length
+                    fasta_key = fasta_header.strip()
                     contig_dict["contig_id"] = fasta_key 
                     contig_dict["length"] = length 
                     contig_dict["name"] = fasta_key 
@@ -186,7 +188,8 @@ def transform(shock_service_url=None,
                     contig_dict["is_circular"] = "unknown"
                     contig_dict["start_position"] = sequence_start
                     contig_dict["num_bytes"] = sequence_stop - sequence_start
-                 
+
+
 #                    print "Sequence Start: " + str(sequence_start) + "Fasta: " + fasta_key
 #                    print "Sequence Stop: " + str(sequence_stop) + "Fasta: " + fasta_key
                     fasta_dict[fasta_key] = contig_dict
@@ -230,9 +233,11 @@ def transform(shock_service_url=None,
 
             length = len(total_sequence)
             total_length = total_length + length
-            gc_length = gc_length + len(re.findall('G|g|C|c',total_sequence))
-            fasta_key = fasta_header.strip()
+            contig_gc_length = len(re.findall('G|g|C|c',total_sequence))
             contig_dict = dict()
+            contig_dict["gc_content"] = float(contig_gc_length)/float(length) 
+            gc_length = gc_length + contig_gc_length
+            fasta_key = fasta_header.strip()
             contig_dict["contig_id"] = fasta_key 
             contig_dict["length"] = length
             contig_dict["name"] = fasta_key
