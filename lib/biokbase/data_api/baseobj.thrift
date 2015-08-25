@@ -6,7 +6,7 @@
  *
 */
 
-namespace * object
+namespace * baseobj
 
 const string VERSION = "0.0.1"
 

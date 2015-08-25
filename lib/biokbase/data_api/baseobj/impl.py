@@ -7,7 +7,7 @@ except ImportError:
     import StringIO as StringIO
 
 import biokbase.workspace.client
-from biokbase.data_api.object import thrift_service
+from . import thrift_service
 
 class ObjectImpl(thrift_service.Iface):
     def __init__(self, services=None):
