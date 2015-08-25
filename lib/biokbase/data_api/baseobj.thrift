@@ -89,7 +89,7 @@ service thrift_service {
      * @param ref. Object to retrieve. This sets the object
      *             reference for subsequent operations.
      */
-    Metadata get_info(),
+    Metadata get_info(1: ObjectReference ref),
 
     /**
      * Retrieve the schema associated with an object.

@@ -11,6 +11,7 @@ from . import thrift_service
 
 class ObjectImpl(thrift_service.Iface):
     def __init__(self, services=None):
+        print("IN ObjectImpl")
         if services is None or type(services) != type({}):
             raise TypeError("You must provide a service configuration "
                             "dictionary! Found {0}".format(type(services)))
@@ -27,10 +28,15 @@ class ObjectImpl(thrift_service.Iface):
 
 
     def get_info(self, ref):
-        info_values = self.ws_client.get_object_info_new({
-            "objects": [{"ref": ref}],
-            "includeMetadata": 0,
-            "ignoreErrors": 0})[0]
+        print("IN get_info: {}".format(ref))
+        try:
+            info_values = self.ws_client.get_object_info_new({
+                "objects": [{"ref": ref}],
+                "includeMetadata": 0,
+                "ignoreErrors": 0})[0]
+        except Exception as err:
+            print('get_object_info_new failed: {}'.format(err))
+            raise # XXX
         info = {
             "object_id": info_values[0],
             "object_name": info_values[1],

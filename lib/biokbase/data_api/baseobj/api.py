@@ -30,14 +30,14 @@ class ObjectAPI(object):
     This can handle both local and remote modes by use of alternate
     implementations of the `client` parameter.
     """
-    def __init__(self, ref, client):
+    def __init__(self, client, ref):
         """Create API instance with an object reference and client
 
         Args:
-          ref (str): Object reference
           client (object):  Implementation of thrift_service.Iface
+          ref (str): Object reference
         """
-        assert issubclass(client, thrift_service.Iface)
+        assert isinstance(client, thrift_service.Iface)
         if not REF_PATTERN.match(ref):
             raise ValueError('Format error for "{}"'.format(ref))
         self._client, self._ref = client, ref
@@ -55,6 +55,9 @@ class ObjectAPI(object):
             [self._info["type_string"]]).values()[0]
         self._version = self._info["version"]
         log_end(_log, 'create_state', level=logging.DEBUG)
+
+    def __str__(self):
+        return str(self._info)
 
     def get_info(self, ref):
         raise RuntimeWarning('get_info() cannot be called directly')
