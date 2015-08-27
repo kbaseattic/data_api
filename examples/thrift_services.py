@@ -7,6 +7,7 @@ __date__ = '8/25/15'
 # Imports
 
 # Stdlib
+import logging
 import sys
 # Third-party
 from thrift import Thrift
@@ -18,10 +19,13 @@ from thrift.server import TServer
 from biokbase.data_api.baseobj import thrift_service
 from biokbase.data_api.baseobj.ttypes import *
 from biokbase.data_api.baseobj.impl import ObjectImpl
-
+from biokbase.data_api.util import get_logger
 
 DEFAULT_WS_URL = 'https://ci.kbase.us/services/ws/'
 DEFAULT_SHOCK_URL = 'https://ci.kbase.us/services/shock-api/'
+
+_log = get_logger('thrift')  # set up a logger for Thrift messages
+_log.setLevel(logging.DEBUG)
 
 def get_services_dict(ws=DEFAULT_WS_URL, shock=DEFAULT_SHOCK_URL):
     return {'workspace_service_url': ws,

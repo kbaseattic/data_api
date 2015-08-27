@@ -8,7 +8,9 @@ __date__ = '8/25/15'
 
 # Stdlib
 import argparse
+import json
 import sys
+import time
 # Third-party
 from thrift import Thrift
 from thrift.transport import TSocket
@@ -53,6 +55,15 @@ def get_object():
     transport, client = connect(**kw)
     api = ObjectAPI(client, args.ref)
     print('{}'.format(api))  # dump default
+    print("Getting data..")
+    t0 = time.time()
+    d = api.data
+    dt = time.time() - t0
+    print("Got and parsed data in {:g} seconds".format(dt))
+    f = open('thrift_data.json', 'w')
+    json.dump(d, f)
+    f.close()
+    print("Dumped data to: {}".format(f.name))
 
     # Close!
     transport.close()

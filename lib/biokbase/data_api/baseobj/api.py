@@ -5,6 +5,7 @@ Module for base class for Data API objects.
 # Imports
 
 # Stdlib
+import json
 import logging
 import re
 # Local
@@ -16,6 +17,7 @@ from . import thrift_service, ttypes
 # Logging
 
 _log = get_logger('object_api')
+_log.setLevel(logging.DEBUG)
 
 # Constants
 
@@ -43,18 +45,19 @@ class ObjectAPI(object):
         self._client, self._ref = client, ref
 
         # Set up client
+        t0 = log_start(_log, 'client.init')
         auth_info = ttypes.AuthInfo(token=get_auth_token())
         self._client.init(auth_info)
+        log_end(_log, t0, 'client.init')
 
         # Create internal state
-        log_start(_log, 'create_state', level=logging.DEBUG)
+        t0 = log_start(_log, 'client.get_info', kvp=dict(ref=ref))
         self._info = self._client.get_info(ref)
-        self._id = self._info["object_id"]
-        self._name = self._info["object_name"]
-        self._typestring = self._client.translate_to_MD5_types(
-            [self._info["type_string"]]).values()[0]
-        self._version = self._info["version"]
-        log_end(_log, 'create_state', level=logging.DEBUG)
+        log_end(_log, t0, 'client.get_info')
+        self._id = self._info.object_id
+        self._name = self._info.object_name
+        self._typestring = self._info.type_string
+        self._version = self._info.version
 
     def __str__(self):
         return str(self._info)
@@ -76,10 +79,11 @@ class ObjectAPI(object):
 
     @property
     def data(self):
-        return self._client.get_data(self._ref)
+        data_dict = json.loads(self._client.get_data())
+        return data_dict
 
     def data_subset(self, path_list=None):
-        return self._client.get_data_subset(self._ref, path_list)
+        return self._client.get_data_subset(path_list)
 
     @property
     def schema(self):

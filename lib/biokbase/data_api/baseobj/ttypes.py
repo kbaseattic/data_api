@@ -26,7 +26,7 @@ class Metadata(object):
    - object_name
    - object_reference
    - object_reference_versioned
-   - type
+   - type_string
    - save_date
    - version
    - saved_by
@@ -43,23 +43,23 @@ class Metadata(object):
     (2, TType.STRING, 'object_name', None, None, ), # 2
     (3, TType.STRING, 'object_reference', None, None, ), # 3
     (4, TType.STRING, 'object_reference_versioned', None, None, ), # 4
-    (5, TType.STRING, 'type', None, None, ), # 5
+    (5, TType.STRING, 'type_string', None, None, ), # 5
     (6, TType.STRING, 'save_date', None, None, ), # 6
     (7, TType.STRING, 'version', None, None, ), # 7
     (8, TType.STRING, 'saved_by', None, None, ), # 8
-    (9, TType.STRING, 'workspace_id', None, None, ), # 9
+    (9, TType.I64, 'workspace_id', None, None, ), # 9
     (10, TType.STRING, 'workspace_name', None, None, ), # 10
-    (11, TType.I64, 'object_checksum', None, None, ), # 11
+    (11, TType.STRING, 'object_checksum', None, None, ), # 11
     (12, TType.I64, 'object_size', None, None, ), # 12
     (13, TType.STRING, 'object_metadata', None, None, ), # 13
   )
 
-  def __init__(self, object_id=None, object_name=None, object_reference=None, object_reference_versioned=None, type=None, save_date=None, version=None, saved_by=None, workspace_id=None, workspace_name=None, object_checksum=None, object_size=None, object_metadata=None,):
+  def __init__(self, object_id=None, object_name=None, object_reference=None, object_reference_versioned=None, type_string=None, save_date=None, version=None, saved_by=None, workspace_id=None, workspace_name=None, object_checksum=None, object_size=None, object_metadata=None,):
     self.object_id = object_id
     self.object_name = object_name
     self.object_reference = object_reference
     self.object_reference_versioned = object_reference_versioned
-    self.type = type
+    self.type_string = type_string
     self.save_date = save_date
     self.version = version
     self.saved_by = saved_by
@@ -100,7 +100,7 @@ class Metadata(object):
           iprot.skip(ftype)
       elif fid == 5:
         if ftype == TType.STRING:
-          self.type = iprot.readString();
+          self.type_string = iprot.readString();
         else:
           iprot.skip(ftype)
       elif fid == 6:
@@ -119,8 +119,8 @@ class Metadata(object):
         else:
           iprot.skip(ftype)
       elif fid == 9:
-        if ftype == TType.STRING:
-          self.workspace_id = iprot.readString();
+        if ftype == TType.I64:
+          self.workspace_id = iprot.readI64();
         else:
           iprot.skip(ftype)
       elif fid == 10:
@@ -129,8 +129,8 @@ class Metadata(object):
         else:
           iprot.skip(ftype)
       elif fid == 11:
-        if ftype == TType.I64:
-          self.object_checksum = iprot.readI64();
+        if ftype == TType.STRING:
+          self.object_checksum = iprot.readString();
         else:
           iprot.skip(ftype)
       elif fid == 12:
@@ -169,9 +169,9 @@ class Metadata(object):
       oprot.writeFieldBegin('object_reference_versioned', TType.STRING, 4)
       oprot.writeString(self.object_reference_versioned)
       oprot.writeFieldEnd()
-    if self.type is not None:
-      oprot.writeFieldBegin('type', TType.STRING, 5)
-      oprot.writeString(self.type)
+    if self.type_string is not None:
+      oprot.writeFieldBegin('type_string', TType.STRING, 5)
+      oprot.writeString(self.type_string)
       oprot.writeFieldEnd()
     if self.save_date is not None:
       oprot.writeFieldBegin('save_date', TType.STRING, 6)
@@ -186,16 +186,16 @@ class Metadata(object):
       oprot.writeString(self.saved_by)
       oprot.writeFieldEnd()
     if self.workspace_id is not None:
-      oprot.writeFieldBegin('workspace_id', TType.STRING, 9)
-      oprot.writeString(self.workspace_id)
+      oprot.writeFieldBegin('workspace_id', TType.I64, 9)
+      oprot.writeI64(self.workspace_id)
       oprot.writeFieldEnd()
     if self.workspace_name is not None:
       oprot.writeFieldBegin('workspace_name', TType.STRING, 10)
       oprot.writeString(self.workspace_name)
       oprot.writeFieldEnd()
     if self.object_checksum is not None:
-      oprot.writeFieldBegin('object_checksum', TType.I64, 11)
-      oprot.writeI64(self.object_checksum)
+      oprot.writeFieldBegin('object_checksum', TType.STRING, 11)
+      oprot.writeString(self.object_checksum)
       oprot.writeFieldEnd()
     if self.object_size is not None:
       oprot.writeFieldBegin('object_size', TType.I64, 12)
@@ -218,7 +218,7 @@ class Metadata(object):
     value = (value * 31) ^ hash(self.object_name)
     value = (value * 31) ^ hash(self.object_reference)
     value = (value * 31) ^ hash(self.object_reference_versioned)
-    value = (value * 31) ^ hash(self.type)
+    value = (value * 31) ^ hash(self.type_string)
     value = (value * 31) ^ hash(self.save_date)
     value = (value * 31) ^ hash(self.version)
     value = (value * 31) ^ hash(self.saved_by)

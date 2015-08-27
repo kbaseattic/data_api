@@ -26,13 +26,13 @@ struct Metadata {
     2: string object_name
     3: ObjectReference object_reference
     4: string object_reference_versioned
-    5: string type
+    5: string type_string
     6: string save_date
     7: string version
     8: string saved_by
-    9: string workspace_id
+    9: i64 workspace_id
     10: string workspace_name
-    11: i64 object_checksum
+    11: string object_checksum
     12: i64 object_size
     13: string object_metadata
 }
@@ -64,7 +64,7 @@ struct Provenance {
 /**
  * Untyped object data
  */
-typedef string RawData
+typedef binary RawData
 
 /**
  * Authorization info
