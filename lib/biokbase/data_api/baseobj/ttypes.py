@@ -243,7 +243,22 @@ class Metadata:
 class History:
   """
   Object history.
-
+thrift_spec = (
+    None, # 0
+    (1, TType.STRING, 'object_id', None, None, ), # 1
+    (2, TType.STRING, 'object_name', None, None, ), # 2
+    (3, TType.STRING, 'object_reference', None, None, ), # 3
+    (4, TType.STRING, 'object_reference_versioned', None, None, ), # 4
+    (5, TType.STRING, 'type_string', None, None, ), # 5
+    (6, TType.STRING, 'save_date', None, None, ), # 6
+    (7, TType.STRING, 'version', None, None, ), # 7
+    (8, TType.STRING, 'saved_by', None, None, ), # 8
+    (9, TType.I64, 'workspace_id', None, None, ), # 9
+    (10, TType.STRING, 'workspace_name', None, None, ), # 10
+    (11, TType.STRING, 'object_checksum', None, None, ), # 11
+    (12, TType.I64, 'object_size', None, None, ), # 12
+    (13, TType.STRING, 'object_metadata', None, None, ), # 13
+  )
   Attributes:
    - events
   """

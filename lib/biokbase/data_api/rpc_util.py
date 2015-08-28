@@ -6,15 +6,62 @@ __date__ = '8/24/15'
 
 # Imports
 
+# Stdlib
 import argparse
+import enum
 import re
 import sys
+# Third-party
+from thrift.Thrift import TType
 
 # Constants
 
 FIXME = '// FIXME'
 
 # Classes and functions
+
+# class ThriftTypes(enum.Enum):
+# TType.BOOL
+# TType.DOUBLE
+# TType.I16
+# TType.I64
+# TType.MAP
+# TType.STOP
+# TType.STRUCT
+# TType.UTF7
+# TType.VOID
+# TType.BYTE
+# TType.I08
+# TType.I32
+# TType.LIST
+# TType.SET
+# TType.STRING
+# TType.UTF16
+# TType.UTF8
+
+class InvalidField(object):
+    def __init__(self, dtype, name, value):
+        s = 'Value "{}" of field {} is not of type "{}"'
+        self._msg = s.format(value, name, dtype)
+
+    def __str__(self):
+        return self._msg
+
+def thrift_validate(obj):
+    invalid_fields = []
+    assert hasattr(obj, 'thrift_spec')
+    for item in getattr(obj, 'thrift_spec'):
+        if item is None:
+            continue # skip it
+        dtype, name = item[1], item[2]
+        value = getattr(obj, name)
+        if value is None:
+            # XXX: warning?
+            continue
+        if dtype == TType.STRING:
+            if not(isinstance(value, str) or
+                       isinstance(value, unicode)):
+                invalid_fields.append(InvalidField(dtype, name, value))
 
 class KIDLToThriftConverter(object):
     """Convert KIDL to Thrift IDL
