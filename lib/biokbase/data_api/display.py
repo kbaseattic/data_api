@@ -171,7 +171,7 @@ class FeatureStats(Table):
         """Create from a genome.
 
         Args:
-          ga: GenomeAnnotationAPI object
+          ga: GenomeAnnotation object
         """
         data = []
         for feature in ga.get_feature_types(): # all feature types
@@ -191,7 +191,7 @@ class FeaturePositions(Table):
         """Create from a genome.
 
         Args:
-          ga: GenomeAnnotationAPI object
+          ga: GenomeAnnotation object
         """
         data = self._get_features(ga)
         Table.__init__(self, data, columns=('type', 'id', 'start', 'len', 'dir'))
@@ -236,7 +236,7 @@ class ProteinStats(Table):
         """Create from a genome.
 
         Args:
-          ga: GenomeAnnotationAPI object
+          ga: GenomeAnnotation object
         """
         proteins = ga.get_proteins()
         data = {}
@@ -262,10 +262,10 @@ class GenomeSummary(TemplateMixin):
     template = '<h3>Genome Summary</h3>'+ Organism.template
 
     def __init__(self, ga, taxons=True, assembly=True, annotation=True):
-        """Create new summary from GenomeAnnotationAPI.
+        """Create new summary from GenomeAnnotation.
 
         Args:
-          ga (GenomeAnnotationAPI): input object
+          ga (GenomeAnnotation): input object
           taxons: If False, do not retrieve taxons
           assembly: If False, do not retrieve assembly
           annotation: If False, do not retrieve annotation

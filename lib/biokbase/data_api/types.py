@@ -54,7 +54,7 @@ def get_object_class(type_name, store=DataStores.workspace):
       store - type of data store (currently only 'workspace')
 
     Returns:
-      appropriate subclass of ObjectAPI (possibly just the base class)
+      appropriate subclass of Data (possibly just the base class)
     """
     clazz = None
     if store == DataStores.workspace:
