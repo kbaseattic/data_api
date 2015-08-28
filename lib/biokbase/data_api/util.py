@@ -11,8 +11,8 @@ __date__ = '8/4/15'
 from datetime import datetime
 import logging
 import logging.config
+import os
 import six
-import sys
 import time
 
 ENTRY_MESSAGE = '{timestamp} {func_name}.begin {kvp}'
@@ -174,3 +174,12 @@ if __name__ == '__main__':
     _example_logger = get_logger('example')
     print("In Main")
     run_examples()
+
+def get_auth_token():
+    try:
+        return os.environ["KB_AUTH_TOKEN"]
+    except KeyError:
+        raise Exception(
+            "Missing authentication token! "
+            "Set KB_AUTH_TOKEN environment variable.")
+

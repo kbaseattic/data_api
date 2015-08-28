@@ -29,6 +29,7 @@ config = {
                  "biokbase.data_api.sequence",
                  "biokbase.data_api.taxonomy",
                  "biokbase.data_api.genome",
+                 "biokbase.data_api.baseobj",
                  "biokbase.data_api.tests",
                  "biokbase.data_api.tests.performance",
                  "biokbase.workspace"],
