@@ -4,8 +4,8 @@ import unittest
 import datetime
 import json
 
-import biokbase.data_api.genome_annotation
-import biokbase.data_api.assembly
+import biokbase.data_api.annotation.genome_annotation
+import biokbase.data_api.sequence.assembly
 
 MB = 2**20 * 1.0
 
