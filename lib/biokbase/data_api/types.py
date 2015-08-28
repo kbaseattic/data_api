@@ -11,10 +11,10 @@ import re
 from enum import  Enum # requires enum34
 
 # Local
-from biokbase.data_api.assembly import AssemblyAPI
-from biokbase.data_api.genome_annotation import GenomeAnnotationAPI
-from biokbase.data_api.taxon import TaxonAPI
-from biokbase.data_api.object import ObjectAPI
+from biokbase.data_api.sequence.assembly import AssemblyAPI
+from biokbase.data_api.annotation.genome_annotation import GenomeAnnotationAPI
+from biokbase.data_api.taxonomy.taxon import TaxonAPI
+from biokbase.data_api.core import ObjectAPI
 
 class DataStores(Enum):
     """The huge variety of data stores we have at the moment."""
