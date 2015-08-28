@@ -62,6 +62,7 @@ class ObjectImpl(thrift_service.Iface):
                 object_checksum=info_values[8],
                 object_size=info_values[9],
                 object_metadata=str(info_values[10]))
+        info.validate()
         return info
 
     def get_schema(self, ref):

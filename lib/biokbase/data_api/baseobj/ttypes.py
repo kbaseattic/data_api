@@ -3,7 +3,7 @@
 #
 # DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
 #
-#  options string: py:new_style
+#  options string: py
 #
 
 from thrift.Thrift import TType, TMessageType, TException, TApplicationException
@@ -17,7 +17,7 @@ except:
 
 
 
-class Metadata(object):
+class Metadata:
   """
   Default metadata for an object.
 
@@ -240,7 +240,7 @@ class Metadata(object):
   def __ne__(self, other):
     return not (self == other)
 
-class History(object):
+class History:
   """
   Object history.
 
@@ -315,7 +315,7 @@ class History(object):
   def __ne__(self, other):
     return not (self == other)
 
-class Provenance(object):
+class Provenance:
   """
   Object provenance.
 
@@ -382,7 +382,7 @@ class Provenance(object):
   def __ne__(self, other):
     return not (self == other)
 
-class AuthInfo(object):
+class AuthInfo:
   """
   Authorization info
 

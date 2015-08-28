@@ -3,7 +3,7 @@
 #
 # DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
 #
-#  options string: py:new_style
+#  options string: py
 #
 
 from thrift.Thrift import TType, TMessageType, TException, TApplicationException
@@ -17,7 +17,7 @@ except:
   fastbinary = None
 
 
-class Iface(object):
+class Iface:
   def init(self, auth):
     """
     Initialize.
@@ -455,7 +455,7 @@ class Processor(Iface, TProcessor):
 
 # HELPER FUNCTIONS AND STRUCTURES
 
-class init_args(object):
+class init_args:
   """
   Attributes:
    - auth
@@ -521,7 +521,7 @@ class init_args(object):
   def __ne__(self, other):
     return not (self == other)
 
-class init_result(object):
+class init_result:
 
   thrift_spec = (
   )
@@ -567,7 +567,7 @@ class init_result(object):
   def __ne__(self, other):
     return not (self == other)
 
-class get_info_args(object):
+class get_info_args:
   """
   Attributes:
    - ref
@@ -632,7 +632,7 @@ class get_info_args(object):
   def __ne__(self, other):
     return not (self == other)
 
-class get_info_result(object):
+class get_info_result:
   """
   Attributes:
    - success
@@ -697,7 +697,7 @@ class get_info_result(object):
   def __ne__(self, other):
     return not (self == other)
 
-class get_schema_args(object):
+class get_schema_args:
 
   thrift_spec = (
   )
@@ -743,7 +743,7 @@ class get_schema_args(object):
   def __ne__(self, other):
     return not (self == other)
 
-class get_schema_result(object):
+class get_schema_result:
   """
   Attributes:
    - success
@@ -807,7 +807,7 @@ class get_schema_result(object):
   def __ne__(self, other):
     return not (self == other)
 
-class get_history_args(object):
+class get_history_args:
 
   thrift_spec = (
   )
@@ -853,7 +853,7 @@ class get_history_args(object):
   def __ne__(self, other):
     return not (self == other)
 
-class get_history_result(object):
+class get_history_result:
   """
   Attributes:
    - success
@@ -918,7 +918,7 @@ class get_history_result(object):
   def __ne__(self, other):
     return not (self == other)
 
-class get_provenance_args(object):
+class get_provenance_args:
 
   thrift_spec = (
   )
@@ -964,7 +964,7 @@ class get_provenance_args(object):
   def __ne__(self, other):
     return not (self == other)
 
-class get_provenance_result(object):
+class get_provenance_result:
   """
   Attributes:
    - success
@@ -1029,7 +1029,7 @@ class get_provenance_result(object):
   def __ne__(self, other):
     return not (self == other)
 
-class get_referrers_args(object):
+class get_referrers_args:
 
   thrift_spec = (
   )
@@ -1075,7 +1075,7 @@ class get_referrers_args(object):
   def __ne__(self, other):
     return not (self == other)
 
-class get_referrers_result(object):
+class get_referrers_result:
   """
   Attributes:
    - success
@@ -1157,7 +1157,7 @@ class get_referrers_result(object):
   def __ne__(self, other):
     return not (self == other)
 
-class get_data_args(object):
+class get_data_args:
 
   thrift_spec = (
   )
@@ -1203,7 +1203,7 @@ class get_data_args(object):
   def __ne__(self, other):
     return not (self == other)
 
-class get_data_result(object):
+class get_data_result:
   """
   Attributes:
    - success
@@ -1267,7 +1267,7 @@ class get_data_result(object):
   def __ne__(self, other):
     return not (self == other)
 
-class get_data_subset_args(object):
+class get_data_subset_args:
   """
   Attributes:
    - path_list
@@ -1340,7 +1340,7 @@ class get_data_subset_args(object):
   def __ne__(self, other):
     return not (self == other)
 
-class get_data_subset_result(object):
+class get_data_subset_result:
   """
   Attributes:
    - success
