@@ -9,21 +9,17 @@ my_location = os.path.split(os.path.dirname(__file__))[0]
 lib_path = sorted([(x, len(os.path.commonprefix([x, my_location]))) for x in paths], cmp=lambda x,y: cmp(x[1],y[1]))[-1][0]
 sys.path.insert(1,lib_path)
 
-if __name__ == "__main__":
-    import biokbase.data_api.object
-    import biokbase.data_api.assembly
-    import biokbase.data_api.taxon
-    import biokbase.data_api.genome_annotation
+import biokbase.data_api.core
+import biokbase.data_api.sequence.assembly
+import biokbase.data_api.taxonomy.taxon
+import biokbase.data_api.annotation.genome_annotation
 
-    services = {
-        "workspace_service_url": "https://ci.kbase.us/services/ws/",
-        "shock_service_url": "https://ci.kbase.us/services/shock-api/",
-    }
-    
+
+def api_demo(services=None, ref=None):
     print "general object API methods using  Genome Annotation"
     
     print "object_api = biokbase.data_api.object.ObjectAPI()"
-    object_api = biokbase.data_api.object.ObjectAPI(services, ref="PrototypeReferenceGenomes/kb|g.3157")
+    object_api = biokbase.data_api.core.ObjectAPI(services, ref)
 
     print "Pull back basic object info for any object type:"
     print "\n\nobject_api.get_typestring()"
@@ -55,43 +51,11 @@ if __name__ == "__main__":
     print "object_api.get_data_subset([\"domain\"])"
     pprint.pprint(object_api.get_data_subset(["domain"]))
     
-
-    print "\n\nAssembly API methods using "
     
-    print "assembly_api = biokbase.data_api.assembly.AssemblyAPI()"
-    assembly_api = biokbase.data_api.assembly.AssemblyAPI(services, ref="PrototypeReferenceGenomes/kb|g.3157_assembly")
-    
-    print "\n\nFetch basic info for an Assembly:"
-    print "assembly_api.get_assembly_id()"
-    pprint.pprint(assembly_api.get_assembly_id())
-        
-    print "\nassembly_api.get_stats()"
-    pprint.pprint(assembly_api.get_stats())
-    
-    print "\nassembly_api.get_number_contigs()"
-    pprint.pprint(assembly_api.get_number_contigs())
-
-    print "\nFetch the information telling me about where this Assembly came from:"
-    print "assembly_api.get_external_source_info()"    
-    pprint.pprint(assembly_api.get_external_source_info())
-
-    print "\nFetch the contig ids:"    
-    print "contig_ids = assembly_api.get_contig_ids()"
-    print "pprint.pprint(contig_ids)"
-    
-    contig_ids = assembly_api.get_contig_ids()
-    pprint.pprint(contig_ids)
-
-    print "\nUse the contig ids to fetch the contig sequences and metadata:"
-    print "assembly_api.get_contigs_by_id([contig_ids[0]])"
-    contigs = assembly_api.get_contigs_by_id([contig_ids[0]])
-    pprint.pprint(contigs)
-
-        
     print "\n\nGenome Annotation API methods using "
     
     print "genome_annotation_api = biokbase.data_api.genome_annotation.GenomeAnnotationAPI()"
-    genome_annotation_api = biokbase.data_api.genome_annotation.GenomeAnnotationAPI(services, ref="PrototypeReferenceGenomes/kb|g.3157")
+    genome_annotation_api = biokbase.data_api.annotation.genome_annotation.GenomeAnnotationAPI(services, ref)
     
     print "\n\nGet my connected Taxon:"
     print "genome_annotation_api.get_taxon()"
@@ -121,7 +85,7 @@ if __name__ == "__main__":
     
     print "\ngenome_annotation_api.get_feature_ids(type_list={0})".format(target_types)
     feature_ids_by_type = genome_annotation_api.get_feature_ids(type_list=target_types)
-    pprint.pprint(len(feature_ids_by_type.values()))
+    pprint.pprint(len(feature_ids_by_type["type"][feature_types[0]]))
 
     target_regions = [{"contig_id": "kb|g.3157.c.0", "strand": "?", "start": 0, "stop": 1000}]
 
@@ -147,15 +111,15 @@ if __name__ == "__main__":
                                                                      function_list=target_functions,
                                                                      alias_list=target_aliases)
     pprint.pprint(feature_ids_intersection)
-    feature_ids = feature_ids_intersection.values().join()
+    feature_ids = feature_ids_intersection["intersect"]
     
     print feature_ids
     
     #print "\n\ngenome_annotation_api.get_protein_ids_by_cds()"
     #pprint.pprint(genome_annotation_api.get_protein_ids_by_cds())
     
-    print "\ngenome_annotation_api.get_features_by_id(feature_ids)"
-    pprint.pprint(genome_annotation_api.get_features_by_id(feature_ids))
+    print "\ngenome_annotation_api.get_features(feature_ids)"
+    pprint.pprint(genome_annotation_api.get_features(feature_ids))
 
     print "\ngenome_annotation_api.get_feature_dna(feature_ids)"
     pprint.pprint(genome_annotation_api.get_feature_dna(feature_ids))
@@ -172,8 +136,36 @@ if __name__ == "__main__":
     print "\n\ngenome_annotation_api.get_proteins()"
     pprint.pprint(len(genome_annotation_api.get_proteins()))
     
+
+    print "\n\nAssembly API methods"
+        
+    print "\n\nFetch basic info for an Assembly:"
+    print "assembly_api.get_assembly_id()"
+    pprint.pprint(assembly_api.get_assembly_id())
+        
+    print "\nassembly_api.get_stats()"
+    pprint.pprint(assembly_api.get_stats())
     
-    print "\n\nTaxon API methods for "
+    print "\nassembly_api.get_number_contigs()"
+    pprint.pprint(assembly_api.get_number_contigs())
+
+    print "\nFetch the information telling me about where this Assembly came from:"
+    print "assembly_api.get_external_source_info()"    
+    pprint.pprint(assembly_api.get_external_source_info())
+
+    print "\nFetch the contig ids:"    
+    print "contig_ids = assembly_api.get_contig_ids()"
+    print "pprint.pprint(contig_ids)"
+    
+    contig_ids = assembly_api.get_contig_ids()
+    pprint.pprint(contig_ids)
+
+    print "\nUse the contig ids to fetch the contig sequences and metadata:"
+    print "assembly_api.get_contigs_by_id([contig_ids[0]])"
+    contigs = assembly_api.get_contigs([contig_ids[0]])
+    pprint.pprint(contigs)
+    
+    print "\n\nTaxon API methods"
     
     print "\n\nPull back my taxonomy information:"        
     print "taxon_api.get_scientific_lineage()"
@@ -212,10 +204,11 @@ if __name__ == "__main__":
     print "pprint.pprint(sibling_info)\n"
     
     parent = taxon_api.get_parent()
-    children = parent.get_children()
-    if children:
-        sibling_info = [(s.get_scientific_name(), s.get_taxonomic_id()) for s in children]
-        pprint.pprint(sibling_info)
+    if parent:
+        children = parent.get_children()
+        if children:
+            sibling_info = [(s.get_scientific_name(), s.get_taxonomic_id()) for s in children]
+            pprint.pprint(sibling_info)
 
     print "\nFind out what Genome Annotations reference my Taxon:"        
     print """
@@ -227,3 +220,15 @@ if __name__ == "__main__":
     annotations = taxon_api.get_genome_annotations()
     for g in annotations:
         pprint.pprint(g.get_info())
+
+
+if __name__ == "__main__":
+
+    services = {
+        "workspace_service_url": "https://ci.kbase.us/services/ws/",
+        "shock_service_url": "https://ci.kbase.us/services/shock-api/",
+    }
+    
+    api_demo(services, "OriginalReferenceGenomes/kb|g.3157")
+    api_demo(services, "PrototypeReferenceGenomes/kb|g.3157")
+
