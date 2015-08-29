@@ -20,48 +20,71 @@ FIXME = '// FIXME'
 
 # Classes and functions
 
-# class ThriftTypes(enum.Enum):
-# TType.BOOL
-# TType.DOUBLE
-# TType.I16
-# TType.I64
-# TType.MAP
-# TType.STOP
-# TType.STRUCT
-# TType.UTF7
-# TType.VOID
-# TType.BYTE
-# TType.I08
-# TType.I32
-# TType.LIST
-# TType.SET
-# TType.STRING
-# TType.UTF16
-# TType.UTF8
-
-class InvalidField(object):
+class InvalidField(Exception):
     def __init__(self, dtype, name, value):
         s = 'Value "{}" of field {} is not of type "{}"'
-        self._msg = s.format(value, name, dtype)
+        msg = s.format(value, name, dtype.name)
+        Exception.__init__(self, msg)
 
     def __str__(self):
         return self._msg
 
+class ThriftTypes(enum.Enum):
+    # can validate these
+    BOOL = TType.BOOL
+    DOUBLE = TType.DOUBLE
+    I16 = TType.I16
+    I64 = TType.I64
+    MAP = TType.MAP
+    VOID = TType.VOID
+    I32 = TType.I32
+    I08 = TType.I08
+    BYTE = TType.BYTE
+    STRING = TType.STRING
+    UTF16 = TType.UTF16
+    UTF8 = TType.UTF8
+    UTF7 = TType.UTF7
+    LIST = TType.LIST
+    SET = TType.SET
+    # not sure how to validate these
+    STOP = TType.STOP
+    STRUCT = TType.STRUCT
+
+class ThriftInputValue(object):
+    def __init__(self, dtype, value):
+        if value is None:
+            self.valid = True # XXX: warning?
+            self.empty = True
+            return
+        self.empty = False
+        self.valid = True  # if not known, it's valid
+        if dtype.value == TType.STRING:
+            self.valid = isinstance(value, (str, unicode))
+        elif dtype.value == TType.BOOL:
+            self.valid = isinstance(value, bool)
+        elif dtype.value == TType.DOUBLE:
+            self.valid = isinstance(value, (int, float))
+        elif dtype.value in (TType.I08, TType.I16,  TType.I32, TType.I64, TType.BYTE):
+            self.valid = isinstance(value, int)
+        elif dtype.value in (TType.STRING, TType.UTF16, TType.UTF8,
+                       TType.UTF7):
+            self.valid = isinstance(value, (str, unicode))
+        elif dtype.value in (TType.LIST, TType.SET):
+            self.valid = isinstance(value, (tuple, list, set))
+        elif dtype.value == TType.MAP:
+            self.valid = isinstance(value, TType.MAP)
+
 def thrift_validate(obj):
-    invalid_fields = []
     assert hasattr(obj, 'thrift_spec')
     for item in getattr(obj, 'thrift_spec'):
         if item is None:
             continue # skip it
-        dtype, name = item[1], item[2]
+        dtype, name = ThriftTypes(item[1]), item[2]
         value = getattr(obj, name)
-        if value is None:
-            # XXX: warning?
-            continue
-        if dtype == TType.STRING:
-            if not(isinstance(value, str) or
-                       isinstance(value, unicode)):
-                invalid_fields.append(InvalidField(dtype, name, value))
+        iv = ThriftInputValue(dtype, value)
+        if not iv.valid:
+            raise InvalidField(dtype, name, value)
+    return True
 
 class KIDLToThriftConverter(object):
     """Convert KIDL to Thrift IDL

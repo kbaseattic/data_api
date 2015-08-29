@@ -14,6 +14,7 @@ except ImportError:
 import biokbase.workspace.client
 from . import thrift_service, ttypes
 from biokbase.data_api.util import get_logger, log_start, log_end
+from biokbase.data_api.rpc_util import thrift_validate
 
 _log = get_logger('baseobj.impl')
 
@@ -43,7 +44,6 @@ class ObjectImpl(thrift_service.Iface):
                 "includeMetadata": 0,
                 "ignoreErrors": 0})[0]
         except Exception as err:
-            print('@@ get_object_info_new failed: {}'.format(err))
             raise # XXX
         md5_typestr = self.ws_client.translate_to_MD5_types([info_values[2]]).values()[0]
         info = ttypes.Metadata(
@@ -62,7 +62,7 @@ class ObjectImpl(thrift_service.Iface):
                 object_checksum=info_values[8],
                 object_size=info_values[9],
                 object_metadata=str(info_values[10]))
-        info.validate()
+        thrift_validate(info)
         return info
 
     def get_schema(self, ref):
