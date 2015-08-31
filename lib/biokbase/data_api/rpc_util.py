@@ -9,6 +9,7 @@ __date__ = '8/24/15'
 # Stdlib
 import argparse
 import enum
+import math
 import re
 import sys
 # Third-party
@@ -25,9 +26,6 @@ class InvalidField(Exception):
         s = 'Value "{}" of field {} is not of type "{}"'
         msg = s.format(value, name, dtype.name)
         Exception.__init__(self, msg)
-
-    def __str__(self):
-        return self._msg
 
 class ThriftTypes(enum.Enum):
     # can validate these
@@ -65,6 +63,10 @@ class ThriftInputValue(object):
         elif dtype.value == TType.DOUBLE:
             self.valid = isinstance(value, (int, float))
         elif dtype.value in (TType.I08, TType.I16,  TType.I32, TType.I64, TType.BYTE):
+            # Allow floats with no fractional part to get converted.
+            # Floats with non-zero fractional parts will fail.
+            if isinstance(value, float) and math.floor(value) == value:
+                value = int(value)
             self.valid = isinstance(value, int)
         elif dtype.value in (TType.STRING, TType.UTF16, TType.UTF8,
                        TType.UTF7):
@@ -75,6 +77,22 @@ class ThriftInputValue(object):
             self.valid = isinstance(value, TType.MAP)
 
 def thrift_validate(obj):
+    """Validate an auto-generated datatype from the Thrift `ttypes` module.
+
+    Automatically extract the fields to be validated from the `thrift_spec`
+    attribute in the `obj`.
+
+    Validation has the following features:
+      - unicode or non-unicode strings are equivalent
+      - an integer value is valid for a floating-point field
+      - a floating-point value is valid for a floating-point field, if and
+        only if the value has no fractional part (i.e. floor(value) == value)
+
+    Args:
+      obj: Object to validate.
+
+    Return: The input object (for chaining)
+    """
     assert hasattr(obj, 'thrift_spec')
     for item in getattr(obj, 'thrift_spec'):
         if item is None:
@@ -84,7 +102,7 @@ def thrift_validate(obj):
         iv = ThriftInputValue(dtype, value)
         if not iv.valid:
             raise InvalidField(dtype, name, value)
-    return True
+    return obj
 
 class KIDLToThriftConverter(object):
     """Convert KIDL to Thrift IDL
