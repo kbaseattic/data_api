@@ -163,6 +163,13 @@ typedef structure {
 } AnnotationQuality;
 
 
+/* 
+Reference to a generic workspace object.  Used in evidence. 
+    @id ws  
+*/ 
+typedef string generic_ws_reference;
+
+
 
 /*
 Evidence is information that supports some other bit of information or assertion
@@ -177,7 +184,7 @@ typedef structure {
   string evidence_id;
   string description;
   string evidence_type; 
-  list<string> supporting_objects;
+  list<generic_ws_reference> supporting_objects;
 } evidence;
 
 
@@ -195,6 +202,31 @@ typedef structure {
   string notes;
   mapping<string evidence_id, evidence evidence> evidences;
 } EvidenceContainer;
+
+/*
+Annotation pipeline specific : Seed_role_element
+
+@optional variant_code role
+*/
+typedef structure {
+    string role;
+    string subsystem;
+    string variant_code;
+} seed_role;
+
+/*
+Annotation pipeline specific : Seed_roles
+*/ 
+typedef structure {
+    mapping<string feature_id, list<seed_role> roles> feature_roles;
+} SeedRoles;
+
+/* 
+Reference to a SeedRoles object
+    @id ws KBaseGenomesCondensedPrototypeV2.SeedRoles
+*/ 
+typedef string seed_roles_ref; 
+
 
 /*
 Protein
@@ -406,7 +438,7 @@ protein_container_ref would be a versioned workspace reference
 assembly_ref would be a versioned workspace reference
 
 @optional external_source external_source_id external_source_origination_date notes environmental_comments quality_score 
-@optional annotation_quality_ref publications evidence_container_ref methodology
+@optional annotation_quality_ref publications evidence_container_ref methodology seed_roles_ref
 */
  
 typedef structure {
@@ -428,6 +460,7 @@ typedef structure {
   feature_lookup feature_lookup;
   string methodology; 
   counts_map counts_map;
+  seed_roles_ref seed_roles_ref;
 } GenomeAnnotation; 
 
 };
