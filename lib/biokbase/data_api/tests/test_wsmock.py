@@ -73,7 +73,7 @@ def test_get_object_subset():
     actors_1 = {'ref': '10/1', 'included': ['muppets.actors']}
     r = _mock.get_object_subset([actors_1])
     assert len(r) == 1
-    obj = r[0]
+    obj = r[0]['data']
     #print("@@ get_os-obj: {}".format(obj))
     assert 'muppets' in obj
     assert 'actors' in obj['muppets']
@@ -83,8 +83,24 @@ def test_get_object_subset():
     r = _mock.get_object_subset([actors_1, actors_2])
     assert len(r) == 2
     for obj in r:
-        assert 'muppets' in obj
-        assert 'actors' in obj['muppets']
-        assert 'colors' not in obj['muppets']
+        d = obj['data']
+        assert 'muppets' in d
+        assert 'actors' in d['muppets']
+        assert 'colors' not in d['muppets']
 
 
+def test_get_objects():
+    r = _mock.get_objects([{'ref': '10/1'}, {'ref': '10/2'}])
+    assert len(r) == 2
+    for obj in r:
+        assert 'data' in obj
+        assert 'object_info' in obj
+
+def test_get_type_info():
+    r = _mock.get_type_info('Foo')
+    assert 'type_string' in r
+    assert r['type_string'] == 'Foo'
+
+
+def test_list_referencing_objects():
+    pass

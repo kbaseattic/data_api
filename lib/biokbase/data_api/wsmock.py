@@ -64,27 +64,9 @@ class WorkspaceMock(object):
 
     def get_object_info_new(self, prm):
         ref = prm['objects'][0]['ref']
-        ws_id = int(ref.split('/')[0])
         records = self.collection.find({'ref': ref})
-        result = []
-        for record in records:
-            oid = self._get_oid(ref)
-            data = record['data']
-            r = {'object_id': oid,
-                 'object_name': 'Object{:d}'.format(oid),
-                 'object_reference': ref,
-                 'object_reference_versioned': '{}/{}'.format(ref, '1'),
-                 'type_string': record['type'],
-                 'save_date': datetime.isoformat(datetime.now()),
-                 'version': 1,
-                 'saved_by': 'CookieMonster',
-                 'workspace_id': ws_id,
-                 'workspace_name': record['name'],
-                 'object_checksum': 0,
-                 'object_size': len(data),
-                 'object_metadata': record['metadata']
-                 }
-            result.append(r)
+        result = [self._make_info(record, ref)
+                  for record in records]
         return result
 
     def get_object_provenance(self, prm):
@@ -96,10 +78,8 @@ class WorkspaceMock(object):
         result = []
         for subset in prm:
             ref, paths = subset['ref'], subset['included']
-            # transform paths into desired fields in 'data'
-            fields = {'data': 1, '_id': 0}
             # get matching records and data in the paths
-            records = self.collection.find({'ref': ref}, fields)
+            records = self.collection.find({'ref': ref})
             # add to result
             for r in records:
                 extracted = {} # all extracted paths
@@ -121,12 +101,115 @@ class WorkspaceMock(object):
                         e[parts[-1]] = d[parts[-1]]
                 if extracted:
                     #print("@@ add extracted: {}".format(extracted))
-                    result.append(extracted)
+                    obj = self._make_object(r, ref, data=extracted)
+                    result.append(obj)
         return result
 
-# get_objects
-# get_type_info
-# list_referencing_objects
+    def get_objects(self, prm):
+        result = []
+        for refs in prm:
+            ref = refs['ref']
+            records = self.collection.find({'ref': ref})
+            #print("@@ GO, got records: {}".format(records))
+            objects = [self._make_object(record, ref) for record in records]
+            result.extend(objects)
+        return result
+
+    def get_type_info(self, type_name):
+        return self._make_type_info({'type': type_name})
+
+    def list_referencing_objects(self, prm):
+
+        result = []
+        for refs in prm:
+            ref = refs['ref']
+            for record in self.collection.find({'ref': ref}):
+                r = self._make_info_tuple(record, ref)
+                result.append(r)
+            # "object_id": info_values[0],
+            # "object_name": info_values[1],
+            # "object_reference": "{0}/{1}".format(info_values[6],
+            #                                      info_values[0]),
+            # "object_reference_versioned": "{0}/{1}/{2}".format(info_values[6],
+            #                                                    info_values[0],
+            #                                                    info_values[4]),
+            # "type_string": info_values[2],
+            # "save_date": info_values[3],
+        return result
+
+    # ___ Internal methods ___
+
+    def _make_info(self, record, ref):
+        """Make and return a single 'info' section.
+        """
+        #print("@@ make_info from: {}".format(record))
+        ws_id = int(ref.split('/')[0])
+        oid = self._get_oid(ref)
+        data = record['data']
+        info = {'object_id': oid,
+                'object_name': 'Object{:d}'.format(oid),
+                'object_reference': ref,
+                'object_reference_versioned': '{}/{}'.format(ref, '1'),
+                'type_string': record['type'],
+                'save_date': datetime.isoformat(datetime.now()),
+                'version': 1,
+                'saved_by': 'CookieMonster',
+                'workspace_id': ws_id,
+                'workspace_name': record['name'],
+                'object_checksum': 0,
+                'object_size': len(data),
+                'object_metadata': record['metadata']
+                }
+        return info
+
+    def _make_info_tuple(self, record, ref):
+        """
+        obj_id objid, obj_name name,
+        type_string type, timestamp save_date,
+        int version, username saved_by,
+		ws_id wsid, ws_name workspace,
+		string chsum, int size,
+		usermeta meta
+        """
+        ver = '1'
+        return (self._get_oid(ref), record['name'],
+                record['type'], datetime.isoformat(datetime.now()),
+                record['type'] + '/' + ver, None,
+                ver, None
+                )
+    def _make_object(self, record, ref, data=None):
+        r = {
+            'data': data or record['data'],
+            'object_info': self._make_info(record, ref),
+            'provenance': [],
+            'creator': 'Gonzo',
+            'created': datetime.isocalendar(datetime.now()),
+            'refs': [],
+            'copied': '',
+            'copy_source_inaccessible': 0,
+            'extracted_ids': {},
+            'handle_error': '',
+            'handle_stacktrace': ''
+        }
+        return r
+
+    def _make_type_info(self, record):
+        r = {
+            'type_string': record['type'],
+            'description': 'This is type {}'.format(record['type']),
+            # 'spec_def': '',
+            # 'json_schema': '{}',
+            # 'parsing_structure': '{}',
+            # 'module_vers': [1],
+            # 'released_module_vers': [1],
+            # 'type_vers' : ['1'],
+            # 'released_type_vers': ['1'],
+            # 'using_func_defs': [],
+            # 'using_type_defs': [],
+            # 'used_type_defs': []
+        }
+        return r
+
 # translate_to_MD
 # copy_object
 # get_object_history
@@ -138,3 +221,4 @@ class WorkspaceMock(object):
 # list_referencing_objects
 # translate_to_MD
 #
+
