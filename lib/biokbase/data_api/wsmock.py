@@ -119,22 +119,12 @@ class WorkspaceMock(object):
         return self._make_type_info({'type': type_name})
 
     def list_referencing_objects(self, prm):
-
         result = []
         for refs in prm:
             ref = refs['ref']
             for record in self.collection.find({'ref': ref}):
                 r = self._make_info_tuple(record, ref)
                 result.append(r)
-            # "object_id": info_values[0],
-            # "object_name": info_values[1],
-            # "object_reference": "{0}/{1}".format(info_values[6],
-            #                                      info_values[0]),
-            # "object_reference_versioned": "{0}/{1}/{2}".format(info_values[6],
-            #                                                    info_values[0],
-            #                                                    info_values[4]),
-            # "type_string": info_values[2],
-            # "save_date": info_values[3],
         return result
 
     # ___ Internal methods ___
