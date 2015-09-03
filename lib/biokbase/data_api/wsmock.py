@@ -1,17 +1,5 @@
 """
-Workspack mocking without a real MongoDB, using the mongomock package.
-
-Input data should be a list of JSON objects (i.e. the outer
-delimiter should be "[ ]"), each in the following form:
-    {
-        "ref": "<object-reference>",
-        "type": "<workspace-type>",
-        "name": "<workspace-name>",
-        "metadata": { <object-metadata> },
-        "data": {
-            <object-data>
-        }
-    }
+Workspace mocking without a real MongoDB, using the mongomock package.
 
 Usage:
   mock = WorkspaceMock('/path/to/mock_data.json')
@@ -37,6 +25,22 @@ def inject_mock(api_instance, mock):
     return orig
 
 class WorkspaceMock(object):
+    """Mock object for KBase Workspace service.
+
+    You can use this in place of the biokbase.client.workspace.Workspace class.
+
+    To insulate from changes in the workspace storage format, the input
+    data is in a simplified and reduced schema. The input should be a list
+    of JSON ojects, separated by commas and bracketed by "[ ]" like a
+    normal JSON list. Each object should have these fields:
+        - ref (str): object reference like "123/4"
+        - type (str): Name of the type of this object, e.g. "FooType"
+        - name (str): Name of this workspace, e.g. "Workspace number 9",
+        - metadata (dict): Object metadata fields (whatever you want)
+        - links (list of str): List of references, each in the same form
+                               as the 'ref' field.
+        - data (dict): JSON object with the data (whatever you want)
+    """
     def __init__(self, file_or_path):
         # create mock client and collection
         self.client = mm.MongoClient()
@@ -52,12 +56,11 @@ class WorkspaceMock(object):
         # some internal state
         self._oids = {}
 
-    def _get_oid(self, ref):
-        if ref in self._oids:
-            return self._oids[ref]
-        n = len(self._oids)
-        self._oids[ref] = n + 1
-        return n
+    # Public methods
+
+    def copy_object(self, prm):
+        # do nothing
+        return
 
     def get_object_history(self, prm):
         return []
@@ -73,6 +76,9 @@ class WorkspaceMock(object):
         return []
 
     def get_object_subset(self, prm):
+        """Note: this is not efficient. It actually looks at
+        the whole object.
+        """
         # loop over each specified subset, and add all results
         # to a single list in `result`
         result = []
@@ -127,7 +133,17 @@ class WorkspaceMock(object):
                 result.append(r)
         return result
 
+    def translate_to_MD5_types(self, types):
+        return {k: 'md5_' + k for k in types}
+
     # ___ Internal methods ___
+
+    def _get_oid(self, ref):
+        if ref in self._oids:
+            return self._oids[ref]
+        n = len(self._oids)
+        self._oids[ref] = n + 1
+        return n
 
     def _make_info(self, record, ref):
         """Make and return a single 'info' section.
@@ -199,16 +215,4 @@ class WorkspaceMock(object):
             # 'used_type_defs': []
         }
         return r
-
-# translate_to_MD
-# copy_object
-# get_object_history
-# get_object_info_new
-# get_object_provenance
-# get_object_subset
-# get_objects
-# get_type_info
-# list_referencing_objects
-# translate_to_MD
-#
 
