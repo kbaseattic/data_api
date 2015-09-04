@@ -8,6 +8,8 @@ import logging
 
 from biokbase.data_api.core import ObjectAPI
 
+g_ws_mock = None  # if set, use `inject_mock(apiObject, g_ws_mock)`
+
 services = {
     "workspace_service_url": "https://ci.kbase.us/services/ws/",
     "shock_service_url": "https://ci.kbase.us/services/shock-api/",

@@ -83,10 +83,24 @@ class WorkspaceMock(object):
                                as the 'ref' field.
         - data (dict): JSON object with the data (whatever you want)
     """
-    def __init__(self, file_or_path):
+    def __init__(self, file_or_path=None):
+        """Create with optional initial file/path.
+        Additional files & paths are added with `put` method.
+        """
         # create mock client and collection
         self.client = mm.MongoClient()
         self.collection = self.client.db.collection
+        # some internal state
+        self._oids = {}
+        # optional initial path(s)
+        if file_or_path is not None:
+            self.put(file_or_path)
+
+    def put(self, file_or_path):
+        """Put data from a file or name of a file into the mock workspace.
+
+        See class documentation on format of input data.
+        """
         # open the input file
         if hasattr(file_or_path, 'read'):
             infile = file_or_path
@@ -95,8 +109,6 @@ class WorkspaceMock(object):
         # insert the file into mongomock
         for record in json.load(infile):
             self.collection.insert(record)
-        # some internal state
-        self._oids = {}
 
     # Public methods
 
