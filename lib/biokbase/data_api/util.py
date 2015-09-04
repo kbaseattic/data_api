@@ -30,7 +30,6 @@ DEFAULT_CONFIG = {
         'console': {
             'class': 'logging.StreamHandler',
             'formatter': 'basic',
-            'level': DEFAULT_LEVEL_NAME,
             'stream': 'ext://sys.stdout'
         }
     },

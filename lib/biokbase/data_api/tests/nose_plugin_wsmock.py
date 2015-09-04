@@ -6,7 +6,6 @@ all tests.
 
 # stdlib
 import glob
-import json
 import os; opj = os.path.join
 # third-party
 from nose.plugins import Plugin

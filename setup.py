@@ -37,7 +37,12 @@ config = {
                 "bin/data_api_demo.py", 
                 "bin/data_api_benchmark.py" , 
                 "bin/data_api_test_genome_annotation_api.py"],
-    "name": "genome_api"
+    "name": "genome_api",
+    "entry_points": {
+        'nose.plugins.0.10': [
+            'wsmock = biokbase.data_api.tests.nose_plugin_wsmock:UseWorkspaceMock'
+        ]
+    }
 }
 
 setuptools.setup(package_dir = {'': 'lib'},
