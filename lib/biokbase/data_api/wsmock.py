@@ -14,8 +14,14 @@ __date__ = '9/3/15'
 # Imports
 
 # Stdlib
+try:
+    import cStringIO as StringIO
+except:
+    import StringIO
 from datetime import datetime
 import json
+import os
+import re
 # Third-party
 import mongomock as mm
 
@@ -23,6 +29,43 @@ def inject_mock(api_instance, mock):
     orig = api_instance.ws_client
     api_instance.ws_client = mock
     return orig
+
+ws_url_template = 'https://{}.kbase.us/services/ws/'
+
+def workspace_to_mock(ref, workspace='narrative', token=None):
+    """Convert Workspace objects to the JSON format read by the
+    MongoDB mocking module.
+
+    Args:
+      ref (str): Workspace object reference e.g. '1019/4/1'
+      workspace (str): Name or full URL for workspace to contact
+                       'narrative' or 'ci' are recognized
+       token (str): KBase auth token
+    Return:
+       (dict) Object in the mock schema
+    """
+    from biokbase.workspace.client import Workspace
+    if re.match(r'https://.*', workspace):
+        url = workspace
+    else:
+        url = ws_url_template.format(workspace)
+    if token is None:
+        token = os.environ.get('KB_AUTH_TOKEN', '')
+        if not token:
+            raise ValueError('No `token` given and environment does not '
+                             'contain value for KB_AUTH_TOKEN')
+    ws = Workspace(url, token=token)
+    objlist = ws.get_objects([{'ref': ref}])
+    obj = objlist[0]
+    # convert to our schema
+    d = {'ref': ref,
+         'type': obj['info'][2],
+         'name': obj['info'][1],
+         'links': obj['refs'],
+         'data': obj['data'],
+         'metadata': obj['info'][10]
+         }
+    return d
 
 class WorkspaceMock(object):
     """Mock object for KBase Workspace service.
@@ -36,7 +79,6 @@ class WorkspaceMock(object):
         - ref (str): object reference like "123/4"
         - type (str): Name of the type of this object, e.g. "FooType"
         - name (str): Name of this workspace, e.g. "Workspace number 9",
-        - metadata (dict): Object metadata fields (whatever you want)
         - links (list of str): List of references, each in the same form
                                as the 'ref' field.
         - data (dict): JSON object with the data (whatever you want)
@@ -127,10 +169,13 @@ class WorkspaceMock(object):
     def list_referencing_objects(self, prm):
         result = []
         for refs in prm:
+            ref_result = []
             ref = refs['ref']
-            for record in self.collection.find({'ref': ref}):
-                r = self._make_info_tuple(record, ref)
-                result.append(r)
+            # find every record that refers to this one
+            for rfr in self.collection.find({'links': ref}):
+                info_tuple = self._make_info_tuple(rfr, rfr['ref'])
+                ref_result.append(info_tuple)
+            result.append(ref_result)
         return result
 
     def translate_to_MD5_types(self, types):

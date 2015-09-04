@@ -17,8 +17,9 @@ record_template = '''{{
         "ref": "{ref}",
         "type": "{type}",
         "name": "{name}",
-        "metadata": {{ }},
-        "data": {data}
+        "links": [ {links} ],
+        "data": {data},
+        "metadata": {{ }}
 }}'''
 
 def foo_datum(n):
@@ -43,15 +44,19 @@ def setup():
     infile = StringIO('[' + ',\n'.join([
         record_template.format(**kw) for kw in [
             {'ref': '10/1', 'type': 'Foo',
-             'name': 'first', 'data': foo_datum(1)},
+             'name': 'first', 'data': foo_datum(1),
+             'links': []},
             {'ref': '10/2', 'type': 'Foo',
-             'name': 'second', 'data': foo_datum(2)},
+              'name': 'second', 'data': foo_datum(2),
+             'links': ','.join(['"{}"'.format(r) for r in ['10/1']])},
         ]
     ]) + ']')
-    _mock = wsmock.WorkspaceMock(infile)
     # note: run nosetests with '-s' to see this
     #print("@@ input data:")
     #print(infile.getvalue())
+
+    _mock = wsmock.WorkspaceMock(infile)
+
 
 def test_get_object_history():
     # just make sure it doesn't crash.
@@ -67,7 +72,7 @@ def test_get_object_info_new():
 
 def test_get_object_provenance():
     # just make sure it doesn't crash.
-    _mock.get_object_provenance({'ref': '10/1'})
+    _mock.get_object_provenance([{'ref': '10/1'}])
 
 def test_get_object_subset():
     actors_1 = {'ref': '10/1', 'included': ['muppets.actors']}
@@ -103,4 +108,10 @@ def test_get_type_info():
 
 
 def test_list_referencing_objects():
-    pass
+    r = _mock.list_referencing_objects([{'ref': '10/1'}, {'ref': '10/2'}])
+    assert len(r) == 2
+    # second is refrring to first
+    assert len(r[0]) == 1
+    assert r[0][0][1] == 'second'
+    # nobody is referring to second
+    assert len(r[1]) == 0
