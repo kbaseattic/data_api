@@ -40,9 +40,10 @@ config = {
     "name": "genome_api",
     "entry_points": {
         'nose.plugins.0.10': [
-            'wsmock = biokbase.data_api.tests.nose_plugin_wsmock:UseWorkspaceMock'
+            'wsurl = biokbase.data_api.tests.nose_plugin_wsurl:WorkspaceURL'
         ]
-    }
+    },
+    "zip_safe": True
 }
 
 setuptools.setup(package_dir = {'': 'lib'},

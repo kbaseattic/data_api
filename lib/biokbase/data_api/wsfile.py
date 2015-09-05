@@ -2,8 +2,8 @@
 Workspace implemented over files, using the mongomock package.
 
 Usage:
-  mock = FileWorkspace('/path/to/mock_data.json')
-  # OR: mock = FileWorkspace(fileobj)
+  mock = WorkspaceFile('/path/to/mock_data.json')
+  # OR: mock = WorkspaceFile(fileobj)
   api = TaxonAPI( ... )
   inject_mock(api, mock)
   # run tests, as usual, on API class
@@ -30,7 +30,11 @@ from biokbase.data_api.util import get_logger
 
 # Logging
 
-_log = get_logger('wsmock')
+_log = get_logger('kbase.data_api.wsfile')
+
+# Globals
+
+NUMERIC_REF_PAT = re.compile('\d+/\d+(/\d+)?')
 
 # Functions and classes
 
@@ -60,18 +64,21 @@ def workspace_to_file(ref, workspace='narrative', token=None):
                              'contain value for KB_AUTH_TOKEN')
     ws = Workspace(url, token=token)
     objlist = ws.get_objects([{'ref': ref}])
-    obj = objlist[0]
+    obj, oi = objlist[0], objlist[0]['info']
+    canonical_ref = "{0}/{1}/{2}".format(oi[6], oi[0], oi[4])
     # convert to our schema
-    d = {'ref': ref,
-         'type': obj['info'][2],
-         'name': obj['info'][1],
+    d = {'ref': canonical_ref,
+         'type': oi[2],
+         'name': oi[1],
          'links': obj['refs'],
          'data': obj['data'],
-         'metadata': obj['info'][10]
+         'metadata': oi[10]
          }
+    _log.debug('workspace_to_file: returning record for: {}'
+               .format(canonical_ref))
     return d
 
-class FileWorkspace(object):
+class WorkspaceFile(object):
     """Mock object for KBase Workspace service.
 
     You can use this in place of the biokbase.client.workspace.Workspace class.
@@ -81,6 +88,7 @@ class FileWorkspace(object):
     of JSON ojects, separated by commas and bracketed by "[ ]" like a
     normal JSON list. Each object should have these fields:
         - ref (str): object reference like "123/4"
+        - ref_name (str): object reference like "PrototypeReferenceGenomes/kb|g.3157"
         - type (str): Name of the type of this object, e.g. "FooType"
         - name (str): Name of this workspace, e.g. "Workspace number 9",
         - links (list of str): List of references, each in the same form
@@ -90,9 +98,9 @@ class FileWorkspace(object):
 
     use_msgpack = True
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self):
         """Create new mock Workspace instance.
-        Additional files are added with the `put` method.
+        Additional files are added with the `load` method.
         """
         # create mock client and collection
         self.client = mm.MongoClient()
@@ -100,12 +108,11 @@ class FileWorkspace(object):
         # some internal state
         self._oids = {}
 
-    def put(self, file_or_path):
-        """Put data from a file or name of a file into the mock workspace.
+    def load(self, file_or_path):
+        """load data from a file or name of a file into the workspace.
 
         See class documentation on format of input data.
         """
-        #print('@@ put {} into workspace'.format(file_or_path))
         # open the input file
         if hasattr(file_or_path, 'read'):
             infile = file_or_path
@@ -127,8 +134,14 @@ class FileWorkspace(object):
 
     def get_object_info_new(self, prm):
         ref = prm['objects'][0]['ref']
+
+        #TODO: Replace all occurrences of this
+        #TODO: with an internal function that looks at both
+        #TODO: ref and ref_name and returns the union of the
+        #TODO: results.
+
         records = self.collection.find({'ref': ref})
-        result = [self._make_info(record, ref)
+        result = [self._make_info(record, record['ref'])
                   for record in records]
         return result
 
@@ -211,6 +224,7 @@ class FileWorkspace(object):
     def _make_info(self, record, ref):
         """Make and return a single 'info' section.
         """
+        assert re.match(NUMERIC_REF_PAT, ref)  # require numeric ref
         #print("@@ make_info from: {}".format(record))
         ws_id = int(ref.split('/')[0])
         oid = self._get_oid(ref)
@@ -240,6 +254,7 @@ class FileWorkspace(object):
 		string chsum, int size,
 		usermeta meta
         """
+        assert re.match(NUMERIC_REF_PAT, ref)  # require numeric ref
         ver = '1'
         return (self._get_oid(ref), record['name'],
                 record['type'], datetime.isoformat(datetime.now()),
@@ -247,12 +262,13 @@ class FileWorkspace(object):
                 ver, None
                 )
     def _make_object(self, record, ref, data=None):
+        canonical_ref = record['ref']
         r = {
             'data': data or record['data'],
-            'object_info': self._make_info(record, ref),
+            'object_info': self._make_info(record, canonical_ref),
             'provenance': [],
             'creator': 'Gonzo',
-            'created': datetime.isocalendar(datetime.now()),
+            'created': datetime.isoformat(datetime.now()),
             'refs': [],
             'copied': '',
             'copy_source_inaccessible': 0,

@@ -1,68 +1,62 @@
 """
-Nose testing plugin for turning on the Workspace mocking for
-all tests.
+Nose testing plugin for configuring Workspace URL during tests.
 """
 # Imports
 
 # stdlib
-import glob
 import os; opj = os.path.join
 # third-party
 from nose.plugins import Plugin
 # local
-from biokbase.data_api import wsmock
+from biokbase.data_api import core
 from biokbase.data_api.util import get_logger
 
 # Logging
 
-_log = get_logger('nose_plugin_wsmock')
+_log = get_logger('nose_plugin_wsurl')
 
 ##
 ## NOT TESTED!! WORK IN PROGRESS!!
 ##
 
-class UseFileWorkspace(Plugin):
+class WorkspaceURL(Plugin):
     """Plugin that sets up the Workspace mocking instead of the
     'real' workspace for all tests.
     """
     def options(self, parser, env):
         """Register commmandline options.
         """
+        # Shock URL
         parser.add_option(
-            "--wsmock", dest="wsmock_dir", metavar='DIR',
-            default=env.get('KB_MOCK_DIR'),
-             help="Use mock workspace, initialized with all "
-                  " files (ending in '.json' or '.msgpack', see "
-                  "--wsmock-msgpack option)"
-                  " at DIR [KB_MOCK_DIR]")
+            "--shock-url", dest="shock_url", metavar='URL',
+            default='https://ci.kbase.us/services/shock-api/',
+            help="Shock URL [%default]")
+        # Workspace URL (or path)
         parser.add_option(
-            "--wsmock-msgpack", dest="wsmock_msgpack",
-            action='store_true',
-            help="Look for .msgpack files instead of the "
-                 "default .json files. Of course, use msgpack to"
-                 "decode them instead of decoding them as JSON.")
+            "--ws-url", dest="ws_url", metavar='URL or PATH',
+            default='https://ci.kbase.us/services/ws/',
+             help="Workspace URL, which may be either a "
+                  "server address or directory path to indicate that "
+                  "tests should use the file-based workspace with "
+                  "all files in that path. [%default]")
+        # File workspace format (JSON or MessagePack)
+        parser.add_option(
+            "--wsfile-msgpack", dest="wsfile_msgpack",
+            action='store_true', default=False,
+            help="If the file-based workspace is being used, "
+                 "look for and decode MessagePack-formatted "
+                 "files ending in '.msgpack'. By default, look for "
+                 "JSON files ending in '.json'")
 
     def configure(self, options, conf):
         """Configure plugin.
         """
-        global g_ws_mock
         if not self.can_configure:
             return
-        if options.wsmock_dir:
-            mock = wsmock.WorkspaceMock()
-            if options.wsmock_msgpack:
-                ext = 'msgpack'
-                mock.use_msgpack = True
-            else:
-                ext = 'json'
-                mock.use_msgpack = False
-            input_files = glob.glob(opj(options.wsmock_dir, '*.' + ext))
-            if len(input_files) == 0:
-                raise ValueError('No .json files found for KBase Workspace '
-                                 'mock in path "{}"'.format(options.wsmock_dir))
-            for f in input_files:
-                _log.info('Unpack file "{}"'.format(f))
-                mock.put(f)
-            g_ws_mock = mock
-        self.enabled = g_ws_mock is not None
+        # Assign parsed values to global variables in the 'core' module.
+        core.g_ws_url = options.ws_url
+        core.g_shock_url = options.shock_url
+        core.g_use_msgpack = options.wsfile_msgpack
+        # Set instance state and return
+        self.enabled = True
         self.conf = conf
