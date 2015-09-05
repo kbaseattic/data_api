@@ -41,7 +41,7 @@ _mock = None
 def setup():
     global _mock
     print("Setting up mock DB")
-    infile = StringIO('[' + ',\n'.join([
+    infiles = map(StringIO,[
         record_template.format(**kw) for kw in [
             {'ref': '10/1', 'type': 'Foo',
              'name': 'first', 'data': foo_datum(1),
@@ -50,12 +50,14 @@ def setup():
               'name': 'second', 'data': foo_datum(2),
              'links': ','.join(['"{}"'.format(r) for r in ['10/1']])},
         ]
-    ]) + ']')
+    ])
     # note: run nosetests with '-s' to see this
     #print("@@ input data:")
     #print(infile.getvalue())
-
-    _mock = wsmock.WorkspaceMock(infile)
+    wsmock.WorkspaceMock.use_msgpack = False
+    _mock = wsmock.WorkspaceMock()
+    for json_data in infiles:
+        _mock.put(json_data)
 
 
 def test_get_object_history():

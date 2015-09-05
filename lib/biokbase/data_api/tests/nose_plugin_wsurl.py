@@ -10,7 +10,6 @@ import os; opj = os.path.join
 # third-party
 from nose.plugins import Plugin
 # local
-from biokbase.data_api.tests.shared import g_ws_mock
 from biokbase.data_api import wsmock
 from biokbase.data_api.util import get_logger
 
@@ -22,7 +21,7 @@ _log = get_logger('nose_plugin_wsmock')
 ## NOT TESTED!! WORK IN PROGRESS!!
 ##
 
-class UseWorkspaceMock(Plugin):
+class UseFileWorkspace(Plugin):
     """Plugin that sets up the Workspace mocking instead of the
     'real' workspace for all tests.
     """

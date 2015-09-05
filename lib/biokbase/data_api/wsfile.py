@@ -1,9 +1,9 @@
 """
-Workspace mocking without a real MongoDB, using the mongomock package.
+Workspace implemented over files, using the mongomock package.
 
 Usage:
-  mock = WorkspaceMock('/path/to/mock_data.json')
-  # OR: mock = WorkspaceMock(fileobj)
+  mock = FileWorkspace('/path/to/mock_data.json')
+  # OR: mock = FileWorkspace(fileobj)
   api = TaxonAPI( ... )
   inject_mock(api, mock)
   # run tests, as usual, on API class
@@ -34,16 +34,11 @@ _log = get_logger('wsmock')
 
 # Functions and classes
 
-def inject_mock(api_instance, mock):
-    orig = api_instance.ws_client
-    api_instance.ws_client = mock
-    return orig
-
 ws_url_template = 'https://{}.kbase.us/services/ws/'
 
-def workspace_to_mock(ref, workspace='narrative', token=None):
+def workspace_to_file(ref, workspace='narrative', token=None):
     """Convert Workspace objects to the JSON format read by the
-    MongoDB mocking module.
+    mongomock module.
 
     Args:
       ref (str): Workspace object reference e.g. '1019/4/1'
@@ -76,7 +71,7 @@ def workspace_to_mock(ref, workspace='narrative', token=None):
          }
     return d
 
-class WorkspaceMock(object):
+class FileWorkspace(object):
     """Mock object for KBase Workspace service.
 
     You can use this in place of the biokbase.client.workspace.Workspace class.
@@ -95,18 +90,15 @@ class WorkspaceMock(object):
 
     use_msgpack = True
 
-    def __init__(self, file_or_path=None):
-        """Create with optional initial file/path.
-        Additional files & paths are added with `put` method.
+    def __init__(self, *args, **kwargs):
+        """Create new mock Workspace instance.
+        Additional files are added with the `put` method.
         """
         # create mock client and collection
         self.client = mm.MongoClient()
         self.collection = self.client.db.collection
         # some internal state
         self._oids = {}
-        # optional initial path(s)
-        if file_or_path is not None:
-            self.put(file_or_path)
 
     def put(self, file_or_path):
         """Put data from a file or name of a file into the mock workspace.
