@@ -20,10 +20,19 @@ except:
     import StringIO
 from datetime import datetime
 import json
+import msgpack
 import os
 import re
 # Third-party
 import mongomock as mm
+# Local
+from biokbase.data_api.util import get_logger
+
+# Logging
+
+_log = get_logger('wsmock')
+
+# Functions and classes
 
 def inject_mock(api_instance, mock):
     orig = api_instance.ws_client
@@ -83,6 +92,9 @@ class WorkspaceMock(object):
                                as the 'ref' field.
         - data (dict): JSON object with the data (whatever you want)
     """
+
+    use_msgpack = True
+
     def __init__(self, file_or_path=None):
         """Create with optional initial file/path.
         Additional files & paths are added with `put` method.
@@ -101,13 +113,15 @@ class WorkspaceMock(object):
 
         See class documentation on format of input data.
         """
+        #print('@@ put {} into workspace'.format(file_or_path))
         # open the input file
         if hasattr(file_or_path, 'read'):
             infile = file_or_path
         else:
             infile = open(file_or_path)
         # insert the file into mongomock
-        for record in json.load(infile):
+        method = msgpack.load if self.use_msgpack else json.load
+        for record in method(infile):
             self.collection.insert(record)
 
     # Public methods
