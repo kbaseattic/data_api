@@ -83,7 +83,7 @@ class ObjectAPI(object):
             "includeMetadata": 0,
             "ignoreErrors": 0})
         if not info_values:
-            raise ValueError("Cannot load object: {}".format(self.ref))
+            raise ValueError("Cannot find object: {}".format(self.ref))
         oi = info_values[0]
 
         self._info = {

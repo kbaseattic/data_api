@@ -88,9 +88,8 @@ class WorkspaceFile(object):
     of JSON ojects, separated by commas and bracketed by "[ ]" like a
     normal JSON list. Each object should have these fields:
         - ref (str): object reference like "123/4"
-        - ref_name (str): object reference like "PrototypeReferenceGenomes/kb|g.3157"
         - type (str): Name of the type of this object, e.g. "FooType"
-        - name (str): Name of this workspace, e.g. "Workspace number 9",
+        - name (str): Name of this object, e.g. "PrototypeReferenceGenomes/kb|g.3157"
         - links (list of str): List of references, each in the same form
                                as the 'ref' field.
         - data (dict): JSON object with the data (whatever you want)
@@ -134,13 +133,7 @@ class WorkspaceFile(object):
 
     def get_object_info_new(self, prm):
         ref = prm['objects'][0]['ref']
-
-        #TODO: Replace all occurrences of this
-        #TODO: with an internal function that looks at both
-        #TODO: ref and ref_name and returns the union of the
-        #TODO: results.
-
-        records = self.collection.find({'ref': ref})
+        records = self._find_ref(ref)
         result = [self._make_info(record, record['ref'])
                   for record in records]
         return result
@@ -158,7 +151,7 @@ class WorkspaceFile(object):
         for subset in prm:
             ref, paths = subset['ref'], subset['included']
             # get matching records and data in the paths
-            records = self.collection.find({'ref': ref})
+            records = self._find_ref(ref)
             # add to result
             for r in records:
                 extracted = {} # all extracted paths
@@ -188,7 +181,7 @@ class WorkspaceFile(object):
         result = []
         for refs in prm:
             ref = refs['ref']
-            records = self.collection.find({'ref': ref})
+            records = self._find_ref(ref)
             #print("@@ GO, got records: {}".format(records))
             objects = [self._make_object(record, ref) for record in records]
             result.extend(objects)
@@ -294,4 +287,20 @@ class WorkspaceFile(object):
             # 'used_type_defs': []
         }
         return r
+
+    def _find_ref(self, ref):
+        """Find records by reference.
+
+        Args:
+          ref (str): numeric or named object reference
+        Returns:
+          list of records (may be an empty list)
+        """
+        records = list(self.collection.find({'ref': ref}))
+        # If nothing is returned, then try to look for the
+        # records by the name (unless the regex shows that it
+        # is definitely _not_ a name).
+        if len(records) == 0 and not NUMERIC_REF_PAT.match(ref):
+            records = list(self.collection.find({'name': ref}))
+        return records
 
