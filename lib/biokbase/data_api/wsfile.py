@@ -66,10 +66,11 @@ def workspace_to_file(ref, workspace='narrative', token=None):
     objlist = ws.get_objects([{'ref': ref}])
     obj, oi = objlist[0], objlist[0]['info']
     canonical_ref = "{0}/{1}/{2}".format(oi[6], oi[0], oi[4])
+    canonical_name = "{0}/{1}".format(oi[7], oi[1])
     # convert to our schema
     d = {'ref': canonical_ref,
          'type': oi[2],
-         'name': oi[1],
+         'name': canonical_name,
          'links': obj['refs'],
          'data': obj['data'],
          'metadata': oi[10]
@@ -120,6 +121,8 @@ class WorkspaceFile(object):
         # insert the file into mongomock
         method = msgpack.load if self.use_msgpack else json.load
         record = method(infile) # assume 1 record per file
+        print("@@ loading record. ref={} name={}"
+              .format(record['ref'], record['name']))
         self.collection.insert(record)
 
     # Public methods
@@ -134,7 +137,7 @@ class WorkspaceFile(object):
     def get_object_info_new(self, prm):
         ref = prm['objects'][0]['ref']
         records = self._find_ref(ref)
-        result = [self._make_info(record, record['ref'])
+        result = [self._make_info_tuple(record, record['ref'])
                   for record in records]
         return result
 
@@ -252,7 +255,8 @@ class WorkspaceFile(object):
         return (self._get_oid(ref), record['name'],
                 record['type'], datetime.isoformat(datetime.now()),
                 record['type'] + '/' + ver, None,
-                ver, None
+                ver, None,
+                '0', 0, {}
                 )
     def _make_object(self, record, ref, data=None):
         canonical_ref = record['ref']
@@ -301,6 +305,7 @@ class WorkspaceFile(object):
         # records by the name (unless the regex shows that it
         # is definitely _not_ a name).
         if len(records) == 0 and not NUMERIC_REF_PAT.match(ref):
+            print("@@ look by name for '{}'".format(ref))
             records = list(self.collection.find({'name': ref}))
         return records
 
