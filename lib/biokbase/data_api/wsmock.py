@@ -121,8 +121,8 @@ class WorkspaceMock(object):
             infile = open(file_or_path)
         # insert the file into mongomock
         method = msgpack.load if self.use_msgpack else json.load
-        for record in method(infile):
-            self.collection.insert(record)
+        record = method(infile) # assume 1 record per file
+        self.collection.insert(record)
 
     # Public methods
 
