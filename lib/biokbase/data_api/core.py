@@ -6,6 +6,7 @@ Module for base class for Data API objects.
 
 # Stdlib
 import glob
+import logging
 import os; opj = os.path.join
 import re
 try:
@@ -13,7 +14,7 @@ try:
 except ImportError:
     import StringIO as StringIO
 # Local
-from biokbase.data_api.util import get_logger
+from biokbase.data_api.util import get_logger, log_start, log_end
 from biokbase.workspace.client import Workspace
 from biokbase.data_api.wsfile import WorkspaceFile
 
@@ -71,10 +72,10 @@ class ObjectAPI(object):
 
         ws_url = services["workspace_service_url"]
         if '://' in ws_url: # assume a real Workspace server
-            _log.info('Connect to Workspace service at {}'.format(ws_url))
+            _log.debug('Connect to Workspace service at {}'.format(ws_url))
             self.ws_client = Workspace(ws_url, token=get_token())
         else:
-            _log.info('Load from Workspace file at {}'.format(ws_url))
+            _log.debug('Load from Workspace file at {}'.format(ws_url))
             self.ws_client = self._init_ws_from_files(ws_url)
         self.ref = ref
 
@@ -123,8 +124,11 @@ class ObjectAPI(object):
                              'in path "{}"'.format(ext, path))
         client = WorkspaceFile()
         for f in input_files:
-            _log.info('Loading file: {}'.format(f))
+            #t0 = log_start(_log, 'client.load', level=logging.DEBUG,
+            #               kvp={'file': f})
             client.load(f)
+            #log_end(_log, t0, 'client.load', level=logging.DEBUG,
+            #        kvp={'file': f})
         return client
 
     def get_schema(self):

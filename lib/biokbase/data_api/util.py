@@ -24,13 +24,14 @@ DEFAULT_LEVEL_NAME = logging.getLevelName(DEFAULT_LEVEL)
 DEFAULT_CONFIG = {
     'version': 1,
     'formatters': {
-        'basic': { 'format': '%(message)s' }
+        'basic': { 'format': '[%(levelname)s] (%(name)s) %(message)s' }
     },
     'handlers': {
         'console': {
             'class': 'logging.StreamHandler',
             'formatter': 'basic',
-            'stream': 'ext://sys.stdout'
+            'stream': 'ext://sys.stdout',
+            'level': DEFAULT_LEVEL_NAME
         }
     },
     'root': {

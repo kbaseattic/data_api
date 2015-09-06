@@ -12,16 +12,18 @@ _log = logging.getLogger(__name__)
 
 genome = "PrototypeReferenceGenomes/kb|g.3899"
 
+services = {}
+
 def setup():
+    global services
     shared.setup()
+    services = shared.get_services()
 
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
 def test_get_cds_by_mrna():
-    """Testing Genome Annotation API"""
-
     _log.info("Fetching CDS by kb|g.3899.mRNA.0, kb|g.3899.mRNA.2066, kb|g.3899.mRNA.99999999999, kb|g.3899.CDS.1")
 
-    ci_genome_annotation_api = GenomeAnnotationAPI(services=shared.services,
+    ci_genome_annotation_api = GenomeAnnotationAPI(services=services,
                                                    ref=genome)
     #last 2 in list are purposely invalid
     subset_features = ci_genome_annotation_api.get_cds_by_mrna(["kb|g.3899.mRNA.0","kb|g.3899.mRNA.2066", "kb|g.3899.mRNA.99999999999", "kb|g.3899.CDS.1"]) 
@@ -31,9 +33,8 @@ def test_get_cds_by_mrna():
 
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
 def test_get_mrna_by_cds():
-    """Testing Genome Annotation API"""
-    print "Fetching mRNA by kb|g.3899.CDS.61899, kb|g.3899.CDS.63658, kb|g.3899.mRNA.99999999999, kb|g.3899.CDS.1" 
-    ci_genome_annotation_api = GenomeAnnotationAPI(services=shared.services,
+    print "Fetching mRNA by kb|g.3899.CDS.61899, kb|g.3899.CDS.63658, kb|g.3899.mRNA.99999999999, kb|g.3899.CDS.1"
+    ci_genome_annotation_api = GenomeAnnotationAPI(services=services,
                                                    ref=genome)
     #last 2 in list are purposely invalid
     subset_features = ci_genome_annotation_api.get_mrna_by_cds(["kb|g.3899.CDS.36740","kb|g.3899.CDS.36739", "kb|g.3899.mRNA.99999999999", "kb|g.3899.CDS.1"]) 
@@ -42,10 +43,8 @@ def test_get_mrna_by_cds():
 
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
 def test_get_gene_by_mrna():
-    """Testing Genome Annotation API"""
-    print "Fetching genes by kb|g.3899.mRNA.0, kb|g.3899.mRNA.2066, kb|g.3899.mRNA.99999999999, kb|g.3899.CDS.1" 
-
-    ci_genome_annotation_api = GenomeAnnotationAPI(services=shared.services,
+    print "Fetching genes by kb|g.3899.mRNA.0, kb|g.3899.mRNA.2066, kb|g.3899.mRNA.99999999999, kb|g.3899.CDS.1"
+    ci_genome_annotation_api = GenomeAnnotationAPI(services=services,
                                                    ref=genome)
     #last 2 in list are purposely invalid
     subset_features = ci_genome_annotation_api.get_gene_by_mrna(["kb|g.3899.mRNA.0","kb|g.3899.mRNA.2066", "kb|g.3899.mRNA.99999999999", "kb|g.3899.CDS.1"]) 
@@ -54,10 +53,8 @@ def test_get_gene_by_mrna():
 
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
 def test_get_cds_by_gene():
-    """Testing Genome Annotation API"""
-    print "Fetching CDS by gene kb|g.3899.locus.26937,kb|g.3899.locus.26761, kb|g.3899.mRNA.99999999999, kb|g.3899.CDS.1" 
-
-    ci_genome_annotation_api = GenomeAnnotationAPI(services=shared.services, ref=genome)
+    print "Fetching CDS by gene kb|g.3899.locus.26937,kb|g.3899.locus.26761, kb|g.3899.mRNA.99999999999, kb|g.3899.CDS.1"
+    ci_genome_annotation_api = GenomeAnnotationAPI(services=services, ref=genome)
     #last 2 in list are purposely invalid
     subset_features = ci_genome_annotation_api.get_cds_by_gene(["kb|g.3899.locus.26937","kb|g.3899.locus.26761", "kb|g.3899.mRNA.99999999999", "kb|g.3899.CDS.1"]) 
     print subset_features 
@@ -65,10 +62,8 @@ def test_get_cds_by_gene():
 
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
 def test_get_mrna_by_gene():
-    """Testing Genome Annotation API"""
-    print "Fetching mRNA by gene kb|g.3899.locus.26937, kb|g.3899.locus.26761, kb|g.3899.mRNA.99999999999, kb|g.3899.CDS.1" 
-
-    ci_genome_annotation_api = GenomeAnnotationAPI(services=shared.services, ref=genome)
+    print "Fetching mRNA by gene kb|g.3899.locus.26937, kb|g.3899.locus.26761, kb|g.3899.mRNA.99999999999, kb|g.3899.CDS.1"
+    ci_genome_annotation_api = GenomeAnnotationAPI(services=services, ref=genome)
     #last 2 in list are purposely invalid
     subset_features = ci_genome_annotation_api.get_mrna_by_gene(["kb|g.3899.locus.26937","kb|g.3899.locus.26761", "kb|g.3899.mRNA.99999999999", "kb|g.3899.CDS.1"]) 
     print subset_features 
@@ -76,11 +71,8 @@ def test_get_mrna_by_gene():
 
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
 def test_get_gene_by_cds():
-    """Testing Genome Annotation API"""
-    print "Fetching genes by kb|g.3899.CDS.61899, kb|g.3899.CDS.63658, kb|g.3899.mRNA.99999999999, kb|g.3899.CDS.1" 
- 
-
-    ci_genome_annotation_api = GenomeAnnotationAPI(services=shared.services, ref=genome)
+    print "Fetching genes by kb|g.3899.CDS.61899, kb|g.3899.CDS.63658, kb|g.3899.mRNA.99999999999, kb|g.3899.CDS.1"
+    ci_genome_annotation_api = GenomeAnnotationAPI(services=services, ref=genome)
     #last 2 in list are purposely invalid
     subset_features = ci_genome_annotation_api.get_gene_by_cds(["kb|g.3899.CDS.36740","kb|g.3899.CDS.36739", "kb|g.3899.mRNA.99999999999", "kb|g.3899.CDS.1"]) 
     print subset_features 
