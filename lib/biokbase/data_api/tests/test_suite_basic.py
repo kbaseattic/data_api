@@ -13,6 +13,15 @@ _log = logging.getLogger(__name__)
 
 services = {}
 
+workspaces = {
+    '3157': {
+        'gene': 'PrototypeReferenceGenomes/kb|g.3157',
+        'features': 'PrototypeReferenceGenomes/kb|g.3157.peg.0',
+        'contigs': 'PrototypeReferenceGenomes/kb|g.3157.c.0'
+    }
+}
+shared.determine_can_connect(workspaces)
+
 def setup():
     shared.setup()
     services.update(shared.get_services())
@@ -20,9 +29,10 @@ def setup():
 def teardown():
     shared.teardown()
 
-@skipUnless(shared.can_connect(), 'Cannot connect to workspace')
+_ws = workspaces['3157']
+
+@skipUnless(_ws['gene'] and _ws['contigs'], shared.connect_fail)
 def test_assembly_api():
-    """Testing Assembly API"""
     _log.debug("Fetching kb|g.3157.c.0")
     ci_assembly_api = AssemblyAPI(services=services,
                                   ref=shared.genome + "_assembly")
@@ -30,9 +40,8 @@ def test_assembly_api():
     _log.debug("Got contigs: {}".format(subset_contigs))
     assert len(subset_contigs) == 1
 
-@skipUnless(shared.can_connect(), 'Cannot connect to workspace')
+@skipUnless(_ws['gene'] and _ws['features'], shared.connect_fail)
 def test_genome_annotation_api():
-    """Testing Genome Annotation API"""
     _log.debug("Fetching kb|g.3157.peg.0")
     ci_genome_annotation_api = GenomeAnnotationAPI(services=services,
                                                    ref=shared.genome)
@@ -40,9 +49,8 @@ def test_genome_annotation_api():
     print subset_features
     assert len(subset_features) == 1
 
-@skipUnless(shared.can_connect(), 'Cannot connect to workspace')
+@skipUnless(_ws['gene'], shared.connect_fail)
 def test_taxon_api():
-    """Testing Taxon API"""
     _log.debug("Fetching taxon for kb|g.3157")
     ci_taxon_api = GenomeAnnotationAPI(services=services,
                                        ref=shared.genome).get_taxon()
