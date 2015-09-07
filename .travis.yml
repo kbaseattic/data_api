@@ -11,7 +11,7 @@ install:
 script:
   - cd lib
   - touch .coverage
-  - nosetests --with-coverage --cover-package=data_api --ws-url=test_data  --wsfile-msgpack
+  - nosetests --with-coverage --cover-inclusive --cover-package=data_api --ws-url=test_data  --wsfile-msgpack
   - cd ..
 
 #after_success:
