@@ -137,7 +137,11 @@ class WorkspaceFile(object):
             infile = open(file_or_path)
         # insert the file into mongomock
         method = msgpack.load if self.use_msgpack else json.load
-        record = FileObjectCache(method).get(infile, infile)
+        try:
+            record = FileObjectCache(method).get(infile, infile)
+        except TypeError as err:
+            raise ValueError("Bad type for input file {}: {}"
+                             .format(infile, err))
         #t0 = log_start(_log, 'collection.insert', level=logging.DEBUG,
         #               kvp={'file': infile})
         self.collection.insert(record)
@@ -179,20 +183,23 @@ class WorkspaceFile(object):
                 extracted = {} # all extracted paths
                 d = r['data'] # alias
                 for p in paths:
-                    parts = p.split('/')
-                    for part in parts[:-1]:
+                    parts, found = p.split('/'), True
+                    # Look for value matching path in 'd'
+                    for part in parts:
                         if d.has_key(part):
                             d = d[part]
                         else:
-                            d = {}
+                            found = False
                             break
-                    if d:
-                        e = extracted
+                    # If we got a value at the leaf (which is now
+                    # in 'd'), then add the path and value to '(e)xtracted'
+                    if found:
+                        e = extracted # alias
                         for part in parts[:-1]:
                             if part not in e:
-                                e[part] = {}
-                            e = e[part]
-                        e[parts[-1]] = d[parts[-1]]
+                                e[part] = {} # create new empty container
+                            e = e[part] # descend
+                        e[parts[-1]] = d
                 if extracted:
                     #print("@@ add extracted: {}".format(extracted))
                     obj = self._make_object(r, ref, data=extracted)
@@ -268,13 +275,13 @@ class WorkspaceFile(object):
         return info
 
     def _make_info_tuple(self, record, ref):
-        """
-        obj_id objid, obj_name name,
-        type_string type, timestamp save_date,
-        int version, username saved_by,
-		ws_id wsid, ws_name workspace,
-		string chsum, int size,
-		usermeta meta
+        """Make the object_info type tuple:
+
+        0: obj_id objid, 1: obj_name name,
+        2: type_string type, 3: timestamp save_date,
+        4: int version, 5: username saved_by,
+		6: ws_id wsid, 7: ws_name workspace,
+		8: string chsum, 9: int size, 10: usermeta meta
         """
         assert re.match(NUMERIC_REF_PAT, ref)  # require numeric ref
         ver = '1'
@@ -361,6 +368,11 @@ class FileObjectCache(object):
         """
         if hasattr(path, 'name'):  # file object
             path = path.name
+        elif not isinstance(path, basestring):
+            import StringIO
+            if isinstance(path, StringIO.StringIO):
+                return self.method(*args, **kwargs)
+            raise TypeError('Not string, file, or StringIO.StringIO')
         # construct key with path and modif. time
         mtime = os.path.getmtime(path)
         key = '{}--{}'.format(path, mtime)

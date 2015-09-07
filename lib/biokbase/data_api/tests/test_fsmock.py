@@ -11,7 +11,7 @@ import json
 from StringIO import StringIO
 # third-party
 # local
-from biokbase.data_api import wsmock
+from biokbase.data_api import wsfile
 
 record_template = '''{{
         "ref": "{ref}",
@@ -54,10 +54,10 @@ def setup():
     # note: run nosetests with '-s' to see this
     #print("@@ input data:")
     #print(infile.getvalue())
-    wsmock.WorkspaceMock.use_msgpack = False
-    _mock = wsmock.WorkspaceMock()
+    wsfile.WorkspaceFile.use_msgpack = False
+    _mock = wsfile.WorkspaceFile()
     for json_data in infiles:
-        _mock.put(json_data)
+        _mock.load(json_data)
 
 
 def test_get_object_history():
@@ -69,24 +69,25 @@ def test_get_object_info_new():
     assert len(r) == 1
     obj = r[0]
     #print("@@ get_oin-obj: {}".format(obj))
-    assert obj['workspace_name'] == 'first'
-    assert obj['type_string'] == 'Foo'
+    assert obj[1] == 'first'
+    assert obj[2] == 'Foo'
 
 def test_get_object_provenance():
     # just make sure it doesn't crash.
     _mock.get_object_provenance([{'ref': '10/1'}])
 
 def test_get_object_subset():
-    actors_1 = {'ref': '10/1', 'included': ['muppets.actors']}
+    actors_1 = {'ref': '10/1', 'included': ['muppets/actors']}
     r = _mock.get_object_subset([actors_1])
     assert len(r) == 1
     obj = r[0]['data']
     #print("@@ get_os-obj: {}".format(obj))
     assert 'muppets' in obj
     assert 'actors' in obj['muppets']
+    assert obj['muppets']['actors']['kermit'] == 'Jim Henson'
     assert 'colors' not in obj['muppets']
     # try again, this time with 2
-    actors_2 = {'ref': '10/2', 'included': ['muppets.actors']}
+    actors_2 = {'ref': '10/2', 'included': ['muppets/actors']}
     r = _mock.get_object_subset([actors_1, actors_2])
     assert len(r) == 2
     for obj in r:
