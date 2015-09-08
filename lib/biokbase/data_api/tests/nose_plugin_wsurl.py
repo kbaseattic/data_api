@@ -15,10 +15,6 @@ from biokbase.data_api.util import get_logger
 
 _log = get_logger('nose_plugin_wsurl')
 
-##
-## NOT TESTED!! WORK IN PROGRESS!!
-##
-
 class WorkspaceURL(Plugin):
     """Plugin that sets up the Workspace mocking instead of the
     'real' workspace for all tests.
