@@ -13,6 +13,6 @@ Sphinx<=1.2.99
 sphinxcontrib-napoleon>=0.3.0
 thrift==0.9.2
 
-#matplotlib==1.4.3
+#matplotlib>=1.4.3
 #bokeh==0.9.2
 #seaborn==0.6.0
