@@ -405,8 +405,10 @@ html_theme_options.update({
     'github_banner': True,
     'github_user': 'kbase',
     'github_repo': 'data_api',
-    'font_family': 'Arial',
-    'head_font_family': 'Arial'
+    'font_family': 'Helvetica Neue, Helvetica, Arial, sans-serif',
+    'head_font_family': 'Helvetica Neue, Helvetica, Arial, sans-serif',
+    'body_text': '#000',
+    'link': '#337AB7'
 # 'gray_1': '#f33',
 # gray_2: Light gray.
 # gray_3: Medium gray.

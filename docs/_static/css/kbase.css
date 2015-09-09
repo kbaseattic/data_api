@@ -1,0 +1,107 @@
+/* KBase documentation CSS */
+a {
+    text-decoration: none;
+}
+/* make text a little less humongous */
+div.body h1  {
+    font-size: 180%;
+}
+
+div.body h2 {
+    font-size: 160%;
+}
+
+div.body h3 {
+    font-size: 140%;
+}
+
+div.body h4 {
+    font-size: 120%;
+}
+h1,h2,h3,h4,h5 {
+    color: #6B844B;
+}
+/*
+ * Copied from kbase.us
+ */
+.sticky-footer, .sticky-push {
+    height: 80px;
+}
+
+.sticky-push {
+    margin-top: 1em;
+}
+
+.sticky-footer {
+    position: relative;
+}
+
+.footer {
+    background-color: #e6e6e6;
+    border-top: 2px solid #999;
+    padding: 20px 0;
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+}
+
+.kbase-footer {
+    background-color: #e6e6e6;
+    border-top: 2px #999 solid;
+    bottom: 0;
+}
+
+.kbase-footer-menu .menu-item {
+    vertical-align: middle;
+    line-height: 42px;
+    margin: 0;
+}
+
+.footer-bar {
+    text-align: center;
+    vertical-align: middle;
+    line-height: 42px;
+}
+
+.footer-sep {
+    position: relative;
+    top: -2px;
+
+}
+
+.footer-sep::before {
+    content: "▰";
+    color: silver;
+
+    font-size: 80%;
+}
+
+.kbase-footer > .row {
+    margin-top: 12px;
+}
+
+.kbase-footer ul {
+    line-height: 1.3em;
+    padding-left: 1.3em;
+    margin: 0 0 0.5em 0;
+}
+
+.kbase-footer ul li {
+    margin-bottom: 0.4em;
+    list-style-type: none;
+}
+
+.kbase-footer-menu {
+    display: inline-block;
+}
+
+.kbase-footer-menu ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: inline-block;
+}
+
+.kbase-footer-menu ul li {
+    display: inline-block;
+}
