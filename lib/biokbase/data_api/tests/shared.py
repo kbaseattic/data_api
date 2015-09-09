@@ -36,7 +36,7 @@ def can_connect(ref=genome):
     try:
         _ = ObjectAPI(services=get_services(), ref=ref)
     except Exception as err:
-        #_log.exception(e)
+        _log.exception(err)
         _log.warn('Connect and fetch object failed: {}'.format(err))
         return False
     return True
@@ -52,6 +52,8 @@ def determine_can_connect(workspaces):
     for num in workspaces:
         all_objects = True
         for ref in workspaces[num]:
+            if isinstance(bool, workspaces[num][ref]):
+                continue # skip, already determined
             ok = can_connect(workspaces[num][ref])
             workspaces[num][ref] = ok
             all_objects = all_objects and ref

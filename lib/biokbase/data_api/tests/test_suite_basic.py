@@ -20,11 +20,11 @@ workspaces = {
         'contigs': 'PrototypeReferenceGenomes/kb|g.3157.c.0'
     }
 }
-shared.determine_can_connect(workspaces)
 
 def setup():
     shared.setup()
     services.update(shared.get_services())
+    shared.determine_can_connect(workspaces)
 
 def teardown():
     shared.teardown()
