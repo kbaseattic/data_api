@@ -28,7 +28,6 @@ config = {
                  "biokbase.data_api.annotation",
                  "biokbase.data_api.sequence",
                  "biokbase.data_api.taxonomy",
-                 "biokbase.data_api.genome",
                  "biokbase.data_api.baseobj",
                  "biokbase.data_api.tests",
                  "biokbase.data_api.tests.performance",
@@ -37,7 +36,13 @@ config = {
                 "bin/data_api_demo.py", 
                 "bin/data_api_benchmark.py" , 
                 "bin/data_api_test_genome_annotation_api.py"],
-    "name": "genome_api"
+    "name": "genome_api",
+    "entry_points": {
+        'nose.plugins.0.10': [
+            'wsurl = biokbase.data_api.tests.nose_plugin_wsurl:WorkspaceURL'
+        ]
+    },
+    "zip_safe": True
 }
 
 setuptools.setup(package_dir = {'': 'lib'},
