@@ -1,11 +1,11 @@
 {% extends "!layout.html" %}
 {% block linktags %}
-<link rel="stylesheet" href="_static/css/boostrap.min.css" type="text/css">
+<link rel="stylesheet" href="_static/css/bootstrap.min.css" type="text/css">
 <link rel="stylesheet" href="_static/css/kbase.css" type="text/css">
 {{ super }}
 {% endblock %}
 {% block footer %}
-<div class="container-fluid sticky-footer kbase-footer">
+<div class="container-fluid kbase-footer">
     <div class="row">
         <div class="col-md-12">
             <div class="footer-bar">
@@ -49,4 +49,5 @@
         </div>
     </div>
 </div>
+{{ super }}
 {% endblock %}

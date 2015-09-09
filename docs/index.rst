@@ -3,21 +3,15 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
+.. toctree::
+    :maxdepth: 2
+
+    API Reference <biokbase>
+
 KBase Data API documentation
 ============================
 The Data API provides a unified entry point to retrieve and, eventually,
 store KBase data objects.
-
-
-.. contents:: On this page
-    :depth: 2
-
-API Reference
--------------
-.. toctree::
-    :maxdepth: 2
-
-    biokbase.data_api
 
 Using the Data API
 ==================
