@@ -6,6 +6,7 @@
 .. toctree::
     :maxdepth: 2
 
+    create_api
     API Reference <biokbase>
 
 KBase Data API documentation
