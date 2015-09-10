@@ -52,7 +52,7 @@ def determine_can_connect(workspaces):
     for num in workspaces:
         all_objects = True
         for ref in workspaces[num]:
-            if isinstance(bool, workspaces[num][ref]):
+            if isinstance(workspaces[num][ref], bool):
                 continue # skip, already determined
             ok = can_connect(workspaces[num][ref])
             workspaces[num][ref] = ok
