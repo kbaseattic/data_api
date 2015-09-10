@@ -7,7 +7,7 @@
     :maxdepth: 4
 
     create_api
-    API Reference <modules>
+    API Reference <_source/modules>
 
 KBase Data API documentation
 ============================
@@ -29,11 +29,13 @@ components of KBase is below::
     |     Workspace/Datastores    |
     +-----------------------------+
     
+Here we see that the Data API library is called by Services or Narrative code cells (via the backend Jupyter/IPython kernel), and communicates with the underlying data stores on behalf of its clients.
 
 Using the Data API
 ==================
 
-There are two primary modes of using the Data API: interactively and programmatically.
+There are two primary modes of using the Data API: interactively, as in the Narrative UI or
+Jupyter noteboook, and programmatically, as from an installed service.
 Interactively, the API can be imported into in the IPython/Jupyter notebook or
 Narrative and used to explore and examine data objects.
 Results will be automatically displayed as HTML and inline plots. Programmatically,

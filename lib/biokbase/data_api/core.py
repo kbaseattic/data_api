@@ -40,16 +40,25 @@ def get_token():
             "Missing authentication token!  Set KB_AUTH_TOKEN environment variable.")
 
 class ObjectAPI(object):
-    """Generic Object API for basic properties and actions
-       of a KBase Data Object.
+    """
+    Generic Object API for basic properties and actions
+    of a KBase Data Object.
+    
+    In general, users will not instantiate this object directly, but instead
+    they will create a biology-specific object like `TaxonAPI` or
+    `GenomeAnnotationAPI`. However, methods in this class may be used to get
+    basic shared properties like provenance or metadata.
+    
+    If you find yourself using some form of :meth:`get_data` or :meth:`get_data_subset` frequently, 
+    you should consider wrapping those calls in a higher-level method that is
+    specific to the kind of data you want. 
     """
     def __init__(self, services=None, ref=None):
         """Create new object.
-
+ 
         Args:
           services (dict): Service configuration dictionary. Required keys:
-              * workspace_service_url: URL for Workspace, such as
-                                       `https://ci.kbase.us/services/ws/`
+              * workspace_service_url: URL for Workspace, such as `https://ci.kbase.us/services/ws/`
           ref (str): Object reference, which can be the name of the object
              (although this is not unique), or a numeric identifier in the
              format `A/B[/C]` where A is the number of the workspace, B is the
