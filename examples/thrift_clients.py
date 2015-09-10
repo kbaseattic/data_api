@@ -17,9 +17,9 @@ from thrift.transport import TSocket
 from thrift.transport import TTransport
 from thrift.protocol import TBinaryProtocol
 # Local
-from biokbase.data_api.baseobj import thrift_service
-from biokbase.data_api.baseobj.ttypes import *
-from biokbase.data_api.baseobj.api import ObjectAPI
+from doekbase.data_api.baseobj import thrift_service
+from doekbase.data_api.baseobj.ttypes import *
+from doekbase.data_api.baseobj.api import ObjectAPI
 
 def connect(host='localhost', port=9090):
     client = None
