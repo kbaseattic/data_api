@@ -15,8 +15,10 @@ If you want to get a 'live preview' of Sphinx docs as you edit the `.rst` files,
 
     pip install sphinx-autobuild 
     
-Then, every time you want to edit the documentation, first run this command:
+Then, every time you want to edit the documentation, first run this command (from within the `docs` sub-directory):
 
-    sphinx-autobuild . _build/html 
+    sphinx-autobuild  -z ../lib/biokbase/data_api . _build/html 
     
-Then open the URL http://127.0.0.1:8000 on your browser. Every time you save a change to a file it will automatically rebuild the docs and update the web pages.
+The `-z` option tells autobuild to also watch the source code for changes.
+    
+Then open the URL http://127.0.0.1:8000 on your browser. Every time you save a change to a file, whether a Sphinx `.rst` file or some Python source code, it will automatically rebuild the docs and update the web pages.
