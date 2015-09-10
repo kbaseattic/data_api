@@ -32,7 +32,6 @@ workspaces = {
         'cds': 'PrototypeReferenceGenomes/kb|g.3157_feature_container_CDS'
     }
 }
-shared.determine_can_connect(workspaces)
 
 # Some purposely invalid object IDs
 bad_obj = ['kb|g.3899.mRNA.99999999999', 'kb|g.3899.CDS.1']
@@ -67,6 +66,7 @@ def setup():
     global services
     shared.setup()
     services = shared.get_services()
+    shared.determine_can_connect(workspaces)
 
 # Tests
 

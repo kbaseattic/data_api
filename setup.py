@@ -35,7 +35,8 @@ config = {
     "scripts": ["bin/data_api_test_basic.py", 
                 "bin/data_api_demo.py", 
                 "bin/data_api_benchmark.py" , 
-                "bin/data_api_test_genome_annotation_api.py"],
+                "bin/data_api_test_genome_annotation_api.py",
+                "bin/dump_wsfile"],
     "name": "genome_api",
     "entry_points": {
         'nose.plugins.0.10': [
