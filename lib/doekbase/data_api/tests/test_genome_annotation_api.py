@@ -14,10 +14,14 @@ _log = logging.getLogger(__name__)
 
 genome_new = "PrototypeReferenceGenomes/kb|g.166819"
 genome_old = "OriginalReferenceGenomes/kb|g.166819"
-
+t_new = None
+t_old = None
 
 def setup():
     shared.setup()
+    global t_new, t_old
+    t_new = GenomeAnnotationAPI(shared.services, shared.token, genome_new)
+    t_old = GenomeAnnotationAPI(shared.services, shared.token, genome_old)
 
 
 ######## New Genome type tests
@@ -26,8 +30,7 @@ def setup():
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
 def test_get_taxon_new():
     _log.info("Input {}".format(genome_new))
-    t = GenomeAnnotationAPI(shared.services, shared.token, genome_new)
-    taxon = t.get_taxon()
+    taxon = t_new.get_taxon()
     _log.info("Output {}".format(taxon))
     assert isinstance(taxon, TaxonAPI)
 
@@ -35,8 +38,7 @@ def test_get_taxon_new():
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
 def test_get_assembly_new():
     _log.info("Input {}".format(genome_new))
-    t = GenomeAnnotationAPI(shared.services, shared.token, genome_new)
-    assembly = t.get_assembly()
+    assembly = t_new.get_assembly()
     _log.info("Output {}".format(assembly))
     assert isinstance(assembly, AssemblyAPI)
 
@@ -44,8 +46,7 @@ def test_get_assembly_new():
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
 def test_get_feature_types_new():
     _log.info("Input {}".format(genome_new))
-    t = GenomeAnnotationAPI(shared.services, shared.token, genome_new)
-    feature_types = t.get_feature_types()
+    feature_types = t_new.get_feature_types()
     _log.info("Output {}".format(feature_types))
     assert isinstance(feature_types, list)
 
@@ -53,8 +54,7 @@ def test_get_feature_types_new():
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
 def test_get_feature_type_descriptions_new():
     _log.info("Input {}".format(genome_new))
-    t = GenomeAnnotationAPI(shared.services, shared.token, genome_new)
-    feature_type_descriptions = t.get_feature_type_descriptions()
+    feature_type_descriptions = t_new.get_feature_type_descriptions()
     _log.info("Output {}".format(feature_type_descriptions))
     assert isinstance(feature_type_descriptions, dict)
 
@@ -62,8 +62,7 @@ def test_get_feature_type_descriptions_new():
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
 def test_get_feature_ids_new():
     _log.info("Input {}".format(genome_new))
-    t = GenomeAnnotationAPI(shared.services, shared.token, genome_new)
-    feature_ids = t.get_feature_ids()
+    feature_ids = t_new.get_feature_ids()
     _log.info("Output {}".format(type(feature_ids)))
     assert isinstance(feature_ids, dict)
 
@@ -71,8 +70,7 @@ def test_get_feature_ids_new():
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
 def test_get_feature_type_counts_new():
     _log.info("Input {}".format(genome_new))
-    t = GenomeAnnotationAPI(shared.services, shared.token, genome_new)
-    feature_type_counts = t.get_feature_type_counts()
+    feature_type_counts = t_new.get_feature_type_counts()
     _log.info("Output {}".format(feature_type_counts))
     assert isinstance(feature_type_counts, dict)
 
@@ -80,8 +78,7 @@ def test_get_feature_type_counts_new():
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
 def test_get_feature_locations_new():
     _log.info("Input {}".format(genome_new))
-    t = GenomeAnnotationAPI(shared.services, shared.token, genome_new)
-    feature_locations = t.get_feature_locations()
+    feature_locations = t_new.get_feature_locations()
     _log.info("Output {}".format(len(feature_locations)))
     assert isinstance(feature_locations, dict)
 
@@ -89,8 +86,7 @@ def test_get_feature_locations_new():
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
 def test_get_feature_dna_new():
     _log.info("Input {}".format(genome_new))
-    t = GenomeAnnotationAPI(shared.services, shared.token, genome_new)
-    feature_dna = t.get_feature_dna()
+    feature_dna = t_new.get_feature_dna()
     _log.info("Output {}".format(len(feature_dna)))
     assert isinstance(feature_dna, dict)
 
@@ -98,8 +94,7 @@ def test_get_feature_dna_new():
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
 def test_get_feature_functions_new():
     _log.info("Input {}".format(genome_new))
-    t = GenomeAnnotationAPI(shared.services, shared.token, genome_new)
-    feature_functions = t.get_feature_functions()
+    feature_functions = t_new.get_feature_functions()
     _log.info("Output {}".format(len(feature_functions)))
     assert isinstance(feature_functions, dict)
 
@@ -107,8 +102,7 @@ def test_get_feature_functions_new():
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
 def test_get_feature_aliases_new():
     _log.info("Input {}".format(genome_new))
-    t = GenomeAnnotationAPI(shared.services, shared.token, genome_new)
-    feature_aliases = t.get_feature_aliases()
+    feature_aliases = t_new.get_feature_aliases()
     _log.info("Output {}".format(len(feature_aliases)))
     assert isinstance(feature_aliases, dict)
 
@@ -116,8 +110,7 @@ def test_get_feature_aliases_new():
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
 def test_get_feature_publications_new():
     _log.info("Input {}".format(genome_new))
-    t = GenomeAnnotationAPI(shared.services, shared.token, genome_new)
-    feature_publications = t.get_feature_publications()
+    feature_publications = t_new.get_feature_publications()
     _log.info("Output {}".format(len(feature_publications)))
     assert isinstance(feature_publications, dict)
 
@@ -125,8 +118,7 @@ def test_get_feature_publications_new():
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
 def test_get_features_new():
     _log.info("Input {}".format(genome_new))
-    t = GenomeAnnotationAPI(shared.services, shared.token, genome_new)
-    features = t.get_features()
+    features = t_new.get_features()
     _log.info("Output {}".format(len(features)))
     assert isinstance(features, dict)
 
@@ -134,8 +126,7 @@ def test_get_features_new():
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
 def test_get_proteins_new():
     _log.info("Input {}".format(genome_new))
-    t = GenomeAnnotationAPI(shared.services, shared.token, genome_new)
-    proteins = t.get_proteins()
+    proteins = t_new.get_proteins()
     _log.info("Output {}".format(len(proteins)))
     assert isinstance(proteins, dict)
 
@@ -144,8 +135,7 @@ def test_get_proteins_new():
 def test_get_cds_by_mrna_valid_new():
     inputs = ["kb|g.166819.mRNA.0", "kb|g.166819.mRNA.238"]
     _log.info("Input {} {}".format(genome_new, inputs))
-    t = GenomeAnnotationAPI(shared.services, shared.token, genome_new)
-    subset_features = t.get_cds_by_mrna(inputs)
+    subset_features = t_new.get_cds_by_mrna(inputs)
     _log.info("Output {}".format(subset_features))
     assert len(subset_features) == 2
 
@@ -154,8 +144,7 @@ def test_get_cds_by_mrna_valid_new():
 def test_get_cds_by_mrna_invalid_new():
     inputs = ["kb|g.166819.mRNA.99999999999", "kb|g.166819.CDS.1"]
     _log.info("Input {} {}".format(genome_new, inputs))
-    t = GenomeAnnotationAPI(shared.services, shared.token, genome_new)
-    subset_features = t.get_cds_by_mrna(inputs)
+    subset_features = t_new.get_cds_by_mrna(inputs)
     _log.info("Output {}".format(subset_features))
     assert len(subset_features) == 0
 
@@ -164,8 +153,7 @@ def test_get_cds_by_mrna_invalid_new():
 def test_get_mrna_by_cds_valid_new():
     inputs = ["kb|g.166819.CDS.0", "kb|g.166819.CDS.278"]
     _log.info("Input {} {}".format(genome_new, inputs))
-    t = GenomeAnnotationAPI(shared.services, shared.token, genome_new)
-    subset_features = t.get_mrna_by_cds(inputs)
+    subset_features = t_new.get_mrna_by_cds(inputs)
     _log.info("Output {}".format(subset_features))
     assert len(subset_features) == 2
 
@@ -174,8 +162,7 @@ def test_get_mrna_by_cds_valid_new():
 def test_get_mrna_by_cds_invalid_new():
     inputs = ["kb|g.166819.mRNA.1", "kb|g.166819.CDS.9999999999"]
     _log.info("Input {} {}".format(genome_new, inputs))
-    t = GenomeAnnotationAPI(shared.services, shared.token, genome_new)
-    subset_features = t.get_mrna_by_cds(inputs)
+    subset_features = t_new.get_mrna_by_cds(inputs)
     _log.info("Output {}".format(subset_features))
     assert len(subset_features) == 0
 
@@ -184,8 +171,7 @@ def test_get_mrna_by_cds_invalid_new():
 def test_get_gene_by_mrna_valid_new():
     inputs = ["kb|g.166819.mRNA.0", "kb|g.166819.mRNA.238"]
     _log.info("Input {} {}".format(genome_new, inputs))
-    t = GenomeAnnotationAPI(shared.services, shared.token, genome_new)
-    subset_features = t.get_gene_by_mrna(inputs)
+    subset_features = t_new.get_gene_by_mrna(inputs)
     _log.info("Output {}".format(subset_features))
     assert len(subset_features) == 2
 
@@ -194,8 +180,7 @@ def test_get_gene_by_mrna_valid_new():
 def test_get_gene_by_mrna_invalid_new():
     inputs = ["kb|g.166819.mRNA.99999999999", "kb|g.166819.CDS.1"]
     _log.info("Input {} {}".format(genome_new, inputs))
-    t = GenomeAnnotationAPI(shared.services, shared.token, genome_new)
-    subset_features = t.get_gene_by_mrna(inputs)
+    subset_features = t_new.get_gene_by_mrna(inputs)
     _log.info("Output {}".format(subset_features))
     assert len(subset_features) == 0
 
@@ -204,8 +189,7 @@ def test_get_gene_by_mrna_invalid_new():
 def test_get_cds_by_gene_valid_new():
     inputs = ["kb|g.166819.locus.256", "kb|g.166819.locus.112"]
     _log.info("Input {} {}".format(genome_new, inputs))
-    t = GenomeAnnotationAPI(shared.services, shared.token, genome_new)
-    subset_features = t.get_cds_by_gene(inputs)
+    subset_features = t_new.get_cds_by_gene(inputs)
     _log.info("Output {}".format(subset_features))
     assert len(subset_features) == 2
 
@@ -214,8 +198,7 @@ def test_get_cds_by_gene_valid_new():
 def test_get_cds_by_gene_invalid_new():
     inputs = ["kb|g.166819.mRNA.1", "kb|g.166819.locus.999999"]
     _log.info("Input {} {}".format(genome_new, inputs))
-    t = GenomeAnnotationAPI(shared.services, shared.token, genome_new)
-    subset_features = t.get_cds_by_gene(inputs)
+    subset_features = t_new.get_cds_by_gene(inputs)
     _log.info("Output {}".format(subset_features))
     assert len(subset_features) == 0
 
@@ -224,8 +207,7 @@ def test_get_cds_by_gene_invalid_new():
 def test_get_mrna_by_gene_valid_new():
     inputs = ["kb|g.166819.locus.256", "kb|g.166819.locus.112"]
     _log.info("Input {} {}".format(genome_new, inputs))
-    t = GenomeAnnotationAPI(shared.services, shared.token, genome_new)
-    subset_features = t.get_mrna_by_gene(inputs)
+    subset_features = t_new.get_mrna_by_gene(inputs)
     _log.info("Output {}".format(subset_features))
     assert len(subset_features) == 2
 
@@ -234,8 +216,7 @@ def test_get_mrna_by_gene_valid_new():
 def test_get_mrna_by_gene_invalid_new():
     inputs = ["kb|g.166819.mRNA.1", "kb|g.166819.locus.999999"]
     _log.info("Input {} {}".format(genome_new, inputs))
-    t = GenomeAnnotationAPI(shared.services, shared.token, genome_new)
-    subset_features = t.get_mrna_by_gene(inputs)
+    subset_features = t_new.get_mrna_by_gene(inputs)
     _log.info("Output {}".format(subset_features))
     assert len(subset_features) == 0
 
@@ -244,8 +225,7 @@ def test_get_mrna_by_gene_invalid_new():
 def test_get_gene_by_cds_valid_new():
     inputs = ["kb|g.166819.CDS.0", "kb|g.166819.CDS.278"]
     _log.info("Input {} {}".format(genome_new, inputs))
-    t = GenomeAnnotationAPI(shared.services, shared.token, genome_new)
-    subset_features = t.get_gene_by_cds(inputs)
+    subset_features = t_new.get_gene_by_cds(inputs)
     _log.info("Output {}".format(subset_features))
     assert len(subset_features) == 2
 
@@ -254,8 +234,7 @@ def test_get_gene_by_cds_valid_new():
 def test_get_gene_by_cds_invalid_new():
     inputs = ["kb|g.166819.mRNA.1", "kb|g.166819.CDS.999999"]
     _log.info("Input {} {}".format(genome_new, inputs))
-    t = GenomeAnnotationAPI(shared.services, shared.token, genome_new)
-    subset_features = t.get_gene_by_cds(inputs)
+    subset_features = t_new.get_gene_by_cds(inputs)
     _log.info("Output {}".format(subset_features))
     assert len(subset_features) == 0
 
@@ -266,8 +245,7 @@ def test_get_gene_by_cds_invalid_new():
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
 def test_get_taxon_old():
     _log.info("Input {}".format(genome_old))
-    t = GenomeAnnotationAPI(shared.services, shared.token, genome_old)
-    taxon = t.get_taxon()
+    taxon = t_old.get_taxon()
     _log.info("Output {}".format(taxon))
     assert isinstance(taxon, TaxonAPI)
 
@@ -275,8 +253,7 @@ def test_get_taxon_old():
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
 def test_get_assembly_old():
     _log.info("Input {}".format(genome_old))
-    t = GenomeAnnotationAPI(shared.services, shared.token, genome_old)
-    assembly = t.get_assembly()
+    assembly = t_old.get_assembly()
     _log.info("Output {}".format(assembly))
     assert isinstance(assembly, AssemblyAPI)
 
@@ -284,8 +261,7 @@ def test_get_assembly_old():
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
 def test_get_feature_types_old():
     _log.info("Input {}".format(genome_old))
-    t = GenomeAnnotationAPI(shared.services, shared.token, genome_old)
-    feature_types = t.get_feature_types()
+    feature_types = t_old.get_feature_types()
     _log.info("Output {}".format(feature_types))
     assert isinstance(feature_types, list)
 
@@ -293,8 +269,7 @@ def test_get_feature_types_old():
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
 def test_get_feature_type_descriptions_old():
     _log.info("Input {}".format(genome_old))
-    t = GenomeAnnotationAPI(shared.services, shared.token, genome_old)
-    feature_type_descriptions = t.get_feature_type_descriptions()
+    feature_type_descriptions = t_old.get_feature_type_descriptions()
     _log.info("Output {}".format(feature_type_descriptions))
     assert isinstance(feature_type_descriptions, dict)
 
@@ -302,8 +277,7 @@ def test_get_feature_type_descriptions_old():
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
 def test_get_feature_ids_old():
     _log.info("Input {}".format(genome_old))
-    t = GenomeAnnotationAPI(shared.services, shared.token, genome_old)
-    feature_ids = t.get_feature_ids()
+    feature_ids = t_old.get_feature_ids()
     _log.info("Output {}".format(type(feature_ids)))
     assert isinstance(feature_ids, dict)
 
@@ -311,8 +285,7 @@ def test_get_feature_ids_old():
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
 def test_get_feature_type_counts_old():
     _log.info("Input {}".format(genome_old))
-    t = GenomeAnnotationAPI(shared.services, shared.token, genome_old)
-    feature_type_counts = t.get_feature_type_counts()
+    feature_type_counts = t_old.get_feature_type_counts()
     _log.info("Output {}".format(feature_type_counts))
     assert isinstance(feature_type_counts, dict)
 
@@ -320,8 +293,7 @@ def test_get_feature_type_counts_old():
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
 def test_get_feature_locations_old():
     _log.info("Input {}".format(genome_old))
-    t = GenomeAnnotationAPI(shared.services, shared.token, genome_old)
-    feature_locations = t.get_feature_locations()
+    feature_locations = t_old.get_feature_locations()
     _log.info("Output {}".format(len(feature_locations)))
     assert isinstance(feature_locations, dict)
 
@@ -329,8 +301,7 @@ def test_get_feature_locations_old():
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
 def test_get_feature_dna_old():
     _log.info("Input {}".format(genome_old))
-    t = GenomeAnnotationAPI(shared.services, shared.token, genome_old)
-    feature_dna = t.get_feature_dna()
+    feature_dna = t_old.get_feature_dna()
     _log.info("Output {}".format(len(feature_dna)))
     assert isinstance(feature_dna, dict)
 
@@ -338,8 +309,7 @@ def test_get_feature_dna_old():
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
 def test_get_feature_functions_old():
     _log.info("Input {}".format(genome_old))
-    t = GenomeAnnotationAPI(shared.services, shared.token, genome_old)
-    feature_functions = t.get_feature_functions()
+    feature_functions = t_old.get_feature_functions()
     _log.info("Output {}".format(len(feature_functions)))
     assert isinstance(feature_functions, dict)
 
@@ -347,8 +317,7 @@ def test_get_feature_functions_old():
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
 def test_get_feature_aliases_old():
     _log.info("Input {}".format(genome_old))
-    t = GenomeAnnotationAPI(shared.services, shared.token, genome_old)
-    feature_aliases = t.get_feature_aliases()
+    feature_aliases = t_old.get_feature_aliases()
     _log.info("Output {}".format(len(feature_aliases)))
     assert isinstance(feature_aliases, dict)
 
@@ -356,8 +325,7 @@ def test_get_feature_aliases_old():
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
 def test_get_feature_publications_old():
     _log.info("Input {}".format(genome_old))
-    t = GenomeAnnotationAPI(shared.services, shared.token, genome_old)
-    feature_publications = t.get_feature_publications()
+    feature_publications = t_old.get_feature_publications()
     _log.info("Output {}".format(len(feature_publications)))
     assert isinstance(feature_publications, dict)
 
@@ -365,8 +333,7 @@ def test_get_feature_publications_old():
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
 def test_get_features_old():
     _log.info("Input {}".format(genome_old))
-    t = GenomeAnnotationAPI(shared.services, shared.token, genome_old)
-    features = t.get_features()
+    features = t_old.get_features()
     _log.info("Output {}".format(len(features)))
     assert isinstance(features, dict)
 
@@ -374,8 +341,7 @@ def test_get_features_old():
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
 def test_get_proteins_old():
     _log.info("Input {}".format(genome_old))
-    t = GenomeAnnotationAPI(shared.services, shared.token, genome_old)
-    proteins = t.get_proteins()
+    proteins = t_old.get_proteins()
     _log.info("Output {}".format(len(proteins)))
     assert isinstance(proteins, dict)
 
@@ -384,8 +350,7 @@ def test_get_proteins_old():
 def test_get_cds_by_mrna_valid_old():
     inputs = ["kb|g.166819.mRNA.0", "kb|g.166819.mRNA.238"]
     _log.info("Input {} {}".format(genome_old, inputs))
-    t = GenomeAnnotationAPI(shared.services, shared.token, genome_old)
-    subset_features = t.get_cds_by_mrna(inputs)
+    subset_features = t_old.get_cds_by_mrna(inputs)
     _log.info("Output {}".format(subset_features))
     assert len(subset_features) == 0
 
@@ -394,8 +359,7 @@ def test_get_cds_by_mrna_valid_old():
 def test_get_cds_by_mrna_invalid_old():
     inputs = ["kb|g.166819.mRNA.99999999999", "kb|g.166819.CDS.1"]
     _log.info("Input {} {}".format(genome_old, inputs))
-    t = GenomeAnnotationAPI(shared.services, shared.token, genome_old)
-    subset_features = t.get_cds_by_mrna(inputs)
+    subset_features = t_old.get_cds_by_mrna(inputs)
     _log.info("Output {}".format(subset_features))
     assert len(subset_features) == 0
 
@@ -404,8 +368,7 @@ def test_get_cds_by_mrna_invalid_old():
 def test_get_mrna_by_cds_valid_old():
     inputs = ["kb|g.166819.CDS.0", "kb|g.166819.CDS.278"]
     _log.info("Input {} {}".format(genome_old, inputs))
-    t = GenomeAnnotationAPI(shared.services, shared.token, genome_old)
-    subset_features = t.get_mrna_by_cds(inputs)
+    subset_features = t_old.get_mrna_by_cds(inputs)
     _log.info("Output {}".format(subset_features))
     assert len(subset_features) == 0
 
@@ -414,8 +377,7 @@ def test_get_mrna_by_cds_valid_old():
 def test_get_mrna_by_cds_invalid_old():
     inputs = ["kb|g.166819.mRNA.1", "kb|g.166819.CDS.9999999999"]
     _log.info("Input {} {}".format(genome_old, inputs))
-    t = GenomeAnnotationAPI(shared.services, shared.token, genome_old)
-    subset_features = t.get_mrna_by_cds(inputs)
+    subset_features = t_old.get_mrna_by_cds(inputs)
     _log.info("Output {}".format(subset_features))
     assert len(subset_features) == 0
 
@@ -424,8 +386,7 @@ def test_get_mrna_by_cds_invalid_old():
 def test_get_gene_by_mrna_valid_old():
     inputs = ["kb|g.166819.mRNA.0", "kb|g.166819.mRNA.238"]
     _log.info("Input {} {}".format(genome_old, inputs))
-    t = GenomeAnnotationAPI(shared.services, shared.token, genome_old)
-    subset_features = t.get_gene_by_mrna(inputs)
+    subset_features = t_old.get_gene_by_mrna(inputs)
     _log.info("Output {}".format(subset_features))
     assert len(subset_features) == 0
 
@@ -434,8 +395,7 @@ def test_get_gene_by_mrna_valid_old():
 def test_get_gene_by_mrna_invalid_old():
     inputs = ["kb|g.166819.mRNA.99999999999", "kb|g.166819.CDS.1"]
     _log.info("Input {} {}".format(genome_old, inputs))
-    t = GenomeAnnotationAPI(shared.services, shared.token, genome_old)
-    subset_features = t.get_gene_by_mrna(inputs)
+    subset_features = t_old.get_gene_by_mrna(inputs)
     _log.info("Output {}".format(subset_features))
     assert len(subset_features) == 0
 
@@ -444,8 +404,7 @@ def test_get_gene_by_mrna_invalid_old():
 def test_get_cds_by_gene_valid_old():
     inputs = ["kb|g.166819.locus.256", "kb|g.166819.locus.112"]
     _log.info("Input {} {}".format(genome_old, inputs))
-    t = GenomeAnnotationAPI(shared.services, shared.token, genome_old)
-    subset_features = t.get_cds_by_gene(inputs)
+    subset_features = t_old.get_cds_by_gene(inputs)
     _log.info("Output {}".format(subset_features))
     assert len(subset_features) == 0
 
@@ -454,8 +413,7 @@ def test_get_cds_by_gene_valid_old():
 def test_get_cds_by_gene_invalid_old():
     inputs = ["kb|g.166819.mRNA.1", "kb|g.166819.locus.999999"]
     _log.info("Input {} {}".format(genome_old, inputs))
-    t = GenomeAnnotationAPI(shared.services, shared.token, genome_old)
-    subset_features = t.get_cds_by_gene(inputs)
+    subset_features = t_old.get_cds_by_gene(inputs)
     _log.info("Output {}".format(subset_features))
     assert len(subset_features) == 0
 
@@ -464,8 +422,7 @@ def test_get_cds_by_gene_invalid_old():
 def test_get_mrna_by_gene_valid_old():
     inputs = ["kb|g.166819.locus.256", "kb|g.166819.locus.112"]
     _log.info("Input {} {}".format(genome_old, inputs))
-    t = GenomeAnnotationAPI(shared.services, shared.token, genome_old)
-    subset_features = t.get_mrna_by_gene(inputs)
+    subset_features = t_old.get_mrna_by_gene(inputs)
     _log.info("Output {}".format(subset_features))
     assert len(subset_features) == 0
 
@@ -474,8 +431,7 @@ def test_get_mrna_by_gene_valid_old():
 def test_get_mrna_by_gene_invalid_old():
     inputs = ["kb|g.166819.mRNA.1", "kb|g.166819.locus.999999"]
     _log.info("Input {} {}".format(genome_old, inputs))
-    t = GenomeAnnotationAPI(shared.services, shared.token, genome_old)
-    subset_features = t.get_mrna_by_gene(inputs)
+    subset_features = t_old.get_mrna_by_gene(inputs)
     _log.info("Output {}".format(subset_features))
     assert len(subset_features) == 0
 
@@ -484,8 +440,7 @@ def test_get_mrna_by_gene_invalid_old():
 def test_get_gene_by_cds_valid_old():
     inputs = ["kb|g.166819.CDS.0", "kb|g.166819.CDS.278"]
     _log.info("Input {} {}".format(genome_old, inputs))
-    t = GenomeAnnotationAPI(shared.services, shared.token, genome_old)
-    subset_features = t.get_gene_by_cds(inputs)
+    subset_features = t_old.get_gene_by_cds(inputs)
     _log.info("Output {}".format(subset_features))
     assert len(subset_features) == 0
 
@@ -494,7 +449,6 @@ def test_get_gene_by_cds_valid_old():
 def test_get_gene_by_cds_invalid_old():
     inputs = ["kb|g.166819.mRNA.1", "kb|g.166819.CDS.999999"]
     _log.info("Input {} {}".format(genome_old, inputs))
-    t = GenomeAnnotationAPI(shared.services, shared.token, genome_old)
-    subset_features = t.get_gene_by_cds(inputs)
+    subset_features = t_old.get_gene_by_cds(inputs)
     _log.info("Output {}".format(subset_features))
     assert len(subset_features) == 0

@@ -22,6 +22,7 @@ record_template = '''{{
         "metadata": {{ }}
 }}'''
 
+
 def foo_datum(n):
     d = {'index': n, 'value': n * 2.0,
         'muppets': {
@@ -36,8 +37,8 @@ def foo_datum(n):
         }}
     return json.dumps(d)
 
-_mock = None
 
+_mock = None
 def setup():
     global _mock
     print("Setting up mock DB")
@@ -64,6 +65,7 @@ def test_get_object_history():
     # just make sure it doesn't crash.
     _mock.get_object_history({'ref': '10/1'})
 
+
 def test_get_object_info_new():
     r = _mock.get_object_info_new({'objects': [{'ref': '10/1'}]})
     assert len(r) == 1
@@ -72,9 +74,11 @@ def test_get_object_info_new():
     assert obj[1] == 'first'
     assert obj[2] == 'Foo'
 
+
 def test_get_object_provenance():
     # just make sure it doesn't crash.
     _mock.get_object_provenance([{'ref': '10/1'}])
+
 
 def test_get_object_subset():
     actors_1 = {'ref': '10/1', 'included': ['muppets/actors']}
@@ -86,6 +90,7 @@ def test_get_object_subset():
     assert 'actors' in obj['muppets']
     assert obj['muppets']['actors']['kermit'] == 'Jim Henson'
     assert 'colors' not in obj['muppets']
+
     # try again, this time with 2
     actors_2 = {'ref': '10/2', 'included': ['muppets/actors']}
     r = _mock.get_object_subset([actors_1, actors_2])
@@ -96,6 +101,24 @@ def test_get_object_subset():
         assert 'actors' in d['muppets']
         assert 'colors' not in d['muppets']
 
+    # retrieve a top level property
+    r = _mock.get_object_subset([{'ref': '10/2', 'included': ['value']}])
+    assert len(r) == 1
+    for obj in r:
+        d = obj['data']
+        assert 'value' in d
+        assert isinstance(d['value'], float)
+
+    # retrieve two children of the same parent
+    r = _mock.get_object_subset([{'ref': '10/2', 'included': ['muppets/actors', 'muppets/colors']}])
+    assert len(r) == 1
+    for obj in r:
+        d = obj['data']
+        assert 'muppets' in d
+        assert 'actors' in d['muppets']
+        assert 'colors' in d['muppets']
+
+
 
 def test_get_objects():
     r = _mock.get_objects([{'ref': '10/1'}, {'ref': '10/2'}])
@@ -103,6 +126,7 @@ def test_get_objects():
     for obj in r:
         assert 'data' in obj
         assert 'object_info' in obj
+
 
 def test_get_type_info():
     r = _mock.get_type_info('Foo')

@@ -47,5 +47,4 @@ config = {
 }
 
 setuptools.setup(package_dir = {'': 'lib'},
-                 test_suite = "doekbase.data_api.tests.test_suite_basic",
                  **config)

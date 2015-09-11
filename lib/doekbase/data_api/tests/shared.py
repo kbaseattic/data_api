@@ -12,14 +12,12 @@ import os
 from doekbase.data_api.core import ObjectAPI, g_ws_url, g_shock_url
 from doekbase.data_api.util import get_logger
 
+genome = "PrototypeReferenceGenomes/kb|g.166819"
+token = os.environ["KB_AUTH_TOKEN"]
+
 # Logging
 _log = None
-services = {"workspace_service_url": g_ws_url,
-            "shock_service_url": g_shock_url}
-
-# Globals
-genome = 'PrototypeReferenceGenomes/kb|g.3157'
-token = os.environ["KB_AUTH_TOKEN"]
+services = None
 
 # Functions and classes
 def get_services():
@@ -67,7 +65,9 @@ def determine_can_connect(workspaces):
 connect_fail = 'Cannot fetch all required objects from workspace'
 
 def setup():
+    global _log, services
     _log = get_logger('doekbase.data_api.tests.shared')
+    services = get_services()
 
 def teardown():
     pass

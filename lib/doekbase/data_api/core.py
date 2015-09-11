@@ -115,12 +115,12 @@ class ObjectAPI(object):
         self._data = None
 
     def _init_ws_from_files(self, path):
-        if g_use_msgpack:
-            ext = 'msgpack'
-            WorkspaceFile.use_msgpack = True
-        else:
-            ext = 'json'
-            WorkspaceFile.use_msgpack = False
+        #if g_use_msgpack:
+        ext = 'msgpack'
+        WorkspaceFile.use_msgpack = True
+        #else:
+        #    ext = 'json'
+        #    WorkspaceFile.use_msgpack = False
         input_files = glob.glob(os.path.join(path, '*.' + ext))
         if len(input_files) == 0:
             raise ValueError('No .{} files found for file-based Workspace '

@@ -180,26 +180,29 @@ class WorkspaceFile(object):
             # add to result
             for r in records:
                 extracted = {} # all extracted paths
-                d = r['data'] # alias
                 for p in paths:
-                    parts, found = p.split('/'), True
+                    d = r['data'] # alias
+                    parts = p.split('/')
+
                     # Look for value matching path in 'd'
-                    for part in parts:
-                        if d.has_key(part):
-                            d = d[part]
+                    e = extracted
+                    for i in xrange(len(parts) - 1):
+                        if parts[i] in d:
+                            d = d[parts[i]]
+
+                            if parts[i] not in e and isinstance(d, dict):
+                                e[parts[i]] = {}
+
+                            if isinstance(e[parts[i]], dict):
+                                e = e[parts[i]]
                         else:
-                            found = False
                             break
-                    # If we got a value at the leaf (which is now
-                    # in 'd'), then add the path and value to '(e)xtracted'
-                    if found:
-                        e = extracted # alias
-                        for part in parts[:-1]:
-                            if part not in e:
-                                e[part] = {} # create new empty container
-                            e = e[part] # descend
-                        e[parts[-1]] = d
-                if extracted:
+                    else:
+                        if parts[-1] in d:
+                            e[parts[-1]] = d[parts[-1]]
+
+                    _log.debug(extracted)
+                if len(extracted) > 0:
                     #print("@@ add extracted: {}".format(extracted))
                     obj = self._make_object(r, ref, data=extracted)
                     result.append(obj)
@@ -396,6 +399,8 @@ MD5_TYPES = {
     u'KBaseGenomes.Genome-5.0': u'KBaseGenomes.Genome-c0526fae0ce1fd8d342ec94fc4dc510a',
     u'KBaseGenomes.Genome-6.0': u'KBaseGenomes.Genome-aafaaa7df90d03b33258f4fa7790dcbe',
     u'KBaseGenomes.Genome-7.0': u'KBaseGenomes.Genome-93da9d2c8fb7836fb473dd9c1e4ca89e',
+    u'KBaseGenomes.Genome-8.0': u'KBaseGenomes.Genome-51b05a5c27084ae56106e60df5b66df5',
+    u'KBaseGenomes.ContigSet-3.0': u'KBaseGenomes.ContigSet-db7f518c9469d166a783d813c15d64e9',
     u'KBaseGenomesCondensedPrototypeV2.GenomeAnnotation-0.1': u'KBaseGenomesCondensedPrototypeV2.GenomeAnnotation-d4301f53dab71e72d70ea5be6919696e',
     u'KBaseGenomesCondensedPrototypeV2.GenomeAnnotation-1.0': u'KBaseGenomesCondensedPrototypeV2.GenomeAnnotation-d4301f53dab71e72d70ea5be6919696e',
     u'KBaseGenomesCondensedPrototypeV2.GenomeAnnotation-1.1': u'KBaseGenomesCondensedPrototypeV2.GenomeAnnotation-97253a4ad440116a6421ede1fca50cad',
@@ -413,6 +418,7 @@ MD5_TYPES = {
     u'KBaseGenomesCondensedPrototypeV2.FeatureContainer-4.0': u'KBaseGenomesCondensedPrototypeV2.FeatureContainer-9f300ab15a34a764eb32acc265983ef3',
     u'KBaseGenomesCondensedPrototypeV2.FeatureContainer-5.0': u'KBaseGenomesCondensedPrototypeV2.FeatureContainer-02ba9ba1340d07c0eb7401dcb9e51647',
     u'KBaseGenomesCondensedPrototypeV2.FeatureContainer-6.0': u'KBaseGenomesCondensedPrototypeV2.FeatureContainer-3cf973a339b0e6e18e8cade7b77272fe',
+    u'KBaseGenomesCondensedPrototypeV2.ProteinContainer-4.0': u'KBaseGenomesCondensedPrototypeV2.ProteinContainer-24986e79a34d6c0800b2008c974015b4',
     u'KBaseGenomesCondensedPrototypeV2.Assembly-0.1': u'KBaseGenomesCondensedPrototypeV2.Assembly-ffd679cc5c9ce4a3b1bb1a5c3960b42e',
     u'KBaseGenomesCondensedPrototypeV2.Assembly-1.0': u'KBaseGenomesCondensedPrototypeV2.Assembly-ffd679cc5c9ce4a3b1bb1a5c3960b42e',
     u'KBaseGenomesCondensedPrototypeV2.Assembly-1.1': u'KBaseGenomesCondensedPrototypeV2.Assembly-1ab165a65ef2bf6d7279107ac185fa99',

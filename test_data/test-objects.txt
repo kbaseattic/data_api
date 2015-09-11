@@ -1,12 +1,15 @@
 # Genomes
-PrototypeReferenceGenomes/kb|g.3157
-PrototypeReferenceGenomes/kb|g.3899
+OriginalReferenceGenomes/kb|g.166819
+PrototypeReferenceGenomes/kb|g.166819
 # Features
-PrototypeReferenceGenomes/kb|g.3899_feature_container_gene
-PrototypeReferenceGenomes/kb|g.3899_feature_container_CDS
-PrototypeReferenceGenomes/kb|g.3899_feature_container_mRNA
-PrototypeReferenceGenomes/kb|g.3157_feature_container_CDS
+PrototypeReferenceGenomes/kb|g.166819_protein_container
+PrototypeReferenceGenomes/kb|g.166819_feature_container_gene
+PrototypeReferenceGenomes/kb|g.166819_feature_container_CDS
+PrototypeReferenceGenomes/kb|g.166819_feature_container_mRNA
 # Taxon
-993/674615/1
+ReferenceTaxons/242159_taxon
+ReferenceTaxons/70447_taxon
+ReferenceTaxons/747676_taxon
 # Assembly
-PrototypeReferenceGenomes/kb|g.3157_assembly
+OriginalReferenceGenomes/kb|g.166819.contigset
+PrototypeReferenceGenomes/kb|g.166819_assembly

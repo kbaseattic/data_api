@@ -194,10 +194,7 @@ class _Prototype(ObjectAPI, TaxonInterface):
                 if object_type.split('-')[0] in _TAXON_TYPES:
                     children.extend([TaxonAPI(self.services, token=self._token, ref=y) for y in referrers[object_type]])
 
-        if len(children) == 0:
-            return None
-        else:
-            return children
+        return children
 
     def get_genome_annotations(self, ref_only=False):
         import doekbase.data_api.annotation.genome_annotation
