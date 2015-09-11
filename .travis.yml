@@ -22,4 +22,3 @@ script:
 
 after_success:
   - codecov
-#  - coveralls --base_dir lib/ --coveralls_yaml lib/.coveralls.yml
