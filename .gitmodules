@@ -1,3 +1,3 @@
 [submodule "test_resources"]
 	path = test_resources
-	url = git@github.com:kbase/data_api_test_resources.git
+	url = https://git@github.com/kbase/data_api_test_resources.git

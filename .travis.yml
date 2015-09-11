@@ -2,6 +2,12 @@ language: python
 python:
   - "2.7"
 
+git:
+  submodules: false
+
+before_install:
+  - git submodule update --init --recursive
+
 install:
   - "mv requirements.txt requirements.txt-"
   - "cp requirements-travis.txt requirements.txt"
@@ -11,8 +17,8 @@ install:
 script:
   - cd lib
   - touch .coverage
-  - nosetests --ws-url=test_resources/data  --wsfile-msgpack
   - cd ..
+  - nosetests --ws-url=test_resources/data  --wsfile-msgpack
 
 #after_success:
 #  - cd lib
