@@ -18,9 +18,8 @@ script:
   - cd lib
   - touch .coverage
   - cd ..
-  - nosetests --ws-url=test_resources/data  --wsfile-msgpack
+  - nosetests --with-coverage --ws-url=test_resources/data  --wsfile-msgpack
 
-#after_success:
-#  - cd lib
-#  - coveralls
-#  - cd ..
+after_success:
+  - codecov
+#  - coveralls --base_dir lib/ --coveralls_yaml lib/.coveralls.yml
