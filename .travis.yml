@@ -20,7 +20,7 @@ script:
   - cd ..
   - nosetests --ws-url=test_resources/data  --wsfile-msgpack
 
-#after_success:
-#  - cd lib
-#  - coveralls
-#  - cd ..
+after_success:
+  - cd lib
+  - coveralls
+  - cd ..
