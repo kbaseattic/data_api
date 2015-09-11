@@ -13,7 +13,11 @@ from doekbase.data_api.core import ObjectAPI, g_ws_url, g_shock_url
 from doekbase.data_api.util import get_logger
 
 genome = "PrototypeReferenceGenomes/kb|g.166819"
-token = os.environ["KB_AUTH_TOKEN"]
+
+try:
+    token = os.environ["KB_AUTH_TOKEN"]
+except KeyError:
+    token = None
 
 # Logging
 _log = None
