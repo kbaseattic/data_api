@@ -16,10 +16,10 @@ from thrift.transport import TTransport
 from thrift.protocol import TBinaryProtocol
 from thrift.server import TServer
 # Local
-from biokbase.data_api.baseobj import thrift_service
-from biokbase.data_api.baseobj.ttypes import *
-from biokbase.data_api.baseobj.impl import ObjectImpl
-from biokbase.data_api.util import get_logger
+from doekbase.data_api.baseobj import thrift_service
+from doekbase.data_api.baseobj.ttypes import *
+from doekbase.data_api.baseobj.impl import ObjectImpl
+from doekbase.data_api.util import get_logger
 
 DEFAULT_WS_URL = 'https://ci.kbase.us/services/ws/'
 DEFAULT_SHOCK_URL = 'https://ci.kbase.us/services/shock-api/'
