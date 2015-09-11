@@ -11,8 +11,8 @@ from doekbase.data_api.annotation.genome_annotation import GenomeAnnotationAPI
 
 _log = logging.getLogger(__name__)
 
-assembly_new = "PrototypeReferenceGenomes/kb|g.3157_assembly"
-assembly_old = "OriginalReferenceGenomes/kb|g.3157.contigset"
+assembly_new = "PrototypeReferenceGenomes/kb|g.166819_assembly"
+assembly_old = "OriginalReferenceGenomes/kb|g.166819.contigset"
 t_new = None
 t_old = None
 
