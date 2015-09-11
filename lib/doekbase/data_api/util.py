@@ -24,14 +24,14 @@ DEFAULT_LEVEL_NAME = logging.getLevelName(DEFAULT_LEVEL)
 DEFAULT_CONFIG = {
     'version': 1,
     'formatters': {
-        'basic': { 'format': '%(message)s' }
+        'basic': { 'format': '[%(levelname)s] (%(name)s) %(funcName)s() %(message)s' }
     },
     'handlers': {
         'console': {
             'class': 'logging.StreamHandler',
             'formatter': 'basic',
-            'level': DEFAULT_LEVEL_NAME,
-            'stream': 'ext://sys.stdout'
+            'stream': 'ext://sys.stdout',
+            'level': DEFAULT_LEVEL_NAME
         }
     },
     'root': {
@@ -152,28 +152,6 @@ def format_kvp(d, sep):
 
 # Format a timestamp as an ISO8601 string.
 format_timestamp = lambda t: datetime.fromtimestamp(t).isoformat()
-
-## Examples
-
-_example_logger = None
-
-def run_examples():
-    @logged(_example_logger)
-    def func_one(*args):
-        print("I am logged")
-
-    @logged(_example_logger, name='joe')
-    def func_two(*args):
-        print("I am also logged")
-
-    func_one()
-    func_two()
-
-if __name__ == '__main__':
-    global _example_logger
-    _example_logger = get_logger('example')
-    print("In Main")
-    run_examples()
 
 def get_auth_token():
     try:

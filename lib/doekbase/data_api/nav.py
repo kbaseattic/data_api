@@ -3,7 +3,7 @@ Navigation of object containers (e.g. workspaces).
 
 The primary class is 'Finder'::
 
-   from biokbase.data_api import nav
+   from doekbase.data_api import nav
    finder = nav.Finder(...) # see class docs for args and usage
 """
 __author__ = 'Dan Gunter <dkgunter@lbl.gov>'

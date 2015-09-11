@@ -1,9 +1,10 @@
 """
 Basic unit test suite.
 """
+# Stdlib
 import logging
 from unittest import skipUnless
-
+# Local
 from . import shared
 
 from doekbase.data_api.sequence.assembly import AssemblyAPI
@@ -11,13 +12,25 @@ from doekbase.data_api.annotation.genome_annotation import GenomeAnnotationAPI
 
 _log = logging.getLogger(__name__)
 
+workspaces = {
+    '3157': {
+        'gene': 'PrototypeReferenceGenomes/kb|g.3157',
+        'features': 'PrototypeReferenceGenomes/kb|g.3157.peg.0',
+        'contigs': 'PrototypeReferenceGenomes/kb|g.3157.c.0'
+    }
+}
+
+
 def setup():
     shared.setup()
+    #shared.determine_can_connect(workspaces)
+
 
 def teardown():
-    pass
+    shared.teardown()
 
-@skipUnless(shared.can_connect(), 'Cannot connect to workspace')
+
+@skipUnless(shared.can_connect, 'Cannot connect to workspace')
 def test_assembly_api():
     """Testing Assembly API"""
     _log.info("{} with {}".format("test_assembly_api", shared.genome + "_assembly"))
@@ -28,7 +41,8 @@ def test_assembly_api():
     _log.debug("Got contigs: {}".format(subset_contigs))
     assert len(subset_contigs) == 1
 
-@skipUnless(shared.can_connect(), 'Cannot connect to workspace')
+
+@skipUnless(shared.can_connect, 'Cannot connect to workspace')
 def test_genome_annotation_api():
     """Testing Genome Annotation API"""
     _log.info("{} with {}".format("test_genome_annotation_api", shared.genome))
@@ -39,7 +53,8 @@ def test_genome_annotation_api():
     _log.debug("Got features: {}".format(subset_features))
     assert len(subset_features) == 1
 
-@skipUnless(shared.can_connect(), 'Cannot connect to workspace')
+
+@skipUnless(shared.can_connect, 'Cannot connect to workspace')
 def test_taxon_api():
     """Testing Taxon API"""
     _log.info("{} with {}".format("test_taxon_api", shared.genome))

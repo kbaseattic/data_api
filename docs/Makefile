@@ -59,6 +59,9 @@ html:
 	@echo
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)."
 
+kbclean:
+	rm -rf $(KB_BUILDDIR)/*
+	
 kbhtml:
 	$(SPHINXBUILD) -b html $(KB_ALLSPHINXOPTS) $(KB_BUILDDIR)
 	@echo

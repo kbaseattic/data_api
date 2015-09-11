@@ -1,0 +1,12 @@
+# Genomes
+PrototypeReferenceGenomes/kb|g.3157
+PrototypeReferenceGenomes/kb|g.3899
+# Features
+PrototypeReferenceGenomes/kb|g.3899_feature_container_gene
+PrototypeReferenceGenomes/kb|g.3899_feature_container_CDS
+PrototypeReferenceGenomes/kb|g.3899_feature_container_mRNA
+PrototypeReferenceGenomes/kb|g.3157_feature_container_CDS
+# Taxon
+993/674615/1
+# Assembly
+PrototypeReferenceGenomes/kb|g.3157_assembly

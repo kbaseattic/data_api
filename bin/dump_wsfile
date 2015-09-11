@@ -1,0 +1,146 @@
+#!/usr/bin/env python
+"""
+Command-line program to dump one or more objects from the
+KBase workspace into JSON files in the format expected by the
+`doekbase.data_api.wsfile` module.
+"""
+__author__ = 'Dan Gunter <dkgunter@lbl.gov>'
+__date__ = '9/4/15'
+
+# Imports
+
+# stdlib
+import argparse
+import json
+import logging
+import msgpack
+import os; opj = os.path.join
+import sys
+# local
+from doekbase.data_api.wsfile import workspace_to_file
+from doekbase.data_api.util import get_logger
+
+# Logging
+
+_log = get_logger('dump_wsmock')
+
+# Exceptions
+
+class CouldNotOpenForWriting(Exception):
+    def __init__(self, filename, errmsg):
+        msg = 'Could not open "{}" for writing: {}'.format(filename, errmsg)
+        super(CouldNotOpenForWriting, self).__init__(msg)
+
+# Classes and functions
+
+class KBEnv(object):
+    @staticmethod
+    def get_name(var):
+        return 'KB_' + var.upper()
+
+    @staticmethod
+    def get_value(var):
+        return os.environ.get(KBEnv.get_name(var))
+
+def get_ref_list(value, path):
+    if value is not None:
+        values = [value]
+    else:
+        f = open(path)
+        values = []
+        for s in f:
+            s = s.strip()
+            if not s or s.startswith('#'):
+                continue
+            values.append(s)
+    return values
+
+def dump_refs(refs, url, token, dir_name, use_msgpack):
+    n = 0
+    print('Get refs from {}'.format(url))
+    for ref in refs:
+        print('Get {}'.format(ref))
+        record = workspace_to_file(ref, url, token=token)
+        fname = opj(dir_name, ref.replace('/', '_'))
+        if use_msgpack:
+            fname += '.msgpack'
+            method = msgpack.dump
+        else:
+            fname += '.json'
+            method = json.dump
+        _log.debug('Write output to "{}"'.format(fname))
+        try:
+            ofile = open(fname, 'w')
+        except IOError as err:
+            raise CouldNotOpenForWriting(fname, str(err))
+        print('Write {}'.format(ref))
+        method(record, ofile)
+        n += 1
+        print('--')
+    return n
+
+def plural(n, noun):
+    if n == 0:
+        return "no {}s".format(noun)
+    elif n == 1:
+        return "1 {}".format(noun)
+    else:
+        return "{:d} {}s".format(n, noun)
+
+def main(cmdline):
+    env = KBEnv()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--ref', dest='ref',
+                        help='Object reference, e.g. "1019/4/1"',
+                        default=None)
+    parser.add_argument('--file', dest='ref_file',
+                        help='File with list of object references,'
+                             'one per line. Use "-" for standard input.',
+                        default=None)
+    parser.add_argument('--msgpack', dest='use_msgpack',
+                        action='store_true',
+                        help='Format output using messagepack instead '
+                        'of plain JSON')
+    parser.add_argument('--dir', dest='out_dir',
+                        help='Output directory [.]',
+                        default='.')
+    parser.add_argument('--url', dest='ws_url',
+                        help='URL for KBase workspace.'
+                             'This can also be a shorthand for a known'
+                             'deployment: "narrative" or "ci" [{}] '.format(
+                            env.get_name('ws_url')),
+                        default=env.get_value('ws_url'))
+    parser.add_argument('--token', dest='auth_token',
+                        help='URL for KBase workspace [{}]'.format(
+                            env.get_name('auth_token')),
+                        default=env.get_value('auth_token'))
+    parser.add_argument('--verbose', '-v', dest='vb', action="count", default=0,
+                        help="Print more verbose messages to standard error. "
+                             "Repeatable. (default=ERROR)")
+    args = parser.parse_args(cmdline)
+    if not args.ref and not args.ref_file:
+        parser.error('Must specify one of --ref or --file')
+    elif args.ref and args.ref_file:
+        parser.error('Cannot specify both of --ref and --file')
+    if args.ws_url is None:
+        parser.error('Must give workspace with --url argument')
+    verbosity = (logging.ERROR, logging.INFO, logging.DEBUG)[min(args.vb, 2)]
+    #print("set verbosity to {}".format(verbosity))
+    _log.setLevel(verbosity)
+    # Get the list of references
+    refs = None
+    try:
+        refs = get_ref_list(args.ref, args.ref_file)
+    except IOError as err:
+        parser.error('Cannot read references from file: {}'.format(err))
+    # Fetch and dump the references
+    n = dump_refs(refs, args.ws_url, args.auth_token, args.out_dir,
+                  args.use_msgpack)
+
+    _log.info('Dumped {count} into "{dirname}"'.format(
+        count=plural(n, 'record'), dirname=args.out_dir))
+    # Done
+    return 0
+
+if __name__ == '__main__':
+    sys.exit(main(sys.argv[1:]))

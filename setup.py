@@ -30,14 +30,20 @@ config = {
                  "doekbase.data_api.taxonomy",
                  "doekbase.data_api.taxonomy.taxon",
                  "doekbase.data_api.taxonomy.taxon.service",
-                 "doekbase.data_api.genome",
                  "doekbase.data_api.baseobj",
                  "doekbase.data_api.tests",
                  "doekbase.data_api.tests.performance",
                  "doekbase.workspace"],
     "scripts": ["bin/data_api_demo.py",
-                "bin/data_api_benchmark.py"],
-    "name": "doekbase_data_api"
+                "bin/data_api_benchmark.py",
+                "bin/dump_wsfile"],
+    "name": "doekbase_data_api",
+    "entry_points": {
+        'nose.plugins.0.10': [
+            'wsurl = doekbase.data_api.tests.nose_plugin_wsurl:WorkspaceURL'
+        ]
+    },
+    "zip_safe": True
 }
 
 setuptools.setup(package_dir = {'': 'lib'},

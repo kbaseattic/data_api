@@ -1,17 +1,34 @@
 """
 Module for base class for Data API objects.
 """
+
+# Imports
+
+# Stdlib
+import glob
 import os
 import re
-
 try:
     import cStringIO as StringIO
 except ImportError:
     import StringIO as StringIO
+# Local
+from doekbase.data_api.util import get_logger, log_start, log_end
+from doekbase.workspace.client import Workspace
+from doekbase.data_api.wsfile import WorkspaceFile
 
-import doekbase.workspace.client
+# Logging
 
+_log = get_logger('doekbase.data_api.core')
+
+# Globals
 REF_PATTERN = re.compile("(.+/.+(/[0-9].+)?)|(ws\.[1-9][0-9]+\.[1-9][0-9]+)")
+
+g_ws_url = "https://ci.kbase.us/services/ws/"
+g_shock_url = "https://ci.kbase.us/services/shock-api/"
+g_use_msgpack = True
+
+# Functions and Classes
 
 def get_token():
     try:
@@ -24,7 +41,6 @@ class ObjectAPI(object):
     """Generic Object API for basic properties and actions
        of a KBase Data Object.
     """
-
     def __init__(self, services=None, token=None, ref=None):
         """Create new object.
 
@@ -58,27 +74,36 @@ class ObjectAPI(object):
         else:
             self._token = token
 
-        self.ws_client = doekbase.workspace.client.Workspace(services["workspace_service_url"], token=self._token)
+        ws_url = services["workspace_service_url"]
+        if '://' in ws_url: # assume a real Workspace server
+            _log.debug('Connect to Workspace service at {}'.format(ws_url))
+            self.ws_client = Workspace(ws_url, token=self._token)
+        else:
+            _log.debug('Load from Workspace file at {}'.format(ws_url))
+            self.ws_client = self._init_ws_from_files(ws_url)
 
         info_values = self.ws_client.get_object_info_new({
             "objects": [{"ref": self.ref}],
             "includeMetadata": 0,
-            "ignoreErrors": 0})[0]        
-        
+            "ignoreErrors": 0})
+        if not info_values:
+            raise ValueError("Cannot find object: {}".format(self.ref))
+        oi = info_values[0]
+
         self._info = {
-            "object_id": info_values[0],
-            "object_name": info_values[1],
-            "object_reference": "{0}/{1}".format(info_values[6],info_values[0]),
-            "object_reference_versioned": "{0}/{1}/{2}".format(info_values[6],info_values[0],info_values[4]),
-            "type_string": info_values[2],
-            "save_date": info_values[3],
-            "version": info_values[4],
-            "saved_by": info_values[5],
-            "workspace_id": info_values[6],
-            "workspace_name": info_values[7],
-            "object_checksum": info_values[8],
-            "object_size": info_values[9],
-            "object_metadata": info_values[10]
+            "object_id": oi[0],
+            "object_name": oi[1],
+            "object_reference": "{0}/{1}".format(oi[6],oi[0]),
+            "object_reference_versioned": "{0}/{1}/{2}".format(oi[6],oi[0],oi[4]),
+            "type_string": oi[2],
+            "save_date": oi[3],
+            "version": oi[4],
+            "saved_by": oi[5],
+            "workspace_id": oi[6],
+            "workspace_name": oi[7],
+            "object_checksum": oi[8],
+            "object_size": oi[9],
+            "object_metadata": oi[10]
         }
         self._id = self._info["object_id"]
         self._name = self._info["object_name"]
@@ -88,6 +113,26 @@ class ObjectAPI(object):
         self._history = None
         self._provenance = None
         self._data = None
+
+    def _init_ws_from_files(self, path):
+        if g_use_msgpack:
+            ext = 'msgpack'
+            WorkspaceFile.use_msgpack = True
+        else:
+            ext = 'json'
+            WorkspaceFile.use_msgpack = False
+        input_files = glob.glob(os.path.join(path, '*.' + ext))
+        if len(input_files) == 0:
+            raise ValueError('No .{} files found for file-based Workspace '
+                             'in path "{}"'.format(ext, path))
+        client = WorkspaceFile()
+        for f in input_files:
+            #t0 = log_start(_log, 'client.load', level=logging.DEBUG,
+            #               kvp={'file': f})
+            client.load(f)
+            #log_end(_log, t0, 'client.load', level=logging.DEBUG,
+            #        kvp={'file': f})
+        return client
 
     def get_schema(self):
         """

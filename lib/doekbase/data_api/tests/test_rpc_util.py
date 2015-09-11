@@ -109,7 +109,7 @@ def test_thrift_errmsg():
         rpc_util.thrift_validate(Metadata(object_size=val))
     except rpc_util.InvalidField as err:
         msg = str(err)
-        print("@@ {}".format(msg))
+        #print("@@ {}".format(msg))
         # make sure both type and value appear in error message
         assert val in msg  # note: assumes string value
         assert 'I64' in msg

@@ -1,5 +1,5 @@
 """
-Tests for biokbase.data_api.nav module
+Tests for doekbase.data_api.nav module
 """
 __author__ = 'Dan Gunter <dkgunter@lbl.gov>'
 __date__ = '8/3/15'

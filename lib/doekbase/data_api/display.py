@@ -26,11 +26,9 @@ except ImportError:
     sns = None
 
 # Local
-from doekbase.data_api.util import log_start, log_end, stdout_config
+from doekbase.data_api.util import get_logger, log_start, log_end
 
-_logger = stdout_config(logging.getLogger(__name__))
-_logger.setLevel(logging.DEBUG)
-_logger.propagate = False
+_log = get_logger('doekbase.data_api.display')
 
 _nbviewer = False
 def nbviewer_mode(value=None):
@@ -294,7 +292,7 @@ class GenomeSummary(TemplateMixin):
 
     @staticmethod
     def _get_taxon(ga):
-        t0 = log_start(_logger, 'get_taxon')
+        t0 = log_start(_log, 'get_taxon')
         try:
             taxon = ga.get_taxon()
         except Exception as err:
@@ -304,12 +302,12 @@ class GenomeSummary(TemplateMixin):
                            'genetic_code', 'scientific_name', 'aliases',
                            'scientific_lineage')}
         txn['lineage_list'] = txn['scientific_lineage'].split(';')
-        log_end(_logger, t0, 'get_taxon')
+        log_end(_log, t0, 'get_taxon')
         return txn
 
     @staticmethod
     def _get_assembly(ga):
-        t0 = log_start(_logger, 'get_assembly')
+        t0 = log_start(_log, 'get_assembly')
         try:
             assembly = ga.get_assembly()
         except Exception as err:
@@ -323,12 +321,12 @@ class GenomeSummary(TemplateMixin):
                 ('contig_length', 'contig_lengths'),
                 ('contig_gc_content', 'contig_gc_content')
             )}
-        log_end(_logger, t0, 'get_assembly')
+        log_end(_log, t0, 'get_assembly')
         return asy
 
     @staticmethod
     def _get_annotation(ga):
-        t0 = log_start(_logger, 'get_annotation')
+        t0 = log_start(_log, 'get_annotation')
         try:
             feature_types = ga.get_feature_types()
         except Exception as err:
@@ -336,7 +334,7 @@ class GenomeSummary(TemplateMixin):
         ann = { 'feature_' + k: getattr(ga, 'get_feature_' + k)(feature_types)
                 for k in ('type_descriptions', 'type_counts')}
         ann['feature_types'] = feature_types
-        log_end(_logger, t0, 'get_annotation')
+        log_end(_log, t0, 'get_annotation')
         return ann
 
     def summary_plots(self):
