@@ -18,8 +18,8 @@ script:
   - cd lib
   - touch .coverage
   - ls -ltR
-  - nosetests --ws-url=test_resources/data  --wsfile-msgpack
   - cd ..
+  - nosetests --ws-url=test_resources/data  --wsfile-msgpack
 
 #after_success:
 #  - cd lib
