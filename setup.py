@@ -1,4 +1,5 @@
 import setuptools
+import os
 
 def parse_requirements():
     packages = list()
@@ -13,13 +14,15 @@ def parse_requirements():
                 packages.append(line)
     return packages
 
+version = open('VERSION').read().strip()
+
 config = {
     "description": "KBase Data API",
     "author": "Matt Henderson",
     "url": "https://github.com/kbase/data_api/",
     "download_url": "https://github.com/kbase/data_api/stuff?download",
     "author_email": "mhenderson@lbl.gov",
-    "version": "0.1",
+    "version": version,
     "setup_requires": ["six"],
     "tests_require": ["nose"],
     "install_requires": parse_requirements(),

@@ -1,11 +1,16 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
-It also likes the suggestions from [Keep a CHANGELOG](http://keepachangelog.com/), especially the admonition to *not* dump raw git commit logs in here. This is a human-readable, curated log.
 
-## [0.0.8] - 2015-02-17
+## [Unreleased][unreleased]
 ### Changed
-- Update year to match in every README example.
-- Reluctantly stop making fun of Brits only, since most of the world
-  writes dates in a strange way.
- 
+- version.py added for version manipulation
+- renamed parent package to doekbase (from biokbase) to make installation in Narrative easier
+- used Thrift for client/server interface
+- many tests, much documentation
+- complete re-org of directory structure for
+
+## [0.1.0] - 2015-08-01
+### First version of the API
+- It sort of works
+
