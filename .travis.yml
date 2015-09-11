@@ -17,7 +17,6 @@ install:
 script:
   - cd lib
   - touch .coverage
-  - ls -ltR
   - cd ..
   - nosetests --ws-url=test_resources/data  --wsfile-msgpack
 
