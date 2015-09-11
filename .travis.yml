@@ -2,6 +2,9 @@ language: python
 python:
   - "2.7"
 
+git:
+  submodules: false
+
 before_install:
   - git submodule update --init --recursive
 
@@ -14,6 +17,7 @@ install:
 script:
   - cd lib
   - touch .coverage
+  - ls -ltR
   - nosetests --ws-url=test_resources/data  --wsfile-msgpack
   - cd ..
 
