@@ -61,3 +61,19 @@ Record changes in a human-readable format in the `CHANGELOG` at the root level. 
     * Fixed for any bug fixes.
     * Security to invite users to upgrade in case of vulnerabilities.
 - Changes not yet released should be put in the "Unreleased" section at the top. This serves as a sort of preview of upcoming changes.
+
+## Test data
+
+The full test suite requires either a network connection and authorization for the KBase Workspace and Shock, or a local copy of test data for use by the file-based workspace and Shock implementations. Even if you have network access and auth tokens, the file-based tests may be preferable because they are faster, self-consistent, and do not add any load to the services. The test data does require one extra setup step, described here.
+
+The test data, because it is big and not code, is separated from the main `data_api` repo. It is stored in a git submodule called `data_api_test_resources`. Please refer to the [Git submodule documentation](http://git-scm.com/docs/git-submodule) for details, but the basic commands that you should make sure you do to get the most recent version of the submodules are:
+
+1. In a repository that does not yet have any copy of the `data_api_test_resources` sub-repo, to initialize and clone the repo:
+
+        git submodule init
+  
+2. In a repository that does have a copy of the cloned repo, to update to the latest version:
+
+        git submodule update
+    
+The sub-repository will be cloned in the directory `test_resources`.
