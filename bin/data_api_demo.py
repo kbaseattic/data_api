@@ -9,17 +9,19 @@ my_location = os.path.split(os.path.dirname(__file__))[0]
 lib_path = sorted([(x, len(os.path.commonprefix([x, my_location]))) for x in paths], cmp=lambda x,y: cmp(x[1],y[1]))[-1][0]
 sys.path.insert(1,lib_path)
 
-import biokbase.data_api.core
-import biokbase.data_api.sequence.assembly
-import biokbase.data_api.taxonomy.taxon
-import biokbase.data_api.annotation.genome_annotation
+import doekbase.data_api.core
+import doekbase.data_api.sequence.assembly
+import doekbase.data_api.taxonomy.taxon.api
+import doekbase.data_api.annotation.genome_annotation
 
 
 def api_demo(services=None, ref=None):
     print "general object API methods using  Genome Annotation"
-    
-    print "object_api = biokbase.data_api.object.ObjectAPI()"
-    object_api = biokbase.data_api.core.ObjectAPI(services, ref)
+
+    token = os.environ["KB_AUTH_TOKEN"]
+
+    print "object_api = doekbase.data_api.object.ObjectAPI()"
+    object_api = doekbase.data_api.core.ObjectAPI(services, token, ref)
 
     print "Pull back basic object info for any object type:"
     print "\n\nobject_api.get_typestring()"
@@ -54,8 +56,8 @@ def api_demo(services=None, ref=None):
     
     print "\n\nGenome Annotation API methods using "
     
-    print "genome_annotation_api = biokbase.data_api.genome_annotation.GenomeAnnotationAPI()"
-    genome_annotation_api = biokbase.data_api.annotation.genome_annotation.GenomeAnnotationAPI(services, ref)
+    print "genome_annotation_api = doekbase.data_api.genome_annotation.GenomeAnnotationAPI()"
+    genome_annotation_api = doekbase.data_api.annotation.genome_annotation.GenomeAnnotationAPI(services, token, ref)
     
     print "\n\nGet my connected Taxon:"
     print "genome_annotation_api.get_taxon()"

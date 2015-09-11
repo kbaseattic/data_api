@@ -27,7 +27,7 @@ e.g., pip install data_api/
 5. set your KB_AUTH_TOKEN to your token string
 e.g., in a KBase environment use kbase-login to retrieve a token, check your .kbase_config
 
-6. run nosetests biokbase.data_api to verify your install is working
+6. run nosetests doekbase.data_api to verify your install is working
 
 You can run pip install data_api/ --upgrade if you have edited files
 locally and want to test them out without having to reset the virtualenv.

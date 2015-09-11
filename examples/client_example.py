@@ -10,10 +10,10 @@ __date__ = '8/20/15'
 import argparse
 import sys
 # Local
-from biokbase.data_api.genome import api
-from biokbase.data_api.genome import avro_client  # keep!
-from biokbase.data_api import registry
-from biokbase.data_api.avro_rpc import AVRO_DEFAULT_PORT
+from doekbase.data_api.genome import api
+from doekbase.data_api.genome import avro_client  # keep!
+from doekbase.data_api import registry
+from doekbase.data_api.avro_rpc import AVRO_DEFAULT_PORT
 
 # Constants and globals
 

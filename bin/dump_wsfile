@@ -2,7 +2,7 @@
 """
 Command-line program to dump one or more objects from the
 KBase workspace into JSON files in the format expected by the
-`biokbase.data_api.wsfile` module.
+`doekbase.data_api.wsfile` module.
 """
 __author__ = 'Dan Gunter <dkgunter@lbl.gov>'
 __date__ = '9/4/15'
@@ -17,8 +17,8 @@ import msgpack
 import os; opj = os.path.join
 import sys
 # local
-from biokbase.data_api.wsfile import workspace_to_file
-from biokbase.data_api.util import get_logger
+from doekbase.data_api.wsfile import workspace_to_file
+from doekbase.data_api.util import get_logger
 
 # Logging
 

@@ -17,3 +17,4 @@ ipython>=3.0.0
 bokeh==0.9.2
 thrift==0.9.2
 mongomock==3.0.0
+msgpack-python==0.4.6
