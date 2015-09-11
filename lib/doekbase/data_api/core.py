@@ -68,14 +68,15 @@ class ObjectAPI(object):
 
         self.services = services
         self.ref = ref
-
-        if token == None or len(token.strip()) == 0:
-            self._token = get_token()
-        else:
-            self._token = token
+        self._token = None
 
         ws_url = services["workspace_service_url"]
         if '://' in ws_url: # assume a real Workspace server
+            if token == None or len(token.strip()) == 0:
+                self._token = get_token()
+            else:
+                self._token = token
+
             _log.debug('Connect to Workspace service at {}'.format(ws_url))
             self.ws_client = Workspace(ws_url, token=self._token)
         else:
