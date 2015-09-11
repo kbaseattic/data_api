@@ -2,6 +2,9 @@ language: python
 python:
   - "2.7"
 
+before_install:
+  - git submodule update --init --recursive
+
 install:
   - "mv requirements.txt requirements.txt-"
   - "cp requirements-travis.txt requirements.txt"
