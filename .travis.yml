@@ -21,4 +21,5 @@ script:
   - nosetests --with-coverage --ws-url=test_resources/data  --wsfile-msgpack
 
 after_success:
-  - coveralls --base_dir lib/ --coveralls_yaml lib/.coveralls.yml
+  - codecov
+#  - coveralls --base_dir lib/ --coveralls_yaml lib/.coveralls.yml
