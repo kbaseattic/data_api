@@ -52,12 +52,12 @@ Keep the version current in the file `VERSION` at the root level.
 
 Record changes in a human-readable format in the `CHANGELOG` at the root level. Each version should:
 
-    - List its release date in the above format.
-    - Group changes to describe their impact on the project, as follows:
-        * Added for new features.
-        * Changed for changes in existing functionality.
-        * Deprecated for once-stable features removed in upcoming releases.
-        * Removed for deprecated features removed in this release.
-        * Fixed for any bug fixes.
-        * Security to invite users to upgrade in case of vulnerabilities.
-    - Changes not yet released should be put in the "Unreleased" section at the top. This serves as a sort of preview of upcoming changes.
+- List its release date in the above format.
+- Group changes to describe their impact on the project, as follows:
+    * Added for new features.
+    * Changed for changes in existing functionality.
+    * Deprecated for once-stable features removed in upcoming releases.
+    * Removed for deprecated features removed in this release.
+    * Fixed for any bug fixes.
+    * Security to invite users to upgrade in case of vulnerabilities.
+- Changes not yet released should be put in the "Unreleased" section at the top. This serves as a sort of preview of upcoming changes.
