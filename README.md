@@ -51,6 +51,7 @@ Use semantic versioning, "x.y.z", where x is major, or incompatible, differences
 Keep the version current in the file `VERSION` at the root level.
 
 Record changes in a human-readable format in the `CHANGELOG` at the root level. Each version should:
+
     - List its release date in the above format.
     - Group changes to describe their impact on the project, as follows:
         * Added for new features.
