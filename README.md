@@ -8,7 +8,7 @@ This repository is configured to use TravisCI
 
 Source code is under lib/ (Python)
 [![Build Status](https://travis-ci.org/kbase/data_api.svg?branch=master)](https://travis-ci.org/kbase/data_api)
-[![Coverage Status](https://coveralls.io/repos/kbase/data_api/badge.svg?branch=master)](https://coveralls.io/r/kbase/data_api?branch=master)
+[![Coverage Status](http://codecov.io/github/kbase/data_api/coverage.svg?branch=master)](http://codecov.io/github/kbase/data_api?branch=master)
 
 #quickstart instructions
 
