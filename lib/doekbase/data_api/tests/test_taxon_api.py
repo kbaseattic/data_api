@@ -28,6 +28,23 @@ def setup():
     t_old = TaxonAPI(shared.services, shared.token, taxon_old)
     t_old_e = _KBaseGenomes_Genome(shared.services, shared.token, taxon_old)
 
+
+@skipUnless(shared.can_connect, 'Cannot connect to workspace')
+def test_bogus_type():
+    inputs = ["Bogus",
+              "PrototypeReferenceGenomes/kb|g.166819",
+              "PrototypeReferenceGenomes/kb|g.166819_assembly",
+              "OriginalReferenceGenomes/kb|g.166819.contigset"]
+    _log.info("Input {}".format(inputs))
+    for x in inputs:
+        try:
+            t = TaxonAPI(shared.services, shared.token, x)
+        except Exception, e:
+            assert isinstance(e, TypeError)
+        else:
+            assert False
+
+
 ####### New Taxon Type tests
 
 
