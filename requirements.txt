@@ -4,7 +4,9 @@ Jinja2==2.7.3
 Sphinx<=1.2.99
 sphinxcontrib-napoleon>=0.3.0
 nose
-python-coveralls
+nose-timer
+coverage
+codecov
 six==1.9.0
 enum34
 pandas==0.16.2
