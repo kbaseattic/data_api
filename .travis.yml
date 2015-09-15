@@ -17,7 +17,8 @@ script:
   - cd lib
   - touch .coverage
   - cd ..
-  - coverage run --source=doekbase.data_api /usr/local/bin/nosetests --with-timer --ws-url=test_resources/data --wsfile-msgpack
+  - which nosetests
+  - coverage run --source=doekbase.data_api /home/travis/virtualenv/bin/nosetests --with-timer --ws-url=test_resources/data --wsfile-msgpack
   - coverage report
 
 after_success:
