@@ -17,7 +17,6 @@ script:
   - cd lib
   - touch .coverage
   - cd ..
-  - which nosetests
   - coverage run --source=doekbase.data_api /home/travis/virtualenv/python2.7.9/bin/nosetests --with-timer --ws-url=test_resources/data --wsfile-msgpack
   - coverage report
 
