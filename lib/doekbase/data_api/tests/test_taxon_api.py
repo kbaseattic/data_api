@@ -41,8 +41,6 @@ def test_bogus_type():
             t = TaxonAPI(shared.services, shared.token, x)
         except Exception, e:
             assert isinstance(e, TypeError)
-        else:
-            assert False
 
 
 ####### New Taxon Type tests

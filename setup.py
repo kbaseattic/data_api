@@ -24,7 +24,7 @@ config = {
     "author_email": "mhenderson@lbl.gov",
     "version": version,
     "setup_requires": ["six"],
-    "tests_require": ["nose"],
+    "tests_require": ["nose", "nose-timer", "codecov"],
     "install_requires": parse_requirements(),
     "packages": ["doekbase",
                  "doekbase.data_api",

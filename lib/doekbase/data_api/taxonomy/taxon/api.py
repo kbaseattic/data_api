@@ -130,6 +130,8 @@ class _KBaseGenomes_Genome(ObjectAPI, TaxonInterface):
     def __init__(self, services, token, ref):
         super(_KBaseGenomes_Genome, self).__init__(services, token, ref)
 
+        self.data = self.get_data_subset(["taxonomy", "scientific_name", "source_id", "domain", "genetic_code"])
+
     def get_parent(self, ref_only=False):
         return None
 
@@ -140,14 +142,14 @@ class _KBaseGenomes_Genome(ObjectAPI, TaxonInterface):
         return list()
 
     def get_scientific_lineage(self):
-        return self.get_data_subset(["taxonomy"])["taxonomy"]
+        return self.data["taxonomy"]
 
     def get_scientific_name(self):
-        return self.get_data_subset(["scientific_name"])["scientific_name"]
+        return self.data["scientific_name"]
 
     def get_taxonomic_id(self):
         try:
-            return int(self.get_data_subset(["source_id"])["source_id"])
+            return int(self.data["source_id"])
         except:
             return -1
 
@@ -155,13 +157,13 @@ class _KBaseGenomes_Genome(ObjectAPI, TaxonInterface):
         return None
 
     def get_domain(self):
-        return self.get_data_subset(["domain"])["domain"]
+        return self.data["domain"]
 
     def get_aliases(self):
         return list()
 
     def get_genetic_code(self):
-        return self.get_data_subset(["genetic_code"])["genetic_code"]
+        return self.data["genetic_code"]
 
 
 class _Prototype(ObjectAPI, TaxonInterface):
