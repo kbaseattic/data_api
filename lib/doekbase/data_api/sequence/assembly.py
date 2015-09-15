@@ -183,7 +183,7 @@ class AssemblyAPI(ObjectAPI, AssemblyInterface):
         return self.proxy.get_contig_lengths(contig_id_list)
 
     def get_contig_gc_content(self, contig_id_list=None):
-        return self.proxy.get_contig_lengths(contig_id_list)
+        return self.proxy.get_contig_gc_content(contig_id_list)
 
     def get_contig_ids(self):
         return self.proxy.get_contig_ids()
