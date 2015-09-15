@@ -1,0 +1,1 @@
+.. |wsref| replace:: ``workspace-id``/``object-id`` OR ``workspace-id``/``object-id``/``version``, where the workspace and object can either be numeric identifiers or names. For example: ``1019/4``, ``1019/4/1``, or ``PrototypeReferenceGenomes/kb|g.166819``

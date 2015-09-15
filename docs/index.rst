@@ -7,6 +7,7 @@
     :maxdepth: 4
 
     create_api
+    taxon_api
     API Reference <_source/modules>
 
 KBase Data API documentation
