@@ -20,6 +20,7 @@ except:
     import StringIO
 from datetime import datetime
 import json
+import logging
 import msgpack
 import os
 import re
@@ -108,44 +109,102 @@ class WorkspaceFile(object):
 
     use_msgpack = True
 
-    def __init__(self):
-        """Create file-based Workspace instance.
+    def __init__(self, working_directory):
+        """Create file-based Workspace instance, using files in
+        the given working directory.
+
         Additional files are added with the `load` method.
+
+        Args:
+          working_directory (str): Path to directory with files to load.
         """
+        self._wd = working_directory
         # create client and collection
         client = mm.MongoClient()
         self.collection = client.db.collection
         # This monkey-patch avoids a copy of the parsed workspace object
         # as it is added to the mongomock collection. Of course, this
         # means that this dict MUST be treated as immutable by other code.
-        # But in this case, the dict is 'record' in the `load` function
-        # that goes out of scope immediately.
         self.collection._internalize_dict = lambda d: d
         # some internal state
         self._oids = {}
+        self._loaded = {}
 
-    def load(self, file_or_path):
-        """load data from a file or name of a file into the workspace.
+    def load(self, ref):
+        """Load data from a given reference.
+
+        The reference will be translated into a file to load,
+        using the following formula::
+
+            <working_directory> + '/' + <norm-ref> + <ext>
+
+        Where ``<working_directory>`` is the path given to the class
+        constructor, ``<norm-ref>`` is the reference given to this
+        function, with the '/' character replaced with a '_', and
+        ``<ext>`` is a file extension '.msgpack' if :attr:``use_msgpack``
+         is True and '.json' if it is False.
+
+        Thus, for ``WorkspaceFile('/tmp/data').load('foo/bar')``,
+        the path loaded would be '/tmp/data/foo_bar.msgpack'.
 
         See class documentation on format of input data.
+
+        Args:
+          ref (str): The reference
+        Post:
+          Object is loaded if and only if that reference was not
+          loaded previously. Modification timestamp of the underlying
+          file is NOT checked, you must manually invalidate modified
+          data with :meth:`unload(ref)`.
+        Raises:
+          IOError: file not found or not readable.
+          ValueError: parsing failed.
         """
-        # open the input file
-        if hasattr(file_or_path, 'read'):
-            infile = file_or_path
-        else:
-            infile = open(file_or_path)
-        # insert the file into mongomock
-        method = msgpack.load if self.use_msgpack else json.load
+        t0 = log_start(_log, 'WorkspaceFile.load', level=logging.DEBUG,
+                       kvp=dict(ref=ref))
+
+        # Do nothing if already loaded in the past
+        if ref in self._loaded:
+            log_end(_log, t0, 'WorkspaceFile.load', level=logging.DEBUG,
+                    kvp=dict(ref=ref, cached='yes'))
+            return
+
+        # create the full path from the reference
+        norm_ref = ref.replace('/', '_')
+        ext = '.msgpack' if self.use_msgpack else '.json'
+        full_path = os.path.join((self._wd, norm_ref, ext))
+
+        # open the file
+        f = open(full_path)
+
+        # parse the file
         try:
-            record = FileObjectCache(method).get(infile, infile)
-        except TypeError as err:
-            raise ValueError("Bad type for input file {}: {}"
-                             .format(infile, err))
-        #t0 = log_start(_log, 'collection.insert', level=logging.DEBUG,
-        #               kvp={'file': infile})
+            record = msgpack.load(f) if self.use_msgpack else json.load(f)
+        except Exception as err:
+            raise ValueError('Loading {}: {}'.format(full_path, err))
+        finally:
+            f.close()
+
+        # cache the parsed data
+        self._loaded[ref] = record
+
+        # insert the parsed data into mongomock
         self.collection.insert(record)
-        #log_end(_log, t0, 'collection.insert', level=logging.DEBUG,
-        #        kvp={'file': infile})
+
+        log_end(_log, t0, 'WorkspaceFile.load', level=logging.DEBUG,
+                kvp=dict(ref=ref, cached='no'))
+
+    def unload(self, ref):
+        """Force reload of ``ref`` the next time.
+        Does nothing if ``ref`` is not already loaded.
+
+        Args:
+          ref (str): The reference
+        Post:
+           ref is no longer loaded
+        """
+        if ref in self._loaded:
+            del self._loaded[ref]
 
     # Public methods
 
@@ -344,49 +403,6 @@ class WorkspaceFile(object):
             records = list(self.collection.find({'name': ref}))
         return records
 
-
-class FileObjectCache(object):
-    """Simple memory cache for files that uses the
-    modification time of the file to see whether to
-    reload.
-    """
-    cache = {}
-
-    def __init__(self, meth):
-        """Create with a method to invoke when creating
-        the cached object.
-        """
-        self.method = meth
-
-    def get(self, path, *args, **kwargs):
-        """Get from cache, or create if not found.
-
-        Args:
-          path: Path to file
-          args: Pass these to create method
-          kwargs: Pass these to create method
-        Returns:
-          New or cached return value from self.method
-        """
-        if hasattr(path, 'name'):  # file object
-            path = path.name
-        elif not isinstance(path, basestring):
-            import StringIO
-            if isinstance(path, StringIO.StringIO):
-                return self.method(*args, **kwargs)
-            raise TypeError('Not string, file, or StringIO.StringIO')
-        # construct key with path and modif. time
-        mtime = os.path.getmtime(path)
-        key = '{}--{}'.format(path, mtime)
-        # look for object by that key
-        if key in self.cache:
-            # if found, return it
-            return self.cache[key]
-        # if not found, create new object,
-        # add it to the cache, and return it
-        obj = self.method(*args, **kwargs)
-        self.cache[key] = obj
-        return obj
 
 ####
 
