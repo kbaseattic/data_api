@@ -31,8 +31,11 @@ class TaxonInterface(object):
         Retrieve parent Taxon of this Taxon as a TaxonAPI object.
         If this is accessing a Genome object, returns None.
 
+        Args:
+          ref_only (bool): Return the reference instead of the full TaxonAPI object.
         Returns:
-          TaxonAPI"""
+          TaxonAPI
+         """
         pass
 
     @abc.abstractmethod

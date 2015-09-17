@@ -4,9 +4,12 @@
 # You can set these variables from the command line.
 SPHINXOPTS    =
 SPHINXBUILD   = sphinx-build
+SPHINXAPI	  = sphinx-apidoc
 PAPER         =
 BUILDDIR      = _build
 KB_BUILDDIR   = ../../../docs-ghpages/docs/data_api
+APIOUTDIR	  = _source
+APIMODULEDIR  = ../lib/biokbase
 
 # User-friendly check for sphinx-build
 ifeq ($(shell which $(SPHINXBUILD) >/dev/null 2>&1; echo $$?), 1)
@@ -25,6 +28,7 @@ I18NSPHINXOPTS  = $(PAPEROPT_$(PAPER)) $(SPHINXOPTS) .
 
 help:
 	@echo "Please use \`make <target>' where <target> is one of"
+	@echo "  api        to build the API .rst file for Sphinx autodoc"
 	@echo "  html       to make standalone HTML files"
 	@echo "  kbhtml     to make standalone HTML files, in KBase target directories"
 	@echo "  dirhtml    to make HTML files named index.html in directories"
@@ -54,6 +58,11 @@ help:
 clean:
 	rm -rf $(BUILDDIR)/*
 
+api:
+	$(SPHINXAPI) -f -o $(APIOUTDIR) $(APIMODULEDIR)
+	@echo
+	@echo "Build finished. The API .rst pages are in $(APIOUTDIR)."
+	
 html:
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)
 	@echo

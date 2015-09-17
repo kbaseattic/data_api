@@ -4,31 +4,48 @@
    contain the root `toctree` directive.
 
 .. toctree::
-    :maxdepth: 2
+    :maxdepth: 4
 
     create_api
-    API Reference <biokbase>
+    taxon_api
+    API Reference <_source/modules>
 
 KBase Data API documentation
 ============================
 The Data API provides a unified entry point to retrieve and, eventually,
-store KBase data objects.
+store KBase data objects. A simplified view of how the Data API relates to other
+components of KBase is below::
+
+    +------------------------------+
+    |Services/Narrative code cells |
+    +------------------------------+
+        |                    ^
+        v                    |
+    *******************************
+    ||     Data API library      ||
+    *******************************
+        ^                    |
+        |                    v
+    +-----------------------------+
+    |     Workspace/Datastores    |
+    +-----------------------------+
+    
+Here we see that the Data API library is called by Services or Narrative code cells (via the backend Jupyter/IPython kernel), and communicates with the underlying data stores on behalf of its clients.
 
 Using the Data API
 ==================
 
-There are two primary modes of using the Data API: interactively and programmatically.
+There are two primary modes of using the Data API: interactively, as in the Narrative UI or
+Jupyter noteboook, and programmatically, as from an installed service.
 Interactively, the API can be imported into in the IPython/Jupyter notebook or
 Narrative and used to explore and examine data objects.
 Results will be automatically displayed as HTML and inline plots. Programmatically,
 the same API can be imported into any Python code and used like a standard
 library.
 
-.. note::
-
-    The integration of the Data API into the KBase Narrative is not quite
-    done yet. For now, you need to try it out in a recent (August 2015+)
-    version of the Jupyter notebook.
+.. note:: 
+  The integration of the Data API into the KBase Narrative is not quite done yet. 
+  For now, you need to try it out in a recent (August 2015+) version of the Jupyter notebook.
 
 In both cases, the :ref:`core-api` functions are used to access the objects.
 For interactive use, and some programmatic use-cases, the :ref:`highlevel-api`
@@ -72,9 +89,6 @@ Running tests
 -------------
 Unit tests can be run with a file-based Workspace library, based on the
 mongomock package and implemented in the `biokbase.data_api.wsfile` module.
-
-Overview
-++++++++
 
 This mode is activated by passing a directory path instead of a
 regular URL to the `--ws-url` option for nosetests. This nosetest option is

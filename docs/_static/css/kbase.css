@@ -83,6 +83,37 @@ div.section h1 {
 }
 
 /*----------------------
+ * Code blocks
+ *----------------------
+ */
+
+dl.method, dl.class, dl.function {
+    color: #256B12; /* muted green */
+}
+/* Class and method declarations */
+/* add a border for classes */
+dl.class dt {
+    border-top: 2px solid #4BB856;
+}
+/* don't have a border for each method */
+dl.method dt {
+    border: none;
+}
+/* methods declarations */
+dl.method dt tt {
+    padding-left: 5px;
+    border-left: 2px solid #4BB856;
+}
+
+/* Class and method names */
+dl.class tt {
+    color: #43877C;
+}
+dl.method tt {
+    color: #43877C;
+}
+
+/*----------------------
  * Footer
  * Copied from kbase.us
  * ---------------------
