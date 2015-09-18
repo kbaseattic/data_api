@@ -12,7 +12,7 @@ from doekbase.data_api import core
 from doekbase.data_api.util import get_logger
 
 # Logging
-_log = get_logger('nose_plugin_wsurl')
+_log = get_logger(__name__)
 
 class WorkspaceURL(Plugin):
     """Plugin that sets up the Workspace mocking instead of the
@@ -21,6 +21,7 @@ class WorkspaceURL(Plugin):
     def options(self, parser, env):
         """Register commmandline options.
         """
+        _log.info('WorkspaceURL.options')
         # Shock URL
         parser.add_option(
             "--shock-url", dest="shock_url", metavar='URL',
@@ -46,6 +47,7 @@ class WorkspaceURL(Plugin):
     def configure(self, options, conf):
         """Configure plugin.
         """
+        _log.info('WorkspaceURL.configure, ws_url={}'.format(options.ws_url))
         if not self.can_configure:
             return
         # Assign parsed values to global variables in the 'core' module.
