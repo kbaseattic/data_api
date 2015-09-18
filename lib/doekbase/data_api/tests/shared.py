@@ -27,7 +27,7 @@ services = None
 def get_services():
     svc = {"workspace_service_url": g_ws_url,
             "shock_service_url": g_shock_url}
-    print("@@ service URLs = {}".format(svc))
+    #print("@@ service URLs = {}".format(svc))
     return svc
 
 def can_connect(ref=genome):

@@ -8,7 +8,8 @@ __date__ = '9/3/15'
 
 # stdlib
 import json
-from StringIO import StringIO
+import os
+import tempfile
 # third-party
 # local
 from doekbase.data_api import wsfile
@@ -37,29 +38,49 @@ def foo_datum(n):
         }}
     return json.dumps(d)
 
+TEST_DATA = [
+    {'ref': '10/1', 'type': 'Foo',
+     'name': 'first', 'data': foo_datum(1),
+     'links': []},
+    {'ref': '10/2', 'type': 'Foo',
+     'name': 'second', 'data': foo_datum(2),
+     'links': ','.join(['"{}"'.format(r) for r in ['10/1']])},
+]
 
 _mock = None
+_tempdir = None
+
 def setup():
-    global _mock
+    global _mock, _tempdir
+
     print("Setting up mock DB")
-    infiles = map(StringIO,[
-        record_template.format(**kw) for kw in [
-            {'ref': '10/1', 'type': 'Foo',
-             'name': 'first', 'data': foo_datum(1),
-             'links': []},
-            {'ref': '10/2', 'type': 'Foo',
-              'name': 'second', 'data': foo_datum(2),
-             'links': ','.join(['"{}"'.format(r) for r in ['10/1']])},
-        ]
-    ])
+    _tempdir = tempfile.mkdtemp()
+    filenames = []
+    for datum in TEST_DATA:
+        filename = datum['ref'].replace('/', '_')
+        #print('@@ filename={} ref={}'.format(filename, datum['ref']))
+        path = os.path.join(_tempdir, filename) + '.json'
+        ofile = open(path, 'w')
+        record_buf = record_template.format(**datum)
+        ofile.write(record_buf)
+        ofile.close()
+        filenames.append(filename)
+
     # note: run nosetests with '-s' to see this
     #print("@@ input data:")
     #print(infile.getvalue())
-    wsfile.WorkspaceFile.use_msgpack = False
-    _mock = wsfile.WorkspaceFile()
-    for json_data in infiles:
-        _mock.load(json_data)
 
+    wsfile.WorkspaceFile.use_msgpack = False
+    _mock = wsfile.WorkspaceFile(_tempdir)
+    for filename in filenames:
+        _mock.load(filename)
+
+def teardown():
+    # remove temporary files and directory
+    for filename in os.listdir(_tempdir):
+        path = os.path.join(_tempdir, filename)
+        os.unlink(path)
+    os.rmdir(_tempdir)
 
 def test_get_object_history():
     # just make sure it doesn't crash.
