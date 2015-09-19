@@ -114,6 +114,29 @@ dl.method tt {
 }
 
 /*----------------------
+ * Note blocks
+ *----------------------
+ */
+div.note {
+    background-color: #F5F5F5;
+    border: none;
+    padding: 10px;
+    margin: 5px 10px;
+}
+div.note:before {
+    font-size: 120%;
+    content: "\261e";
+    color: #6B844B; /* like the text */
+}
+div.note p.first {
+    font-size: 120%;
+    color: #6B844B; /* like a heading */
+}
+div.note p.first + p {
+    display: inline;
+}
+
+/*----------------------
  * Footer
  * Copied from kbase.us
  * ---------------------

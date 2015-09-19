@@ -1,12 +1,5 @@
 """
 Workspace implemented over files, using the mongomock package.
-
-Usage:
-  mock = WorkspaceFile('/path/to/mock_data.json')
-  # OR: mock = WorkspaceFile(fileobj)
-  api = TaxonAPI( ... )
-  inject_mock(api, mock)
-  # run tests, as usual, on API class
 """
 __author__ = 'Dan Gunter <dkgunter@lbl.gov>'
 __date__ = '9/3/15'
@@ -99,14 +92,15 @@ class WorkspaceFile(object):
     data is in a simplified and reduced schema. The input should be a list
     of JSON ojects, separated by commas and bracketed by "[ ]" like a
     normal JSON list. Each object should have these fields:
-        - ref (str): object reference like "123/4"
-        - type (str): Name of the type of this object, e.g. "FooType"
-        - name (str): Name of this object, e.g. "PrototypeReferenceGenomes/kb|g.3157"
-        - links (list of str): List of references, each in the same form
-                               as the 'ref' field.
-        - data (dict): JSON object with the data (whatever you want)
+
+    * ref - object reference like "123/4"
+    * type - Name of the type of this object, e.g. "FooType"
+    * name - Name of this object, e.g. "PrototypeReferenceGenomes/kb|g.3157"
+    * links - List of references, each in the same form as the 'ref' field.
+    * data - JSON object with the data (whatever you want)
     """
 
+    #: Use MessagePack encoding for workspace objects
     use_msgpack = True
 
     def __init__(self, working_directory):
@@ -134,15 +128,13 @@ class WorkspaceFile(object):
         """Load data from a given reference.
 
         The reference will be translated into a file to load,
-        using the following formula::
-
-            <working_directory> + '/' + <norm-ref> + <ext>
-
-        Where ``<working_directory>`` is the path given to the class
+        using the following formula:
+        ``<working_directory> + '/' + <norm-ref> + <ext>`,
+        where ``<working_directory>`` is the path given to the class
         constructor, ``<norm-ref>`` is the reference given to this
         function, with the '/' character replaced with a '_', and
-        ``<ext>`` is a file extension '.msgpack' if :attr:``use_msgpack``
-         is True and '.json' if it is False.
+        ``<ext>`` is a file extension '.msgpack' if
+        `use_msgpack` is True and '.json' otherwise.
 
         Thus, for ``WorkspaceFile('/tmp/data').load('foo/bar')``,
         the path loaded would be '/tmp/data/foo_bar.msgpack'.
@@ -151,11 +143,13 @@ class WorkspaceFile(object):
 
         Args:
           ref (str): The reference
-        Post:
-          Object is loaded if and only if that reference was not
-          loaded previously. Modification timestamp of the underlying
-          file is NOT checked, you must manually invalidate modified
-          data with :meth:`unload(ref)`.
+
+        Notes:
+          * Post-condition: Object is loaded if and only if that reference was
+            not loaded previously. Modification timestamp of the underlying
+            file is NOT checked, you must manually invalidate modified
+            data with :meth:`unload(ref)`.
+
         Raises:
           IOError: file not found or not readable.
           ValueError: parsing failed.

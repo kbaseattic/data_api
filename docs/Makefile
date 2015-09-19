@@ -9,7 +9,7 @@ PAPER         =
 BUILDDIR      = _build
 KB_BUILDDIR   = ../../../docs-ghpages/docs/data_api
 APIOUTDIR	  = _source
-APIMODULEDIR  = ../lib/biokbase
+APIMODULEDIR  = ../lib/doekbase
 
 # User-friendly check for sphinx-build
 ifeq ($(shell which $(SPHINXBUILD) >/dev/null 2>&1; echo $$?), 1)
