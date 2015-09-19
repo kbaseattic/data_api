@@ -25,7 +25,7 @@ from doekbase.workspace.client import ServerError
 
 # Logging
 
-_log = get_logger('kbase.data_api.wsfile')
+_log = get_logger(__name__)
 
 # Globals
 
@@ -102,6 +102,7 @@ class WorkspaceFile(object):
 
     #: Use MessagePack encoding for workspace objects
     use_msgpack = True
+    _loaded = {}  # static cache of loaded refs
 
     def __init__(self, working_directory):
         """Create file-based Workspace instance, using files in
@@ -122,21 +123,20 @@ class WorkspaceFile(object):
         self.collection._internalize_dict = lambda d: d
         # some internal state
         self._oids = {}
-        self._loaded = {}
 
     def load(self, ref):
         """Load data from a given reference.
 
         The reference will be translated into a file to load,
         using the following formula:
-        ``<working_directory> + '/' + <norm-ref> + <ext>`,
+        ``<working_directory> + '/' + <ref> + <ext>`,
         where ``<working_directory>`` is the path given to the class
-        constructor, ``<norm-ref>`` is the reference given to this
-        function, with the '/' character replaced with a '_', and
+        constructor, ``<ref>`` is the reference given to this
+        function, and
         ``<ext>`` is a file extension '.msgpack' if
         `use_msgpack` is True and '.json' otherwise.
 
-        Thus, for ``WorkspaceFile('/tmp/data').load('foo/bar')``,
+        Thus, for ``WorkspaceFile('/tmp/data').load('foo_bar')``,
         the path loaded would be '/tmp/data/foo_bar.msgpack'.
 
         See class documentation on format of input data.
@@ -154,23 +154,20 @@ class WorkspaceFile(object):
           IOError: file not found or not readable.
           ValueError: parsing failed.
         """
-        t0 = log_start(_log, 'WorkspaceFile.load', level=logging.DEBUG,
+        # log start
+        t0 = log_start(_log, 'WorkspaceFile.load', level=logging.INFO,
                        kvp=dict(ref=ref))
-
-        # Do nothing if already loaded in the past
+        # stop if already loaded in the past
         if ref in self._loaded:
-            log_end(_log, t0, 'WorkspaceFile.load', level=logging.DEBUG,
+            # log done and return
+            log_end(_log, t0, 'WorkspaceFile.load', level=logging.INFO,
                     kvp=dict(ref=ref, cached='yes'))
             return
-
         # create the full path from the reference
-        norm_ref = ref.replace('/', '_')
-        ext = '.msgpack' if self.use_msgpack else '.json'
-        full_path = os.path.join((self._wd, norm_ref, ext))
-
-        # open the file
+        ext = 'msgpack' if self.use_msgpack else 'json'
+        full_path = '{}.{}'.format(os.path.join(self._wd, ref), ext)
+        # open the file; raises IOError on failure
         f = open(full_path)
-
         # parse the file
         try:
             record = msgpack.load(f) if self.use_msgpack else json.load(f)
@@ -178,14 +175,18 @@ class WorkspaceFile(object):
             raise ValueError('Loading {}: {}'.format(full_path, err))
         finally:
             f.close()
-
-        # cache the parsed data
+        # cache the parsed data, both by reference and by 'name'
+        # (if name is not the same as reference)
+        #print("@@ REF={r} RECORD[ref]={rr} RECORD[name]={n}"
+        #      .format(r=ref, rr=record['ref'], n=record['name']))
         self._loaded[ref] = record
-
+        self._loaded[record['ref']] = record
+        self._loaded[record['name']] = record
+        #print('@@ STORE RECORD BY ({},{})'.format(record['ref'], record['name']))
         # insert the parsed data into mongomock
         self.collection.insert(record)
-
-        log_end(_log, t0, 'WorkspaceFile.load', level=logging.DEBUG,
+        # log done
+        log_end(_log, t0, 'WorkspaceFile.load', level=logging.INFO,
                 kvp=dict(ref=ref, cached='no'))
 
     def unload(self, ref):
@@ -388,15 +389,11 @@ class WorkspaceFile(object):
         Returns:
           list of records (may be an empty list)
         """
-        records = list(self.collection.find({'ref': ref}))
-        # If nothing is returned, then try to look for the
-        # records by the name (unless the regex shows that it
-        # is definitely _not_ a name).
-        if len(records) == 0 and not NUMERIC_REF_PAT.match(ref):
-            #print("@@ look by name for '{}'".format(ref))
-            records = list(self.collection.find({'name': ref}))
-        return records
-
+        #print("@@ looking for REF={} in KEYS={}".format(ref, self._loaded.keys()))
+        result = []
+        if ref in self._loaded:
+            result.append(self._loaded[ref])
+        return result
 
 ####
 

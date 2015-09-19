@@ -5,7 +5,7 @@ Module for base class for Data API objects.
 # Imports
 
 # Stdlib
-import glob
+import logging
 import os
 import re
 try:
@@ -81,7 +81,7 @@ class ObjectAPI(object):
 
         ws_url = services["workspace_service_url"]
         if '://' in ws_url: # assume a real Workspace server
-            if token == None or len(token.strip()) == 0:
+            if token is None or len(token.strip()) == 0:
                 self._token = get_token()
             else:
                 self._token = token
@@ -117,7 +117,8 @@ class ObjectAPI(object):
         }
         self._id = self._info["object_id"]
         self._name = self._info["object_name"]
-        self._typestring = self.ws_client.translate_to_MD5_types([self._info["type_string"]]).values()[0]
+        self._typestring = self.ws_client.translate_to_MD5_types(
+            [self._info["type_string"]]).values()[0]
         self._version = self._info["version"]
         self._schema = None
         self._history = None
@@ -125,23 +126,23 @@ class ObjectAPI(object):
         self._data = None
 
     def _init_ws_from_files(self, path):
-        #if g_use_msgpack:
-        ext = 'msgpack'
+        ext = '.msgpack'
+        extlen = len(ext)
         WorkspaceFile.use_msgpack = True
-        #else:
-        #    ext = 'json'
-        #    WorkspaceFile.use_msgpack = False
-        input_files = glob.glob(os.path.join(path, '*.' + ext))
-        if len(input_files) == 0:
-            raise ValueError('No .{} files found for file-based Workspace '
-                             'in path "{}"'.format(ext, path))
-        client = WorkspaceFile()
-        for f in input_files:
-            #t0 = log_start(_log, 'client.load', level=logging.DEBUG,
-            #               kvp={'file': f})
-            client.load(f)
-            #log_end(_log, t0, 'client.load', level=logging.DEBUG,
-            #        kvp={'file': f})
+        client = WorkspaceFile(path)
+        num_loaded = 0
+        for name in os.listdir(path):
+            if name.endswith(ext):
+                ref = name[:-extlen]
+                t0 = log_start(_log, 'load', level=logging.DEBUG,
+                               kvp={'ref': ref})
+                client.load(ref)
+                log_end(_log, t0, 'client.load', level=logging.DEBUG,
+                        kvp={'ref': ref})
+            num_loaded += 1
+        if num_loaded == 0:
+            raise ValueError('No files with extension "{e}" found in path {p}'
+                             .format(e=ext, p=path))
         return client
 
     def get_schema(self):
@@ -151,7 +152,7 @@ class ObjectAPI(object):
         Returns:
           string"""
     
-        if self._schema == None:
+        if self._schema is None:
             self._schema = self.ws_client.get_type_info(self.get_info()["type_string"])
         
         return self._schema
