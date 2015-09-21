@@ -14,12 +14,12 @@
 
 import sys
 import os
-import shlex
+#import shlex
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-#sys.path.insert(0, os.path.abspath('.'))
+sys.path.insert(0, os.path.abspath('../lib'))
 
 # -- General configuration ------------------------------------------------
 
@@ -37,6 +37,7 @@ extensions = [
     'sphinx.ext.coverage',
     'sphinx.ext.mathjax',
     'sphinx.ext.viewcode',
+    'alabaster'
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -55,7 +56,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'KBase Data API'
-copyright = u'2015, Dan Gunter, Matt Henderson'
+copyright = u'2015 The KBase Project'
 author = u'Dan Gunter, Matt Henderson'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -140,7 +141,7 @@ html_theme_options = { }
 # The name of an image file (within the static path) to use as favicon of the
 # docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
 # pixels large.
-#html_favicon = None
+html_favicon = 'kbase-logo.ico'
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
@@ -154,7 +155,7 @@ html_static_path = ['_static']
 
 # If not '', a 'Last updated on:' timestamp is inserted at every page bottom,
 # using the given strftime format.
-#html_last_updated_fmt = '%b %d, %Y'
+html_last_updated_fmt = '%b %d, %Y'
 
 # If true, SmartyPants will be used to convert quotes and dashes to
 # typographically correct entities.
@@ -361,35 +362,12 @@ epub_exclude_files = ['search.html']
 # If false, no index is generated.
 #epub_use_index = True
 
-# =================================
-# Guzzle
-# =================================
-
-# guzzle = True
-# if guzzle:
-#     import guzzle_sphinx_theme
-#
-#     # Adds an HTML table visitor to apply Bootstrap table classes
-#     html_translator_class = 'guzzle_sphinx_theme.HTMLTranslator'
-#     html_theme_path = guzzle_sphinx_theme.html_theme_path()
-#     html_theme = 'guzzle_sphinx_theme'
-#
-#     # Register the theme as an extension to generate a sitemap.xml
-#     extensions.append("guzzle_sphinx_theme")
-#
-#     # Guzzle theme options (see theme.conf for more information)
-#     html_theme_options = {
-#         # Set the name of the project to appear in the sidebar
-#         "project_nav_name": "KBase Data API",
-#     }
-
 # ====================
 # Alabaster
 # ====================
 import alabaster
 
 html_theme_path = [alabaster.get_path()]
-extensions = ['alabaster']
 html_theme = 'alabaster'
 html_sidebars = {
     '**': [
