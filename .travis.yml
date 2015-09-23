@@ -2,16 +2,23 @@ language: python
 python:
   - "2.7"
 
+git:
+  submodules: false
+
+before_install:
+  - git submodule update --init --recursive
+
 install:
-  - "pip install -r requirements-travis.txt"
+  - mv requirements.txt requirements.txt-
+  - cp requirements-travis.txt requirements.txt
+  - python setup.py install
 
 script:
-  - cd lib
-  - touch .coverage
-  - nosetests --with-coverage --cover-package=data_api
-  - cd ..
+#   cd lib
+#   touch .coverage
+#   cd ..
+  - coverage run /home/travis/virtualenv/python2.7.9/bin/nosetests --with-timer --ws-url=test_resources/data --wsfile-msgpack
+  - coverage report
 
-#after_success:
-#  - cd lib
-#  - coveralls
-#  - cd ..
+after_success:
+  - codecov

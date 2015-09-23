@@ -107,6 +107,7 @@ typedef structure {
   string is_circular; 
   int start_position;
   int num_bytes;
+  float gc_content;
 } contig;
 
 
@@ -162,6 +163,13 @@ typedef structure {
 } AnnotationQuality;
 
 
+/* 
+Reference to a generic workspace object.  Used in evidence. 
+    @id ws  
+*/ 
+typedef string generic_ws_reference;
+
+
 
 /*
 Evidence is information that supports some other bit of information or assertion
@@ -176,7 +184,7 @@ typedef structure {
   string evidence_id;
   string description;
   string evidence_type; 
-  list<string> supporting_objects;
+  list<generic_ws_reference> supporting_objects;
 } evidence;
 
 
@@ -194,6 +202,31 @@ typedef structure {
   string notes;
   mapping<string evidence_id, evidence evidence> evidences;
 } EvidenceContainer;
+
+/*
+Annotation pipeline specific : Seed_role_element
+
+@optional variant_code role
+*/
+typedef structure {
+    string role;
+    string subsystem;
+    string variant_code;
+} seed_role;
+
+/*
+Annotation pipeline specific : Seed_roles
+*/ 
+typedef structure {
+    mapping<string feature_id, list<seed_role> roles> feature_roles;
+} SeedRoles;
+
+/* 
+Reference to a SeedRoles object
+    @id ws KBaseGenomesCondensedPrototypeV2.SeedRoles
+*/ 
+typedef string seed_roles_ref; 
+
 
 /*
 Protein
@@ -229,7 +262,6 @@ typedef structure {
   string name;
   string description;
   string notes;
-  int protein_count;
   mapping<string protein_id, protein protein> proteins;
 } ProteinContainer;
 
@@ -349,7 +381,6 @@ typedef structure {
   string description;
   string notes;
   assembly_ref assembly_ref;
-  int feature_count;
   mapping<string feature_id, feature feature> features;
 } FeatureContainer;
 
@@ -366,6 +397,12 @@ The feature type is a controlled vocabulary perhaps derived from http://www.insd
 typedef mapping<string feature_type, feature_container_ref feature_container_ref> feature_containers_map;
 
 
+
+/*
+The type is either a feature type or "protein". 
+This is designed for fast count lookup of all the types instead of having to drill down into the containers
+*/
+typedef mapping<string type, int count> counts_map;
   
 /*
 Feature lookup is way to look up a feature within a GenomeAnnotation.
@@ -401,7 +438,7 @@ protein_container_ref would be a versioned workspace reference
 assembly_ref would be a versioned workspace reference
 
 @optional external_source external_source_id external_source_origination_date notes environmental_comments quality_score 
-@optional annotation_quality_ref publications evidence_container_ref methodology
+@optional annotation_quality_ref publications evidence_container_ref methodology seed_roles_ref
 */
  
 typedef structure {
@@ -422,6 +459,8 @@ typedef structure {
   evidence_container_ref evidence_container_ref;
   feature_lookup feature_lookup;
   string methodology; 
+  counts_map counts_map;
+  seed_roles_ref seed_roles_ref;
 } GenomeAnnotation; 
 
 };

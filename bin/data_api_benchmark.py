@@ -10,13 +10,13 @@ lib_path = sorted([(x, len(os.path.commonprefix([x, my_location]))) for x in pat
 sys.path.insert(1,lib_path)
 
 if __name__ == "__main__":
-    import biokbase.data_api
-    import biokbase.data_api.object
-    import biokbase.data_api.assembly
-    import biokbase.data_api.taxon
-    import biokbase.data_api.genome_annotation
+    #import doekbase.data_api
+    #import doekbase.data_api.core
+    #import doekbase.data_api.sequence.assembly
+    #import doekbase.data_api.taxonomy.taxon.api
+    import doekbase.data_api.annotation.genome_annotation
     
-    from biokbase.data_api.tests.performance import WallClockTimer
+    from doekbase.data_api.tests.performance import WallClockTimer
 
     services = {
         "workspace_service_url": "https://ci.kbase.us/services/ws/",
@@ -25,11 +25,11 @@ if __name__ == "__main__":
     
     print "Benchmarking API methods"
     
-    old_ws = biokbase.data_api.browse(1011)    
-    new_ws = biokbase.data_api.browse(1013)    
+    old_ws = doekbase.data_api.browse(1011)
+    new_ws = doekbase.data_api.browse(1013)
     
-    old_genomes = [x for x in old_ws.ls() if x.type.split("-")[0] in biokbase.data_api.genome_annotation.TYPES]
-    new_genomes = [x for x in new_ws.ls() if x.type.split("-")[0] in biokbase.data_api.genome_annotation.TYPES]
+    old_genomes = [x for x in old_ws.ls() if x.type.split("-")[0] in doekbase.data_api.annotation.genome_annotation.TYPES]
+    new_genomes = [x for x in new_ws.ls() if x.type.split("-")[0] in doekbase.data_api.annotation.genome_annotation.TYPES]
 
     def benchmark_genome(g):
         genome_annotation = g
@@ -141,7 +141,7 @@ if __name__ == "__main__":
     for g in old_genomes:
         old_timings.update(benchmark_genome(g.object))
     
-    for n in new_genomes(n):
+    for n in new_genomes:
         new_timings.update(benchmark_genome(n.object))
         
     with open('old_genomes_bench.json', 'w') as old_timings_file:
