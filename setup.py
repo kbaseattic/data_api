@@ -36,6 +36,7 @@ config = {
                  "doekbase.data_api.baseobj",
                  "doekbase.data_api.tests",
                  "doekbase.data_api.tests.performance",
+                 "doekbase.data_api.tests.examples",
                  "doekbase.workspace"],
     "scripts": ["bin/data_api_demo.py",
                 "bin/data_api_benchmark.py",
