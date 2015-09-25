@@ -46,7 +46,10 @@ You can get out of the virtualenv environment with "deactivate".
 
 # Examples
 
-Example IPython (Jupyter) notebooks are in examples/notebooks. To run, follow installation instructions above, then
+Example IPython (Jupyter) notebooks are in examples/notebooks. 
+To install ipython/jupyter dependencies for the examples:
+
+    pip install -r data_api/requirements-jupyter.txt
 
     ipython notebook examples/notebooks/data_api-display.ipynb 
     
