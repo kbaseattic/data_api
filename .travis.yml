@@ -5,6 +5,10 @@ python:
 git:
   submodules: false
 
+cache:
+  directories:
+    - $HOME/.cache/pip
+
 before_install:
   - git submodule update --init --recursive
 
@@ -12,7 +16,7 @@ install:
   - python setup.py install
 
 script:
-  - coverage run /home/travis/virtualenv/python2.7.9/bin/nosetests --with-timer --ws-url=test_resources/data --wsfile-msgpack
+  - coverage run $HOME/virtualenv/python2.7.9/bin/nosetests --with-timer --ws-url=test_resources/data --wsfile-msgpack
   - coverage report
 
 after_success:
