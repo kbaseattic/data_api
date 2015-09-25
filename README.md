@@ -9,9 +9,16 @@ Towards a unified data api for KBase
 This repository is configured to use TravisCI
 
 Source code is under lib/ (Python)
+
+Master branch status
 [![Build Status](https://travis-ci.org/kbase/data_api.svg?branch=master)](https://travis-ci.org/kbase/data_api)
 [![Coverage Status](http://codecov.io/github/kbase/data_api/coverage.svg?branch=master)](http://codecov.io/github/kbase/data_api?branch=master)
 ![Coverage Graph](http://codecov.io/github/kbase/data_api/branch.svg?branch=master&time=1y)
+
+Develop branch status
+[![Build Status](https://travis-ci.org/kbase/data_api.svg?branch=develop)](https://travis-ci.org/kbase/data_api)
+[![Coverage Status](http://codecov.io/github/kbase/data_api/coverage.svg?branch=develop)](http://codecov.io/github/kbase/data_api?branch=master)
+![Coverage Graph](http://codecov.io/github/kbase/data_api/branch.svg?branch=develop&time=1y)
 
 #quickstart instructions
 
