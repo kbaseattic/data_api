@@ -7,7 +7,9 @@ __author__ = 'Dan Gunter <dkgunter@lbl.gov>'
 __date__ = '9/26/15'
 
 ## Imports
-
+# System
+import os
+import uuid
 # Third-party
 from dogpile.cache import make_region
 
@@ -54,3 +56,25 @@ def get_redis_cache(redis_host='localhost', redis_port=6379):
     )
     return region
 
+def get_dbm_cache(path='/tmp', name=''):
+    """Get a new anydbm (DBM) cache 'region' object.
+
+    Args:
+        path (str): Path to directory with cache file
+        name (str): Name of cache file. if empty a random name
+                    will be generated.
+    Returns:
+        An object, of type CacheRegion
+    """
+    if not name:
+        name = str(uuid.uuid1())
+    filename = os.path.join(path, name)
+    region = make_region(
+        function_key_generator=ref_key_generator
+    ).configure(
+        'dogpile.cache.dbm',
+        arguments={
+            'filename': filename
+        }
+    )
+    return region
