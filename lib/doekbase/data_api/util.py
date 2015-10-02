@@ -168,17 +168,43 @@ class PerfCollector(object):
     """Collector of multiple performance events.
     """
     MAX_SIZE = 1000 # max number events in history
+    EVENT_WILDCARD = '*'
 
     def __init__(self, namespace):
         self._ns = namespace
         self._history = deque(maxlen=self.MAX_SIZE)
         self._cur = {}
         self._make_key = lambda e, k: '{e}::{k}'.format(e=e, k=k)
+        self._observers = {}
+
+    def add_observer(self, event, start_fn, end_fn):
+        """Add observer functions for an event.
+
+        Args:
+          event (str): Event name or EVENT_WILDCARD for all events.
+          start_fn: Function taking (event, key, timestamp) or None
+          end_fn: Function taking (event, PerfEvent) or None
+        """
+        if event in self._observers:
+            self._observers[event].append((start_fn, end_fn))
+        else:
+            self._observers[event] = [(start_fn, end_fn)]
+
+    def _broadcast(self, event, idx, *args):
+        if event in self._observers:
+            for obs in self._observers[event]:
+                if obs[idx]:
+                    obs[idx](event, *args)
+        if self.EVENT_WILDCARD in self._observers:
+            for obs in self._observers[self.EVENT_WILDCARD]:
+                if obs[idx]:
+                    obs[idx](event, *args)
 
     def start_event(self, event, key):
         timestamp = time.time()
         ekey = self._make_key(event, key)
         self._cur[ekey] = timestamp
+        self._broadcast(event, 0, key, timestamp)
 
     def end_event(self, event, key, **meta):
         timestamp = time.time()
@@ -191,6 +217,7 @@ class PerfCollector(object):
         full_event = '{}.{}'.format(self._ns, event)
         pevent = PerfEvent(full_event, key, t0, timestamp, meta)
         self._history.append(pevent)
+        self._broadcast(event, 1, pevent)
 
     def get_last(self):
         return self._history[-1]

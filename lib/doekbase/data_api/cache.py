@@ -94,7 +94,8 @@ class WorkspaceCached(client.Workspace):
     """
     class ConnectionError(Exception):
         def __init__(self, *args):
-            Exception.__init__(self, *args)
+            msg = str(args[0]).split('\n')[0]
+            Exception.__init__(self, msg)
 
     def __init__(self, cache_create_fn, cache_params={}, **workspace_kw):
         super(WorkspaceCached, self).__init__(**workspace_kw)
@@ -144,6 +145,28 @@ class WorkspaceCached(client.Workspace):
             was_in_cache))
         return obj
 
+    def _normalize_oid(self, oid):
+        if 'ref' in oid:
+            ref = oid['ref']
+        else:
+            if 'wsid' in oid:
+                ws = oid['ws_id']
+            elif 'workspace' in oid:
+                ws = oid['ws_name']
+            else:
+                raise KeyError('wsid OR workspace')
+            if 'objid' in oid:
+                objid = oid['objid']
+            elif 'name' in oid:
+                objid = oid['name']
+            else:
+                raise KeyError('objid OR name')
+            if 'ver' in oid:
+                ref = '/'.join([ws, objid, oid['ver']])
+            else:
+                ref = '/'.join([ws, objid])
+        return ref
+
     def get_objects(self, object_ids):
         """Get one or more (possibly cached) objects.
 
@@ -155,7 +178,8 @@ class WorkspaceCached(client.Workspace):
         self._call_ws(self._get_objects, object_ids)
 
     def _get_objects(self, object_ids):
-        objkey = ';'.join(object_ids)
+        object_refs = map(self._normalize_oid, object_ids)
+        objkey = ';'.join(object_refs)
         self._stats.start_event('get_objects', objkey)
         if len(object_ids) == 0:
             self._stats.end_event('get_objects', objkey, num_cached=0, num=0)
@@ -163,7 +187,7 @@ class WorkspaceCached(client.Workspace):
         result, gaps, cacheable = [], [], []
         # pull what we can from cache, add indexes to gaps
         # list for those we don't have
-        for i, ref in enumerate(object_ids):
+        for i, ref in enumerate(object_refs):
             should_cache = self._should_cache(ref)
             if should_cache:
                 obj = self._cache.get(ref)
@@ -186,11 +210,10 @@ class WorkspaceCached(client.Workspace):
                 for index, item in zip(gaps, result2):
                     result[index] = item
         # cache all results
-        for i in range(len(object_ids)):
+        for i in range(len(object_refs)):
             if cacheable[i]:
-                self._cache.set(object_ids[i], result[i])
+                self._cache.set(object_refs[i], result[i])
         self._stats.end_event('get_objects', objkey, num=len(
-            object_ids), num_cached=len(
-            object_ids) - len(gaps))
+            object_ids), num_cached=len(object_ids) - len(gaps))
 
 

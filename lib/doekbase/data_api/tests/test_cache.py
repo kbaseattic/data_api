@@ -18,6 +18,8 @@ from . import shared
 dbm_region = None
 genome_new = "PrototypeReferenceGenomes/kb|g.166819"
 genome_old = "OriginalReferenceGenomes/kb|g.166819"
+taxon_new = "ReferenceTaxons/242159_taxon"
+taxon_old = "OriginalReferenceGenomes/kb|g.166819"
 g_token = ''
 
 def setup():
@@ -25,7 +27,7 @@ def setup():
     dbm_region = cache.get_dbm_cache()
     shared.setup()
     g_token = os.environ.get('KB_AUTH_TOKEN', 'No token in environment')
-    print('Got token = "{}"'.format(g_token))
+    #print('@@ Got token = "{}"'.format(g_token))
 
 def teardown():
     global dbm_region
@@ -86,21 +88,29 @@ def dbm_wait_1_sec(x):
 def test_ws_cached_get_object():
     ws = cache.WorkspaceCached(cache.get_dbm_cache, {},
                                url=shared.g_ws_url, token=g_token)
+    ws.stats.add_observer(ws.stats.EVENT_WILDCARD, print_ws_cached_start, None)
     timings = []
-    ws.get_objects([genome_old])
-    timings.append(('old + no-cache', ws.stats.get_last()['duration']))
-    ws.get_objects([genome_new])
-    timings.append(('new + no-cache', ws.stats.get_last()['duration']))
-    ws.get_objects([genome_old])
-    timings.append(('old + cache', ws.stats.get_last()['duration']))
-    ws.get_objects([genome_new])
-    timings.append(('new + cache', ws.stats.get_last()['duration']))
+    objlist = lambda items: [{'ref': x} for x in items]
+    # Taxon
+    try:
+        # New
+        ws.get_objects(objlist([taxon_new]))
+        timings.append(('new + no-cache', ws.stats.get_last()['duration']))
+        ws.get_objects(objlist([taxon_new]))
+        timings.append(('new + cache', ws.stats.get_last()['duration']))
+        # Old
+        ws.get_objects(objlist([taxon_old]))
+        timings.append(('old + no-cache', ws.stats.get_last()['duration']))
+        ws.get_objects(objlist([taxon_old]))
+        timings.append(('old + cache', ws.stats.get_last()['duration']))
+    except ws.ConnectionError as err:
+         raise
+    print("\nTimings:\n" + '\n'.join(['  {}: {:.3f} seconds'.format(*v)
+                                          for v in timings]))
 
-    print("Timings: {}".format('\n'.join(['{}: {:.3f} seconds'.format(*v)
-                                          for v in timings])))
+    # cache should be faster, always
+    for i in range(0, len(timings), 2):
+        assert timings[i] > timings[i + 1]
 
-    # cache should be faster, in either case
-    assert timings[0] > timings[2]
-    assert timings[0] > timings[3]
-    assert timings[1] > timings[2]
-    assert timings[1] > timings[3]
+def print_ws_cached_start(event, key, timestamp):
+    print("Start: {e} for <{k}>".format(e=event, k=key))
