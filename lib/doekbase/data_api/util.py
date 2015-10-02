@@ -222,6 +222,21 @@ class PerfCollector(object):
     def get_last(self):
         return self._history[-1]
 
+    def dump(self, stream):
+        by_event = {}
+        for item in self._history:
+            if item.event in by_event:
+                by_event[item.event].append(item)
+            else:
+                by_event[item.event] = [item]
+        stream.write("Event                          Duration  Metadata\n")
+        for event in sorted(by_event.keys()):
+            for item in by_event[event]:
+                meta_str = ' '.join(['{k}={v}'.format(k=k, v=v)
+                                     for k,v in item.metadata.items()])
+                stream.write("{e:30s} {d:8.3f}  {m}\n".format(
+                    e=event[:30], d=item.duration, m=meta_str))
+
 class PerfEvent(object):
     """Single timed event.
 
@@ -244,6 +259,10 @@ class PerfEvent(object):
         self.end = end_time
         self.duration = end_time - start_time
         self._meta = meta
+
+    @property
+    def metadata(self):
+        return self._meta.copy()
 
     def __getitem__(self, key):
         if key in ('event', 'key', 'start', 'end', 'duration'):

@@ -6,6 +6,7 @@ __date__ = '9/30/15'
 
 # System
 import os
+import sys
 import threading
 import time
 from unittest import skipUnless
@@ -99,18 +100,17 @@ def test_ws_cached_get_object():
         ws.get_objects(objlist([taxon_new]))
         timings.append(('new + cache', ws.stats.get_last()['duration']))
         # Old
-        ws.get_objects(objlist([taxon_old]))
-        timings.append(('old + no-cache', ws.stats.get_last()['duration']))
-        ws.get_objects(objlist([taxon_old]))
-        timings.append(('old + cache', ws.stats.get_last()['duration']))
+        #ws.get_objects(objlist([taxon_old]))
+        #timings.append(('old + no-cache', ws.stats.get_last()['duration']))
+        #ws.get_objects(objlist([taxon_old]))
+        #timings.append(('old + cache', ws.stats.get_last()['duration']))
     except ws.ConnectionError as err:
          raise
-    print("\nTimings:\n" + '\n'.join(['  {}: {:.3f} seconds'.format(*v)
-                                          for v in timings]))
-
     # cache should be faster, always
     for i in range(0, len(timings), 2):
         assert timings[i] > timings[i + 1]
+    # dump timings at end
+    ws.stats.dump(sys.stdout)
 
 def print_ws_cached_start(event, key, timestamp):
     print("Start: {e} for <{k}>".format(e=event, k=key))
