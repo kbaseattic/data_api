@@ -9,9 +9,14 @@ __date__ = '9/26/15'
 ## Imports
 # System
 import os
+import requests  # for errors
 import uuid
 # Third-party
 from dogpile.cache import make_region
+from dogpile.cache.api import NO_VALUE
+# Local
+from doekbase.workspace import client
+from doekbase.data_api.util import PerfCollector, PerfEvent
 
 ## Functions and Classes
 
@@ -78,3 +83,114 @@ def get_dbm_cache(path='/tmp', name=''):
         }
     )
     return region
+
+class WorkspaceCached(client.Workspace):
+    """Caching version of workspace client.
+
+    Should be 100% backwards-compatible with the standard client.
+
+    In addition, this class provides some basic performance information
+    for each of its operations.
+    """
+    class ConnectionError(Exception):
+        def __init__(self, *args):
+            Exception.__init__(self, *args)
+
+    def __init__(self, cache_create_fn, cache_params={}, **workspace_kw):
+        super(WorkspaceCached, self).__init__(**workspace_kw)
+        self._cache = cache_create_fn(**cache_params)
+        self._get_ref_from_params = lambda p: p['objects'][0]['ref']
+        self._stats = PerfCollector(self.__class__.__name__)
+
+    def _should_cache(self, ref):
+        # TODO: See whether this is 'reference data' or not
+        return True
+
+    @property
+    def stats(self):
+        return self._stats
+
+    def _call_ws(self, method, *args):
+        try:
+            return method(*args)
+        except (requests.ConnectionError, client.ServerError) as err:
+            raise self.ConnectionError(err)
+
+    def get_object(self, params):
+        """Get (possibly cached) object.
+
+        Returns:
+           Single object instance
+        Raises:
+           self.ConnectionError
+        """
+        self._call_ws(self._get_object, params)
+
+    def _get_object(self, params):
+        ref = self._get_ref_from_params(params)
+        self._stats.start_event('get_objects', ref)  # see get_objects()
+        should_cache = self._should_cache(ref)
+        was_in_cache = False
+        if should_cache:
+            obj = self._cache.get(ref)
+            if obj is NO_VALUE:
+                obj = client.Workspace.get_object(self, params)
+                self._cache.set(ref, obj)
+            else:
+                was_in_cache = True
+        else:
+            obj = super(WorkspaceCached, self).get_object(params)
+        self._stats.end_event('get_objects', ref, num=1, num_cached=int(
+            was_in_cache))
+        return obj
+
+    def get_objects(self, object_ids):
+        """Get one or more (possibly cached) objects.
+
+        Args:
+            object_ids: List of references
+        Returns:
+            list of object instances
+        """
+        self._call_ws(self._get_objects, object_ids)
+
+    def _get_objects(self, object_ids):
+        objkey = ';'.join(object_ids)
+        self._stats.start_event('get_objects', objkey)
+        if len(object_ids) == 0:
+            self._stats.end_event('get_objects', objkey, num_cached=0, num=0)
+            return []
+        result, gaps, cacheable = [], [], []
+        # pull what we can from cache, add indexes to gaps
+        # list for those we don't have
+        for i, ref in enumerate(object_ids):
+            should_cache = self._should_cache(ref)
+            if should_cache:
+                obj = self._cache.get(ref)
+                if obj is NO_VALUE:
+                    gaps.append(i)
+                else:
+                    result.append(obj)
+            else:
+                gaps.append(i)
+            cacheable.append(should_cache)
+        # fill in missing objects
+        if len(gaps) > 0:
+            # get all the missing objects at once
+            missing_ids = [object_ids[i] for i in gaps]
+            result2 = super(WorkspaceCached, self).get_objects(missing_ids)
+            # fill objects into gaps
+            if len(gaps) == len(object_ids):  # nothing came from cache
+                result = result2
+            else:
+                for index, item in zip(gaps, result2):
+                    result[index] = item
+        # cache all results
+        for i in range(len(object_ids)):
+            if cacheable[i]:
+                self._cache.set(object_ids[i], result[i])
+        self._stats.end_event('get_objects', objkey, num=len(
+            object_ids), num_cached=len(
+            object_ids) - len(gaps))
+
+

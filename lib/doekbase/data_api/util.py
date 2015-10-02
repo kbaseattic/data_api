@@ -8,6 +8,7 @@ Includes:
 __author__ = 'Dan Gunter <dkgunter@lbl.gov>'
 __date__ = '8/4/15'
 
+from collections import deque
 from datetime import datetime
 import logging
 import logging.config
@@ -161,3 +162,65 @@ def get_auth_token():
             "Missing authentication token! "
             "Set KB_AUTH_TOKEN environment variable.")
 
+# Simple performance classes
+
+class PerfCollector(object):
+    """Collector of multiple performance events.
+    """
+    MAX_SIZE = 1000 # max number events in history
+
+    def __init__(self, namespace):
+        self._ns = namespace
+        self._history = deque(maxlen=self.MAX_SIZE)
+        self._cur = {}
+        self._make_key = lambda e, k: '{e}::{k}'.format(e=e, k=k)
+
+    def start_event(self, event, key):
+        timestamp = time.time()
+        ekey = self._make_key(event, key)
+        self._cur[ekey] = timestamp
+
+    def end_event(self, event, key, **meta):
+        timestamp = time.time()
+        ekey = self._make_key(event, key)
+        if not ekey in self._cur:
+            raise KeyError('No current event found for key "{}"'
+                           .format(ekey))
+        t0 = self._cur[ekey]
+        del self._cur[ekey]
+        full_event = '{}.{}'.format(self._ns, event)
+        pevent = PerfEvent(full_event, key, t0, timestamp, meta)
+        self._history.append(pevent)
+
+    def get_last(self):
+        return self._history[-1]
+
+class PerfEvent(object):
+    """Single timed event.
+
+    Events can be extracted using dictionary syntax,
+    e.g. my_event['<key'], with the keys:
+    """
+    def __init__(self, event, key, start_time, end_time, meta):
+        """Ctor.
+
+        Args:
+          event (str): Full name of event <namespace>.<event-name>
+          key (str): Identifying key
+          start_time (float): Unix epoch seconds for start
+          end_time (float): Floating point time in seconds for end
+          meta (dict) : Additional key/value pairs
+        """
+        self.event = event
+        self.key = key
+        self.start = start_time
+        self.end = end_time
+        self.duration = end_time - start_time
+        self._meta = meta
+
+    def __getitem__(self, key):
+        if key in ('event', 'key', 'start', 'end', 'duration'):
+            return getattr(self, key)
+        if key in self._meta:
+            return self._meta[key]
+        raise KeyError(key)

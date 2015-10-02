@@ -4,17 +4,28 @@ Test caching.
 __author__ = 'Dan Gunter <dkgunter@lbl.gov>'
 __date__ = '9/30/15'
 
+# System
 import os
 import threading
 import time
-from doekbase.data_api import cache
+from unittest import skipUnless
+# Third-party
 from dogpile.cache.api import NO_VALUE
+# Local
+from doekbase.data_api import cache
+from . import shared
 
 dbm_region = None
+genome_new = "PrototypeReferenceGenomes/kb|g.166819"
+genome_old = "OriginalReferenceGenomes/kb|g.166819"
+g_token = ''
 
 def setup():
-    global dbm_region
+    global dbm_region, g_token
     dbm_region = cache.get_dbm_cache()
+    shared.setup()
+    g_token = os.environ.get('KB_AUTH_TOKEN', 'No token in environment')
+    print('Got token = "{}"'.format(g_token))
 
 def teardown():
     global dbm_region
@@ -68,3 +79,28 @@ def dbm_wait_1_sec(x):
         time.sleep(1)
         val = x
     return val
+
+# Caching version of Workspace client
+
+@skipUnless(shared.can_connect, 'Cannot connect to workspace')
+def test_ws_cached_get_object():
+    ws = cache.WorkspaceCached(cache.get_dbm_cache, {},
+                               url=shared.g_ws_url, token=g_token)
+    timings = []
+    ws.get_objects([genome_old])
+    timings.append(('old + no-cache', ws.stats.get_last()['duration']))
+    ws.get_objects([genome_new])
+    timings.append(('new + no-cache', ws.stats.get_last()['duration']))
+    ws.get_objects([genome_old])
+    timings.append(('old + cache', ws.stats.get_last()['duration']))
+    ws.get_objects([genome_new])
+    timings.append(('new + cache', ws.stats.get_last()['duration']))
+
+    print("Timings: {}".format('\n'.join(['{}: {:.3f} seconds'.format(*v)
+                                          for v in timings])))
+
+    # cache should be faster, in either case
+    assert timings[0] > timings[2]
+    assert timings[0] > timings[3]
+    assert timings[1] > timings[2]
+    assert timings[1] > timings[3]
