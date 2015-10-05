@@ -1,14 +1,14 @@
-module KBaseGenomesCondensedPrototypeV2{ 
+module KBaseGenomeAnnotations{ 
 
 /*
 Reference to a taxon object 
-    @id ws KBaseGenomesCondensedPrototypeV2.Taxon
+    @id ws KBaseGenomeAnnotations.Taxon
 */
 typedef string taxon_ref;
 
 /*
 Reference to a taxon object 
-    @id ws KBaseGenomesCondensedPrototypeV2.TaxonSet
+    @id ws KBaseGenomeAnnotations.TaxonSet
 */
 typedef string taxon_set_ref;
 
@@ -63,7 +63,7 @@ typedef structure {
 
 /*
 Reference to a taxon object 
-    @id ws KBaseGenomesCondensedPrototypeV2.GenomeAnnotation
+    @id ws KBaseGenomeAnnotations.GenomeAnnotation
 */
 typedef string genome_annotation_ref;
 
@@ -144,7 +144,7 @@ typedef structure {
 
 /*
 Reference to an assembly object 
-    @id ws KBaseGenomesCondensedPrototypeV2.Assembly
+    @id ws KBaseGenomeAnnotations.Assembly
 */
 typedef string assembly_ref;
 
@@ -223,7 +223,7 @@ typedef structure {
 
 /* 
 Reference to a SeedRoles object
-    @id ws KBaseGenomesCondensedPrototypeV2.SeedRoles
+    @id ws KBaseGenomeAnnotations.SeedRoles
 */ 
 typedef string seed_roles_ref; 
 
@@ -267,13 +267,13 @@ typedef structure {
 
 /*
 Reference to an EvidenceContainer object 
-    @id ws KBaseGenomesCondensedPrototypeV2.EvidenceContainer
+    @id ws KBaseGenomeAnnotations.EvidenceContainer
 */
 typedef string evidence_container_ref;
 
 /*
 Reference to an ProteinContainer object 
-    @id ws KBaseGenomesCondensedPrototypeV2.ProteinContainer
+    @id ws KBaseGenomeAnnotations.ProteinContainer
 */
 typedef string protein_container_ref;
 
@@ -386,7 +386,7 @@ typedef structure {
 
 /*
 Reference to an FeatureContainer object 
-    @id ws KBaseGenomesCondensedPrototypeV2.FeatureContainer
+    @id ws KBaseGenomeAnnotations.FeatureContainer
 */
 typedef string feature_container_ref;
 
@@ -417,7 +417,7 @@ typedef mapping<string feature_key, list<tuple<feature_container_ref feature_con
 
 /*
 Reference to an FeatureContainer object 
-    @id ws KBaseGenomesCondensedPrototypeV2.AnnotationQuality
+    @id ws KBaseGenomeAnnotations.AnnotationQuality
 */
 typedef string annotation_quality_ref;
 
