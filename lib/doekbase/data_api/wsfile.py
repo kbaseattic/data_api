@@ -105,6 +105,9 @@ class WorkspaceFile(object):
     use_redis = False
     _loaded = {}  # static cache of loaded refs
 
+    #: Version of the workspace we are emulating
+    VERSION = '1.0'
+
     def __init__(self, working_directory):
         """Create file-based Workspace instance, using files in
         the given working directory.
@@ -297,6 +300,9 @@ class WorkspaceFile(object):
                 raise LibError('Type schema record was not found for {}'
                                   .format(t))
         return m
+
+    def ver(self):
+        return self.VERSION
 
     # ___ Internal methods ___
 

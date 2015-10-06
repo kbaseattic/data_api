@@ -115,13 +115,15 @@ class WorkspaceCached(object):
         self._get_ref_from_params = lambda p: p['objects'][0]['ref']
         self._stats = PerfCollector(self.__class__.__name__)
 
-    def _should_cache(self, ref):
-        # TODO: See whether this is 'reference data' or not
-        return True
+###
 
-    @property
-    def stats(self):
-        return self._stats
+    def create_workspace(self, params):
+        """Delegate to workspace client method."""
+        return self._ws.create_workspace(params)
+
+    def delete_workspace(self, params):
+        """Delegate to workspace client method."""
+        return self._ws.delete_workspace(params)
 
     def get_object(self, params):
         """Get (possibly cached) object.
@@ -132,6 +134,31 @@ class WorkspaceCached(object):
            self.ConnectionError
         """
         self._safe_call(self._get_object, params)
+
+    def get_objects(self, object_ids):
+        """Get one or more (possibly cached) objects.
+
+        Args:
+            object_ids: List of references
+        Returns:
+            list of object instances
+        """
+        self._safe_call(self._get_objects, object_ids)
+
+    def ver(self):
+        """Get version of Workspace server.
+        """
+        return self._ws.ver()
+
+###
+
+    def _should_cache(self, ref):
+        # TODO: See whether this is 'reference data' or not
+        return True
+
+    @property
+    def stats(self):
+        return self._stats
 
     def _get_object(self, params):
         ref = self._get_ref_from_params(params)
@@ -173,15 +200,6 @@ class WorkspaceCached(object):
                 ref = '/'.join([ws, objid])
         return ref
 
-    def get_objects(self, object_ids):
-        """Get one or more (possibly cached) objects.
-
-        Args:
-            object_ids: List of references
-        Returns:
-            list of object instances
-        """
-        self._safe_call(self._get_objects, object_ids)
 
     def _get_objects(self, object_ids):
         object_refs = map(self._normalize_oid, object_ids)

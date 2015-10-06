@@ -10,7 +10,7 @@ import os
 import sys
 import threading
 import time
-from unittest import skipUnless
+from unittest import skipUnless, TestCase
 # Third-party
 from dogpile.cache.api import NO_VALUE
 # Local
@@ -149,173 +149,230 @@ def print_ws_cached_start(event, key, timestamp):
 # Comprehensive workspace tests #
 #################################
 
-def test_ver():
-    assert False
+class CachedWorkspaceTests(TestCase):
 
-def test_create_workspace():
-    assert False
+    # maximum allowable version of workspace for this
+    # test suite to be valid
+    MAX_WS_VERSION = (0, 999, 999)
 
-def test_alter_workspace_metadata():
-    assert False
+    def setUp(self):
+        self.ws = g_workspace_objects
+        self._delete_ws = set()
 
-def test_clone_workspace():
-    assert False
+    def tearDown(self):
+        # delete temporary workspaces
+        for ws in self._delete_ws:
+            g_workspace_objects['redis'].delete_workspace({'workspace': ws})
 
-def test_lock_workspace():
-    assert False
+    def test_all(self):
+        """Run all tests
+        """
+        test_methods = filter(lambda s: s.startswith('_t_'),
+                              dir(self))
+        for meth_name in test_methods:
+            test_method = getattr(self, meth_name)
+            friendly_name = meth_name[3:]  # strip prefix
+            for cache_type in g_workspace_objects:
+                self.ws = g_workspace_objects[cache_type]
+                self._start("Workspace test '{n}' (cache-type={t})",
+                            t=cache_type, n=friendly_name)
+                try:
+                    test_method()
+                    self._succeeded()
+                except AssertionError as err:
+                    self._failed(err)
+                except ws_client.ServerError as err:
+                    self._server_error(err)
 
-def test_get_workspacemeta():
-    assert False
+    def _start(self, m, **k):
+        sys.stdout.write(m.format(**k) + "...")
+        sys.stdout.flush()
 
-def test_get_workspace_info():
-    assert False
+    def _succeeded(self):
+        sys.stdout.write("OK\n")
 
-def test_get_workspace_description():
-    assert False
+    def _failed(self, err):
+        sys.stdout.write("FAILED: {}\n".format(err))
 
-def test_set_permissions():
-    assert False
+    def _server_error(self, err):
+        err = str(err).split('\n')[0]
+        sys.stdout.write("FAILED: (ServerError) {}\n".format(err))
 
-def test_set_global_permission():
-    assert False
+    def _t_ver(self):
+        value = self.ws.ver()
+        p = value.split('.')
+        assert len(p) == 3
+        for i in range(3):
+            assert int(p[i]) <= self.MAX_WS_VERSION[i], \
+                "Version mismatch: {ver} > {expected}".format(
+                    ver=value, expected='.'.join(map(str, self.MAX_WS_VERSION)))
 
-def test_set_workspace_description():
-    assert False
+    def _t_create_workspace(self):
+        name = 'foo-{:.3f}'.format(time.time())
+        self.ws.create_workspace({'workspace': name})
+        self._delete_ws.add(name)
 
-def test_get_permissions():
-    assert False
+    def _t_alter_workspace_metadata(self):
+        assert False
 
-def test_save_object():
-    assert False
+    def _t_clone_workspace(self):
+        assert False
 
-def test_save_objects():
-    assert False
+    def _t_lock_workspace(self):
+        assert False
 
-def test_get_object():
-    assert False
+    def _t_get_workspacemeta(self):
+        assert False
 
-def test_get_object_provenance():
-    assert False
+    def _t_get_workspace_info(self):
+        assert False
 
-def test_get_objects():
-    assert False
+    def _t_get_workspace_description(self):
+        assert False
 
-def test_get_object_subset():
-    assert False
+    def _t_set_permissions(self):
+        assert False
 
-def test_get_object_history():
-    assert False
+    def _t_set_global_permission(self):
+        assert False
 
-def test_list_referencing_objects():
-    assert False
+    def _t_set_workspace_description(self):
+        assert False
 
-def test_list_referencing_object_counts():
-    assert False
+    def _t_get_permissions(self):
+        assert False
 
-def test_get_referenced_objects():
-    assert False
+    def _t_save_object(self):
+        assert False
 
-def test_list_workspaces():
-    assert False
+    def _t_save_objects(self):
+        assert False
 
-def test_list_workspace_info():
-    assert False
+    def _t_get_object(self):
+        assert False
 
-def test_list_workspace_objects():
-    assert False
+    def _t_get_object_provenance(self):
+        assert False
 
-def test_list_objects():
-    assert False
+    def _t_get_objects(self):
+        assert False
 
-def test_get_objectmeta():
-    assert False
+    def _t_get_object_subset(self):
+        assert False
 
-def test_get_object_info():
-    assert False
+    def _t_get_object_history(self):
+        assert False
 
-def test_get_object_info_new():
-    assert False
+    def _t_list_referencing_objects(self):
+        assert False
 
-def test_rename_workspace():
-    assert False
+    def _t_list_referencing_object_counts(self):
+        assert False
 
-def test_rename_object():
-    assert False
+    def _t_get_referenced_objects(self):
+        assert False
 
-def test_copy_object():
-    assert False
+    def _t_list_workspaces(self):
+        assert False
 
-def test_revert_object():
-    assert False
+    def _t_list_workspace_info(self):
+        assert False
 
-def test_hide_objects():
-    assert False
+    def _t_list_workspace_objects(self):
+        assert False
 
-def test_unhide_objects():
-    assert False
+    def _t_list_objects(self):
+        assert False
 
-def test_delete_objects():
-    assert False
+    def _t_get_objectmeta(self):
+        assert False
 
-def test_undelete_objects():
-    assert False
+    def _t_get_object_info(self):
+        assert False
 
-def test_delete_workspace():
-    assert False
+    def _t_get_object_info_new(self):
+        assert False
 
-def test_undelete_workspace():
-    assert False
+    def _t_rename_workspace(self):
+        assert False
 
-def test_request_module_ownership():
-    assert False
+    def _t_rename_object(self):
+        assert False
 
-def test_register_typespec():
-    assert False
+    def _t_copy_object(self):
+        assert False
 
-def test_register_typespec_copy():
-    assert False
+    def _t_revert_object(self):
+        assert False
 
-def test_release_module():
-    assert False
+    def _t_hide_objects(self):
+        assert False
 
-def test_list_modules():
-    assert False
+    def _t_unhide_objects(self):
+        assert False
 
-def test_list_module_versions():
-    assert False
+    def _t_delete_objects(self):
+        assert False
 
-def test_get_module_info():
-    assert False
+    def _t_undelete_objects(self):
+        assert False
 
-def test_get_jsonschema():
-    assert False
+    def _t_delete_workspace(self):
+        assert False
 
-def test_translate_from_MD5_types():
-    assert False
+    def _t_undelete_workspace(self):
+        assert False
 
-def test_translate_to_MD5_types():
-    assert False
+    def _t_request_module_ownership(self):
+        assert False
 
-def test_get_type_info():
-    assert False
+    def _t_register_typespec(self):
+        assert False
 
-def test_get_all_type_info():
-    assert False
+    def _t_register_typespec_copy(self):
+        assert False
 
-def test_get_func_info():
-    assert False
+    def _t_release_module(self):
+        assert False
 
-def test_get_all_func_info():
-    assert False
+    def _t_list_modules(self):
+        assert False
 
-def test_grant_module_ownership():
-    assert False
+    def _t_list_module_versions(self):
+        assert False
 
-def test_remove_module_ownership():
-    assert False
+    def _t_get_module_info(self):
+        assert False
 
-def test_list_all_types():
-    assert False
+    def _t_get_jsonschema(self):
+        assert False
 
-def test_administer():
-    assert False
+    def _t_translate_from_MD5_types(self):
+        assert False
+
+    def _t_translate_to_MD5_types(self):
+        assert False
+
+    def _t_get_type_info(self):
+        assert False
+
+    def _t_get_all_type_info(self):
+        assert False
+
+    def _t_get_func_info(self):
+        assert False
+
+    def _t_get_all_func_info(self):
+        assert False
+
+    def _t_grant_module_ownership(self):
+        assert False
+
+    def _t_remove_module_ownership(self):
+        assert False
+
+    def _t_list_all_types(self):
+        assert False
+
+    def _t_administer(self):
+        assert False
