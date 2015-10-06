@@ -16,6 +16,7 @@ from dogpile.cache import make_region
 from dogpile.cache.api import NO_VALUE
 # Local
 from doekbase.workspace import client
+from doekbase.data_api import wsfile
 from doekbase.data_api.util import PerfCollector, PerfEvent
 
 ## Functions and Classes
@@ -47,9 +48,8 @@ def get_redis_cache(redis_host='localhost', redis_port=6379):
     Returns:
         An object, of type CacheRegion
     """
-    region = make_region(
-        function_key_generator=ref_key_generator
-    ).configure(
+    region = make_region(function_key_generator=ref_key_generator)
+    region.configure(
         'dogpile.cache.redis',
         arguments={
             'host': redis_host,
@@ -84,7 +84,7 @@ def get_dbm_cache(path='/tmp', name=''):
     )
     return region
 
-class WorkspaceCached(client.Workspace):
+class WorkspaceCached(object):
     """Caching version of workspace client.
 
     Should be 100% backwards-compatible with the standard client.
@@ -97,9 +97,21 @@ class WorkspaceCached(client.Workspace):
             msg = str(args[0]).split('\n')[0]
             Exception.__init__(self, msg)
 
-    def __init__(self, cache_create_fn, cache_params={}, **workspace_kw):
-        super(WorkspaceCached, self).__init__(**workspace_kw)
-        self._cache = cache_create_fn(**cache_params)
+    def __init__(self, cache_create_fn=None, cache_params=None,
+                 ws_create_fn=None, ws_params=None):
+        """Create cache, instantiating given workspace class to handle
+        initial retrieval of data.
+
+        Both the caching object and the workspace object are pluggable.
+
+        Keywords:
+          cache_create_fn (function): Function to create cache instance
+          cache_params (dict): Parameters for cache instance
+          ws_create_fn (function): Function to create workspace instance
+          ws_params (dict): Parameters for workspace instance
+        """
+        self._cache = cache_create_fn(**(cache_params or {}))
+        self._ws = ws_create_fn(**(ws_params or {}))
         self._get_ref_from_params = lambda p: p['objects'][0]['ref']
         self._stats = PerfCollector(self.__class__.__name__)
 
@@ -111,12 +123,6 @@ class WorkspaceCached(client.Workspace):
     def stats(self):
         return self._stats
 
-    def _call_ws(self, method, *args):
-        try:
-            return method(*args)
-        except (requests.ConnectionError, client.ServerError) as err:
-            raise self.ConnectionError(err)
-
     def get_object(self, params):
         """Get (possibly cached) object.
 
@@ -125,7 +131,7 @@ class WorkspaceCached(client.Workspace):
         Raises:
            self.ConnectionError
         """
-        self._call_ws(self._get_object, params)
+        self._safe_call(self._get_object, params)
 
     def _get_object(self, params):
         ref = self._get_ref_from_params(params)
@@ -135,12 +141,12 @@ class WorkspaceCached(client.Workspace):
         if should_cache:
             obj = self._cache.get(ref)
             if obj is NO_VALUE:
-                obj = client.Workspace.get_object(self, params)
+                obj = self._ws.get_object(self, params)
                 self._cache.set(ref, obj)
             else:
                 was_in_cache = True
         else:
-            obj = super(WorkspaceCached, self).get_object(params)
+            obj = self._ws.get_object(params)
         self._stats.end_event('get_objects', ref, num=1, num_cached=int(
             was_in_cache))
         return obj
@@ -175,7 +181,7 @@ class WorkspaceCached(client.Workspace):
         Returns:
             list of object instances
         """
-        self._call_ws(self._get_objects, object_ids)
+        self._safe_call(self._get_objects, object_ids)
 
     def _get_objects(self, object_ids):
         object_refs = map(self._normalize_oid, object_ids)
@@ -189,20 +195,21 @@ class WorkspaceCached(client.Workspace):
         # list for those we don't have
         for i, ref in enumerate(object_refs):
             should_cache = self._should_cache(ref)
-            if should_cache:
-                obj = self._cache.get(ref)
-                if obj is NO_VALUE:
-                    gaps.append(i)
-                else:
-                    result.append(obj)
-            else:
-                gaps.append(i)
+            cached_object = self._cache.get(ref) if should_cache else NO_VALUE
             cacheable.append(should_cache)
+            if cached_object is NO_VALUE:
+                gaps.append(i)
+                result.append(None)
+            else:
+                result.append(cached_object)
         # fill in missing objects
         if len(gaps) > 0:
             # get all the missing objects at once
             missing_ids = [object_ids[i] for i in gaps]
-            result2 = super(WorkspaceCached, self).get_objects(missing_ids)
+            result2 = self._ws.get_objects(missing_ids)
+            if len(result2) != len(object_ids):
+                raise ValueError('Workspace objects not found: {}'.format(
+                    ', '.join([r for r in object_refs])))
             # fill objects into gaps
             if len(gaps) == len(object_ids):  # nothing came from cache
                 result = result2
@@ -210,10 +217,20 @@ class WorkspaceCached(client.Workspace):
                 for index, item in zip(gaps, result2):
                     result[index] = item
         # cache all results
+        print("@@ object_refs={} len(result)={:d}".format(object_refs,
+                                                          len(result)))
         for i in range(len(object_refs)):
             if cacheable[i]:
                 self._cache.set(object_refs[i], result[i])
         self._stats.end_event('get_objects', objkey, num=len(
             object_ids), num_cached=len(object_ids) - len(gaps))
+
+    def _safe_call(self, method, *args):
+        """Standardize exception handling for a workspace call.
+        """
+        try:
+            return method(*args)
+        except (requests.ConnectionError, client.ServerError) as err:
+            raise self.ConnectionError(err)
 
 
