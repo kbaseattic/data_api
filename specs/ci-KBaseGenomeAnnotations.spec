@@ -431,6 +431,8 @@ quality_score could be in genome_annotation_quality_detail instead
 
 methodology - Not sure if needed? example would be rast
 
+type -refers to representative, reference, user, etc
+
 taxon_ref is a versioned workspace reference
 annotation_quality_ref is a versioned workspace reference
 evidence_container_ref would be a versioned workspace reference 
@@ -461,6 +463,7 @@ typedef structure {
   string methodology; 
   counts_map counts_map;
   seed_roles_ref seed_roles_ref;
+  string type;
 } GenomeAnnotation; 
 
 };
