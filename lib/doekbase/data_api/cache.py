@@ -114,8 +114,12 @@ class WorkspaceCached(object):
         self._ws = ws_create_fn(**(ws_params or {}))
         self._get_ref_from_params = lambda p: p['objects'][0]['ref']
         self._stats = PerfCollector(self.__class__.__name__)
+        self._known_cacheable_refs = set()
 
 ###
+
+    def alter_workspace_metadata(self, params):
+        return self._ws.alter_workspace_metadata(params)
 
     def create_workspace(self, params):
         """Delegate to workspace client method."""
@@ -152,9 +156,27 @@ class WorkspaceCached(object):
 
 ###
 
-    def _should_cache(self, ref):
-        # TODO: See whether this is 'reference data' or not
-        return True
+    def _cacheable(self, ref):
+        """Is this reference (really, its workspace) globally readable
+        and therefore cacheable?
+
+        Args:
+          ref (str): Workspace reference string.
+        Returns:
+           True if this reference is globally readable, otherwise False.
+        """
+        ws_name = self._get_ref_workspace(ref)
+        # Cache the knowledge of cacheability in memory.
+        # This assumes that 'reference data' doesn't become user data,
+        # really ever.
+        if ws_name in self._known_cacheable_refs:
+            return True
+        info = self._ws.get_workspace_info({'workspace': ws_name})
+        globalread = info[6]  # ugh
+        cacheable = (globalread == 'r')
+        if cacheable:
+            self._known_cacheable_refs.add(ws_name)
+        return cacheable
 
     @property
     def stats(self):
@@ -163,7 +185,7 @@ class WorkspaceCached(object):
     def _get_object(self, params):
         ref = self._get_ref_from_params(params)
         self._stats.start_event('get_objects', ref)  # see get_objects()
-        should_cache = self._should_cache(ref)
+        should_cache = self._cacheable(ref)
         was_in_cache = False
         if should_cache:
             obj = self._cache.get(ref)
@@ -200,6 +222,14 @@ class WorkspaceCached(object):
                 ref = '/'.join([ws, objid])
         return ref
 
+    def _get_ref_workspace(self, ref):
+        """Extract workspace name from an object reference.
+        """
+        parts = ref.split('/')
+        if len(parts) < 2:
+            raise ValueError('Invalid format for object reference: {'
+                             'r}'.format(r=ref))
+        return parts[0]
 
     def _get_objects(self, object_ids):
         object_refs = map(self._normalize_oid, object_ids)
@@ -212,7 +242,7 @@ class WorkspaceCached(object):
         # pull what we can from cache, add indexes to gaps
         # list for those we don't have
         for i, ref in enumerate(object_refs):
-            should_cache = self._should_cache(ref)
+            should_cache = self._cacheable(ref)
             cached_object = self._cache.get(ref) if should_cache else NO_VALUE
             cacheable.append(should_cache)
             if cached_object is NO_VALUE:
@@ -235,8 +265,8 @@ class WorkspaceCached(object):
                 for index, item in zip(gaps, result2):
                     result[index] = item
         # cache all results
-        print("@@ object_refs={} len(result)={:d}".format(object_refs,
-                                                          len(result)))
+        #print("@@ object_refs={} len(result)={:d}".format(object_refs,
+        # len(result)))
         for i in range(len(object_refs)):
             if cacheable[i]:
                 self._cache.set(object_refs[i], result[i])
