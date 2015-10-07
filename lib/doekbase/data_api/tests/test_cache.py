@@ -5,7 +5,7 @@ __author__ = 'Dan Gunter <dkgunter@lbl.gov>'
 __date__ = '9/30/15'
 
 # System
-import glob
+import logging
 import os
 import sys
 import threading
@@ -27,6 +27,8 @@ taxon_old = "OriginalReferenceGenomes/kb|g.166819"
 g_token = ''
 
 g_workspace_objects = {}  # key is cache type, value is object
+
+_log = logging.getLogger('doekbase.tests.test_cache')
 
 def setup():
     global g_token, dbm_path
@@ -162,6 +164,7 @@ class CachedWorkspaceTests(TestCase):
     def tearDown(self):
         # delete temporary workspaces
         for ws in self._delete_ws:
+            _log.info('deleting temporary workspace: {}'.format(ws))
             g_workspace_objects['redis'].delete_workspace({'workspace': ws})
 
     def test_all(self):
@@ -169,13 +172,21 @@ class CachedWorkspaceTests(TestCase):
         """
         test_methods = filter(lambda s: s.startswith('_t_'),
                               dir(self))
+        sys.stdout.write('\n')
+
+        default_ws = {}
+        for t in g_workspace_objects:
+            self.ws = g_workspace_objects[t]
+            default_ws[t] = self._t_create_workspace()
+
         for meth_name in test_methods:
             test_method = getattr(self, meth_name)
             friendly_name = meth_name[3:]  # strip prefix
             for cache_type in g_workspace_objects:
                 self.ws = g_workspace_objects[cache_type]
-                self._start("Workspace test '{n}' (cache-type={t})",
-                            t=cache_type, n=friendly_name)
+                self.default_ws = default_ws[cache_type]
+                self._start(type_=cache_type,
+                            name=friendly_name)
                 try:
                     test_method()
                     self._succeeded()
@@ -184,8 +195,9 @@ class CachedWorkspaceTests(TestCase):
                 except ws_client.ServerError as err:
                     self._server_error(err)
 
-    def _start(self, m, **k):
-        sys.stdout.write(m.format(**k) + "...")
+    def _start(self, type_=None, name=None):
+        m = ".  Cached workspace ({:6s}) {:30s} "
+        sys.stdout.write(m.format(type_, name))
         sys.stdout.flush()
 
     def _succeeded(self):
@@ -198,6 +210,7 @@ class CachedWorkspaceTests(TestCase):
         err = str(err).split('\n')[0]
         sys.stdout.write("FAILED: (ServerError) {}\n".format(err))
 
+
     def _t_ver(self):
         value = self.ws.ver()
         p = value.split('.')
@@ -207,49 +220,78 @@ class CachedWorkspaceTests(TestCase):
                 "Version mismatch: {ver} > {expected}".format(
                     ver=value, expected='.'.join(map(str, self.MAX_WS_VERSION)))
 
+
     def _t_create_workspace(self):
         name = 'foo-{:.3f}'.format(time.time())
         self.ws.create_workspace({'workspace': name})
         self._delete_ws.add(name)
+        return name  # for re-use elsewhere
 
     def _t_alter_workspace_metadata(self):
-        assert False
+        name = self._t_create_workspace()
+        self.ws.alter_workspace_metadata({'wsi': {'workspace': name},
+                                          'new': {'trump': 'idiot'}})
 
     def _t_clone_workspace(self):
-        assert False
+        name = self.default_ws
+        name2 = 'bar-{:.3f}'.format(time.time())
+        self.ws.clone_workspace({'wsi': {'workspace': name},
+                                 'workspace': name2})
+        self._delete_ws.add(name2)
 
     def _t_lock_workspace(self):
-        assert False
+        # this is not reversible and the workspace cannot
+        # be deleted (!), so running this as a test against a
+        # real workspace creates cruft.
+        # name = self._t_create_workspace()
+        # self.ws.lock_workspace({'workspace': name})
+        return
 
     def _t_get_workspacemeta(self):
-        assert False
+        # deprecated form of get_workspace_info
+        return
 
     def _t_get_workspace_info(self):
-        assert False
+        self.ws.get_workspace_info({'workspace': self.default_ws})
 
     def _t_get_workspace_description(self):
-        assert False
+        self.ws.get_workspace_description({'workspace': self.default_ws})
 
     def _t_set_permissions(self):
-        assert False
+        name = self._t_create_workspace()
+        self.ws.set_permissions({'workspace': name,
+                                 'new_permission': 'r',
+                                 'users': ['kbasetest']})
 
     def _t_set_global_permission(self):
-        assert False
+        name = self._t_create_workspace()
+        self.ws.set_global_permission({'workspace': name,
+                                 'new_permission': 'r'})
 
     def _t_set_workspace_description(self):
-        assert False
+        self.ws.set_workspace_description(
+            {'workspace': self.default_ws,
+             'description': 'quite lame'})
 
     def _t_get_permissions(self):
-        assert False
+        self.ws.get_permissions({'workspace': self.default_ws})
 
     def _t_save_object(self):
-        assert False
+        # deprecated for save_objects
+        return
 
     def _t_save_objects(self):
-        assert False
+        name = self._t_create_workspace()
+        obj = {'type': 'KBaseGenomes.Genome-0.1', 'data': {}}
+        try:
+            self.ws.save_objects({'workspace': name, 'objects': [obj]})
+        except ws_client.ServerError as err:
+            assert 'failed type checking' in str(err), \
+            'Expected type check error, got: {}'.format(err)
 
     def _t_get_object(self):
-        assert False
+        # deprecated for get_objects
+        return
 
     def _t_get_object_provenance(self):
         assert False
@@ -375,4 +417,9 @@ class CachedWorkspaceTests(TestCase):
         assert False
 
     def _t_administer(self):
-        assert False
+        try:
+            self.ws.administer({})
+        except ws_client.ServerError as err:
+            # fail if this is NOT the "normal" error
+            # caused by lack of admin. permissions
+            assert 'not an admin' in str(err)

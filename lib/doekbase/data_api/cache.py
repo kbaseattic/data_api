@@ -91,11 +91,28 @@ class WorkspaceCached(object):
 
     In addition, this class provides some basic performance information
     for each of its operations.
+
+    Some useful data structures to know (from the workspace spec.):
+    * workspace_info (tuple): 0) ws_name id, 1) username owner,
+        2) timestamp moddate, 3) int objects, 4) permission user_permission,
+        5) permission global_permission, 6) ws_id num_id
+    * workspace identity (WSI): a dict with two possible forms
+      {'workspace': '<string workspace name>'} or {'id': <integer-id>}
     """
     class ConnectionError(Exception):
         def __init__(self, *args):
             msg = str(args[0]).split('\n')[0]
             Exception.__init__(self, msg)
+
+    # List of methods directly delegated to client
+    _delegated = ('administer', 'alter_workspace_metadata',
+                  'clone_workspace', 'create_workspace', 'delete_workspace',
+                  'get_permissions',
+                  'get_workspace_description', 'get_workspace_info',
+                  'lock_workspace', 'set_global_permission', 'set_permissions',
+                  'save_object', 'save_objects',
+                  'set_workspace_description',
+                  'ver')
 
     def __init__(self, cache_create_fn=None, cache_params=None,
                  ws_create_fn=None, ws_params=None):
@@ -118,16 +135,15 @@ class WorkspaceCached(object):
 
 ###
 
-    def alter_workspace_metadata(self, params):
-        return self._ws.alter_workspace_metadata(params)
+    def __getattr__(self, item):
+        """If this is one of the delegated methods, return a wrapper
+        function so it will call the underlying workspace.
+        """
+        if item in self._delegated:
+            return lambda *a: getattr(self._ws, item)(*a)
+        raise AttributeError(item)
 
-    def create_workspace(self, params):
-        """Delegate to workspace client method."""
-        return self._ws.create_workspace(params)
-
-    def delete_workspace(self, params):
-        """Delegate to workspace client method."""
-        return self._ws.delete_workspace(params)
+###
 
     def get_object(self, params):
         """Get (possibly cached) object.
@@ -149,10 +165,6 @@ class WorkspaceCached(object):
         """
         self._safe_call(self._get_objects, object_ids)
 
-    def ver(self):
-        """Get version of Workspace server.
-        """
-        return self._ws.ver()
 
 ###
 
