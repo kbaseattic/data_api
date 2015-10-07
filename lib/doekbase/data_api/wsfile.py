@@ -106,7 +106,7 @@ class WorkspaceFile(object):
     _loaded = {}  # static cache of loaded refs
 
     #: Version of the workspace we are emulating
-    VERSION = '1.0'
+    VERSION = '0.3.5'
 
     def __init__(self, working_directory):
         """Create file-based Workspace instance, using files in
