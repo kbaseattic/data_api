@@ -210,6 +210,9 @@ class CachedWorkspaceTests(TestCase):
         err = str(err).split('\n')[0]
         sys.stdout.write("FAILED: (ServerError) {}\n".format(err))
 
+    def generic_object(self):
+        return {'type': 'Empty.AType-1.0',
+                'data': {'hello': 'world'}}
 
     def _t_ver(self):
         value = self.ws.ver()
@@ -282,12 +285,10 @@ class CachedWorkspaceTests(TestCase):
 
     def _t_save_objects(self):
         name = self._t_create_workspace()
-        obj = {'type': 'KBaseGenomes.Genome-0.1', 'data': {}}
-        try:
-            self.ws.save_objects({'workspace': name, 'objects': [obj]})
-        except ws_client.ServerError as err:
-            assert 'failed type checking' in str(err), \
-            'Expected type check error, got: {}'.format(err)
+        self.ws.save_objects({
+            'workspace': name,
+            'objects': [self.generic_object()]
+        })
 
     def _t_get_object(self):
         # deprecated for get_objects
