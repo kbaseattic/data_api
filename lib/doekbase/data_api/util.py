@@ -21,50 +21,16 @@ EXIT_MESSAGE = '{timestamp} {func_name}.end {dur} {kvp}'
 EVENT_MESSAGE = '{timestamp} {func_name} {kvp}'
 
 DEFAULT_LEVEL = logging.INFO
-DEFAULT_LEVEL_NAME = logging.getLevelName(DEFAULT_LEVEL)
-DEFAULT_CONFIG = {
-    'version': 1,
-    'formatters': {
-        'basic': { 'format': '%(levelname)s %(message)s' }
-    },
-    'handlers': {
-        'console': {
-            'class': 'logging.StreamHandler',
-            'formatter': 'basic',
-            'stream': 'ext://sys.stderr',
-            'level': DEFAULT_LEVEL_NAME
-        }
-    },
-    'root': {
-        'handlers': ['console'],
-        'level': DEFAULT_LEVEL_NAME
-    }
-}
+logformat = '%(levelname)s %(message)s'
 
-_configuration = None
-
-def get_logger(name, config=DEFAULT_CONFIG):
-    """Called by other modules to get a logger,
-    and set or change the configuration.
-    """
-    global _configuration
-
-    # Perform configuration/reconfiguration if necessary.
-    # Usually none of this is done.
-    if _configuration is None:
-        assert config is not None  # need something!
-        logging.config.dictConfig(config)
-        _configuration = config  # first time
-    elif config is DEFAULT_CONFIG and _configuration is DEFAULT_CONFIG:
-        pass  # quickly check the common case
-    elif config != _configuration:
-        assert config is not None
-        logging.config.dictConfig(config)  # reconfigure
-        _configuration = config
-
-    # Get the logger, given the current configuration.
-    return logging.getLogger(name)
-
+def get_logger(name):
+    if not name.startswith('doekbase.'):
+        name = 'doekbase.' + name
+    logger = logging.getLogger(name)
+    #handler = logging.StreamHandler()
+    #handler.setFormatter(logging.Formatter(logformat))
+    #logger.addHandler(handler)
+    return logger
 
 class Timer(object):
     def __init__(self):
