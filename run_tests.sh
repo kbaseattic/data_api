@@ -1,4 +1,9 @@
 #!/bin/bash
+#
+# This is a developer tool intended for running the test suite with the
+# correct arguments. It includes starting/stopping the caching with Redis
+#
+# Author: Dan Gunter <dkgunter@lbl.gov>
 
 # Nose
 
@@ -25,7 +30,7 @@ REDIS=redis-server
 REDIS_CONFIG=redis.conf
 
 function stop_redis () {
-    printf "stopping redis..\n"
+    printf "* stopping redis..\n"
     pid=$(ps auxw | grep "[r]edis" | cut -c12-22)
     if [ "$pid" != "" ]; then
         printf "  killing PID $pid\n"
@@ -39,14 +44,14 @@ function stop_redis () {
         printf "  removing dump-file: dump.rdb\n"
         /bin/rm -f dump.rdb
     else
-        printf "no running server found\n"
+        printf "  no running server found\n"
     fi
-    printf "done\n"
+    printf "  done\n"
 }
 
 function start_redis () {
     version=$($REDIS --version)
-    printf "starting redis (%s) ..\n" "$version"
+    printf "* starting redis (%s) ..\n" "$version"
     ${REDIS} ${REDIS_CONFIG} >/dev/null &
 }
 
@@ -66,7 +71,9 @@ function show_help () {
 }
 
 function inst_lib () {
+    printf "* installing Python library..\n"
     python setup.py install >/dev/null
+    printf "  done"
 }
 
 # Main
@@ -88,11 +95,19 @@ case $mode in
 esac
 
 
+# prepare
 restart_redis
+inst_lib
+
+# run
 printf "\n\nRUNNING TESTS\n\n"
+
 run_nose_$mode "$*"
+
 printf "\n\n"
 sleep 1
+
+# cleanup
 stop_redis
 
 exit 0
