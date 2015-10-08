@@ -14,9 +14,10 @@ import unittest
 from dogpile.cache.api import NO_VALUE
 # Local
 from doekbase.data_api import cache
+from doekbase.data_api import util
 from . import shared
 
-_log = logging.getLogger('doekbase.tests.test_cache')
+_log = util.get_logger(__name__)
 
 # Uncomment this line to turn off DBM tests
 USE_DBM = False
