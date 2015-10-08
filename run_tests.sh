@@ -3,7 +3,7 @@
 # Nose
 
 NOSE=nosetests
-NOSE_OPTS=""
+NOSE_OPTS="--logging-filter=-doekbase"
 
 function run_nose_ci () {
     $NOSE $NOSE_OPTS \
@@ -47,7 +47,7 @@ function stop_redis () {
 function start_redis () {
     version=$($REDIS --version)
     printf "starting redis (%s) ..\n" "$version"
-    ${REDIS} ${REDIS_CONFIG} &
+    ${REDIS} ${REDIS_CONFIG} >/dev/null &
 }
 
 function restart_redis () {
@@ -89,8 +89,10 @@ esac
 
 
 restart_redis
+printf "\n\nRUNNING TESTS\n\n"
 run_nose_$mode "$*"
-#sleep 1
-#stop_redis
+printf "\n\n"
+sleep 1
+stop_redis
 
 exit 0
