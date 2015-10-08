@@ -220,6 +220,8 @@ class PerfCollector(object):
         self._broadcast(event, 1, pevent)
 
     def get_last(self):
+        if not self._history:
+            return None
         return self._history[-1]
 
     def dump(self, stream):

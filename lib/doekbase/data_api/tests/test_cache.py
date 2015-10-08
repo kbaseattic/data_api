@@ -18,24 +18,28 @@ from . import shared
 
 _log = logging.getLogger('doekbase.tests.test_cache')
 
-# def setup():
-#     shared.setup()
+# Uncomment this line to turn off DBM tests
+USE_DBM = False
 
 class TestCache(unittest.TestCase):
-    """
+    """Test the cache.
     """
     dbm_path = None
 
+## Setup / teardown
+
     @classmethod
     def setUpClass(cls):
-        cls.dbm_path = '/tmp/test_cache-{:d}'.format(int(time.time()))
-        os.mkdir(cls.dbm_path)
-        cls.dbm_region = cache.get_dbm_cache(path=cls.dbm_path)
+        if USE_DBM:
+            cls.dbm_path = '/tmp/test_cache-{:d}'.format(int(time.time()))
+            os.mkdir(cls.dbm_path)
+            cls.dbm_region = cache.get_dbm_cache(path=cls.dbm_path)
 
     def setUp(self):
         self.regions = {}
         # DBM
-        self.regions['DBM'] = self.dbm_region
+        if USE_DBM:
+            self.regions['DBM'] = self.dbm_region
         # Redis
         try:
             redis_region = cache.get_redis_cache()
@@ -55,9 +59,12 @@ class TestCache(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        for f in os.listdir(cls.dbm_path):
-            os.unlink(os.path.join(cls.dbm_path, f))
-        os.rmdir(cls.dbm_path)
+        if USE_DBM:
+            for f in os.listdir(cls.dbm_path):
+                os.unlink(os.path.join(cls.dbm_path, f))
+            os.rmdir(cls.dbm_path)
+
+## Tests
 
     def test_get(self):
         for key, region in self.regions.items():
@@ -101,10 +108,68 @@ class TestCache(unittest.TestCase):
         # different values are different
         assert v3 != v2
 
-
     def get_set(self, region, x):
         val = region.get(x)
         if val == NO_VALUE:
             region.set(x, x)
             val = x
         return val
+
+    def test_large(self):
+        for key, region in self.regions.items():
+            _log.info('large_objects.{}'.format(key))
+            self.put_large_objects(region)
+
+    def put_large_objects(self, region):
+        """Try putting large objects into the cache."""
+        return
+        # z = []
+        # for i in range(2):
+        #     _log.info('Put large object with {:d}M zeroes'.format(
+        #         (i + 1)*50))
+        #     z.extend([0] * 50000000)  # add 10M zeros
+        #     region.set('zeroes_{:d}M'.format(i), z)
+
+class TestCachedObjectAPI(unittest.TestCase):
+
+    genome_new = "PrototypeReferenceGenomes/kb|g.166819"
+    genome_old = "OriginalReferenceGenomes/kb|g.166819"
+
+    def setUp(self):
+        cache.CachedObjectAPI.cache_class = cache.RedisCache
+        cache.CachedObjectAPI.cache_params = {'redis_host': 'localhost'}
+
+    def test_extract_paths(self):
+        data = {'a1': {'b1': {'c1': 1, 'c2': 2}, 'b2': {'d1': 3}}}
+        paths = ['a1/b1', 'a1/b1/c2', 'a1/b2/d1', 'a1/b1/N', 'N', 'a1/N']
+        r = cache.CachedObjectAPI.extract_paths(data, paths)
+        assert len(r) == 3, 'Wrong number of results, got {:d} expected {:d}'.\
+            format(len(r), 3)
+        msg = 'Invalid result "{r}" for path "{p}"'
+        assert r[0] == {'a1': {'b1': {'c1': 1, 'c2': 2}}}, \
+            msg.format(r=r[0], p=paths[0])
+        # TODO: ..etc..
+
+    def test_get_new_genome(self):
+        g = cache.CachedObjectAPI(services=shared.get_services(),
+                                   ref=self.genome_new)
+        g.get_data()
+        event = g.stats.get_last()
+        _log.info('Get new genome #1 (cached={}): {:.3f}'.format(
+            event['cached'], event.duration))
+        g.get_data()
+        event = g.stats.get_last()
+        _log.info('Get new genome #2 (cached={}): {:.3f}'.format(
+            event['cached'], event.duration))
+
+    def test_get_old_genome(self):
+        g = cache.CachedObjectAPI(services=shared.get_services(),
+                                   ref=self.genome_old)
+        g.get_data()
+        event = g.stats.get_last()
+        _log.info('Get old genome #1 (cached={}): {:.3f}'.format(
+            event['cached'], event.duration))
+        g.get_data()
+        event = g.stats.get_last()
+        _log.info('Get old genome #2 (cached={}): {:.3f}'.format(
+            event['cached'], event.duration))
