@@ -16,6 +16,8 @@ except ImportError:
 from doekbase.data_api.util import get_logger, log_start, log_end
 from doekbase.workspace.client import Workspace
 from doekbase.data_api.wsfile import WorkspaceFile
+from doekbase.data_api import cache
+from doekbase.data_api.util import PerfCollector
 
 # Logging
 
@@ -124,6 +126,14 @@ class ObjectAPI(object):
         self._history = None
         self._provenance = None
         self._data = None
+        # Init stats
+        self._stats = PerfCollector(self.__class__.__name__)
+        # Init the caching object.
+        self._cache = cache.ObjectCache(self._id, stats=self._stats)
+
+    @property
+    def stats(self):
+        return self._stats
 
     def _init_ws_from_files(self, path):
         ext = '.msgpack'
@@ -215,34 +225,41 @@ class ObjectAPI(object):
         return self._name
     
     def get_data(self):
-        """
-        Retrieve object data.
+        """Retrieve object data.
         
         Returns:
-          dict"""
-        
-        if self._data == None:
-            self._data = self.ws_client.get_objects([{"ref": self.ref}])[0]["data"]
-        
-        return self._data
+          dict
+        """
+        return self._cache.get_data(self._get_data_ws)
+
+    def _get_data_ws(self):
+        return self.ws_client.get_objects([{"ref": self.ref}])[0]["data"]
 
     def get_data_subset(self, path_list=None):
-        """
-        Retrieve a subset of data from this object, given a list of paths to the data elements.
-        
-        Returns:
-          dict"""
+        """Retrieve a subset of data from this object, given a list of paths
+        to the data elements.
 
+        Args:
+          path_list (list): List of paths, each a string of node names
+                            separated by forward slashes, e.g.
+                            ['a/bee/sea', 'd/ee/eph/gee']
+        Returns:
+          dict
+        """
+        return self._cache.get_data_subset(self._get_data_subset_ws,
+                                           path_list=path_list)
+
+    def _get_data_subset_ws(self, path_list=None):
         return self.ws_client.get_object_subset([{"ref": self.ref, 
                         "included": path_list}])[0]["data"]
     
     def get_referrers(self):
-        """
-        Retrieve a dictionary that indicates by type what objects are referring to this object.
+        """Retrieve a dictionary that indicates by type what objects are
+        referring to this object.
         
         Returns:
-          dict"""
-        
+          dict
+        """
         referrers = self.ws_client.list_referencing_objects([{"ref": self.ref}])[0]
         
         object_refs_by_type = dict()        

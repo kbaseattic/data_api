@@ -15,6 +15,7 @@ from dogpile.cache.api import NO_VALUE
 # Local
 from doekbase.data_api import cache
 from doekbase.data_api import util
+from doekbase.data_api.core import ObjectAPI
 from . import shared
 
 _log = util.get_logger(__name__)
@@ -34,7 +35,7 @@ class TestCache(unittest.TestCase):
         if USE_DBM:
             cls.dbm_path = '/tmp/test_cache-{:d}'.format(int(time.time()))
             os.mkdir(cls.dbm_path)
-            cls.dbm_region = cache.get_dbm_cache(path=cls.dbm_path)
+            cls.dbm_region = cache.get_dbm_region(path=cls.dbm_path)
 
     def setUp(self):
         self.regions = {}
@@ -43,7 +44,7 @@ class TestCache(unittest.TestCase):
             self.regions['DBM'] = self.dbm_region
         # Redis
         try:
-            redis_region = cache.get_redis_cache()
+            redis_region = cache.get_redis_region()
             redis_region.get('foo')
             self.regions['Redis'] = redis_region
         except Exception as err:
@@ -137,23 +138,23 @@ class TestCachedObjectAPI(unittest.TestCase):
     genome_old = "OriginalReferenceGenomes/kb|g.166819"
 
     def setUp(self):
-        cache.CachedObjectAPI.cache_class = cache.RedisCache
-        cache.CachedObjectAPI.cache_params = {'redis_host': 'localhost'}
+        cache.ObjectCache.cache_class = cache.RedisCache
+        cache.ObjectCache.cache_params = {'redis_host': 'localhost'}
 
     def test_extract_paths(self):
         data = {'a1': {'b1': {'c1': 1, 'c2': 2}, 'b2': {'d1': 3}}}
         paths = ['a1/b1', 'a1/b1/c2', 'a1/b2/d1', 'a1/b1/N', 'N', 'a1/N']
-        r = cache.CachedObjectAPI.extract_paths(data, paths)
+        r = cache.ObjectCache.extract_paths(data, paths)
         assert len(r) == 3, 'Wrong number of results, got {:d} expected {:d}'.\
             format(len(r), 3)
         msg = 'Invalid result "{r}" for path "{p}"'
         assert r[0] == {'a1': {'b1': {'c1': 1, 'c2': 2}}}, \
             msg.format(r=r[0], p=paths[0])
-        # TODO: ..etc..
+        assert r[1] == {'a1': {'b1': {'c2': 2}}}, msg.format(r=r[1], p=paths[1])
+        assert r[2] == {'a1': {'b2':{'d1': 3}}}, msg.format(r=r[2], p=paths[2])
 
     def test_get_new_genome(self):
-        g = cache.CachedObjectAPI(services=shared.get_services(),
-                                   ref=self.genome_new)
+        g = ObjectAPI(services=shared.get_services(), ref=self.genome_new)
         g.get_data()
         event = g.stats.get_last()
         _log.info('Get new genome #1 (cached={}): {:.3f}'.format(
@@ -164,8 +165,7 @@ class TestCachedObjectAPI(unittest.TestCase):
             event['cached'], event.duration))
 
     def test_get_old_genome(self):
-        g = cache.CachedObjectAPI(services=shared.get_services(),
-                                   ref=self.genome_old)
+        g = ObjectAPI(services=shared.get_services(), ref=self.genome_old)
         g.get_data()
         event = g.stats.get_last()
         _log.info('Get old genome #1 (cached={}): {:.3f}'.format(
@@ -174,3 +174,9 @@ class TestCachedObjectAPI(unittest.TestCase):
         event = g.stats.get_last()
         _log.info('Get old genome #2 (cached={}): {:.3f}'.format(
             event['cached'], event.duration))
+
+    def test_get_referrers(self):
+        g = ObjectAPI(services=shared.get_services(), ref=self.genome_old)
+        r = g.get_referrers()
+        g = ObjectAPI(services=shared.get_services(), ref=self.genome_new)
+        r = g.get_referrers()
