@@ -23,13 +23,21 @@ EVENT_MESSAGE = '{timestamp} {func_name} {kvp}'
 DEFAULT_LEVEL = logging.INFO
 logformat = '%(levelname)s %(message)s'
 
+g_running_nosetests = None
+
 def get_logger(name):
+    global g_running_nosetests
     if not name.startswith('doekbase.'):
         name = 'doekbase.' + name
+    # If we are running in nose, nest under there so nose -v options
+    # can apply to us. Cache the result of checking for nose in a global var.
+    if g_running_nosetests is None:  # haven't checked yet
+         g_running_nosetests = 'nose' in logging.root.manager.loggerDict
+    if g_running_nosetests:
+         name = 'nose.' + name
+    # create logger
     logger = logging.getLogger(name)
-    #handler = logging.StreamHandler()
-    #handler.setFormatter(logging.Formatter(logformat))
-    #logger.addHandler(handler)
+#    logger.propagate = 1
     return logger
 
 class Timer(object):
@@ -209,7 +217,16 @@ class PerfEvent(object):
     """Single timed event.
 
     Events can be extracted using dictionary syntax,
-    e.g. my_event['<key'], with the keys:
+    e.g. my_event['<key'], for any key in the metadata.
+    This will also work for any of the attributes, in case it's
+    more convenient to get at them that way.
+
+    Attributes:
+        event (str): Full name of event <namespace>.<event-name>
+        key (str): Identifying key
+        start(float): Start timestamp, in seconds since 1/1/1970
+        end (float): End timestamp, in seconds since 1/1/1970
+        duration (float): Duration in seconds
     """
     def __init__(self, event, key, start_time, end_time, meta):
         """Ctor.
@@ -238,3 +255,21 @@ class PerfEvent(object):
         if key in self._meta:
             return self._meta[key]
         raise KeyError(key)
+
+def collect_performance(perf_collector):
+    def real_decorator(method):
+        event = method.__name__
+        key = str(time.time())
+        # create wrapper
+        def method_wrapper(self, *args, **kwds):
+            perf_collector.start_event(event, key)
+            returnval = method(self, *args, **kwds)
+            for i, a in args:
+                kwds['_{:d}'.format(i)] = str(a)
+            perf_collector.end_event(event, key, **kwds)
+            return returnval
+
+        # return wrapper
+        return method_wrapper
+
+    return real_decorator

@@ -19,6 +19,8 @@ from doekbase.data_api.core import ObjectAPI
 from . import shared
 
 _log = util.get_logger(__name__)
+#from logging_tree import printout
+#printout()
 
 # Uncomment this line to turn off DBM tests
 USE_DBM = False
@@ -70,14 +72,14 @@ class TestCache(unittest.TestCase):
 
     def test_get(self):
         for key, region in self.regions.items():
-            _log.info('get.{}'.format(key))
+            _log.debug('get.{}'.format(key))
             region.set('x', 1)
             x = region.get('x')
             assert x == 1
 
     def test_parallel(self):
         for key, region in self.regions.items():
-            _log.info('parallel.{}'.format(key))
+            _log.debug('parallel.{}'.format(key))
             self.parallel_simple(region)
 
     def parallel_simple(self, region):
@@ -96,7 +98,7 @@ class TestCache(unittest.TestCase):
 
     def test_basic(self):
         for key, region in self.regions.items():
-            _log.info('wait.{}'.format(key))
+            _log.debug('wait.{}'.format(key))
             self.basic(region)
 
     def basic(self, region):
@@ -119,18 +121,17 @@ class TestCache(unittest.TestCase):
 
     def test_large(self):
         for key, region in self.regions.items():
-            _log.info('large_objects.{}'.format(key))
+            _log.debug('large_objects.{}'.format(key))
             self.put_large_objects(region)
 
     def put_large_objects(self, region):
         """Try putting large objects into the cache."""
-        return
-        # z = []
-        # for i in range(2):
-        #     _log.info('Put large object with {:d}M zeroes'.format(
-        #         (i + 1)*50))
-        #     z.extend([0] * 50000000)  # add 10M zeros
-        #     region.set('zeroes_{:d}M'.format(i), z)
+        z = []
+        for i in range(2):
+            _log.debug('Put large object with {:d}M zeroes'.format(
+                (i + 1)*50))
+            z.extend([0] * 50000000)
+            region.set('zeroes_{:d}M'.format(i), z)
 
 class TestCachedObjectAPI(unittest.TestCase):
 
@@ -140,6 +141,12 @@ class TestCachedObjectAPI(unittest.TestCase):
     def setUp(self):
         cache.ObjectCache.cache_class = cache.RedisCache
         cache.ObjectCache.cache_params = {'redis_host': 'localhost'}
+        _log.debug('Fetching old object')
+        self.old_object = ObjectAPI(services=shared.get_services(),
+                                    ref=self.genome_old)
+        _log.debug('Fetching new object')
+        self.new_object = ObjectAPI(services=shared.get_services(),
+                                    ref=self.genome_new)
 
     def test_extract_paths(self):
         data = {'a1': {'b1': {'c1': 1, 'c2': 2}, 'b2': {'d1': 3}}}
@@ -153,30 +160,35 @@ class TestCachedObjectAPI(unittest.TestCase):
         assert r[1] == {'a1': {'b1': {'c2': 2}}}, msg.format(r=r[1], p=paths[1])
         assert r[2] == {'a1': {'b2':{'d1': 3}}}, msg.format(r=r[2], p=paths[2])
 
-    def test_get_new_genome(self):
-        g = ObjectAPI(services=shared.get_services(), ref=self.genome_new)
-        g.get_data()
-        event = g.stats.get_last()
+    def test_get_new_data(self):
+        self.new_object.get_data()
+        event = self.new_object.cache_stats.get_last()
         _log.info('Get new genome #1 (cached={}): {:.3f}'.format(
             event['cached'], event.duration))
-        g.get_data()
-        event = g.stats.get_last()
+        self.new_object.get_data()
+        event = self.new_object.cache_stats.get_last()
         _log.info('Get new genome #2 (cached={}): {:.3f}'.format(
             event['cached'], event.duration))
 
-    def test_get_old_genome(self):
-        g = ObjectAPI(services=shared.get_services(), ref=self.genome_old)
-        g.get_data()
-        event = g.stats.get_last()
+    def test_get_old_data(self):
+        self.old_object.get_data()
+        event = self.old_object.cache_stats.get_last()
         _log.info('Get old genome #1 (cached={}): {:.3f}'.format(
             event['cached'], event.duration))
-        g.get_data()
-        event = g.stats.get_last()
+        self.old_object.get_data()
+        event = self.old_object.cache_stats.get_last()
         _log.info('Get old genome #2 (cached={}): {:.3f}'.format(
             event['cached'], event.duration))
 
-    def test_get_referrers(self):
+    def test_perf_stats(self):
         g = ObjectAPI(services=shared.get_services(), ref=self.genome_old)
-        r = g.get_referrers()
-        g = ObjectAPI(services=shared.get_services(), ref=self.genome_new)
-        r = g.get_referrers()
+        for method in ('get_schema', 'get_history', 'get_data', 'get_referrers',
+                       'copy', 'get_provenance'):
+            getattr(self.old_object, method)()
+            assert method in g.stats.get_last().event
+            _log.info('Old genome {:20s}  {:.3f} seconds'.format(
+                method, g.stats.get_last().duration))
+            getattr(self.new_object, method)()
+            assert method in g.stats.get_last().event
+            _log.info('New genome {:20s}  {:.3f} seconds'.format(
+                method, g.stats.get_last().duration))

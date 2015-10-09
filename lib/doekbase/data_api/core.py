@@ -17,7 +17,7 @@ from doekbase.data_api.util import get_logger, log_start, log_end
 from doekbase.workspace.client import Workspace
 from doekbase.data_api.wsfile import WorkspaceFile
 from doekbase.data_api import cache
-from doekbase.data_api.util import PerfCollector
+from doekbase.data_api.util import PerfCollector, collect_performance
 
 # Logging
 
@@ -29,6 +29,8 @@ REF_PATTERN = re.compile("(.+/.+(/[0-9].+)?)|(ws\.[1-9][0-9]+\.[1-9][0-9]+)")
 g_ws_url = "https://ci.kbase.us/services/ws/"
 g_shock_url = "https://ci.kbase.us/services/shock-api/"
 g_use_msgpack = True
+
+g_stats = PerfCollector('ObjectAPI')
 
 # Functions and Classes
 
@@ -127,13 +129,17 @@ class ObjectAPI(object):
         self._provenance = None
         self._data = None
         # Init stats
-        self._stats = PerfCollector(self.__class__.__name__)
+        self._stats = g_stats
         # Init the caching object.
-        self._cache = cache.ObjectCache(self._id, stats=self._stats)
+        self._cache = cache.ObjectCache(self._id)
 
     @property
     def stats(self):
         return self._stats
+
+    @property
+    def cache_stats(self):
+        return self._cache.stats
 
     def _init_ws_from_files(self, path):
         ext = '.msgpack'
@@ -155,6 +161,7 @@ class ObjectAPI(object):
                              .format(e=ext, p=path))
         return client
 
+    @collect_performance(g_stats)
     def get_schema(self):
         """
         Retrieve the schema associated with this object.
@@ -167,6 +174,7 @@ class ObjectAPI(object):
         
         return self._schema
 
+    @collect_performance(g_stats)
     def get_typestring(self):
         """
         Retrieve the type identifier string.
@@ -176,6 +184,7 @@ class ObjectAPI(object):
                 
         return self._typestring
 
+    @collect_performance(g_stats)
     def get_info(self):
         """
         Retrieve basic properties about this object.
@@ -186,6 +195,7 @@ class ObjectAPI(object):
             
         return self._info
 
+    @collect_performance(g_stats)
     def get_history(self):
         """
         Retrieve the recorded history of this object describing how it has been modified.
@@ -195,7 +205,8 @@ class ObjectAPI(object):
             self._history = self.ws_client.get_object_history({"ref": self.ref})
         
         return self._history
-    
+
+    @collect_performance(g_stats)
     def get_provenance(self):
         """
         Retrieve the recorded provenance of this object describing how to recreate it.
@@ -205,7 +216,8 @@ class ObjectAPI(object):
             self._provenance = self.ws_client.get_object_provenance([{"ref": self.ref}])
         
         return self._provenance
-    
+
+    @collect_performance(g_stats)
     def get_id(self):
         """
         Retrieve the internal identifier for this object.
@@ -214,7 +226,8 @@ class ObjectAPI(object):
           string"""
     
         return self._id
-    
+
+    @collect_performance(g_stats)
     def get_name(self):
         """
         Retrieve the name assigned to this object.
@@ -223,7 +236,8 @@ class ObjectAPI(object):
           string"""
     
         return self._name
-    
+
+    @collect_performance(g_stats)
     def get_data(self):
         """Retrieve object data.
         
@@ -235,6 +249,7 @@ class ObjectAPI(object):
     def _get_data_ws(self):
         return self.ws_client.get_objects([{"ref": self.ref}])[0]["data"]
 
+    @collect_performance(g_stats)
     def get_data_subset(self, path_list=None):
         """Retrieve a subset of data from this object, given a list of paths
         to the data elements.
@@ -252,7 +267,8 @@ class ObjectAPI(object):
     def _get_data_subset_ws(self, path_list=None):
         return self.ws_client.get_object_subset([{"ref": self.ref, 
                         "included": path_list}])[0]["data"]
-    
+
+    @collect_performance(g_stats)
     def get_referrers(self):
         """Retrieve a dictionary that indicates by type what objects are
         referring to this object.
@@ -271,7 +287,8 @@ class ObjectAPI(object):
             
             object_refs_by_type[typestring].append(str(x[6]) + "/" + str(x[0]) + "/" + str(x[4]))
         return object_refs_by_type
-    
+
+    @collect_performance(g_stats)
     def copy(self, to_ws=None):
         """
         Performs a naive object copy to a target workspace.  A naive object copy is a simple

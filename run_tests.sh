@@ -8,7 +8,7 @@
 # Nose
 
 NOSE=nosetests
-NOSE_OPTS="--logging-filter=-doekbase"
+NOSE_OPTS="--logging-filter=doekbase"
 
 function run_nose_ci () {
     $NOSE $NOSE_OPTS \
