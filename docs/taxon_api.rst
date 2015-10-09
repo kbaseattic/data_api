@@ -1,5 +1,7 @@
 .. include:: wsref.txt
 
+.. _taxon_api:
+
 Taxon Data API
 ==============
 
@@ -9,41 +11,33 @@ The API can be used as a library or in client/server mode.
 
 .. py:currentmodule:: doekbase.data_api.taxonomy.taxon.api
 
-Getting a Taxonomic object
+Creating a Taxonomic object
 --------------------------
 
-To get a taxon, create an instance of the `TaxonAPI` class.
- 
-.. autoclass:: TaxonAPI
-    :noindex:
+To create a new taxon, you will create an object that implements the interface defined in :class:`doekbase.data_api.taxonomy.taxon.api.TaxonInterface`. If you are using the Python library (see :ref:`overview_diagram`), then you can instantiate the :class:`doekbase.data_api.taxonomy.taxon.api.TaxonAPI` class. This will communicate with the back-end database directly. This is the mode used when you are creating code in Python code cells in the KBase Narrative.
 
-    .. automethod:: __init__
+If instead you are using Python or another language as a client, and running the TaxonAPI within a Thrift server, you would use :class:`doekbase.data_api.taxonomy.taxon.api.TaxonClientAPI` in Python or the equivalent in the target language.
 
-For the client, use instead `TaxonClientAPI`:
+In either case you will instantiate the class with an object reference, in the format expected by the KBase workspace: |wsref|. 
 
-.. autoclass:: TaxonClientAPI
-    :noindex:
+Taxon object interface
+-----------------------
 
-    .. automethod:: __init__
-    
-
-In both cases the object reference is in the format expected by the
-KBase workspace: |wsref|. 
-
-Basic operations
-----------------
-
-The basic operations are documented in the parent class to both library and client/server, ``TaxonInterface``.
+The interface used by both the client/server and local Python library APIs is shown below.
 
 .. autoclass:: TaxonInterface
-    :noindex:
-    :members: get_parent, get_children, get_scientific_name, get_taxonomic_id, get_kingdom, get_domain, get_aliases, get_genetic_code
-
+    :members:
+    
 Examples
-++++++++
+--------
+
+Below are example(s) in Python and, "real soon now", in JavaScript.
+
+Python examples
++++++++++++++++
 
 For the following examples, assume the file has the following imports
-at the top::
+at the top of your file, Jupyter notebook, or KBase Narrative (in a code cell)::
 
     import os
     from doekbase.data_api.taxonomy.taxon.api import TaxonAPI
@@ -58,13 +52,4 @@ Example: Fetch and Print Taxon
 .. literalinclude:: ../lib/doekbase/data_api/tests/examples/taxon_api.py
     :linenos:
     :pyobject: fetch_and_print_taxon
-
-Advanced operations
--------------------
-
-The advanced operations are (also) documented in the parent class to both library and client/server, ``TaxonInterface``.
-
-.. autoclass:: TaxonInterface
-    :noindex:
-    :members: get_scientific_lineage, get_genome_annotations
 

@@ -102,6 +102,7 @@ class WorkspaceFile(object):
 
     #: Use MessagePack encoding for workspace objects
     use_msgpack = True
+    use_redis = False
     _loaded = {}  # static cache of loaded refs
 
     def __init__(self, working_directory):
