@@ -1,0 +1,5 @@
+/nbproject/
+/build/
+/temp/
+/dist/
++*.egg-info/
