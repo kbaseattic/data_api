@@ -196,4 +196,3 @@ class ObjectCache(object):
     @property
     def stats(self):
         return self._stats
-
