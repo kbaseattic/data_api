@@ -173,8 +173,13 @@ class TestCachedObjectAPI(unittest.TestCase):
     genome_old = "OriginalReferenceGenomes/kb|g.166819"
 
     def setUp(self):
-        cache.ObjectCache.cache_class = cache.RedisCache
-        cache.ObjectCache.cache_params = {'redis_host': 'localhost'}
+        if shared.g_redis_host is not None:
+            cache.ObjectCache.cache_class = cache.RedisCache
+            cache.ObjectCache.cache_params = {'redis_host': 'localhost'}
+        else:
+            _log.warn("KB_REDIS_HOST not defined, using 'null' cache")
+            cache.ObjectCache.cache_class = cache.NullCache
+            cache.ObjectCache.cache_params = {}
         _log.debug('Fetching old object')
         self.old_object = ObjectAPI(services=shared.get_services(),
                                     ref=self.genome_old)
