@@ -19,3 +19,4 @@ msgpack-python==0.4.6
 dogpile==0.2.2
 dogpile.cache==0.5.6
 dogpile.core==0.4.1
+redis==2.10.3
