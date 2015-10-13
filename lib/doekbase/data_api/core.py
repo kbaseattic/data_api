@@ -131,7 +131,8 @@ class ObjectAPI(object):
         # Init stats
         self._stats = g_stats
         # Init the caching object.
-        self._cache = cache.ObjectCache(self._id)
+        self._cache = cache.ObjectCache(
+            self._info["object_reference_versioned"])
 
     @property
     def stats(self):

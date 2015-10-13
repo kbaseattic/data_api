@@ -119,7 +119,41 @@ class TestCache(unittest.TestCase):
             val = x
         return val
 
-    def test_large(self):
+    def test_complex_dict(self):
+        d = {"glossary": {
+                "title": "example glossary",
+                "GlossDiv": {
+                    "title": "S",
+                    "GlossList": {
+                        "GlossEntry": {
+                            "ID": "SGML",
+                            "SortAs": "SGML",
+                            "GlossTerm": "Standard Generalized Markup Language",
+                            "Acronym": "SGML",
+                            "Abbrev": "ISO 8879:1986",
+                            "GlossDef": {
+                                "para": "A meta-markup language, used to create markup languages such as DocBook.",
+                                "GlossSeeAlso": ["GML", "XML"]
+                            },
+                            "GlossSee": "markup"
+                        }
+                    }
+                }
+            },
+            "values": [
+                {"x": [1, 2, 3, 4, 5],
+                 "y": [6, 7, 8, 9, 10]}
+            ]
+        }
+        for region in self.regions.values():
+            region.set('my-key', d)
+        for region in self.regions.values():
+            d2 = region.get('my-key')
+            assert d == d2, "Cached value does not match original"
+
+    # This takes too long to include in the normal unit tests,
+    # but it is good to have around as a stress test.
+    def toast_large(self):
         for key, region in self.regions.items():
             _log.debug('large_objects.{}'.format(key))
             self.put_large_objects(region)
@@ -148,39 +182,35 @@ class TestCachedObjectAPI(unittest.TestCase):
         self.new_object = ObjectAPI(services=shared.get_services(),
                                     ref=self.genome_new)
 
-    def test_extract_paths(self):
-        data = {'a1': {'b1': {'c1': 1, 'c2': 2}, 'b2': {'d1': 3}}}
-        paths = ['a1/b1', 'a1/b1/c2', 'a1/b2/d1', 'a1/b1/N', 'N', 'a1/N']
-        r = cache.ObjectCache.extract_paths(data, paths)
-        assert len(r) == 3, 'Wrong number of results, got {:d} expected {:d}'.\
-            format(len(r), 3)
-        msg = 'Invalid result "{r}" for path "{p}"'
-        assert r['a1/b1'] == {'a1': {'b1': {'c1': 1, 'c2': 2}}}, \
-            msg.format(r=r[0], p=paths[0])
-        assert r['a1/b1/c2'] == {'a1': {'b1': {'c2': 2}}}, msg.format(r=r[1],
-                                                               p=paths[1])
-        assert r['a1/b2/d1'] == {'a1': {'b2':{'d1': 3}}}, msg.format(r=r[2],
-                                                              p=paths[2])
+    # def test_extract_paths(self):
+    #     data = {'a1': {'b1': {'c1': 1, 'c2': 2}, 'b2': {'d1': 3}}}
+    #     paths = ['a1/b1', 'a1/b1/c2', 'a1/b2/d1', 'a1/b1/N', 'N', 'a1/N']
+    #     r = cache.ObjectCache.extract_paths(data, paths)
+    #     assert len(r) == 3, 'Wrong number of results, got {:d} expected {:d}'.\
+    #         format(len(r), 3)
+    #     msg = 'Invalid result "{r}" for path "{p}"'
+    #     assert r['a1/b1'] == {'a1': {'b1': {'c1': 1, 'c2': 2}}}, \
+    #         msg.format(r=r[0], p=paths[0])
+    #     assert r['a1/b1/c2'] == {'a1': {'b1': {'c2': 2}}}, msg.format(r=r[1],
+    #                                                            p=paths[1])
+    #     assert r['a1/b2/d1'] == {'a1': {'b2':{'d1': 3}}}, msg.format(r=r[2],
+    #                                                           p=paths[2])
 
     def test_get_new_data(self):
         self.new_object.get_data()
         event = self.new_object.cache_stats.get_last()
-        _log.info('Get new genome #1 (cached={}): {:.3f}'.format(
-            event['cached'], event.duration))
+        _log.info('Get new genome #1: {:.3f}'.format(event.duration))
         self.new_object.get_data()
         event = self.new_object.cache_stats.get_last()
-        _log.info('Get new genome #2 (cached={}): {:.3f}'.format(
-            event['cached'], event.duration))
+        _log.info('Get new genome #2: {:.3f}'.format(event.duration))
 
     def test_get_old_data(self):
         self.old_object.get_data()
         event = self.old_object.cache_stats.get_last()
-        _log.info('Get old genome #1 (cached={}): {:.3f}'.format(
-            event['cached'], event.duration))
+        _log.info('Get old genome #1: {:.3f}'.format(event.duration))
         self.old_object.get_data()
         event = self.old_object.cache_stats.get_last()
-        _log.info('Get old genome #2 (cached={}): {:.3f}'.format(
-            event['cached'], event.duration))
+        _log.info('Get old genome #2: {:.3f}'.format(event.duration))
 
     def test_perf_stats(self):
         g = ObjectAPI(services=shared.get_services(), ref=self.genome_old)

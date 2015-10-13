@@ -1126,16 +1126,15 @@ class _Prototype(ObjectAPI, GenomeInterface):
                                 "received an empty list.")
 
         for ref in feature_containers:
+            # Get list of feature IDs
             if feature_id_list is None:
-#                features = ObjectAPI(self.services, self._token, ref).get_data()["features"]
-                feature_data =  ObjectAPI(self.services, self._token, ref)\
-                    .get_data()
-                working_list = feature_data["features"]
+                features = ObjectAPI(self.services, self._token, ref).get_data()["features"]
+                working_list = features
             else:
                 container = ObjectAPI(self.services, self._token, ref)
                 features = container.get_data_subset(path_list=feature_refs)["features"]
                 working_list = feature_id_list
-
+            # Pull out either aliases or locations from each feature
             if data == "aliases":
                 for feature_id in working_list:
                     if "aliases" in features[feature_id]:
