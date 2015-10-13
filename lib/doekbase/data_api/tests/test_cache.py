@@ -56,10 +56,11 @@ class TestCache(unittest.TestCase):
 
     def tearDown(self):
         # clear data on persistent redis cache
-        region = self.regions['Redis']
-        for key in list(set(self._clear_keys)):
-            _log.debug('Deleting key "{}" from Redis'.format(key))
-            region.delete(key)
+        region = self.regions.get('Redis', None)
+        if region is not None:
+            for key in list(set(self._clear_keys)):
+                _log.debug('Deleting key "{}" from Redis'.format(key))
+                region.delete(key)
 
     @classmethod
     def tearDownClass(cls):
