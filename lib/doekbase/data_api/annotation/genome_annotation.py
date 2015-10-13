@@ -1127,8 +1127,10 @@ class _Prototype(ObjectAPI, GenomeInterface):
 
         for ref in feature_containers:
             if feature_id_list is None:
-                features = ObjectAPI(self.services, self._token, ref).get_data()["features"]
-                working_list = features
+#                features = ObjectAPI(self.services, self._token, ref).get_data()["features"]
+                feature_data =  ObjectAPI(self.services, self._token, ref)\
+                    .get_data()
+                working_list = feature_data["features"]
             else:
                 container = ObjectAPI(self.services, self._token, ref)
                 features = container.get_data_subset(path_list=feature_refs)["features"]

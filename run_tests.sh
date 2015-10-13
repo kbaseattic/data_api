@@ -63,9 +63,12 @@ function restart_redis () {
 # Misc
 
 function show_help () {
-    printf "usage: $0 MODE ...\n"
-    printf "  if MODE is 'ci', run against workspace in contin. integration\n"
-    printf "  if MODE is 'local', run against local workspace data objects\n"
+    printf "usage: $0 [OPTIONS] MODE [ARGS...]\n"
+    printf "OPTIONS:\n"
+    printf "   -n     don't stop/restart Redis"
+    printf "MODE:\n"
+    printf "  ci      run against workspace in contin. integration\n"
+    printf "  local   run against local workspace data objects\n"
     printf "\n"
     printf "  remaining arguments are passed to the nosetests command.\n"
 }
@@ -78,6 +81,16 @@ function inst_lib () {
 
 # Main
 
+# process options
+CONTROL_REDIS=y
+case "$1" in
+    "-n") 
+        CONTROL_REDIS=n
+        shift
+        ;;
+esac
+
+# process mode
 mode="$1"
 shift
 
@@ -96,7 +109,7 @@ esac
 
 
 # prepare
-restart_redis
+[ $CONTROL_REDIS = y ] && restart_redis
 inst_lib
 
 # run
@@ -108,6 +121,6 @@ printf "\n\n"
 sleep 1
 
 # cleanup
-stop_redis
+[ $CONTROL_REDIS = y ] && stop_redis
 
 exit 0

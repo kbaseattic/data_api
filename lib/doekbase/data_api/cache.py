@@ -9,13 +9,16 @@ __date__ = '9/26/15'
 ## Imports
 
 # System
+import hashlib
 import os
 import uuid
 # Third-party
 from dogpile.cache import make_region
 from dogpile.cache.api import NO_VALUE
 # Local
-from doekbase.data_api.util import PerfCollector
+from doekbase.data_api.util import PerfCollector, get_logger
+
+_log = get_logger(__name__)
 
 ## Functions and Classes
 
@@ -122,6 +125,8 @@ class ObjectCache(object):
         cp = cache_params or self.cache_params
         self._cache = cc(**cp)  # workers of the world unite!
         self._stats.end_event('cache.init', self._cache_key)
+        _log.info('ObjectCache.init.end cache_class={}'.format(
+            cc.__name__))
 
     def get_data(self, parent_method):
         from_cache = False
@@ -130,25 +135,50 @@ class ObjectCache(object):
         if data is NO_VALUE:
             data = parent_method()
             self._cache.set(self._cache_key, data)
+            print("@@ Main CACHING ({}): {} => keys => {}".format(
+                self._cache.__class__.__name__, self._cache_key, data.keys()))
         else:
             from_cache = True
+            print("@@ Main FROM CACHE: {} => keys {}".format(
+                self._cache_key, data.keys()))
         self._stats.end_event('cache.get_data', self._cache_key, cached=from_cache)
         return data
 
     def get_data_subset(self, parent_method, path_list=None):
-        result, from_cache = [], False
-        self._stats.start_event('cache.get_data_subset', self._cache_key)
-        data = self._cache.get(self._cache_key)
+        """
+        :param parent_method:
+        :param path_list:
+        :return:
+        """
+        if path_list is None:
+            return {}
+        result, from_cache = None, False
+        # build extended key using the path list
+        path_cache_key = '{}:{}'.format(self._cache_key, self.path_hash(path_list))
+        self._stats.start_event('cache.get_data_subset', path_cache_key)
+        data = self._cache.get(path_cache_key)
         if data is NO_VALUE:
-            result = parent_method(path_list=path_list)
-            # result = self.ws_client.get_object_subset(
-            #     [{'ref': self.ref, 'included': path_list}])[0]['data']
-            self._cache.set(self._cache_key, data)
-        elif path_list is not None:
-            result = self.extract_paths(data, path_list)
-        self._stats.end_event('cache.get_data_subset', self._cache_key,
+            data = parent_method(path_list=path_list)
+            self._cache.set(path_cache_key, data)
+            print("@@ Subset CACHING ({}): {} => keys => {}".format(self._cache.__class__.__name__, path_cache_key, data.keys()))
+            for k in data.keys():
+                if isinstance(data[k], dict):
+                    print("@@ data[{}] keys => {}".format(k, data[k].keys()))
+        else:
+            print("@@ Subset FROM CACHE: {} => {} TYPE {}".format(
+                path_cache_key, path_list, type(data)))
+            if isinstance(data, dict):
+                print("@@ Subset FROM CACHE: dict keys = {}".format(
+                    data.keys()))
+            from_cache = True
+            #result = self.extract_paths(data, path_list)
+        self._stats.end_event('cache.get_data_subset', path_cache_key,
                               cached=from_cache)
-        return result
+        return data
+
+    @staticmethod
+    def path_hash(plist):
+        return hashlib.sha1(';'.join(plist)).hexdigest()
 
     @staticmethod
     def extract_paths(data, path_list):
@@ -160,9 +190,9 @@ class ObjectCache(object):
            path_list (list): List of path strings, which use a '/'
                              separator between items of the path.
         Return:
-           List of dicts representing matching paths.
+           (dict) All data subsets matching the paths
         """
-        result = []
+        result = {}
         # Extract data for each path in path_list
         for p in path_list:
             extracted = {}       # create extracted path
@@ -188,8 +218,10 @@ class ObjectCache(object):
             if not had_path or not leaf in cur_data:
                 continue
             cur_ex[leaf] = cur_data[leaf]  # copy leaf to extracted path
-            result.append(extracted)       # add extracted path to result
+            result.update(extracted)       # add extracted path to result
+            print("@@ update result with {}: NEW VALUE = {}".format(extracted, result))
             # Repeat this process with the next path
+        print("@@ return result: {}".format(result))
         return result
 
 

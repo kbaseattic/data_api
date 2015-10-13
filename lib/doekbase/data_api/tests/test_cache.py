@@ -5,7 +5,6 @@ __author__ = 'Dan Gunter <dkgunter@lbl.gov>'
 __date__ = '9/30/15'
 
 # System
-import logging
 import os
 import threading
 import time
@@ -19,11 +18,12 @@ from doekbase.data_api.core import ObjectAPI
 from . import shared
 
 _log = util.get_logger(__name__)
-#from logging_tree import printout
-#printout()
 
 # Uncomment this line to turn off DBM tests
 USE_DBM = False
+
+def setup():
+    shared.setup()
 
 class TestCache(unittest.TestCase):
     """Test the cache.
@@ -155,10 +155,12 @@ class TestCachedObjectAPI(unittest.TestCase):
         assert len(r) == 3, 'Wrong number of results, got {:d} expected {:d}'.\
             format(len(r), 3)
         msg = 'Invalid result "{r}" for path "{p}"'
-        assert r[0] == {'a1': {'b1': {'c1': 1, 'c2': 2}}}, \
+        assert r['a1/b1'] == {'a1': {'b1': {'c1': 1, 'c2': 2}}}, \
             msg.format(r=r[0], p=paths[0])
-        assert r[1] == {'a1': {'b1': {'c2': 2}}}, msg.format(r=r[1], p=paths[1])
-        assert r[2] == {'a1': {'b2':{'d1': 3}}}, msg.format(r=r[2], p=paths[2])
+        assert r['a1/b1/c2'] == {'a1': {'b1': {'c2': 2}}}, msg.format(r=r[1],
+                                                               p=paths[1])
+        assert r['a1/b2/d1'] == {'a1': {'b2':{'d1': 3}}}, msg.format(r=r[2],
+                                                              p=paths[2])
 
     def test_get_new_data(self):
         self.new_object.get_data()

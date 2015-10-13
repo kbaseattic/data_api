@@ -264,7 +264,7 @@ def collect_performance(perf_collector):
         def method_wrapper(self, *args, **kwds):
             perf_collector.start_event(event, key)
             returnval = method(self, *args, **kwds)
-            for i, a in args:
+            for i, a in enumerate(args):
                 kwds['_{:d}'.format(i)] = str(a)
             perf_collector.end_event(event, key, **kwds)
             return returnval

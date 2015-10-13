@@ -310,8 +310,10 @@ class WorkspaceFile(object):
         if ref in self._oids:
             return self._oids[ref]
         n = len(self._oids)
-        self._oids[ref] = n + 1
-        return n
+        pfx = abs(hash(ref))
+        new_oid = int('{:d}{:04d}'.format(pfx, n + 1))
+        self._oids[ref] = new_oid
+        return new_oid
 
     def _make_info(self, record, ref):
         """Make and return a single 'info' section.
