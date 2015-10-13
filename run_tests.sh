@@ -83,44 +83,62 @@ function inst_lib () {
 
 # process options
 CONTROL_REDIS=y
+TRAVIS_MODE=n
 case "$1" in
     "-n") 
         CONTROL_REDIS=n
         shift
         ;;
-esac
-
-# process mode
-mode="$1"
-shift
-
-case $mode in
-    ci)
-        mode=ci
-        ;;
-    local)
-        mode=local
-        ;;
-    *)
-        show_help
-        exit 1
+    "-T")
+        TRAVIS_MODE=y
+        shift
         ;;
 esac
 
+if [ $TRAVIS_MODE = n ]; then
+    # process mode
+    mode="$1"
+    shift
 
-# prepare
-[ $CONTROL_REDIS = y ] && restart_redis
-inst_lib
+    case $mode in
+        ci)
+            mode=ci
+            ;;
+        local)
+            mode=local
+            ;;
+        *)
+            show_help
+            exit 1
+            ;;
+    esac
+fi
 
-# run
-printf "\n\nRUNNING TESTS\n\n"
+if [ $TRAVIS_MODE = y ]
+then
+    printf "==============================================\n"
+    printf "  running tests with Rediis caching\n"
+    printf "==============================================\n"
+    start_redis
+    export KB_REDIS_HOST=localhost
+    run_nose_local  --ws-url=test_resources/data --wsfile-msgpack
+    sleep 1
+    stop_redis
+else
+    # prepare
+    [ $CONTROL_REDIS = y ] && restart_redis
+    inst_lib
 
-run_nose_$mode "$*"
+    # run
+    printf "\n\nRUNNING TESTS\n\n"
 
-printf "\n\n"
-sleep 1
+    run_nose_$mode "$*"
 
-# cleanup
-[ $CONTROL_REDIS = y ] && stop_redis
+    printf "\n\n"
+    sleep 1
+
+    # cleanup
+    [ $CONTROL_REDIS = y ] && stop_redis
+fi
 
 exit 0
