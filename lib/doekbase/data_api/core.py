@@ -5,6 +5,7 @@ Module for base class for Data API objects.
 # Imports
 
 # Stdlib
+from collections import namedtuple
 import logging
 import os
 import re
@@ -16,6 +17,8 @@ except ImportError:
 from doekbase.data_api.util import get_logger, log_start, log_end
 from doekbase.workspace.client import Workspace
 from doekbase.data_api.wsfile import WorkspaceFile
+from doekbase.data_api import cache
+from doekbase.data_api.util import PerfCollector, collect_performance
 
 # Logging
 
@@ -28,7 +31,22 @@ g_ws_url = "https://ci.kbase.us/services/ws/"
 g_shock_url = "https://ci.kbase.us/services/shock-api/"
 g_use_msgpack = True
 
+g_stats = PerfCollector('ObjectAPI')
+
 # Functions and Classes
+
+#: Name positional parts of WorkspaceInfo tuple
+WorkspaceInfo = namedtuple('WorkspaceInfo', [
+    'id',               # ws_id (int)
+    'workspace',        # ws_name
+    'owner',            # username
+    'moddate',          # timestamp
+    'object',           # int
+    'user_permission',  # permission
+    'globalread',       # permission
+    'lockstat',         # lock_status
+    'metadata'          # usermeta
+])
 
 def get_token():
     try:
@@ -71,15 +89,18 @@ class ObjectAPI(object):
         if ref is None:
             raise TypeError("Missing object reference!")
         elif type(ref) != type("") and type(ref) != type(unicode()):
-            raise TypeError("Invalid reference given, expected string! Found {0}".format(type(ref)))
+            raise TypeError("Invalid reference given, expected string! "
+                            "Found {0}".format(type(ref)))
         elif re.match(REF_PATTERN, ref) is None:
-            raise TypeError("Invalid workspace reference string! Found {0}".format(ref))
+            raise TypeError("Invalid workspace reference string! Found {0}"
+                            .format(ref))
 
         self.services = services
         self.ref = ref
         self._token = None
 
         ws_url = services["workspace_service_url"]
+        local_workspace = False
         if '://' in ws_url: # assume a real Workspace server
             if token is None or len(token.strip()) == 0:
                 self._token = get_token()
@@ -90,6 +111,7 @@ class ObjectAPI(object):
             self.ws_client = Workspace(ws_url, token=self._token)
         else:
             _log.debug('Load from Workspace file at {}'.format(ws_url))
+            local_workspace = True
             self.ws_client = self._init_ws_from_files(ws_url)
 
         info_values = self.ws_client.get_object_info_new({
@@ -124,6 +146,27 @@ class ObjectAPI(object):
         self._history = None
         self._provenance = None
         self._data = None
+        # Init stats
+        self._stats = g_stats
+        # Init the caching object. Pass in whether the object is
+        # publically available (which can determine whether it is cached)
+        if local_workspace:
+            global_read = True  # Local file-workspace objects are public
+        else:
+            wsinfo = WorkspaceInfo(self.ws_client.get_workspace_info({
+                'id': self._info['workspace_id']}))
+            global_read = (wsinfo.globalread == 'r')
+        self._cache = cache.ObjectCache(
+            self._info["object_reference_versioned"],
+            is_public=global_read)
+
+    @property
+    def stats(self):
+        return self._stats
+
+    @property
+    def cache_stats(self):
+        return self._cache.stats
 
     def _init_ws_from_files(self, path):
         ext = '.msgpack'
@@ -145,6 +188,7 @@ class ObjectAPI(object):
                              .format(e=ext, p=path))
         return client
 
+    @collect_performance(g_stats)
     def get_schema(self):
         """
         Retrieve the schema associated with this object.
@@ -157,6 +201,7 @@ class ObjectAPI(object):
         
         return self._schema
 
+    @collect_performance(g_stats)
     def get_typestring(self):
         """
         Retrieve the type identifier string.
@@ -166,6 +211,7 @@ class ObjectAPI(object):
                 
         return self._typestring
 
+    @collect_performance(g_stats)
     def get_info(self):
         """
         Retrieve basic properties about this object.
@@ -176,6 +222,7 @@ class ObjectAPI(object):
             
         return self._info
 
+    @collect_performance(g_stats)
     def get_history(self):
         """
         Retrieve the recorded history of this object describing how it has been modified.
@@ -185,7 +232,8 @@ class ObjectAPI(object):
             self._history = self.ws_client.get_object_history({"ref": self.ref})
         
         return self._history
-    
+
+    @collect_performance(g_stats)
     def get_provenance(self):
         """
         Retrieve the recorded provenance of this object describing how to recreate it.
@@ -195,7 +243,8 @@ class ObjectAPI(object):
             self._provenance = self.ws_client.get_object_provenance([{"ref": self.ref}])
         
         return self._provenance
-    
+
+    @collect_performance(g_stats)
     def get_id(self):
         """
         Retrieve the internal identifier for this object.
@@ -204,7 +253,8 @@ class ObjectAPI(object):
           string"""
     
         return self._id
-    
+
+    @collect_performance(g_stats)
     def get_name(self):
         """
         Retrieve the name assigned to this object.
@@ -213,36 +263,46 @@ class ObjectAPI(object):
           string"""
     
         return self._name
-    
+
+    @collect_performance(g_stats)
     def get_data(self):
-        """
-        Retrieve object data.
+        """Retrieve object data.
         
         Returns:
-          dict"""
-        
-        if self._data == None:
-            self._data = self.ws_client.get_objects([{"ref": self.ref}])[0]["data"]
-        
-        return self._data
+          dict
+        """
+        return self._cache.get_data(self._get_data_ws)
 
+    def _get_data_ws(self):
+        return self.ws_client.get_objects([{"ref": self.ref}])[0]["data"]
+
+    @collect_performance(g_stats)
     def get_data_subset(self, path_list=None):
-        """
-        Retrieve a subset of data from this object, given a list of paths to the data elements.
-        
-        Returns:
-          dict"""
+        """Retrieve a subset of data from this object, given a list of paths
+        to the data elements.
 
+        Args:
+          path_list (list): List of paths, each a string of node names
+                            separated by forward slashes, e.g.
+                            ['a/bee/sea', 'd/ee/eph/gee']
+        Returns:
+          dict
+        """
+        return self._cache.get_data_subset(self._get_data_subset_ws,
+                                           path_list=path_list)
+
+    def _get_data_subset_ws(self, path_list=None):
         return self.ws_client.get_object_subset([{"ref": self.ref, 
                         "included": path_list}])[0]["data"]
-    
+
+    @collect_performance(g_stats)
     def get_referrers(self):
-        """
-        Retrieve a dictionary that indicates by type what objects are referring to this object.
+        """Retrieve a dictionary that indicates by type what objects are
+        referring to this object.
         
         Returns:
-          dict"""
-        
+          dict
+        """
         referrers = self.ws_client.list_referencing_objects([{"ref": self.ref}])[0]
         
         object_refs_by_type = dict()        
@@ -254,7 +314,8 @@ class ObjectAPI(object):
             
             object_refs_by_type[typestring].append(str(x[6]) + "/" + str(x[0]) + "/" + str(x[4]))
         return object_refs_by_type
-    
+
+    @collect_performance(g_stats)
     def copy(self, to_ws=None):
         """
         Performs a naive object copy to a target workspace.  A naive object copy is a simple
@@ -273,3 +334,10 @@ class ObjectAPI(object):
             return self.ws_client.copy_object({"from": {"ref": self.ref}, "to": {"workspace": to_ws, "name": name}})
         except Exception, e:
             return {"error": e.message}
+
+    def __eq__(self, other):
+        """Test equality by underlying KBase object ID.
+        """
+        #print("@@ obj. eq called")
+        return self._id == other._id
+
