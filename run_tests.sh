@@ -8,7 +8,7 @@
 # Nose
 
 NOSE=nosetests
-NOSE_OPTS="--logging-filter=doekbase"
+NOSE_OPTS="--logging-filter=doekbase --with-timer"
 
 function run_nose_ci () {
     $NOSE $NOSE_OPTS \
@@ -53,6 +53,7 @@ function start_redis () {
     version=$($REDIS --version)
     printf "* starting redis (%s) ..\n" "$version"
     ${REDIS} ${REDIS_CONFIG} >/dev/null &
+    export KB_REDIS_HOST=localhost
 }
 
 function restart_redis () {
@@ -117,7 +118,7 @@ fi
 if [ $TRAVIS_MODE = y ]
 then
     printf "==============================================\n"
-    printf "  running tests with Rediis caching\n"
+    printf "  running tests with Redis caching\n"
     printf "==============================================\n"
     start_redis
     export KB_REDIS_HOST=localhost

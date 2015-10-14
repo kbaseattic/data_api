@@ -235,6 +235,15 @@ class _Prototype(ObjectAPI, TaxonInterface):
         else:
             return None
 
+    def __str__(self):
+        """Simple string representation, for debugging.
+        """
+        return 'Id: {}, Name: {}, Lineage: {}'.format(
+            self.get_taxonomic_id(),
+            self.get_scientific_name(),
+            self.get_scientific_lineage()
+        )
+
     def get_domain(self):
         return self.data["domain"]
 
@@ -297,6 +306,27 @@ class TaxonAPI(ObjectAPI, TaxonInterface):
     def get_genetic_code(self):
         return self.proxy.get_genetic_code()
 
+    def __str__(self):
+        """Simple string representation, for debugging.
+        """
+        return '[{}] Id: {}, Name: {}, Lineage: {}'.format(
+            type(self.proxy),
+            self.get_taxonomic_id(),
+            self.get_scientific_name(),
+            self.get_scientific_lineage()
+        )
+
+    def __eq__(self, other):
+        """Define a deeper equality than simple object
+        identity (which is messed up when using caches).
+
+        Args:
+          other (TaxonAPI): Object to compare with
+        Returns:
+          True if taxonomic id and scientific name are the same.
+        """
+        return (self.get_taxonomic_id() == other.get_taxonomic_id() and
+                self.get_scientific_name() == other.get_scientific_name())
 
 class TaxonClientAPI(TaxonInterface):
     def __init__(self, host='localhost', port=9090, token=None, ref=None):

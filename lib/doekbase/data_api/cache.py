@@ -107,7 +107,7 @@ class ObjectCache(object):
     cache_class = NullCache   #: Class for cache backend
     cache_params = {}         #: Constructor parameters for cache backend
 
-    def __init__(self, ref, stats=None, cache_class=None, cache_params=None):
+    def __init__(self, ref, stats=None, cache_class=None, cache_params=None, is_public=True):
         """Constructor.
 
         Args:
@@ -117,6 +117,7 @@ class ObjectCache(object):
           cache_params (dict): Parameters for cache constructor
         """
         self._key = ref
+        self._public = is_public
         # init performance statistics
         self._stats = stats or PerfCollector(self.__class__.__name__)
         self._stats.start_event('cache.init', self._key)
@@ -165,7 +166,7 @@ class ObjectCache(object):
         Return:
           (bool) True if this object should be cached, False otherwise.
         """
-        result = True  # TODO: Check if this is "public" data
+        result = self._public
         _log.debug("should_cache result={:d}".format(int(result)))
         return result
 

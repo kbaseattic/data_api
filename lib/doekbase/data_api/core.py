@@ -75,15 +75,18 @@ class ObjectAPI(object):
         if ref is None:
             raise TypeError("Missing object reference!")
         elif type(ref) != type("") and type(ref) != type(unicode()):
-            raise TypeError("Invalid reference given, expected string! Found {0}".format(type(ref)))
+            raise TypeError("Invalid reference given, expected string! "
+                            "Found {0}".format(type(ref)))
         elif re.match(REF_PATTERN, ref) is None:
-            raise TypeError("Invalid workspace reference string! Found {0}".format(ref))
+            raise TypeError("Invalid workspace reference string! Found {0}"
+                            .format(ref))
 
         self.services = services
         self.ref = ref
         self._token = None
 
         ws_url = services["workspace_service_url"]
+        local_workspace = False
         if '://' in ws_url: # assume a real Workspace server
             if token is None or len(token.strip()) == 0:
                 self._token = get_token()
@@ -94,6 +97,7 @@ class ObjectAPI(object):
             self.ws_client = Workspace(ws_url, token=self._token)
         else:
             _log.debug('Load from Workspace file at {}'.format(ws_url))
+            local_workspace = True
             self.ws_client = self._init_ws_from_files(ws_url)
 
         info_values = self.ws_client.get_object_info_new({
@@ -130,9 +134,16 @@ class ObjectAPI(object):
         self._data = None
         # Init stats
         self._stats = g_stats
-        # Init the caching object.
+        # Init the caching object. Pass in whether the object is
+        # publically available (which can determine whether it is cached)
+        if local_workspace:
+            global_read = True  # Local file-workspace objects are public
+        else:
+            global_read = self.ws_client.get_workspace_info({
+                'id': self._info['workspace_id']})[6] == 'r'
         self._cache = cache.ObjectCache(
-            self._info["object_reference_versioned"])
+            self._info["object_reference_versioned"],
+            is_public=global_read)
 
     @property
     def stats(self):
@@ -308,3 +319,9 @@ class ObjectAPI(object):
             return self.ws_client.copy_object({"from": {"ref": self.ref}, "to": {"workspace": to_ws, "name": name}})
         except Exception, e:
             return {"error": e.message}
+
+    def __eq__(self, other):
+        """Test equality by underlying KBase object ID.
+        """
+        #print("@@ obj. eq called")
+        return self._id == other._id
