@@ -8,7 +8,6 @@ Includes:
 __author__ = 'Dan Gunter <dkgunter@lbl.gov>'
 __date__ = '8/4/15'
 
-from collections import deque
 from datetime import datetime
 import logging
 import logging.config
@@ -21,24 +20,50 @@ EXIT_MESSAGE = '{timestamp} {func_name}.end {dur} {kvp}'
 EVENT_MESSAGE = '{timestamp} {func_name} {kvp}'
 
 DEFAULT_LEVEL = logging.INFO
-logformat = '%(levelname)s %(message)s'
+DEFAULT_LEVEL_NAME = logging.getLevelName(DEFAULT_LEVEL)
+DEFAULT_CONFIG = {
+    'version': 1,
+    'formatters': {
+        'basic': { 'format': '%(levelname)s %(message)s' }
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'basic',
+            'stream': 'ext://sys.stderr',
+            'level': DEFAULT_LEVEL_NAME
+        }
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': DEFAULT_LEVEL_NAME
+    }
+}
 
-g_running_nosetests = None
+_configuration = None
 
-def get_logger(name):
-    global g_running_nosetests
-    if not name.startswith('doekbase.'):
-        name = 'doekbase.' + name
-    # If we are running in nose, nest under there so nose -v options
-    # can apply to us. Cache the result of checking for nose in a global var.
-    if g_running_nosetests is None:  # haven't checked yet
-         g_running_nosetests = 'nose' in logging.root.manager.loggerDict
-    if g_running_nosetests:
-         name = 'nose.' + name
-    # create logger
-    logger = logging.getLogger(name)
-#    logger.propagate = 1
-    return logger
+def get_logger(name, config=DEFAULT_CONFIG):
+    """Called by other modules to get a logger,
+    and set or change the configuration.
+    """
+    global _configuration
+
+    # Perform configuration/reconfiguration if necessary.
+    # Usually none of this is done.
+    if _configuration is None:
+        assert config is not None  # need something!
+        logging.config.dictConfig(config)
+        _configuration = config  # first time
+    elif config is DEFAULT_CONFIG and _configuration is DEFAULT_CONFIG:
+        pass  # quickly check the common case
+    elif config != _configuration:
+        assert config is not None
+        logging.config.dictConfig(config)  # reconfigure
+        _configuration = config
+
+    # Get the logger, given the current configuration.
+    return logging.getLogger(name)
+
 
 class Timer(object):
     def __init__(self):
@@ -136,140 +161,3 @@ def get_auth_token():
             "Missing authentication token! "
             "Set KB_AUTH_TOKEN environment variable.")
 
-# Simple performance classes
-
-class PerfCollector(object):
-    """Collector of multiple performance events.
-    """
-    MAX_SIZE = 1000 # max number events in history
-    EVENT_WILDCARD = '*'
-
-    def __init__(self, namespace):
-        self._ns = namespace
-        self._history = deque(maxlen=self.MAX_SIZE)
-        self._cur = {}
-        self._make_key = lambda e, k: '{e}::{k}'.format(e=e, k=k)
-        self._observers = {}
-
-    def add_observer(self, event, start_fn, end_fn):
-        """Add observer functions for an event.
-
-        Args:
-          event (str): Event name or EVENT_WILDCARD for all events.
-          start_fn: Function taking (event, key, timestamp) or None
-          end_fn: Function taking (event, PerfEvent) or None
-        """
-        if event in self._observers:
-            self._observers[event].append((start_fn, end_fn))
-        else:
-            self._observers[event] = [(start_fn, end_fn)]
-
-    def _broadcast(self, event, idx, *args):
-        if event in self._observers:
-            for obs in self._observers[event]:
-                if obs[idx]:
-                    obs[idx](event, *args)
-        if self.EVENT_WILDCARD in self._observers:
-            for obs in self._observers[self.EVENT_WILDCARD]:
-                if obs[idx]:
-                    obs[idx](event, *args)
-
-    def start_event(self, event, key):
-        timestamp = time.time()
-        ekey = self._make_key(event, key)
-        self._cur[ekey] = timestamp
-        self._broadcast(event, 0, key, timestamp)
-
-    def end_event(self, event, key, **meta):
-        timestamp = time.time()
-        ekey = self._make_key(event, key)
-        if not ekey in self._cur:
-            raise KeyError('No current event found for key "{}"'
-                           .format(ekey))
-        t0 = self._cur[ekey]
-        del self._cur[ekey]
-        full_event = '{}.{}'.format(self._ns, event)
-        pevent = PerfEvent(full_event, key, t0, timestamp, meta)
-        self._history.append(pevent)
-        self._broadcast(event, 1, pevent)
-
-    def get_last(self):
-        if not self._history:
-            return None
-        return self._history[-1]
-
-    def dump(self, stream):
-        by_event = {}
-        for item in self._history:
-            if item.event in by_event:
-                by_event[item.event].append(item)
-            else:
-                by_event[item.event] = [item]
-        stream.write("Event                          Duration  Metadata\n")
-        for event in sorted(by_event.keys()):
-            for item in by_event[event]:
-                meta_str = ' '.join(['{k}={v}'.format(k=k, v=v)
-                                     for k,v in item.metadata.items()])
-                stream.write("{e:30s} {d:8.3f}  {m}\n".format(
-                    e=event[:30], d=item.duration, m=meta_str))
-
-class PerfEvent(object):
-    """Single timed event.
-
-    Events can be extracted using dictionary syntax,
-    e.g. my_event['<key'], for any key in the metadata.
-    This will also work for any of the attributes, in case it's
-    more convenient to get at them that way.
-
-    Attributes:
-        event (str): Full name of event <namespace>.<event-name>
-        key (str): Identifying key
-        start(float): Start timestamp, in seconds since 1/1/1970
-        end (float): End timestamp, in seconds since 1/1/1970
-        duration (float): Duration in seconds
-    """
-    def __init__(self, event, key, start_time, end_time, meta):
-        """Ctor.
-
-        Args:
-          event (str): Full name of event <namespace>.<event-name>
-          key (str): Identifying key
-          start_time (float): Unix epoch seconds for start
-          end_time (float): Floating point time in seconds for end
-          meta (dict) : Additional key/value pairs
-        """
-        self.event = event
-        self.key = key
-        self.start = start_time
-        self.end = end_time
-        self.duration = end_time - start_time
-        self._meta = meta
-
-    @property
-    def metadata(self):
-        return self._meta.copy()
-
-    def __getitem__(self, key):
-        if key in ('event', 'key', 'start', 'end', 'duration'):
-            return getattr(self, key)
-        if key in self._meta:
-            return self._meta[key]
-        raise KeyError(key)
-
-def collect_performance(perf_collector):
-    def real_decorator(method):
-        event = method.__name__
-        key = str(time.time())
-        # create wrapper
-        def method_wrapper(self, *args, **kwds):
-            perf_collector.start_event(event, key)
-            returnval = method(self, *args, **kwds)
-            for i, a in enumerate(args):
-                kwds['_{:d}'.format(i)] = str(a)
-            perf_collector.end_event(event, key, **kwds)
-            return returnval
-
-        # return wrapper
-        return method_wrapper
-
-    return real_decorator
