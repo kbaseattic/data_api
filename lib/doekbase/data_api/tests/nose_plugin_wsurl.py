@@ -49,6 +49,7 @@ class WorkspaceURL(Plugin):
         """
         _log.info('WorkspaceURL.configure, ws_url={}'.format(options.ws_url))
         if not self.can_configure:
+            _log.error('Cannot configure')
             return
         # Assign parsed values to global variables in the 'core' module.
         core.g_ws_url = options.ws_url
