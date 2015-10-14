@@ -395,7 +395,7 @@ def convert_original_genome_object_to_prototype(source_wsname=None,destination_w
                     counts_map['protein'] = len(protein_container['proteins']) 
                     while protein_container_not_saved:
                         try:
-                            protein_container_info =  destination_ws_client.save_objects({"workspace": destination_workspace_name,"objects":[ { "type":"KBaseGenomesCondensedPrototypeV2.ProteinContainer","data":protein_container,"name": protein_container_object_name,"provenance":protein_container_provenance}]})
+                            protein_container_info =  destination_ws_client.save_objects({"workspace": destination_workspace_name,"objects":[ { "type":"KBaseGenomeAnnotations.ProteinContainer","data":protein_container,"name": protein_container_object_name,"provenance":protein_container_provenance}]})
                             protein_container_not_saved = False
                         except biokbase.workspace.client.ServerError as err:
                             raise
@@ -422,7 +422,7 @@ def convert_original_genome_object_to_prototype(source_wsname=None,destination_w
                     feature_container_not_saved = True
                     while feature_container_not_saved: 
                         try: 
-                            feature_container_info =  destination_ws_client.save_objects({"workspace":destination_workspace_name,"objects":[ { "type":"KBaseGenomesCondensedPrototypeV2.FeatureContainer","data":feature_container,"name": feature_container_object_name,"provenance":feature_container_provenance}]}) 
+                            feature_container_info =  destination_ws_client.save_objects({"workspace":destination_workspace_name,"objects":[ { "type":"KBaseGenomeAnnotations.FeatureContainer","data":feature_container,"name": feature_container_object_name,"provenance":feature_container_provenance}]}) 
                             feature_container_not_saved = False 
                             print "Feature Container saved for %s" % (feature_container_object_name)
                         except biokbase.workspace.client.ServerError as err: 
@@ -445,7 +445,7 @@ def convert_original_genome_object_to_prototype(source_wsname=None,destination_w
 
                 while genome_annotation_not_saved: 
                     try: 
-                        genome_annotation_info =  destination_ws_client.save_objects({"workspace":destination_workspace_name,"objects":[ { "type":"KBaseGenomesCondensedPrototypeV2.GenomeAnnotation","data":genome_annotation,"name": genome_annotation_object_name,"provenance":genome_annotation_provenance}]}) 
+                        genome_annotation_info =  destination_ws_client.save_objects({"workspace":destination_workspace_name,"objects":[ { "type":"KBaseGenomeAnnotations.GenomeAnnotation","data":genome_annotation,"name": genome_annotation_object_name,"provenance":genome_annotation_provenance}]}) 
                         genome_annotation_not_saved = False
                         print "Genome Annotation saved for %s" % (core_object_name) 
                     except biokbase.workspace.client.ServerError as err: 

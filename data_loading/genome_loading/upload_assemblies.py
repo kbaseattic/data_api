@@ -37,7 +37,7 @@ def transform(shock_service_url=None,
 #              taxon_names_file=None,
               level=logging.INFO, logger=None):
     """
-    Uploads CondensedGenomeAssembly
+    Uploads KBaseGenomeAnnotations.Assembly
     Args:
         shock_service_url: A url for the KBase SHOCK service.
         input_fasta_directory: The directory where files will be read from.
@@ -286,7 +286,7 @@ def transform(shock_service_url=None,
         while assembly_not_saved: 
             try: 
                 assembly_info =  assembly_ws_client.save_objects({"workspace": workspace_name,"objects":[ 
-                            {"type":"KBaseGenomesCondensedPrototypeV2.Assembly", 
+                            {"type":"KBaseGenomeAnnotations.Assembly", 
                              "data":contig_set_dict, 
                              "name": "%s_assembly" % (genome_id), 
                              "provenance":assembly_provenance}]}) 
