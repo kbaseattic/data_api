@@ -316,18 +316,6 @@ class TaxonAPI(ObjectAPI, TaxonInterface):
             self.get_scientific_lineage()
         )
 
-    def __eq__(self, other):
-        """Define a deeper equality than simple object
-        identity (which is messed up when using caches).
-
-        Args:
-          other (TaxonAPI): Object to compare with
-        Returns:
-          True if taxonomic id and scientific name are the same.
-        """
-        return (self.get_taxonomic_id() == other.get_taxonomic_id() and
-                self.get_scientific_name() == other.get_scientific_name())
-
 class TaxonClientAPI(TaxonInterface):
     def __init__(self, host='localhost', port=9090, token=None, ref=None):
         from doekbase.data_api.taxonomy.taxon.service.interface import TaxonClientConnection

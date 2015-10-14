@@ -5,6 +5,7 @@ Module for base class for Data API objects.
 # Imports
 
 # Stdlib
+from collections import namedtuple
 import logging
 import os
 import re
@@ -33,6 +34,19 @@ g_use_msgpack = True
 g_stats = PerfCollector('ObjectAPI')
 
 # Functions and Classes
+
+#: Name positional parts of WorkspaceInfo tuple
+WorkspaceInfo = namedtuple('WorkspaceInfo', [
+    'id',               # ws_id (int)
+    'workspace',        # ws_name
+    'owner',            # username
+    'moddate',          # timestamp
+    'object',           # int
+    'user_permission',  # permission
+    'globalread',       # permission
+    'lockstat',         # lock_status
+    'metadata'          # usermeta
+])
 
 def get_token():
     try:
@@ -139,8 +153,9 @@ class ObjectAPI(object):
         if local_workspace:
             global_read = True  # Local file-workspace objects are public
         else:
-            global_read = self.ws_client.get_workspace_info({
-                'id': self._info['workspace_id']})[6] == 'r'
+            wsinfo = WorkspaceInfo(self.ws_client.get_workspace_info({
+                'id': self._info['workspace_id']}))
+            global_read = (wsinfo.globalread == 'r')
         self._cache = cache.ObjectCache(
             self._info["object_reference_versioned"],
             is_public=global_read)
@@ -325,3 +340,4 @@ class ObjectAPI(object):
         """
         #print("@@ obj. eq called")
         return self._id == other._id
+
