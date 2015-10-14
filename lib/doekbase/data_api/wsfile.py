@@ -105,9 +105,6 @@ class WorkspaceFile(object):
     use_redis = False
     _loaded = {}  # static cache of loaded refs
 
-    #: Version of the workspace we are emulating
-    VERSION = '0.3.5'
-
     def __init__(self, working_directory):
         """Create file-based Workspace instance, using files in
         the given working directory.
@@ -301,19 +298,14 @@ class WorkspaceFile(object):
                                   .format(t))
         return m
 
-    def ver(self):
-        return self.VERSION
-
     # ___ Internal methods ___
 
     def _get_oid(self, ref):
         if ref in self._oids:
             return self._oids[ref]
         n = len(self._oids)
-        pfx = abs(hash(ref))
-        new_oid = int('{:d}{:04d}'.format(pfx, n + 1))
-        self._oids[ref] = new_oid
-        return new_oid
+        self._oids[ref] = n + 1
+        return n
 
     def _make_info(self, record, ref):
         """Make and return a single 'info' section.

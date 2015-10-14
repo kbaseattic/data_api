@@ -66,10 +66,7 @@ def test_get_children_new():
     #and len(children) > 0
     children_e = t_new_e.get_children()
     assert isinstance(children, list)
-    assert children == children_e, \
-        "Children mismatch {} != {}".format(
-            ','.join([str(x) for x in children]),
-            ','.join([str(x) for x in children_e]))
+    assert children == children_e
 
 
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
@@ -81,10 +78,8 @@ def test_get_genome_annotations_new():
     #and len(annotations) > 0
     annotations_e = t_new_e.get_genome_annotations()
     assert isinstance(annotations_e, list)
-    assert annotations == annotations_e, \
-        "Annotation mismatch {} != {}".format(
-            ','.join(map(str, annotations)),
-            ','.join(map(str, annotations_e)))
+    assert annotations == annotations_e
+
 
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
 def test_get_scientific_lineage_new():
