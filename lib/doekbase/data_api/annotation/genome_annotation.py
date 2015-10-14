@@ -72,7 +72,7 @@ class GenomeInterface(object):
         Genome Annotation.
         
         Returns:
-          List[str]: List of feature type identifiers.
+          list<str>: List of feature type identifiers.
         """
         pass
 
@@ -130,7 +130,7 @@ class GenomeInterface(object):
         
         Args:
           type_list (list<str>): List of feature types. Each should match a
-            value in :data:`FEATURE_DESCRIPTIONS`. Default is None. If None,
+            value in :data:`FEATURE_DESCRIPTIONS`. If None,
             or empty, will retrieve all type counts.
 
         Returns:
@@ -144,7 +144,7 @@ class GenomeInterface(object):
         
         Args:
           feature_id_list (list<str>): List of features to retrieve.
-            Defaults to None. If None, returns all feature functions.
+            If None, returns all feature functions.
         
         Returns:
           dict: Mapping from feature IDs to location information for each.
@@ -176,7 +176,7 @@ class GenomeInterface(object):
 
         Args:
           feature_id_list (list<str>): List of features to retrieve.
-            Defaults to None. If None, returns all feature functions.
+            If None, returns all feature functions.
 
         
         Returns:
@@ -191,7 +191,7 @@ class GenomeInterface(object):
 
         Args:
           feature_id_list (list<str>): List of features to retrieve.
-            Defaults to None. If None, returns all feature functions.
+            If None, returns all feature functions.
         
         Returns:
           dict<str>: list<str>"""
@@ -203,7 +203,7 @@ class GenomeInterface(object):
 
         Args:
           feature_id_list (list<str>): List of features to retrieve.
-            Defaults to None. If None, returns all feature functions.
+            If None, returns all feature functions.
         
         Returns:
           dict<str>: list<dict>"""
@@ -215,7 +215,7 @@ class GenomeInterface(object):
 
         Args:
           feature_id_list (list<str>): List of features to retrieve.
-            Defaults to None. If None, returns all feature functions.
+            If None, returns all feature functions.
         
         Returns:
           dict<str>: dict<str>: list
@@ -236,7 +236,7 @@ class GenomeInterface(object):
 
         Args:
            mrna_feature_id_list (list<str>): List of features to retrieve.
-             Defaults to None. If None, returns all values.
+             If None, returns all values.
         Returns:
           ????
         """
@@ -248,7 +248,7 @@ class GenomeInterface(object):
 
         Args:
            cds_feature_id_list (list<str>): List of features to retrieve.
-             Defaults to None. If None, returns all values.
+             If None, returns all values.
         Returns:
           ????
         """
@@ -260,7 +260,7 @@ class GenomeInterface(object):
 
         Args:
            cds_feature_id_list (list<str>): List of features to retrieve.
-             Defaults to None. If None, returns all values.
+             If None, returns all values.
         Returns:
           ????
         """
@@ -272,7 +272,7 @@ class GenomeInterface(object):
 
         Args:
            mrna_feature_id_list (list<str>): List of features to retrieve.
-             Defaults to None. If None, returns all values.
+             If None, returns all values.
         Returns:
           ????
         """
@@ -284,7 +284,7 @@ class GenomeInterface(object):
 
         Args:
            gene_feature_id_list (list<str>): List of features to retrieve.
-             Defaults to None. If None, returns all values.
+             If None, returns all values.
         Returns:
           ????
         """
@@ -296,7 +296,7 @@ class GenomeInterface(object):
 
         Args:
            gene_feature_id_list (list<str>): List of features to retrieve.
-             Defaults to None. If None, returns all values.
+             If None, returns all values.
         Returns:
           ????
         """
