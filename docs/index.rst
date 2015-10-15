@@ -7,7 +7,7 @@
     :maxdepth: 4
 
     annotation_api
-    genome_api
+    assembly_api
     taxon_api
     developer
     API Reference <_source/modules>
@@ -16,7 +16,7 @@ KBase Data API documentation
 ============================
 The Data API provides a unified entry point to retrieve and, eventually,
 store KBase data objects. This page covers concepts and installation instructions.
-For usage see the individual API pages for the :ref:`annotation_api`, :ref:`genome_api` , and :ref:`taxon_api`.
+For usage see the individual API pages for the :ref:`annotation_api`, :ref:`assembly_api` , and :ref:`taxon_api`.
 
 Developers should read the :ref:`developer_notes`.
 
