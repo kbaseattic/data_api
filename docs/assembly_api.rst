@@ -9,7 +9,7 @@ The assembly API can be used as a library or in client/server mode.
 
 .. contents::
 
-.. py:currentmodule:: doekbase.data_api.assembly.genome_assembly
+.. py:currentmodule:: doekbase.data_api.sequence.assembly
 
 Creating an assembly
 --------------------------

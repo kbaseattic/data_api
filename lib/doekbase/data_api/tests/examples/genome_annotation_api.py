@@ -1,6 +1,7 @@
 """
 Examples for Genome Annotation API
 """
+import os
 
 from doekbase.data_api.annotation.genome_annotation import GenomeAnnotationAPI
 
