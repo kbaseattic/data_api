@@ -437,6 +437,8 @@ def convert_original_genome_object_to_prototype(source_wsname=None,destination_w
                 genome_annotation['protein_container_ref'] = "%s/%s" % (destination_workspace_name, protein_container_object_name)
                 genome_annotation['feature_container_references'] = feature_container_references
                 genome_annotation['counts_map'] = counts_map
+                genome_annotation['type'] = "KBase Reference"
+
                 genome_annotation_provenance = [{"script": __file__, "script_ver": "0.1", "description": "Genome Annotation generated from old genome object %s in workspace %s " % (original_genome['data']['id'],source_wsname)}] 
                 genome_annotation_not_saved = True
                 genome_annotation_object_name = core_object_name
