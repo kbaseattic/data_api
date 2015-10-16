@@ -13,14 +13,14 @@ install:
   - python setup.py install
 
 script:
-  - coverage run nosetests -c nose.cfg -c $KB_NOSE_CFG
+  - coverage run `which nosetests` -c nose.cfg -c $KB_NOSE_CFG
   - coverage report
 
 env:
-  - KB_REDIS_HOST=localhost
-  - KB_REDIS_HOST=
-  - KB_NOSE_CFG=nose-local.cfg
-  - KB_NOSE_CFG=nose-ci.cfg
+  - KB_REDIS_HOST=localhost; KB_NOSE_CFG=nose-local.cfg
+  - KB_REDIS_HOST=localhost; KB_NOSE_CFG=nose-ci.cfg
+  - KB_REDIS_HOST="";        KB_NOSE_CFG=nose-local.cfg
+  - KB_REDIS_HOST="";        KB_NOSE_CFG=nose-ci.cfg
 
 after_success:
   - codecov
