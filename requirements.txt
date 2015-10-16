@@ -1,14 +1,11 @@
 alabaster==0.7.6
-avro
 codecov
 coverage
 enum34
 Jinja2>=2.7.3
-mongomock==3.0.0
-msgpack-python==0.4.6
 nose
 nose-timer
-pandas==0.16.2
+nose-exclude
 requests==2.3.0
 six==1.9.0
 Sphinx<=1.2.99

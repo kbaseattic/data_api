@@ -148,9 +148,16 @@ class GenomeInterface(object):
         
         Returns:
           dict: Mapping from feature IDs to location information for each.
-          The location information has the following form::
-          
-              { "contig_id": str, "strand": str, "start": int, "length": int }
+          The location information has the following key/value pairs:
+
+          contig_id : str
+              The identifier for this contig
+          strand : str
+              The strand for the contig ????
+          start : int
+              The start position for the contig
+          length : int
+              The length of the contig
         """
         pass
     
@@ -218,7 +225,8 @@ class GenomeInterface(object):
             If None, returns all feature functions.
         
         Returns:
-          dict<str>: dict<str>: list
+          dict<str,dict<str,list>>: Mapping from feature IDs to dicts
+            of available data.
         """
         pass
 
