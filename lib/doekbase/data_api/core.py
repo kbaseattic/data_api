@@ -153,9 +153,10 @@ class ObjectAPI(object):
         if local_workspace:
             global_read = True  # Local file-workspace objects are public
         else:
-            wsinfo = WorkspaceInfo(self.ws_client.get_workspace_info({
-                'id': self._info['workspace_id']}))
-            global_read = (wsinfo.globalread == 'r')
+            wsinfo = self.ws_client.get_workspace_info({
+                'id': self._info['workspace_id']})
+            wsinfo_obj = WorkspaceInfo(*wsinfo)
+            global_read = (wsinfo_obj.globalread == 'r')
         self._cache = cache.ObjectCache(
             self._info["object_reference_versioned"],
             is_public=global_read)
