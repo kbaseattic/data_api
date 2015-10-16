@@ -122,7 +122,7 @@ then
     printf "==============================================\n"
     start_redis
     export KB_REDIS_HOST=localhost
-    run_nose_local  --ws-url=test_resources/data --wsfile-msgpack
+    run_nose_local --exclude-dir-file=exclude-tests.txt
     sleep 1
     stop_redis
 else
