@@ -22,24 +22,31 @@ Develop branch status
 
 #quickstart instructions
 
-1. install virtualenv using your local installer
-e.g., apt-get install virtualenv
+1. install virtualenv using your local installer::
 
-2. create a virtualenv environment to install the source to 
-e.g., virtualenv venv
+        apt-get install virtualenv
 
-3. activate the virtualenv
-e.g., source venv/bin/activate
+2. create a virtualenv environment to install the source to::
+
+        virtualenv venv
+
+3. activate the virtualenv::
+
+        source venv/bin/activate
 
 4. pip install this package to your virtualenv
-e.g., pip install data_api/
 
-5. set your KB_AUTH_TOKEN to your token string
-e.g., in a KBase environment use kbase-login to retrieve a token, check your .kbase_config
+        pip install data_api
 
-6. run nosetests doekbase.data_api to verify your install is working
+5. set your `KB_AUTH_TOKEN` to your token string. In a KBase environment use `kbase-login` to retrieve a token, and check your `.kbase_config`. Once you have the value, run this command in the bash shell:
 
-You can run pip install data_api/ --upgrade if you have edited files
+        export KB_AUTH_TOKEN="<value-you-grabbed>"
+
+6. run tests to verify your install is working:
+
+        nosetests doekbase.data_api 
+
+You can run `pip install data_api/ --upgrade` if you have edited files
 locally and want to test them out without having to reset the virtualenv.
 
 You can get out of the virtualenv environment with "deactivate".
