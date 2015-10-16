@@ -7,20 +7,20 @@ cache:
     - $HOME/.cache/pip
 
 before_install:
-  - redis-server redis.conf
+  - redis-server redis.conf &
 
 install:
   - python setup.py install
 
 script:
-  - nosetests --with-timer --ws-url=test_resources/data --wsfile-msgpack --exclude-dir-file=exclude-tests.txt
-  - nosetests --with-timer --ws-url=https://ci.kbase.us/services/ws/ --exclude-dir-file=exclude-tests.txt
-  - coverage run nosetests --with-timer --ws-url=https://ci.kbase.us/services/ws/ --exclude-dir-file=exclude-tests.txt
+  - coverage run nosetests -c nose.cfg -c $KB_NOSE_CFG
   - coverage report
 
 env:
   - KB_REDIS_HOST=localhost
   - KB_REDIS_HOST=
+  - KB_NOSE_CFG=nose-local.cfg
+  - KB_NOSE_CFG=nose-ci.cfg
 
 after_success:
   - codecov
