@@ -83,7 +83,7 @@ div.section h1 {
 }
 
 /*----------------------
- * Code blocks
+ * Code documentation
  *----------------------
  */
 
@@ -95,6 +95,8 @@ dl.method, dl.class, dl.function {
 dl.class dt {
     border-top: 2px solid #4BB856;
 }
+tt.descclassname {
+}
 /* don't have a border for each method */
 dl.method dt {
     border: none;
@@ -102,15 +104,60 @@ dl.method dt {
 /* methods declarations */
 dl.method dt tt {
     padding-left: 5px;
-    border-left: 2px solid #4BB856;
+    /*border-left: 2px solid #4BB856;*/
+}
+
+/* fine-tune colors in parameter list */
+tt.descname + big, tt.descname + big + em + big, tt.descname + big + big {
+    color: grey;
+    font-weight: 400;
+}
+tt.descname + big + em {
+    color: black;
+    font-weight: 500;
 }
 
 /* Class and method names */
 dl.class tt {
-    color: #43877C;
+    color: #0066B9;
 }
 dl.method tt {
-    color: #43877C;
+    /*color: #43877C;*/
+    color: #0066B9;
+}
+/*
+ * We use definition lists to spell out the contents of returned
+ *  dicts from API methods, so it is helpful to make them clean and compact.
+ */
+dl.docutils {
+    padding: 0.5em;
+}
+dl.docutils dt {
+    float: left;
+    clear: left;
+    width: 120px;
+    text-align: left;
+    font-weight: 500;
+    line-height: 1;
+}
+dl.docutils dd {
+   margin: 0 0 0 130px;
+   padding: 0 0 0.5em 0;
+   line-height: 1;
+}
+/* replace 'a : b' with 'a (b)', where '(b)' is smaller */
+dl.docutils span.classifier-delimiter {
+    display: none;
+}
+dl.docutils span.classifier {
+    font-size: 90%;
+    color: grey;
+}
+dl.docutils span.classifier::before {
+  content: "(";
+}
+dl.docutils span.classifier::after {
+  content: ")";
 }
 
 /*----------------------

@@ -167,8 +167,7 @@ class ObjectAPI(object):
         return self._typestring
 
     def get_info(self):
-        """
-        Retrieve basic properties about this object.
+        """Retrieve basic properties about this object.
         
         Returns:
           dict
