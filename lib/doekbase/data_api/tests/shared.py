@@ -27,6 +27,8 @@ services = None
 # Globals
 
 g_redis_host = os.environ.get('KB_REDIS_HOST', None)
+if g_redis_host == "":
+    g_redis_host = None
 g_redis_port = int(os.environ.get('KB_REDIS_PORT', '6379'))
 
 # Functions and classes
