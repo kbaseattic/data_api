@@ -214,8 +214,7 @@ class ObjectAPI(object):
 
     @collect_performance(g_stats)
     def get_info(self):
-        """
-        Retrieve basic properties about this object.
+        """Retrieve basic properties about this object.
         
         Returns:
           dict

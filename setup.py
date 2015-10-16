@@ -1,14 +1,31 @@
 import setuptools
+import logging
 import os
 import sys
 
+# Logging
+
+logging.basicConfig()
+_log = logging.getLogger('setup')
+
+# Globals
+
+version = open('VERSION').read().strip()
+packages = setuptools.find_packages("lib")
+g_with_jupyter = False
+
+# Functions
 
 def filter_args():
+    global g_with_jupyter
     setup_args = sys.argv[1:]
 
+    # TODO: Put this new option into --help output
+
     if "--jupyter" in setup_args:
+        g_with_jupyter = True
         setup_args.remove("--jupyter")
-    
+
     return setup_args
 
 
@@ -30,17 +47,22 @@ def get_dependencies():
 
     setup_args = sys.argv[1:]
 
-    if "--jupyter" in setup_args:
+    if g_with_jupyter:
         install_requires = parse_requirements(
             os.path.join(os.path.dirname(__file__),"requirements-jupyter.txt"))
+        open('exclude-tests.txt', 'w').write('') # clear it
     else:
+        _log.warn("--jupyter not specified, so using minimal install "
+                  "without packages in doekbase.data_api.interactive")
+        exclude_pkg = 'doekbase.data_api.interactive'
+        packages.remove(exclude_pkg)
         install_requires = parse_requirements(
             os.path.join(os.path.dirname(__file__),"requirements.txt"))
+        open('exclude-tests.txt', 'w')\
+            .write('lib/' + exclude_pkg.replace('.', '/') + '\n')
+        # clear it
 
     return install_requires
-
-version = open('VERSION').read().strip()
-packages = setuptools.find_packages("lib")
 
 config = {
     "description": "KBase Data API",

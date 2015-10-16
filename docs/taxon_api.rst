@@ -5,7 +5,7 @@
 Taxon Data API
 ==============
 
-The API can be used as a library or in client/server mode.
+The Taxon API can be used as a library or in client/server mode.
 
 .. contents::
 
@@ -21,13 +21,13 @@ If instead you are using Python or another language as a client, and running the
 In either case you will instantiate the class with an object reference, in the format expected by the KBase workspace: |wsref|. 
 
 Taxon object interface
------------------------
+----------------------
 
 The interface used by both the client/server and local Python library APIs is shown below.
 
 .. autoclass:: TaxonInterface
     :members:
-    
+
 Examples
 --------
 

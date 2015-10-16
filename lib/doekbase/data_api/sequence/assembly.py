@@ -36,7 +36,8 @@ class AssemblyInterface(object):
         """Retrieve the id for an Assembly.
 
         Returns:
-          id: string identifier for the Assembly"""
+          str: string identifier for the Assembly
+        """
         pass
 
     @abc.abstractmethod    
@@ -44,16 +45,17 @@ class AssemblyInterface(object):
         """Retrieve the GenomeAnnotations that refer to this Assembly.
         
         Returns:
-          list<GenomeAnnotationAPI>
+          list<GenomeAnnotationAPI>: List of GenomeAnnotationAPI objects
         """
         pass
     
     @abc.abstractmethod    
     def get_external_source_info(self):
-        """Retrieve the external source information associated with this Assembly.
+        """Retrieve the external source information for this Assembly.
         
         Returns:
-          id: string identifier for the Assembly"""        
+          str: string identifier for the Assembly
+        """
         pass
 
     @abc.abstractmethod    
@@ -61,9 +63,15 @@ class AssemblyInterface(object):
         """Retrieve the derived statistical information about this Assembly.
         
         Returns:
-          gc_content: total guanine and cytosine content, counting all G and C only
-          dna_size: total length of all dna sequence for this Assembly
-          num_contigs: total number of contiguous sequences in this Assembly"""        
+          dict: Statistics with the following keys and values:
+
+            gc_content : float
+                proportion of guanine (G) and cytosine (C) content
+            dna_size : int
+                total length of all dna sequences
+            num_contigs : int
+                total number of contiguous sequences
+        """
         pass
 
     @abc.abstractmethod    
@@ -71,7 +79,8 @@ class AssemblyInterface(object):
         """Retrieve the number of contiguous sequences in this Assembly.
         
         Returns:
-          int"""
+          int
+        """
         pass
 
     @abc.abstractmethod    
@@ -79,7 +88,8 @@ class AssemblyInterface(object):
         """Retrieve the total GC content for this Assembly.
         
         Returns:
-          float"""
+          float: Proportion of GC content, 0 <= x <= 1.
+        """
         pass
 
     @abc.abstractmethod    
@@ -87,23 +97,27 @@ class AssemblyInterface(object):
         """Retrieve the total DNA size for this Assembly.
         
         Returns:
-          int"""
+          int: Total DNA size
+        """
         pass
 
     @abc.abstractmethod    
     def get_contig_lengths(self, contig_id_list=None):
-        """Retrieve the ids for every contiguous sequence in this Assembly.
+        """Retrieve the length for every contiguous sequence.
         
         Returns:
-          dict<str>: <int>"""
+          dict<str,int>: Mapping of sequence identifiers to lengths.
+        """
         pass
 
     @abc.abstractmethod    
     def get_contig_gc_content(self, contig_id_list=None):
-        """Retrieve the total GC content for each contiguous sequence of this Assembly.
+        """Retrieve the total GC content for each contiguous sequence
+        of this Assembly.
         
         Returns:
-          dict<str>: float"""
+          dict<str,float>: Mapping of sequence identifiers to GC content.
+        """
         pass
 
     @abc.abstractmethod    
@@ -111,7 +125,8 @@ class AssemblyInterface(object):
         """Retrieve the ids for every contiguous sequence in this Assembly.
         
         Returns:
-          list<str>"""
+          list<str>: Sequence identifiers
+        """
         pass
 
     @abc.abstractmethod    
@@ -121,21 +136,25 @@ class AssemblyInterface(object):
         Args:
           contig_id_list: list<str>
         Returns:
-          dict
-          
-          dictionary of contigs, with contig id as key
-          contig value structure::
+          dict<str,dict>: dictionary of contigs, with contig id as key
+          and each value itself a dict with the following key/value pairs:
 
-              {
-                  'contig_id': string,
-                  'length': integer,
-                  'md5': string,
-                  'name': string,
-                  'description': string,
-                  'is_complete': 0 or 1,
-                  'is_circular': 0 or 1,
-                  'sequence': string
-              }
+          contig_id : str
+            the contig identifier
+          length : integer
+            length of the contig
+          md5 : string
+            hex-digest of MD5 hash of the contig's contents,
+          name : string
+            name of the contig
+          description : string
+            description of the contig
+          is_complete : int
+             0 if this contig is complete, 1 otherwise
+          is_circular : int
+             0 or 1
+          sequence : string
+             actual contents of the sequence for this contig
         """
         pass
 
