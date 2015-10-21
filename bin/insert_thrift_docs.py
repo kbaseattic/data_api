@@ -26,27 +26,20 @@ _log.addHandler(_h)
 
 SOURCE_EXT = {'py'}
 THRIFT_FUNC_RE = re.compile('\S+\s+([a-z_]+)\(')
-PYTHON_FUNC_RE = re.compile('def ([a-z_]+)\(')
 
 # Classes and functions
 
-class Method(object):
-    """Method in the target source file.
+def str_prefix(s, num):
+    prefix = s[:num]
+    if len(s) > num:
+        prefix += '...'
+    return prefix
 
-    Expect the body to contain a Python-style formatting
-    template, `{desc}`, that will be replaced with the
-    description from the Thrift file.
-    """
-    def __init__(self, name, body):
-        self.name = name
-        self._body = body
-
-    def set_desc(self, text):
-        self._body = self._body.format(desc=text)
-
-    def dump(self, strm):
-        strm.write(self._body)
-        strm.write('\n')
+PYTHON_FUNC_RE = re.compile(
+    '\s*@abc.abstractmethod\s*\\n'
+    '\s*def\s+(\w+)\s*\(.*?\):\s*\\n'
+    '\s*"""(.*?)(?:\.\\n|\\n\\n).*?',
+    flags=re.X | re.M | re.S)
 
 def extract_python_methods(src):
     """Extract method bodies from Python file.
@@ -57,59 +50,51 @@ def extract_python_methods(src):
       dict<str,str>: Mapping of method names to descriptive text
     """
     methods = {}
+
     with open(src, 'r') as f:
-        name, body, expect_desc, comment_block = None, None, False, False
+        chunk, in_docstring = '', False
         for line in f:
-            txt = line.strip()
-            _log.debug("PYTHON ({}) {}".format(name, txt))
-            # If we are currently processing a method block..
-            if name is not None:
-                # Name being empty means we still need to get
-                # the actual function name itself. After this,
-                # we expect the description.
-                if name == '':
-                    m = PYTHON_FUNC_RE.match(txt)
-                    if m is None:
-                        _log.error('Expected Python function in: {}'
-                                   .format(txt))
-                        raise ValueError('Parse error in {}'.format(src))
-                    name = m.group(1)
-                    expect_desc = True
-                    body += line
-                # If we are past the desc, but still in the comment
-                # block, then look for the end of that block.
-                # Any other text in the docstring should be escaped so
-                # template '{}' characters are not accidentally added.
-                elif comment_block:
-                    s = line.replace('{', '{{').replace('}', '}}')
-                    body += s
-                    if txt.endswith('"""'):
-                        comment_block = False
-                        expect_desc = False
-                    elif expect_desc and (txt.endswith('.') or len(line) == 0):
-                        expect_desc = False
-                # If we processed the method name, but haven't handled the
-                # docstring yet, then handle it. The initial description of
-                # the docstring will be replaced with a single placeholder
-                # variable name.
-                elif expect_desc:
-                    if txt.startswith('"""'):
-                        body += '    """{desc}\n'
-                        comment_block = True
-                # A blank line signals the end of the method block.
-                # Create a new entry in the methods mapping and reset
-                # the state.
-                elif len(txt) == 0:
-                    methods[name] = Method(name, body)
-                    name = None # reset
-                    expect_desc, comment_block = False, False
-            # Otherwise check to see if this is the start of a
-            # new method block. If so, start the processing. Otherwise,
-            # ignore the line.
-            elif txt.startswith('@abc.abstractmethod'):
-                body = line
-                name = ''
+            # See whether we are in/out of docstring by looking for
+            # triple-quotes. Do nothing if there are 2 pairs of
+            # triple-quotes on the same line.
+            p1 = line.find('"""')
+            if p1 >= 0:
+                p2 = line.find('"""', p1 + 1)
+                if p2 < 0:
+                    in_docstring = not in_docstring
+            # At a blank line, not inside a docstring, process current chunk
+            if line.strip() == '' and not in_docstring:
+                name, method = None, None
+                _log.debug("Python method: {}".format(chunk))
+                match = PYTHON_FUNC_RE.match(chunk)
+                if match:
+                    # function name is first inner group
+                    name = match.group(1)
+                    # replace description, in second group, with a placeholder
+                    desc_start, desc_end = match.span(2)
+                    chunk = chunk[:desc_start] + '{desc}' + chunk[desc_end:]
+                    _log.debug("add Python method '{}'".format(name))
+                    methods[name] = chunk
+                else:
+                    if 'abstractmethod' in chunk:
+                        _log.warn('Failed to match method: {}'
+                                  .format(str_prefix(chunk, 280)))
+                if name:
+                    methods[name] = chunk
+                chunk = ''
+            else:
+                chunk += line
+
+    _log.debug('Python methods found: {}'.format(methods.keys()))
+
     return methods
+
+DESCRIPTION_RE = re.compile('''
+\s*/\*\*(.*?)        # Comment start
+(?:\.\\n|\\n\\n).*?  # end of description
+\*/\s*\\n            # Comment end
+\s*[a-zA-Z0-9_<>,]+\s+(\w+)\s*\(.*   # Method declaration
+''', flags=re.X | re.M | re.S)
 
 def extract_descriptions(src):
     """Extract descriptions from Thrift file.
@@ -128,66 +113,54 @@ def extract_descriptions(src):
       dict<str,str>: Mapping of method names to descriptive text
     """
     descriptions = {}
-    last_desc, expect_desc = None, False
     with open(src, 'r') as f:
+        chunk = ''
         for line in f:
-            # If we are processing a description, then add
-            # this line to the description. If this line is
-            # blank or ends in a period or doesn't start with a
-            # comment '*', then stop processing a description.
-            if expect_desc:
-                line = line.strip()
-                if line[0] != '*':
-                    expect_desc = False
+            s = line.strip()
+            if chunk and (s.startswith('/**') or not s):
+                _log.debug('Thrift method:<<{}>>'.format(chunk))
+                match = DESCRIPTION_RE.match(chunk)
+                if match:
+                    d1 = match.group(1).strip()
+                    d2 = d1.split('\n')
+                    d3 = ' '.join([d4[d4.find('*') + 1:].strip()
+                                   for d4 in d2])
+                    desc = d3.strip()
+                    name = match.group(2)
+                    descriptions[name] = desc
                 else:
-                    text = line[1:].strip()
-                    if len(text) == 0:
-                        expect_desc = False
-                    else:
-                        if last_desc is None:
-                            last_desc = ''
-                        else:
-                            last_desc += ' '
-                        last_desc += text
-                        if text.endswith('.'):
-                            expect_desc = False
-                continue
+                    # Print a warning if this looks like it
+                    # is a function.
+                    if '(' in chunk and ')' in chunk and 'throws' in chunk:
+                        _log.warn('Not recognized as a documented method: {}'
+                              .format(str_prefix(chunk, 20)))
+                chunk = line.strip()
+                _log.debug('Reset text block to: {}'.format(chunk))
+            else:
+                chunk += line
 
-            # If we are not processing a description, then
-            # check for a Thrift function declaration. If this is
-            # found, then record the matching description and
-            # reset the description to be empty.
-            m = THRIFT_FUNC_RE.match(line)
-            if m is not None:
-                method_name = m.group(1)
-                if last_desc is not None:
-                    descriptions[method_name] = last_desc
-                    last_desc = None
-                else:
-                    _log.warn('Undocumented thrift function: {f}'
-                              .format(f=method_name))
-                continue
-
-            # If neither a description nor a method, then check if this
-            # is the start of a description block. Otherwise, do nothing.
-            if line.strip().startswith('/**'):
-                expect_desc = True
+    _log.debug('Descriptions found for: {}'.format(descriptions.keys()))
 
     return descriptions
 
-def insert_python(src, tgt):
+def insert_python(src, tgt, strm=sys.stdout):
     _log.info("Insert: from={src} target={tgt} language=Python"
               .format(src=src, tgt=tgt))
     descriptions = extract_descriptions(src)
     methods = extract_python_methods(tgt)
-    for key, desc in descriptions:
+    formatted_methods = {}
+    for key, desc in descriptions.iteritems():
         if not key in methods:
             _log.warn('Description for method {m} has no match in Python'
                       .format(m=key))
         else:
-            methods[key].set_desc(desc)
+            formatted_methods[key] = methods[key].format(desc=desc)
     for name in sorted(methods.keys()):
-        methods[name].dump(sys.stdout)
+        if name in formatted_methods:
+            strm.write(formatted_methods[name])
+        else:
+            strm.write(methods[name].format(desc='Description goes here'))
+        strm.write('\n')
 
 def get_target_method(tgt):
     ext_dot = tgt.rfind('.')
@@ -209,7 +182,8 @@ def main(cmdline):
                         help="Print more verbose messages to standard error. "
                              "Repeatable. (default=ERROR)")
     args = parser.parse_args(cmdline)
-    verbosity = (logging.ERROR, logging.INFO, logging.DEBUG)[min(args.vb, 2)]
+    verbosity = (logging.ERROR, logging.WARNING, logging.INFO,
+                 logging.DEBUG)[min(args.vb, 3)]
     _log.setLevel(verbosity)
 
     meth = get_target_method(args.target)
