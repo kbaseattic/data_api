@@ -17,6 +17,7 @@ except ImportError:
 
 # Local
 from doekbase.data_api.core import ObjectAPI
+from doekbase.data_api.util import PerfCollector, collect_performance
 
 CHUNK_SIZE = 2**30
 
@@ -24,6 +25,7 @@ _CONTIGSET_TYPES = ['KBaseGenomes.ContigSet']
 _ASSEMBLY_TYPES = ['KBaseGenomesCondensedPrototypeV2.Assembly']
 TYPES = _CONTIGSET_TYPES + _ASSEMBLY_TYPES
 
+g_stats = PerfCollector('AssemblyAPI')
 
 class AssemblyInterface(object):
     """API for the assembled sequences associated with a Genome Annotation.
@@ -328,6 +330,7 @@ class _KBaseGenomes_ContigSet(ObjectAPI, AssemblyInterface):
         contigs = self.get_data()["contigs"]
         return [c["id"] for c in contigs]
 
+    @collect_performance(g_stats, prefix='old.')
     def get_contigs(self, contig_id_list=None):
         pattern = re.compile(r'g|G|c|C')
         contigs = dict()
@@ -437,6 +440,7 @@ class _Prototype(ObjectAPI, AssemblyInterface):
         contigs = self.get_data()["contigs"]
         return [contigs[c]["contig_id"] for c in contigs]
 
+    @collect_performance(g_stats, prefix='new.')
     def get_contigs(self, contig_id_list=None):
         data = self.get_data()
 
