@@ -7,14 +7,16 @@ __date__ = '10/21/15'
 # Imports
 
 # System
+import csv
 import json
-import os
+import logging
 import subprocess
+import sys
 import unittest
 
 # Local
 from doekbase.data_api.util import get_logger
-#from doekbase.data_api.annotation import genome_annotation as ga_api
+from doekbase.data_api.annotation import genome_annotation as ga_api
 from doekbase.data_api.sequence import assembly as asm_api
 from doekbase.data_api import cache
 from doekbase.data_api.tests import shared
@@ -23,6 +25,7 @@ from doekbase.data_api.util import PerfCollector
 # Logging
 
 _log = get_logger(__name__)
+_log.setLevel(logging.DEBUG)
 
 # Global constants and variables
 
@@ -43,10 +46,12 @@ def control_redis(start=False, stop=False):
     """
     global g_redis_process
     if stop:
+        _log.info('Stopping Redis server')
         if g_redis_process:
             g_redis_process.terminate()
             g_redis_process.wait()
     if start:
+        _log.info('Starting Redis server')
         if not g_redis_process:
             g_redis_process = subprocess.Popen([shared.g_redis_bin,
                                                 shared.g_redis_conf],
@@ -56,6 +61,13 @@ def setup():
     shared.setup()
 
 def set_redis(flag):
+    """Set Redis to on/off.
+
+    Assumes Redis server is not already running.
+
+    Args:
+      flag (bool): True is on, False is off
+    """
     global g_redis_process
     if flag:
         control_redis(start=True)
@@ -94,10 +106,17 @@ class TestPerformance(unittest.TestCase):
                                              "kb|g.140106.c.500000",
                                              "kb|g.140106.c.600000",
                                              "kb|g.140106.c.700000"]}
+        self.csv_out = csv.writer(sys.stdout)
 
     def test_get_contigs(self):
-        def print_stats(event):
-            print('EVENT: {}'.format(str(event)))
+
+        self.csv_out.writerow(['ts', 'event', 'dur', 'op', 'sz', 'id'])
+        def print_stats(event, pevent):
+            #print('Completed: {}'.format(str(event)))
+            md = pevent.metadata  # alias
+            row = [pevent.start, event, pevent.duration,
+                   md['op'], md['size'], md['genome']]
+            self.csv_out.writerow(row)
 
         perf = PerfCollector('get_contigs')
         perf.add_observer('*', None, print_stats)
@@ -105,25 +124,30 @@ class TestPerformance(unittest.TestCase):
         for redis_flag in (False, True):
             set_redis(redis_flag)  # both redis server and config. in cache
             for genome, ref in self.genomes.items():
-                # ga_obj = ga_api.GenomeAnnotationAPI(shared.get_services(),
-                #                                     shared.token,
-                #                                     ref)
-                asm_obj = asm_api.AssemblyAPI(shared.get_services(),
-                                              shared.token,
-                                              ref)
+                ga_obj = ga_api.GenomeAnnotationAPI(
+                    shared.get_services(),
+                    shared.token,
+                    ref)
+                asm_obj = ga_obj.get_assembly()
                 for type_, obj in (('assembly', asm_obj),):
                     for operation in ('ALL', 'SUBSET'):
                         event_key = '/'.join([genome, type_, operation])
                         perf.start_event('get_contigs', event_key)
                         if operation == 'ALL':
+                            _log.debug('Get all contigs')
                             contigs = asm_obj.get_contigs()
+                            nc = 0  # all
                         else:
                             contig_list = self.fetch_contigs[genome]
+                            nc = len(contig_list)
+                            _log.debug('Get {:d} contigs'.format(nc))
                             contigs = asm_obj.get_contigs(contig_list)
+
                         perf.set_metadata({'redis': int(redis_flag),
                                            'op': operation,
                                            'size': calc_size(contigs),
                                            'genome': genome,
+                                           'num_contigs': nc,
                                            'ref': ref})
                         perf.end_event('get_contigs', event_key)
 
