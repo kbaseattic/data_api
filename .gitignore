@@ -2,4 +2,4 @@
 /build/
 /temp/
 /dist/
-+*.egg-info/
+*.egg-info/
