@@ -15,7 +15,7 @@ module.exports = function (grunt) {
     // since it contains normal, un-minified javascript.
     var buildDir = runtimeDir + '/build';
 
-    var distDir = 'dist';
+    var distDir = '../bower';
 
     var testDir = runtimeDir + '/test';
 
@@ -243,7 +243,7 @@ module.exports = function (grunt) {
                     {
                         cwd: 'runtime/build/js',
                         src: '**/*',
-                        dest: 'dist/bower/pkg',
+                        dest: makeDistPath(),
                         expand: true
                     }
                 ]
@@ -371,12 +371,20 @@ module.exports = function (grunt) {
                     'thrift',
                     '-gen js:jquery',
                     '-o temp',
-                    'bower_components/data-api/thrift/specs/taxonomy/taxon/taxon.thrift'
+                    '../thrift/specs/taxonomy/taxon/taxon.thrift'
                 ].join(' '),
                 options: {
                     stderr: false
                 }
-            }
+            },
+           bowerUpdate: {
+              command: [
+                 'bower', 'update'
+              ].join(' '),
+              options: {
+                 cwd: '..'
+              }
+           }
         },
         mkdir: {
             temp: {
@@ -388,6 +396,7 @@ module.exports = function (grunt) {
         bower: {
             install: {
                 options: {
+                   base: '..',
                     copy: false
                 }
             }
@@ -420,7 +429,7 @@ module.exports = function (grunt) {
     });
 
     grunt.registerTask('build', [
-        'bower:install',
+        'shell:bowerUpdate',
         'jsdoc:build',
         'markdown:build',
         'copy:runtime',

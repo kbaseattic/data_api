@@ -2,6 +2,3 @@
 /temp/
 /dist/
 *.egg-info/
-/jslib/node_modules/
-/jslib/bower_components/
-/jslib/runtime/

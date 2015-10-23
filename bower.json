@@ -1,15 +1,26 @@
 {
   "name": "JsLibrary",
   "version": "0.0.1",
-  "main": "dist/bower/package/js/Taxon.js",
   "ignore": [
-    "src",
-    "package.json",
-    "Gruntfile.js",
-    "README.md",
-    ".gitignore",
-    "tools",
-    "test"
+     ".*",
+     "bin",
+     "build"
+     "CHANGELOG",
+     "config",
+     "data_loading",
+     "docs",
+     "examples",
+     "experiments",
+     "GolgiVolvox.png",
+     "jslib",
+     "lib",
+     "README.md",
+     "redis.conf",
+     "requirements*",
+     "run_tests.sh",
+     "setup.py",
+     "specs",
+     "temp"
   ],
   "dependencies": {
     "bluebird": "2.10.2",
@@ -18,7 +29,6 @@
     "thrift-binary-protocol": "eapearson/thrift-js-binary-protocol#master"
   },
   "devDependencies": {
-    "data-api": "eapearson/data_api#develop",
     "text": "requirejs-text#2.0.14",
     "requirejs-text": "2.0.14",
     "require-yaml": "0.1.2",

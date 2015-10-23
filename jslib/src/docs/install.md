@@ -9,21 +9,34 @@ servivce on CI or Production), see
 
 ### Data API JS Client
 
-- prepare your local developer environment. The following applications are 
-required:
+- prepare your local developer environment. The following applications are required:
     - git
     - nodejs
     - bower
     - thrift
 
-E.g. on mac you might want to use homebrew http://brew.sh/
+E.g. on mac you might want to use homebrew http://brew.sh/ or macports (https://www.macports.org).
+
+#### Brew
 
 ```
-sudo brew install git
-sudo brew install nodejs
+brew install git
+brew install nodejs
 sudo npm install -g bower
-sudo brew install thrift
+brew install thrift
 ```
+
+#### Macports
+
+```
+sudo port install git
+sudo port install nodejs
+sudo npm install -g bower
+sudo port install boost -no_static
+sudo port install thrift
+```
+
+(it may not be so simple, though. There are sometimes incompatibilities, as currently, after a new Mac OS X release, and some packages may require special attention to install. E.g. the boost library needs to be installed as -no_static, because the default +no_static install conflicts with thrift and possibly other packages.)
 
 - clone the repo
 
@@ -31,9 +44,7 @@ sudo brew install thrift
 git clone https://github.com/eapearson/kbase-data-api-js-wrappers.git
 ```
 
-- The following tasks are described using command line tools. You may use your 
-favorite developer tools to manage the following tasks. E.g. netbeans integrates
-all of these tools to provide a smooth development process.
+- The following tasks are described using command line tools. You may use your favorite developer tools to manage the following tasks. E.g. netbeans integrates all of these tools to provide a smooth development process.
 
 - install dependencies
 

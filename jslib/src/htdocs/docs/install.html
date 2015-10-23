@@ -121,8 +121,7 @@ servivce on CI or Production), see</p>
 </ul>
 <h3 id="data-api-js-client">Data API JS Client</h3>
 <ul>
-<li>prepare your local developer environment. The following applications are
-required:<ul>
+<li>prepare your local developer environment. The following applications are required:<ul>
 <li>git</li>
 <li>nodejs</li>
 <li>bower</li>
@@ -130,19 +129,25 @@ required:<ul>
 </ul>
 </li>
 </ul>
-<p>E.g. on mac you might want to use homebrew <a href="http://brew.sh/">http://brew.sh/</a></p>
-<pre><code>sudo brew install git
-sudo brew install nodejs
+<p>E.g. on mac you might want to use homebrew <a href="http://brew.sh/">http://brew.sh/</a> or macports (<a href="https://www.macports.org">https://www.macports.org</a>).</p>
+<h4 id="brew">Brew</h4>
+<pre><code>brew install git
+brew install nodejs
 sudo npm install -g bower
-sudo brew install thrift
-</code></pre><ul>
+brew install thrift
+</code></pre><h4 id="macports">Macports</h4>
+<pre><code>sudo port install git
+sudo port install nodejs
+sudo npm install -g bower
+sudo port install boost -no_static
+sudo port install thrift
+</code></pre><p>(it may not be so simple, though. There are sometimes incompatibilities, as currently, after a new Mac OS X release, and some packages may require special attention to install. E.g. the boost library needs to be installed as -no_static, because the default +no_static install conflicts with thrift and possibly other packages.)</p>
+<ul>
 <li>clone the repo</li>
 </ul>
 <pre><code>git clone https://github.com/eapearson/kbase-data-api-js-wrappers.git
 </code></pre><ul>
-<li><p>The following tasks are described using command line tools. You may use your
-favorite developer tools to manage the following tasks. E.g. netbeans integrates
-all of these tools to provide a smooth development process.</p>
+<li><p>The following tasks are described using command line tools. You may use your favorite developer tools to manage the following tasks. E.g. netbeans integrates all of these tools to provide a smooth development process.</p>
 </li>
 <li><p>install dependencies</p>
 </li>
