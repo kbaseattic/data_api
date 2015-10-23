@@ -4,7 +4,7 @@
   "ignore": [
      ".*",
      "bin",
-     "build"
+     "build",
      "CHANGELOG",
      "config",
      "data_loading",
