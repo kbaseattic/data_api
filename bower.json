@@ -20,7 +20,10 @@
      "run_tests.sh",
      "setup.py",
      "specs",
-     "temp"
+     "temp",
+     "thrift",
+     "version.py",
+     "test_resources"
   ],
   "dependencies": {
     "bluebird": "2.10.2",
