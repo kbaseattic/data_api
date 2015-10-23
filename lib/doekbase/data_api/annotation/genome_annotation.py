@@ -16,6 +16,10 @@ _GENOME_TYPES = ['KBaseGenomes.Genome']
 _GENOME_ANNOTATION_TYPES = ['KBaseGenomesCondensedPrototypeV2.GenomeAnnotation']
 TYPES = _GENOME_TYPES + _GENOME_ANNOTATION_TYPES
 
+#: Mapping of feature type codes to descriptions
+#: of their meaning. The keys of this mapping give possible values for
+#: functions taking feature type identifiers, e.g.
+#: :meth:`GenomeInterface.get_feature_types`.
 FEATURE_DESCRIPTIONS = {
     "CDS": "Coding Sequence",
     "PEG": "Protein Encoding Genes",
@@ -46,137 +50,155 @@ class GenomeInterface(object):
 
     @abc.abstractmethod
     def get_taxon(self):
-        """
-        Retrieves the Taxon assigned to this Genome Annotation.
+        """Retrieves the Taxon assigned to this Genome Annotation.
         
         Returns:
-          TaxonAPI"""
+          TaxonAPI: Taxon object
+        """
         pass
 
     @abc.abstractmethod
     def get_assembly(self):
-        """
-        Retrieves the Assembly used to create this Genome Annotation.
+        """Retrieves the Assembly used to create this Genome Annotation.
         
         Returns:
-          AssemblyAPI"""
+          AssemblyAPI: Assembly object
+        """
         pass
     
     @abc.abstractmethod
     def get_feature_types(self):
-        """
-        Retrieves the Genome Feature type identifiers available from this Genome Annotation.
+        """Retrieves the Genome Feature type identifiers available from this
+        Genome Annotation.
         
         Returns:
-          list<str>"""
+          list<str>: List of feature type identifiers.
+        """
         pass
 
     def get_feature_type_descriptions(self, type_list=None):
-        """
-        Retrieves a descriptive string for each feature type identifier.
+        """Retrieves a descriptive string for each feature type identifier.
         
         Args:
-          type_list: list<str>
+          type_list (list<str>): List of feature types. The known values for
+            these are enumerated in the module's  :data:`FEATURE_DESCRIPTIONS`.
+            If this list is empty or None, then the whole mapping will be
+            returned.
         
         Returns:
-          dict"""
+          dict: Key/value pairs for each requested feature description.
+        """
         
-        if type_list is None:
-            return FEATURE_DESCRIPTIONS
-        elif isinstance(type_list, list) and len(type_list) > 0 and \
-             (isinstance(type_list[0], unicode) or isinstance(type_list[0],str)):
-            return {x: FEATURE_DESCRIPTIONS[x] for x in FEATURE_DESCRIPTIONS if x in type_list}
+        if not type_list:
+            result = FEATURE_DESCRIPTIONS
         else:
-            raise TypeError()
+            result = {}
+            for key in type_list:
+                if not isinstance(key, basestring):
+                    raise TypeError("key '{}' is type '{}', but type 'str' "
+                                    "expected".format(key, type(key)))
+            result[key] = FEATURE_DESCRIPTIONS[key]
+        return result
 
     @abc.abstractmethod
-    def get_feature_ids(self, type_list=None, region_list=None, function_list=None, alias_list=None):
-        """
-        Retrieves feature ids based on filters such as feature types, regions, functional descriptions, aliases.
+    def get_feature_ids(self, type_list=None, region_list=None,
+                        function_list=None, alias_list=None):
+        """Retrieves feature ids based on filters such as feature types,
+        regions, functional descriptions, aliases.
         
         If any argument is None, it will not be used as a filter.  
         If all arguments are None, all feature ids will be returned.
         
         Args:
-          type_list: list<str>
-          region_list: list<dict> e.g., [{"contig_id": str, "strand": "+"|"-"|"?", "start": int, "stop": int},...]
-          function_list: list<str>
-          alias_list: list<str>
+          type_list (list<str>): List of feature types. Each should match a
+            value in :data:`FEATURE_DESCRIPTIONS`.
+          region_list (list<dict>): List of region objects, e.g.:
+            [{"contig_id": str, "strand": "+"|"-"|"?", "start": int, "stop": int},...]
+          function_list (list<str>): List of functions
+          alias_list (list<str>): List of feature aliases
         
         Returns:
-          dict<str>:list<dict or str>"""
-        pass
+          dict<str,list<dict or str>>: Mapping of each retrieved feature ID
+             to its corresponding value.
+        """
+        pass  # TODO: add examples in docs for function_list and alias_list
 
     @abc.abstractmethod
     def get_feature_type_counts(self, type_list=None):
-        """
-        Retrieve the number of Genome Features contained in this Genome Annotation by Feature type identifier.
-        
-        If type_list is None, will retrieve all type counts.
+        """Retrieve the number of Genome Features, grouped by
+        feature type identifier.
         
         Args:
-          type_list: list<str>
-        
+          type_list (list<str>): List of feature types. Each should match a
+            value in :data:`FEATURE_DESCRIPTIONS`. If None,
+            or empty, will retrieve all type counts.
+
         Returns:
-          dict<str>:<int>"""        
+          dict: Map of string feature types to integer counts.
+        """
         pass
     
     @abc.abstractmethod
     def get_feature_locations(self, feature_id_list=None):
-        """
-        Retrieves the location information for Genome Features present in this Genome Annotation.
-        
-        If feature_id_list is None, returns all feature locations.
+        """Retrieves the location information for given genome features.
         
         Args:
-          feature_id_list: list<str>
+          feature_id_list (list<str>): List of features to retrieve.
+            If None, returns all feature functions.
         
         Returns:
-          dict<str>: dict
-          
-          {"contig_id": str,
-           "strand": str,
-           "start": int
-           "length": int}"""                        
+          dict: Mapping from feature IDs to location information for each.
+          The location information has the following key/value pairs:
+
+          contig_id : str
+              The identifier for this contig
+          strand : str
+              The strand for the contig ????
+          start : int
+              The start position for the contig
+          length : int
+              The length of the contig
+        """
         pass
     
     @abc.abstractmethod
     def get_feature_dna(self, feature_id_list=None):
-        """
-        Retrieves the dna sequence for Genome Features present in this Genome Annotation.
+        """Retrieves the DNA sequence for genome features.
         
-        If feature_id_list is None, returns all feature dna.
+        If `feature_id_list` is None, returns all feature dna.
         
         Args:
-          feature_id_list: list<str>
+          feature_id_list (list<str>): List of features.
         
         Returns:
-          dict<str>: str"""
+          dict<str,str>: Mapping of feature IDs to their values.
+        """
         pass
 
     @abc.abstractmethod
     def get_feature_functions(self, feature_id_list=None):
         """
-        Retrieves the functional description for Genome Features present in this Genome Annotation.
-        
-        If feature_id_list is None, returns all feature functions.
-        
+        Retrieves the functional description for given features.
+
+
         Args:
-          feature_id_list: list<str>
+          feature_id_list (list<str>): List of features to retrieve.
+            If None, returns all feature functions.
+
         
         Returns:
-          dict<str>: str"""
+          dict<str,str>: Mapping from feature IDs to their functions.
+
+        """
         pass
 
     @abc.abstractmethod
     def get_feature_aliases(self, feature_id_list=None):
-        """
-        Retrieves the aliases for Genome Features present in this Genome Annotation.
-        
-        If feature_id_list is None, returns all feature aliases.
-        
+        """Retrieves the aliases for genome features.
+
         Args:
-          feature_id_list: list<str>
+          feature_id_list (list<str>): List of features to retrieve.
+            If None, returns all feature functions.
         
         Returns:
           dict<str>: list<str>"""
@@ -184,13 +206,11 @@ class GenomeInterface(object):
     
     @abc.abstractmethod
     def get_feature_publications(self, feature_id_list=None):
-        """
-        Retrieves the publications for Genome Features present in this Genome Annotation.
-        
-        If feature_id_list is None, returns all feature associated publications.
-        
+        """Retrieves the publications for genome features.
+
         Args:
-          feature_id_list: list<str>
+          feature_id_list (list<str>): List of features to retrieve.
+            If None, returns all feature functions.
         
         Returns:
           dict<str>: list<dict>"""
@@ -198,60 +218,95 @@ class GenomeInterface(object):
 
     @abc.abstractmethod
     def get_features(self, feature_id_list=None):
-        """
-        Retrieves all the available data for Genome Features present in this Genome Annotation.
-        
-        If feature_id_list is None, returns all feature data.
-        
+        """Retrieves all the available data for Genome Features.
+
         Args:
-          feature_id_list: list<str>
+          feature_id_list (list<str>): List of features to retrieve.
+            If None, returns all feature functions.
         
         Returns:
-          dict<str>: dict<str>: list"""
+          dict<str,dict<str,list>>: Mapping from feature IDs to dicts
+            of available data.
+        """
         pass
 
     @abc.abstractmethod
     def get_proteins(self):
-        """
-        Retrieves all the available proteins for Genome Features present in this Genome Annotation.
-        
+        """Retrieves all the available proteins for genome features.
+
         Returns:
           list<dict>"""
         pass
 
     @abc.abstractmethod
     def get_cds_by_mrna(self, mrna_feature_id_list=None):
-        """
+        """Retrieves coding sequences (cds) for given mRNA feature IDs.
+
+        Args:
+           mrna_feature_id_list (list<str>): List of features to retrieve.
+             If None, returns all values.
+        Returns:
+          ????
         """
         pass
 
     @abc.abstractmethod
-    def get_mrna_by_cds(self, cds_feature_id_list=None): 
-        """
+    def get_mrna_by_cds(self, cds_feature_id_list=None):
+        """Retrieves mRNA for given coding sequences (cds) feature IDs.
+
+        Args:
+           cds_feature_id_list (list<str>): List of features to retrieve.
+             If None, returns all values.
+        Returns:
+          ????
         """
         pass
 
     @abc.abstractmethod
     def get_gene_by_cds(self, cds_feature_id_list=None):
-        """
+        """Retrieves Genes for given coding sequence (cds)  feature IDs.
+
+        Args:
+           cds_feature_id_list (list<str>): List of features to retrieve.
+             If None, returns all values.
+        Returns:
+          ????
         """
         pass
   
     @abc.abstractmethod
     def get_gene_by_mrna(self, mrna_feature_id_list=None):
-        """
+        """Retrieves Genes for given mRNA feature IDs.
+
+        Args:
+           mrna_feature_id_list (list<str>): List of features to retrieve.
+             If None, returns all values.
+        Returns:
+          ????
         """
         pass
 
     @abc.abstractmethod
     def get_cds_by_gene(self, gene_feature_id_list=None):
-        """
+        """Retrieves coding sequences (cds) for given Gene feature IDs.
+
+        Args:
+           gene_feature_id_list (list<str>): List of features to retrieve.
+             If None, returns all values.
+        Returns:
+          ????
         """
         pass
     
     @abc.abstractmethod
     def get_mrna_by_gene(self, gene_feature_id_list=None):
-        """
+        """Retrieves mRNA for given Gene feature IDs.
+
+        Args:
+           gene_feature_id_list (list<str>): List of features to retrieve.
+             If None, returns all values.
+        Returns:
+          ????
         """
         pass
 
@@ -1126,6 +1181,7 @@ class _Prototype(ObjectAPI, GenomeInterface):
                                 "received an empty list.")
 
         for ref in feature_containers:
+            # Get list of feature IDs
             if feature_id_list is None:
                 features = ObjectAPI(self.services, self._token, ref).get_data()["features"]
                 working_list = features
@@ -1133,7 +1189,7 @@ class _Prototype(ObjectAPI, GenomeInterface):
                 container = ObjectAPI(self.services, self._token, ref)
                 features = container.get_data_subset(path_list=feature_refs)["features"]
                 working_list = feature_id_list
-
+            # Pull out either aliases or locations from each feature
             if data == "aliases":
                 for feature_id in working_list:
                     if "aliases" in features[feature_id]:

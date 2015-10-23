@@ -23,7 +23,6 @@ def setup():
     t_new = GenomeAnnotationAPI(shared.services, shared.token, genome_new)
     t_old = GenomeAnnotationAPI(shared.services, shared.token, genome_old)
 
-
 ######## New Genome type tests
 
 

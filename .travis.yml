@@ -16,8 +16,9 @@ install:
   - python setup.py install
 
 script:
-  - coverage run $HOME/virtualenv/python2.7.9/bin/nosetests --with-timer --ws-url=test_resources/data --wsfile-msgpack
+  - coverage run $HOME/virtualenv/python2.7.9/bin/nosetests --with-timer --ws-url=test_resources/data --wsfile-msgpack --exclude-dir-file=exclude-tests.txt
   - coverage report
+  - ./run_tests.sh -T
 
 after_success:
   - codecov
