@@ -129,6 +129,14 @@ class ObjectCache(object):
         _log.info('ObjectCache.init.end cache_class={}'.format(
             cc.__name__))
 
+    def get_derived_data(self, parent_method, name):
+        key = self._key + '::' + name  # store separately from 'raw' data
+        self._stats.start_event('cache.get_derived_data', key)
+        data = self._cache.get_or_create(key, parent_method,
+                                         should_cache_fn=self._should_cache)
+        self._stats.end_event('cache.get_derived_data', key)
+        return data
+
     def get_data(self, parent_method):
         """Get data from cache or the callee's method.
         """

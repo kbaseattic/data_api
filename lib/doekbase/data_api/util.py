@@ -204,6 +204,26 @@ class PerfCollector(object):
             return None
         return self._history[-1]
 
+    def get_event(self, event, limit=0):
+        """Get all performance events matching name `event`, up
+        to `limit` number of entries (0=all).
+        """
+        #print('@@ events in history: {}'.format(
+        #    [x.event for x in self._history]))
+        if not self._history:
+            result = []
+        else:
+            if event == self.EVENT_WILDCARD:
+                limit = len(self._history) + 1
+            n, result = 0, []
+            for i in range(len(self._history) - 1, 0, -1):
+                if self._history[i].event == event:
+                    result.append(self._history[i])
+                    n += 1
+                    if n == limit:
+                        break
+        return result
+
     def dump(self, stream):
         by_event = {}
         for item in self._history:
