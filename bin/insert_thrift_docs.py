@@ -1,15 +1,22 @@
 #!/usr/bin/env python
 """
-Insert method descriptions from a .thrift file in another source
-code file.
+Generate a structured set of method descriptions from the comments
+in a Thrift specification file. The output format is decided by program flags.
 
-Currently supported source code files:
-  Python
+For programming language outputs, an input file is also parsed
+to find the full text of the definition of the same functions. Then
+a new output is generated that merges the method descriptions into this
+existing source code.
+
+For JSON output, the parsed Thrift data is written as a language-neutral and
+easily parsed form. 
 """
 __author__ = 'Dan Gunter <dkgunter@lbl.gov>'
 __date__ = '10/20/15'
 
 import argparse
+import itertools
+import json
 import logging
 import os
 import re
@@ -24,7 +31,8 @@ _log.addHandler(_h)
 
 # Globals
 
-SOURCE_EXT = {'py'}
+SOURCE_EXT = {'py', 'json'}
+SOURCE_EXT_DESC = {'py': 'Python', 'json': 'JSON file'}
 THRIFT_FUNC_RE = re.compile('\S+\s+([a-z_]+)\(')
 
 # Classes and functions
@@ -162,6 +170,19 @@ def insert_python(src, tgt, strm=sys.stdout):
             strm.write(methods[name].format(desc='Description goes here'))
         strm.write('\n')
 
+def dump_json(src, tgt):
+    _log.info("Insert: from={src} target={tgt} language=JSON"
+              .format(src=src, tgt=tgt))
+    # open output file
+    if tgt == '-' or tgt == '':
+        ofile = sys.stdout
+    else:
+        ofile = open(tgt, 'w')
+    # parse descriptions from source Thrift file
+    descriptions = extract_descriptions(src)
+    # dump parsed descriptions as JSON to output file
+    json.dump(descriptions, ofile, indent=2)
+    
 def get_target_method(tgt):
     ext_dot = tgt.rfind('.')
     if ext_dot == -1 or ext_dot == len(tgt) - 1:
@@ -171,13 +192,29 @@ def get_target_method(tgt):
         return None
     if target_ext == 'py':
         return insert_python
+    elif target_ext == 'json':
+        return dump_json
 
+def parse_main_docstring():
+    """Parse the main docstring into two parts by breaking on the first
+    line with only whitespace (or nothing at all except the newline).
+    """
+    s = __doc__.split('\n')
+    while not s[0].strip():
+        s = s[1:]
+    desc = list(itertools.takewhile(lambda x: x.strip(), s))
+    rest = s[len(desc) + 1:]
+    return ' '.join(desc), ' '.join(rest)
+        
 def main(cmdline):
+    desc, desc2 = parse_main_docstring()
     cwd = os.path.dirname(os.path.abspath(__file__))
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description=desc, epilog=desc2)
     parser.add_argument('source', help='Source .thrift file')
+    ext_help = ', '.join(['".{}"={}'.format(k, v) for k, v in SOURCE_EXT_DESC.items()])
     parser.add_argument('target', help='Target source code file. Type is '
-                                       'determined by file extension.')
+                                       'determined by file extension. {}'
+                                       .format(ext_help))
     parser.add_argument('--verbose', '-v', dest='vb', action="count", default=0,
                         help="Print more verbose messages to standard error. "
                              "Repeatable. (default=ERROR)")
