@@ -18,9 +18,9 @@ script:
 
 env:
   - KB_REDIS_HOST=localhost; KB_NOSE_CFG=nose-local.cfg
-  - KB_REDIS_HOST=localhost; KB_NOSE_CFG=nose-ci.cfg
   - KB_REDIS_HOST="";        KB_NOSE_CFG=nose-local.cfg
-  - KB_REDIS_HOST="";        KB_NOSE_CFG=nose-ci.cfg
+#  - KB_REDIS_HOST=localhost; KB_NOSE_CFG=nose-ci.cfg
+#  - KB_REDIS_HOST="";        KB_NOSE_CFG=nose-ci.cfg
 
 after_success:
   - codecov

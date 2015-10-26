@@ -351,7 +351,7 @@ class _KBaseGenomes_ContigSet(ObjectAPI, AssemblyInterface):
                    'is_complete': c.get('complete', 0),
                    'is_circular': c.get('replicon_geometry','Unkown')
                    }
-            
+
             # OLD code superseded by code above and below:
             #contigs[c["id"]] = dict()
             #contigs[c["id"]]["contig_id"] = c["id"]
