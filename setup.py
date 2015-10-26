@@ -76,7 +76,8 @@ config = {
     "packages": packages,
     "scripts": ["bin/data_api_demo.py",
                 "bin/data_api_benchmark.py",
-                "bin/dump_wsfile"],
+                "bin/dump_wsfile",
+                "bin/extract_thrift_docs"],
     "name": "doekbase_data_api",
     "entry_points": {
         'nose.plugins.0.10': [
