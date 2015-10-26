@@ -174,7 +174,7 @@ def dump_json(src, tgt):
     _log.info("Insert: from={src} target={tgt} language=JSON"
               .format(src=src, tgt=tgt))
     # open output file
-    if tgt == '-' or tgt == '':
+    if tgt == '-.json' or tgt == '.json':
         ofile = sys.stdout
     else:
         ofile = open(tgt, 'w')
