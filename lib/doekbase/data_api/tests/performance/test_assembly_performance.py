@@ -102,6 +102,9 @@ class WriteNow(object):
 
 # ----------------------------------------------------
 
+g_travis = shared.in_travis()
+
+@unittest.skipIf(g_travis, "Do not run in TravisCI")
 class TestPerformance(unittest.TestCase):
 
     def setUp(self):
