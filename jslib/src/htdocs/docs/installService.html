@@ -1,0 +1,270 @@
+<!DOCTYPE  html>
+<html>
+  <head>
+    <meta charset="utf-8">
+
+    <title>doc</title>
+    <style>
+      /*github.com style (c) Vasily Polovnyov <vast@whiteants.net>*/
+      pre code {
+        display: block; padding: 0.5em;
+        color: #333;
+        background: #f8f8ff
+      }
+      pre .comment,
+      pre .template_comment,
+      pre .diff .header,
+      pre .javadoc {
+        color: #998;
+        font-style: italic
+      }
+      pre .keyword,
+      pre .css .rule .keyword,
+      pre .winutils,
+      pre .javascript .title,
+      pre .nginx .title,
+      pre .subst,
+      pre .request,
+      pre .status {
+        color: #333;
+        font-weight: bold
+      }
+      pre .number,
+      pre .hexcolor,
+      pre .ruby .constant {
+        color: #099;
+      }
+      pre .string,
+      pre .tag .value,
+      pre .phpdoc,
+      pre .tex .formula {
+        color: #d14
+      }
+      pre .title,
+      pre .id {
+        color: #900;
+        font-weight: bold
+      }
+      pre .javascript .title,
+      pre .lisp .title,
+      pre .clojure .title,
+      pre .subst {
+        font-weight: normal
+      }
+      pre .class .title,
+      pre .haskell .type,
+      pre .vhdl .literal,
+      pre .tex .command {
+        color: #458;
+        font-weight: bold
+      }
+      pre .tag,
+      pre .tag .title,
+      pre .rules .property,
+      pre .django .tag .keyword {
+        color: #000080;
+        font-weight: normal
+      }
+      pre .attribute,
+      pre .variable,
+      pre .lisp .body {
+        color: #008080
+      }
+      pre .regexp {
+        color: #009926
+      }
+      pre .class {
+        color: #458;
+        font-weight: bold
+      }
+      pre .symbol,
+      pre .ruby .symbol .string,
+      pre .lisp .keyword,
+      pre .tex .special,
+      pre .prompt {
+        color: #990073
+      }
+      pre .built_in,
+      pre .lisp .title,
+      pre .clojure .built_in {
+        color: #0086b3
+      }
+      pre .preprocessor,
+      pre .pi,
+      pre .doctype,
+      pre .shebang,
+      pre .cdata {
+        color: #999;
+        font-weight: bold
+      }
+      pre .deletion {
+        background: #fdd
+      }
+      pre .addition {
+        background: #dfd
+      }
+      pre .diff .change {
+        background: #0086b3
+      }
+      pre .chunk {
+        color: #aaa
+      }
+    </style>
+  </head>
+  <body>
+    <h1 id="installing-data-api-service-for-dev-usage">Installing Data API Service for Dev Usage</h1>
+<ul>
+<li><p>set up a vm</p>
+<ul>
+<li><p>create vm</p>
+<pre><code>mkdir service
+cd service
+vagrant init ubuntu/trusty64
+</code></pre></li>
+<li><p>get data_api</p>
+<pre><code>  git clone -b develop https://github.com/eapearson/data_api.git
+</code></pre></li>
+<li><p>edit Vagrantfile and add the networking line</p>
+<pre><code> config.vm.network &quot;private_network&quot;, type: &quot;dhcp&quot;
+</code></pre></li>
+<li><p>and enable and edit the virtualbox provider section so that it looks like this:</p>
+<pre><code>  ```
+  config.vm.provider &quot;virtualbox&quot; do |vb|
+       vb.memory = &quot;2048&quot;
+  end
+  ```
+</code></pre></li>
+<li><p>Finally, bring up vagrant and go in:</p>
+<pre><code>  vagrant up
+  vagrant ssh
+</code></pre></li>
+</ul>
+</li>
+<li><p>update vm system</p>
+<pre><code>  sudo su
+  apt-get update
+  apt-get upgrade
+  apt-get dist-upgrade
+</code></pre><ul>
+<li>If anything happened in dist-upgrade, exit, then vagrant reload.</li>
+</ul>
+</li>
+<li><p>install system dependencies:</p>
+<pre><code>  apt-get install nginx-extras
+  apt-get install libfreetype6-dev
+  apt-get install pkg-config
+</code></pre></li>
+<li><p>install thrift</p>
+<p>  Although the thrift docs give some manual steps for installing thrift, and the Ubuntu distro is a little out of date, the ubuntu distro does work (perhaps a PPA is more up to date.)</p>
+<pre><code>  apt-get install thrift-compiler
+</code></pre></li>
+<li><p>install python extra tools:</p>
+<pre><code>  apt-get install python-dev
+  apt-get install python-setuptools
+  apt-get install python-pip
+  pip install --upgrade pip
+</code></pre><ul>
+<li>the latter solves a problem with pandas install</li>
+</ul>
+</li>
+<li><p>install python dependencies</p>
+<pre><code>  cd /vagrant/data_api
+  pip install -r requirements.txt
+</code></pre><ul>
+<li>relax, this takes a while, as there are many c binaries to compile and install.</li>
+<li>I could not get numpy to install with python setup.py install, so had to use pip.</li>
+</ul>
+</li>
+<li><p>You can drop out of root now.</p>
+</li>
+<li><p>if not using branch with http service, install </p>
+<p>  <code>lib/doekbase/data_api/tests/taxon_service_http_binary_driver.py</code></p>
+<p>  from the same named sample file found here.</p>
+</li>
+<li><p>generate python thrift pieces and install in the proper location.</p>
+<pre><code>  mkdir temp
+  thrift --gen py:new_style -out temp thrift/specs/taxonomy/taxon/taxon.thrift
+  cp -pr temp/taxon/* lib/doekbase/data_api/taxonomy/taxon/service
+</code></pre><ul>
+<li><p>Thrift will install the generated files in <code>taxon</code> into whichever &quot;out&quot; directory you specify. However, data_api expects it to be in <code>lib/doekbase/data_api/taxonomy/taxon/service</code>.</p>
+</li>
+<li><p>Therefore we can&#39;t just generate the files and point them to the correct location. So we generate them in a temp location and then copy them.</p>
+</li>
+</ul>
+</li>
+<li><p>regenerate the egg</p>
+<pre><code>  sudo python setup.py install
+</code></pre></li>
+<li><p>set up nginx</p>
+<ul>
+<li><p>edit the default config</p>
+<pre><code>sudo vi /etc/nginx/sites-enabled/default
+</code></pre></li>
+<li><p>replace the content with the sample &quot;nginx_config.conf&quot; file found here</p>
+</li>
+<li><p>this sets up CORS and the reverse proxy.</p>
+</li>
+<li><p>restart nginx</p>
+<pre><code>sudo service nginx restart
+</code></pre></li>
+</ul>
+</li>
+<li><p>start the thrift service</p>
+<pre><code>  python lib/doekbase/data_api/tests/taxon_service_http_binary_driver.py
+</code></pre></li>
+<li><p>map <code>euk.kbase.us</code> to the server</p>
+<ul>
+<li>on your local dev host, you&#39;ll need to map the euk.kbase.us (or whatever
+host name you want to use) host to the IP of the VM:</li>
+<li><p>in the vm issue</p>
+<pre><code>ifconfig
+</code></pre></li>
+<li><p>note the ipaddress for eth1.</p>
+</li>
+<li><p>in the local dev host (mac) edit the hosts file</p>
+<pre><code>sudo vi /etc/hosts
+</code></pre></li>
+<li><p>at the end of the file place</p>
+<pre><code>IP euk.kbase.us
+</code></pre><p>where IP is the ip address you noted above.</p>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="todo">TODO</h2>
+<ul>
+<li>use nginx extra headers to allow CORS to work with 502s - DONE</li>
+<li>startup binary over http service</li>
+</ul>
+<h2 id="fin">FIN</h2>
+<style type="text/css">
+    body {
+        font-family: sans-serif;
+    }
+    h1, h2, h3, h4, h5, h6 {
+        xcolor: #FFF;
+        color: blue;
+    }
+    h3 {
+        padding: 4px;
+        background-color: gray;
+        color: #FFF;
+    }
+     code {
+        xmargin: 1em;
+        xdisplay: block;
+        xpadding: 1em;
+        xcolor: lime;
+        background-color: #CCC;
+    }
+    pre > code {
+        font-size: 80%;
+        margin: 1em;
+        display: block;
+        padding: 1em;
+        color: lime;
+        background-color: black;
+    }
+</style>
+  </body>
+</html>
