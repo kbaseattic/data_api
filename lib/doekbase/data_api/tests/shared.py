@@ -27,9 +27,17 @@ services = None
 # Globals
 
 g_redis_host = os.environ.get('KB_REDIS_HOST', None)
+if g_redis_host == "":
+    g_redis_host = None
 g_redis_port = int(os.environ.get('KB_REDIS_PORT', '6379'))
+g_redis_bin = os.environ.get('KB_REDIS_BIN', '/usr/local/bin/redis-server')
+g_redis_conf = os.environ.get('KB_REDIS_CONF', 'redis.conf')
 
 # Functions and classes
+
+def in_travis():
+    return os.environ.get('TRAVIS', 'pissoff') == 'true'
+
 def get_services():
     svc = {"workspace_service_url": g_ws_url,
             "shock_service_url": g_shock_url}

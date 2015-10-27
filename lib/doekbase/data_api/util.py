@@ -150,6 +150,7 @@ class PerfCollector(object):
         self._cur = {}
         self._make_key = lambda e, k: '{e}::{k}'.format(e=e, k=k)
         self._observers = {}
+        self._meta = {}
 
     def add_observer(self, event, start_fn, end_fn):
         """Add observer functions for an event.
@@ -174,6 +175,9 @@ class PerfCollector(object):
                 if obs[idx]:
                     obs[idx](event, *args)
 
+    def set_metadata(self, meta):
+        self._meta = meta
+
     def start_event(self, event, key):
         timestamp = time.time()
         ekey = self._make_key(event, key)
@@ -190,6 +194,8 @@ class PerfCollector(object):
         del self._cur[ekey]
         full_event = '{}.{}'.format(self._ns, event)
         pevent = PerfEvent(full_event, key, t0, timestamp, meta)
+        for k in self._meta:
+            pevent.add_metadata(k, self._meta[k])
         self._history.append(pevent)
         self._broadcast(event, 1, pevent)
 
@@ -197,6 +203,26 @@ class PerfCollector(object):
         if not self._history:
             return None
         return self._history[-1]
+
+    def get_event(self, event, limit=0):
+        """Get all performance events matching name `event`, up
+        to `limit` number of entries (0=all).
+        """
+        #print('@@ events in history: {}'.format(
+        #    [x.event for x in self._history]))
+        if not self._history:
+            result = []
+        else:
+            if event == self.EVENT_WILDCARD:
+                limit = len(self._history) + 1
+            n, result = 0, []
+            for i in range(len(self._history) - 1, 0, -1):
+                if self._history[i].event == event:
+                    result.append(self._history[i])
+                    n += 1
+                    if n == limit:
+                        break
+        return result
 
     def dump(self, stream):
         by_event = {}
@@ -245,8 +271,15 @@ class PerfEvent(object):
         self.duration = end_time - start_time
         self._meta = meta
 
+    def add_metadata(self, key, value):
+        """Modify the metadata by setting `value` for `key`.
+        """
+        self._meta[key] = value
+
     @property
     def metadata(self):
+        """Return a *copy* of the metadata.
+        """
         return self._meta.copy()
 
     def __getitem__(self, key):
@@ -256,9 +289,17 @@ class PerfEvent(object):
             return self._meta[key]
         raise KeyError(key)
 
-def collect_performance(perf_collector):
+    def as_dict(self):
+        d = self._meta.copy()
+        d.update({'event': self.event,
+                'key': self.key,
+                'timestamp': self.start_time,
+                'dur': self.duration})
+        return d
+
+def collect_performance(perf_collector, prefix='', suffix=''):
     def real_decorator(method):
-        event = method.__name__
+        event = prefix + method.__name__ + suffix
         key = str(time.time())
         # create wrapper
         def method_wrapper(self, *args, **kwds):
