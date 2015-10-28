@@ -1,0 +1,190 @@
+<!DOCTYPE  html>
+<html>
+  <head>
+    <meta charset="utf-8">
+
+    <title>doc</title>
+    <style>
+      /*github.com style (c) Vasily Polovnyov <vast@whiteants.net>*/
+      pre code {
+        display: block; padding: 0.5em;
+        color: #333;
+        background: #f8f8ff
+      }
+      pre .comment,
+      pre .template_comment,
+      pre .diff .header,
+      pre .javadoc {
+        color: #998;
+        font-style: italic
+      }
+      pre .keyword,
+      pre .css .rule .keyword,
+      pre .winutils,
+      pre .javascript .title,
+      pre .nginx .title,
+      pre .subst,
+      pre .request,
+      pre .status {
+        color: #333;
+        font-weight: bold
+      }
+      pre .number,
+      pre .hexcolor,
+      pre .ruby .constant {
+        color: #099;
+      }
+      pre .string,
+      pre .tag .value,
+      pre .phpdoc,
+      pre .tex .formula {
+        color: #d14
+      }
+      pre .title,
+      pre .id {
+        color: #900;
+        font-weight: bold
+      }
+      pre .javascript .title,
+      pre .lisp .title,
+      pre .clojure .title,
+      pre .subst {
+        font-weight: normal
+      }
+      pre .class .title,
+      pre .haskell .type,
+      pre .vhdl .literal,
+      pre .tex .command {
+        color: #458;
+        font-weight: bold
+      }
+      pre .tag,
+      pre .tag .title,
+      pre .rules .property,
+      pre .django .tag .keyword {
+        color: #000080;
+        font-weight: normal
+      }
+      pre .attribute,
+      pre .variable,
+      pre .lisp .body {
+        color: #008080
+      }
+      pre .regexp {
+        color: #009926
+      }
+      pre .class {
+        color: #458;
+        font-weight: bold
+      }
+      pre .symbol,
+      pre .ruby .symbol .string,
+      pre .lisp .keyword,
+      pre .tex .special,
+      pre .prompt {
+        color: #990073
+      }
+      pre .built_in,
+      pre .lisp .title,
+      pre .clojure .built_in {
+        color: #0086b3
+      }
+      pre .preprocessor,
+      pre .pi,
+      pre .doctype,
+      pre .shebang,
+      pre .cdata {
+        color: #999;
+        font-weight: bold
+      }
+      pre .deletion {
+        background: #fdd
+      }
+      pre .addition {
+        background: #dfd
+      }
+      pre .diff .change {
+        background: #0086b3
+      }
+      pre .chunk {
+        color: #aaa
+      }
+    </style>
+  </head>
+  <body>
+    <h1 id="installation">Installation</h1>
+<h3 id="local-data-api-service">Local Data API Service</h3>
+<p>If you need to run the data API service locally (as opposed to against a running
+servivce on CI or Production), see</p>
+<ul>
+<li><a href="installService.html">Local Service Installation</a></li>
+</ul>
+<h3 id="data-api-js-client">Data API JS Client</h3>
+<ul>
+<li>prepare your local developer environment. The following applications are required:<ul>
+<li>git</li>
+<li>nodejs</li>
+<li>bower</li>
+<li>thrift</li>
+</ul>
+</li>
+</ul>
+<p>E.g. on mac you might want to use homebrew <a href="http://brew.sh/">http://brew.sh/</a> or macports (<a href="https://www.macports.org">https://www.macports.org</a>).</p>
+<h4 id="brew">Brew</h4>
+<pre><code>brew install git
+brew install nodejs
+sudo npm install -g bower
+brew install thrift
+</code></pre><h4 id="macports">Macports</h4>
+<pre><code>sudo port install git
+sudo port install nodejs
+sudo npm install -g bower
+sudo port install boost -no_static
+sudo port install thrift
+</code></pre><p>(it may not be so simple, though. There are sometimes incompatibilities, as currently, after a new Mac OS X release, and some packages may require special attention to install. E.g. the boost library needs to be installed as -no_static, because the default +no_static install conflicts with thrift and possibly other packages.)</p>
+<ul>
+<li>clone the repo</li>
+</ul>
+<pre><code>git clone https://github.com/eapearson/kbase-data-api-js-wrappers.git
+</code></pre><ul>
+<li><p>The following tasks are described using command line tools. You may use your favorite developer tools to manage the following tasks. E.g. netbeans integrates all of these tools to provide a smooth development process.</p>
+</li>
+<li><p>install dependencies</p>
+</li>
+</ul>
+<pre><code>npm install
+bower install or bower update
+</code></pre><ul>
+<li>build it</li>
+</ul>
+<pre><code>grunt build
+</code></pre><p>This will build not only the distribution, but also a local environment for running
+demos, tests, and viewing documentation.</p>
+<ul>
+<li><p>A config file is generated for the runnable components, such as test and demo. In
+order for this to be useful, you need to update the <code>runtime/config/test.yml</code> file;</p>
+<ul>
+<li>add your own preferred <code>username</code> + <code>password</code> for testing<ul>
+<li>note that the <code>runtime</code> directory is ingored by git, so local settings will NOT be saved.</li>
+</ul>
+</li>
+<li>point to the taxon data API server of your choice<ul>
+<li>if this is a kbase taxon service, you&#39;ll need that url, otherwise for
+a local install, it will be the local host mapping you set up.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Set up a local web server or use the included nodejs test server. The nodejs server
+has no dependencies, so it can be run straight from the command line. </p>
+<ul>
+<li>open a terminal in the project, and change to the tools directory</li>
+<li>fire up the server. The server will automatically point to the correct runtime
+directory (<code>runtime/build</code>).</li>
+</ul>
+</li>
+</ul>
+<pre><code>node server.js
+</code></pre>
+  </body>
+</html>

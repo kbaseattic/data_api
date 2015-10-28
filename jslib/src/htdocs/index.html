@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html>
+    <head>
+        <title>Taxon API Test Page</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script src="/bower_components/requirejs/require.js"></script>
+        <script src="require-config.js"></script>
+        <style type="text/css">
+            #error [data-element="label"] {
+                font-style: italic;
+                color: gray;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Taxon API Test Page</h1>
+        <ul>
+            <li>Examples
+                <ul>
+                    <li>Arabidopsis thaliana (Taxon)
+                        <ul>
+                            <li><a href="scientific-name.html?objectRef=654/7">Get Scientific Name</a></li>
+                            <li><a href="lineage.html?objectRef=654/7">Get Lineage</a></li>
+                            <li><a href="allmethods.html?objectRef=654/7">Run All Methods</a></li>
+                        </ul>
+                    </li>
+                    <li>Escherichia coli str. K-12 substr. MG1655 (Genome)
+                        <ul>
+                            <li><a href="scientific-name.html?objectRef=899/6/2">Get Scientific Name</a></li>
+                            <li><a href="lineage.html?objectRef=899/6/2">Get Lineage</a></li>
+                            <li><a href="allmethods.html?objectRef=899/6/2">Run All Methods</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            <li>Documentation
+                <ul>
+                    <li><a href="docs/install.html">Installation</a></li>
+                    <li><a href="docs/api.html">API Documentation</a></li>
+                    <li><a href="docs/usage.html">Usage </a></li>
+                    <li><a href="jsdocs/index.html">JS Docs</a></li>
+                </ul>
+            </li>
+        </ul>
+
+    </body>
+</html>

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html>
+    <head>
+        <title>Taxon API Test Page</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script src="/bower_components/requirejs/require.js"></script>
+        <script src="require-config.js"></script>
+    </head>
+    <body>
+        <h1>Taxon API Test Page</h1>
+        <p><a href="index.html">Home</a></p>
+
+        <p>Testing with <i id="objectRef"></i></p>
+        <div id="status"></div>
+        <div id="error">
+            <div data-field="type"></div>
+            <div data-field="title"></div>
+            <div data-field="message"></div>
+            <div data-field="suggestion"></div>
+        </div>
+        <div id="result"></div>
+        <script src='allmethods.js'></script>
+    </body>
+</html>

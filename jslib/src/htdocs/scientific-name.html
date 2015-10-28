@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html>
+    <head>
+        <title>Taxon API Test Page</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script src="/bower_components/requirejs/require.js"></script>
+        <script src="require-config.js"></script>
+        <style type="text/css">
+            #error [data-element="label"] {
+                font-style: italic;
+                color: gray;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Taxon API Test</h1>
+        <p><a href="index.html">Home</a></p>
+        <h2>Demo</h2>
+        <p>The following demonstrates fetching the scientific name from a taxon.</p>
+        <h3>Config</h3>
+        <table border="1" cellspacing="0" cellpadding="4" id="config">
+            <tr>
+                <th>Object Ref</th>
+                <td data-field="objectRef"></td>
+            </tr>
+            <tr>
+                <th>Service URL</th>
+                <td data-field="serviceUrl"></td>
+            </tr>
+            <tr>
+                <th>Timeout</th>
+                <td data-field="timeout"></td>
+            </tr>
+        </table>
+        <p>The configuration file is in <tt>/runtime/config/test.yml</tt>.</p>
+        <h3>Result</h3>
+            <table border="1" cellspacing="0" cellpadding="4" id="result">
+                <tr>
+                    <th>Status</th>
+                    <td><span data-field="status"></span></td>
+                </tr>
+                <tr>
+                    <th>Value</th>
+                    <td><span data-field="value"></span></td>
+                </tr>
+                <tr>
+                    <th>Time</th>
+                    <td><span data-field="time"></span></td>
+                </tr>
+            </table>
+        <div id="error" style="display:none;">
+            <h3>Error</h3>
+            <table border="1" cellspacing="0" cellpadding="4">
+                <tr data-field="type">
+                    <th data-element="label">Type</th>
+                    <td><span  data-element="value"></span></td>
+                </tr>
+                <tr data-field="reason">
+                    <th data-element="label">Reason:</th>
+                    <td><span  data-element="value"></span></td>
+                </tr>
+                <tr data-field="title">
+                    <th data-element="label">Title:</th>
+                    <td><span  data-element="value"></span></td>
+                </tr>
+                <tr data-field="message">
+                    <th data-element="label">Message:</th>
+                    <td><span  data-element="value"></span></td>
+                </tr>
+                <tr data-field="suggestions">
+                    <th data-element="label">Suggestion:</th>
+                    <td><span  data-element="value"></span></td>
+                </tr>
+            </table>
+        </div>
+        <script>
+            require([
+                // This is the Taxon API
+                'kb_data_taxon',
+                // Session module for authentication, to get token.
+                'kb_common_session',
+                // Local utils for display, etc.
+                'htdocs/utils',
+                // Require js plugin for loading a yaml file
+                'yaml!config/config.yml'
+            ], function (Taxon, Session, utils, config) {
+                'use strict';
+
+                var objectRef = '993/329/2',
+                    start, finish, elapsed,
+                    params = utils.getParams(),
+                    objectRef = params.objectRef || config.objectRef;
+
+                if (!objectRef) {
+                    utils.showError({
+                        type: 'ParamError',
+                        reason: 'MissingParam',
+                        message: 'The object ref was neither provided as a query param nor specified in the config file'
+                    });
+                    return
+                }
+
+                try {
+                    var session = Session.make({
+                        cookieName: config.cookieName,
+                        loginUrl: config.loginUrl
+                    });
+                    utils.showField('config', 'objectRef', objectRef);
+                    utils.showField('config', 'serviceUrl', config.taxonUrl);
+                    utils.showField('config', 'timeout', config.timeout);
+                    utils.showField('result', 'status', 'Logging in...');
+                    start = new Date();
+                    session.login({
+                        username: config.username,
+                        password: config.password
+                    })
+                        .then(function (kbSession) {
+                            return Taxon({
+                                ref: objectRef,
+                                url: config.taxonUrl,
+                                token: kbSession.token,
+                                timeout: config.timeout
+                            });
+                        })
+                        .then(function (taxon) {
+                            utils.showField('result', 'status', 'Loading...');
+                            start = new Date();
+                            return taxon.getScientificName();
+                        })
+                        .then(function (value) {
+                            utils.showField('result', 'status', 'Success!');
+                            finish = new Date();
+                            elapsed = finish.getTime() - start.getTime();
+                            utils.showField('result', 'time', elapsed);
+                            utils.showField('result', 'value', value);
+                        })
+                        .catch(function (err) {
+                            // console.log('ERROR'); console.log(err);
+                            finish = new Date();
+                            elapsed = finish.getTime() - start.getTime();
+                            utils.showField('result', 'time', elapsed);
+                            if (err.type) {
+                                utils.showError(err);
+                            } else if (utils.findProp(err, 'name', 'TException')) {
+                                utils.showError({
+                                    type: 'ThriftException',
+                                    reason: err.name,
+                                    message: err.getMessage()
+                                });
+                            } else {
+                                console.log('ERROR');
+                                console.log(err);
+                                var message = String(err) + 'Check the browser console for details';
+                                utils.showError({
+                                    type: 'UnknownError',
+                                    message: message
+                                });
+                            }
+                        });
+                } catch (ex) {
+                    utils.showError(ex);
+                }
+            });
+        </script>
+    </body>
+</html>
