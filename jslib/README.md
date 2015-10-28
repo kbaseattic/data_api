@@ -1,6 +1,6 @@
-# Javascript API Wrappers for the Data API
+# JavaScript API Wrappers for the Data API
 
-## Docs
+The JavaScript 
 
 - install local service
 - generated api docs
@@ -8,6 +8,20 @@
 
 ## Installation
 
+1. Clone the GitHub repository
+
+Follow instructions at: https://github.com/kbase/data_api
+
+2. Update JavaScript dependencies
+
+    a. Change to the `jslib` directory and run the Node Package Manager (npm). 
+    This downloads and installs a bunch of things, so it will take a couple of 
+    minutes the first time, and create many screenfulls of output.
+    
+        cd jslib
+        npm install
+        
+    b. Change to the top-level director and run `bower`
 ### Local Data API Service
 
 If you need to run the data API service locally (as opposed to against a running

@@ -314,3 +314,31 @@ def collect_performance(perf_collector, prefix='', suffix=''):
         return method_wrapper
 
     return real_decorator
+
+def get_msgpack_object_ref(path):
+    """Get object-id ref for object in messagepack-encoded file.
+
+    Args:
+        (str) path: Full path to file.
+    Returns:
+        (str) reference, in form A/B/C e.g. '93/111124/2'
+    Raises:
+        IOError if the file cannot be opened.
+        ValueError if the data in the file cannot be decoded.
+        KeyError if the reference field is not found in the data.
+    """
+    import msgpack
+    try:
+        f = open(path)
+    except IOError as err:
+        raise IOError('Cannot open file for reading: {}'.format(path))
+    try:
+        t = msgpack.load(f)
+    except Exception as err:
+        raise ValueError('Cannot decode messagepack data in path "{}": {}'
+                         ''.format(path, err))
+    try:
+        ref = t['ref']
+    except KeyError:
+        raise KeyError('Field "ref" not found in object at "{}"'.format(path))
+    return ref
