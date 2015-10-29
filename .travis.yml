@@ -10,7 +10,7 @@ before_install:
   - redis-server redis.conf &
 
 install:
-  - python setup.py install
+  - python setup.py -v install
 
 script:
   - coverage run `which nosetests` -c nose.cfg -c $KB_NOSE_CFG
