@@ -1,9 +1,9 @@
 alabaster==0.7.6
-avro
 codecov
 coverage
 enum34
 Jinja2>=2.7.3
+lockfile>=0.11
 mongomock==3.0.0
 msgpack-python==0.4.6
 nose
@@ -14,3 +14,4 @@ six==1.9.0
 Sphinx<=1.2.99
 sphinxcontrib-napoleon>=0.3.0
 thrift==0.9.2
+twisted>=15.4.0

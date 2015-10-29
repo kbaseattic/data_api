@@ -86,9 +86,9 @@ def test_get_scientific_lineage_new():
     _log.info("Input {}".format(taxon_new))
     scientific_lineage = t_new.get_scientific_lineage()
     _log.info("Output {}".format(scientific_lineage))
-    assert isinstance(scientific_lineage, basestring) and len(scientific_lineage) > 0
+    assert isinstance(scientific_lineage, list) and len(scientific_lineage) > 0
     scientific_lineage_e = t_new_e.get_scientific_lineage()
-    assert isinstance(scientific_lineage_e, basestring) and len(scientific_lineage_e) > 0
+    assert isinstance(scientific_lineage_e, list) and len(scientific_lineage_e) > 0
     assert scientific_lineage == scientific_lineage_e
 
 
@@ -163,11 +163,21 @@ def test_get_genetic_code_new():
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
 def test_get_parent_old():
     _log.info("Input {}".format(taxon_old))
-    parent = t_old.get_parent()
-    _log.info("Output {}".format(parent))
-    assert parent is None
-    parent_e = t_old_e.get_parent()
-    assert parent_e is None
+    try:
+        parent = t_old.get_parent()
+        _log.info("Output {}".format(parent))
+    except AttributeError:
+        assert True
+    else:
+        assert False
+
+    try:
+        parent_e = t_old_e.get_parent()
+    except AttributeError:
+        assert True
+    else:
+        assert False
+
 
 
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
@@ -186,10 +196,10 @@ def test_get_genome_annotations_old():
     _log.info("Input {}".format(taxon_old))
     annotations = t_old.get_genome_annotations()
     _log.info("Output {}".format(annotations))
-    assert isinstance(annotations, list) and len(annotations) == 0
+    assert isinstance(annotations, list) and len(annotations) == 1
     annotations_e = t_old_e.get_genome_annotations()
-    assert isinstance(annotations_e, list) and len(annotations_e) == 0
-    assert annotations == annotations_e
+    assert isinstance(annotations_e, list) and len(annotations_e) == 1
+    assert annotations[0].get_feature_ids() == annotations_e[0].get_feature_ids()
 
 
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
@@ -197,9 +207,9 @@ def test_get_scientific_lineage_old():
     _log.info("Input {}".format(taxon_old))
     scientific_lineage = t_old.get_scientific_lineage()
     _log.info("Output {}".format(scientific_lineage))
-    assert isinstance(scientific_lineage, basestring) and len(scientific_lineage) > 0
+    assert isinstance(scientific_lineage, list) and len(scientific_lineage) > 0
     scientific_lineage_e = t_old_e.get_scientific_lineage()
-    assert isinstance(scientific_lineage_e, basestring) and len(scientific_lineage_e) > 0
+    assert isinstance(scientific_lineage_e, list) and len(scientific_lineage_e) > 0
     assert scientific_lineage == scientific_lineage_e
 
 
@@ -216,23 +226,40 @@ def test_get_scientific_name_old():
 
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
 def test_get_taxonomic_id_old():
-    _log.info("Input {}".format(taxon_old))
-    taxonomic_id = t_old.get_taxonomic_id()
-    _log.info("Output {}".format(taxonomic_id))
-    assert isinstance(taxonomic_id, int) and taxonomic_id == -1
-    taxonomic_id_e = t_old_e.get_taxonomic_id()
-    assert isinstance(taxonomic_id_e, int) and taxonomic_id_e == -1
-    assert taxonomic_id == taxonomic_id_e
+    try:
+        _log.info("Input {}".format(taxon_old))
+        taxonomic_id = t_old.get_taxonomic_id()
+        _log.info("Output {}".format(taxonomic_id))
+    except AttributeError:
+        assert True
+    else:
+        assert False
+
+    try:
+        taxonomic_id_e = t_old_e.get_taxonomic_id()
+    except AttributeError:
+        assert True
+    else:
+        assert False
 
 
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
 def test_get_kingdom_old():
-    _log.info("Input {}".format(taxon_old))
-    kingdom = t_old.get_kingdom()
-    _log.info("Output {}".format(kingdom))
-    assert kingdom is None
-    kingdom_e = t_old_e.get_kingdom()
-    assert kingdom_e is None
+    try:
+        _log.info("Input {}".format(taxon_old))
+        kingdom = t_old.get_kingdom()
+        _log.info("Output {}".format(kingdom))
+    except AttributeError:
+        assert True
+    else:
+        assert False
+
+    try:
+        kingdom_e = t_old_e.get_kingdom()
+    except AttributeError:
+        assert True
+    else:
+        assert False
 
 
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
@@ -259,9 +286,16 @@ def test_get_aliases_old():
 
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
 def test_get_genetic_code_old():
-    _log.info("Input {}".format(taxon_old))
-    genetic_code = t_old.get_genetic_code()
-    _log.info("Output {}".format(genetic_code))
-    assert isinstance(genetic_code, int) and genetic_code != -1
-    genetic_code_e = t_old_e.get_genetic_code()
-    assert isinstance(genetic_code_e, int) and genetic_code_e != -1
+    try:
+        _log.info("Input {}".format(taxon_old))
+        genetic_code = t_old.get_genetic_code()
+        _log.info("Output {}".format(genetic_code))
+        assert isinstance(genetic_code, int) and genetic_code != -1
+    except AttributeError:
+        assert False
+
+    try:
+        genetic_code_e = t_old_e.get_genetic_code()
+        assert isinstance(genetic_code_e, int) and genetic_code_e != -1
+    except AttributeError:
+        assert False

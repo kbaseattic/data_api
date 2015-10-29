@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 # Stdlib
 import argparse
 import os
@@ -15,7 +17,7 @@ def test_client():
     ap.add_argument('--host', dest='host', default='localhost',
                     metavar='ADDR', help='Remote server host '
                                          '(default=%(default)s)')
-    ap.add_argument('--port', dest='port', default=9090,
+    ap.add_argument('--port', dest='port', default=9101,
                     metavar='PORT', help='Remote server port '
                                          '(default=%(default)d)')
     args = ap.parse_args()
@@ -25,29 +27,65 @@ def test_client():
     print("Getting data..")
 
     t0 = time.time()
+    object_info = api.get_info()
+    dt = time.time() - t0
+    print object_info
+    print("Got and parsed data from get_info in {:g} seconds".format(dt))
+
+    t0 = time.time()
+    history = api.get_history()
+    dt = time.time() - t0
+    print history
+    print("Got and parsed data from get_history in {:g} seconds".format(dt))
+
+    t0 = time.time()
+    provenance = api.get_provenance()
+    dt = time.time() - t0
+    print provenance
+    print("Got and parsed data from get_provenance in {:g} seconds".format(dt))
+
+    t0 = time.time()
+    id = api.get_id()
+    dt = time.time() - t0
+    print id
+    print("Got and parsed data from get_id in {:g} seconds".format(dt))
+
+    t0 = time.time()
+    name = api.get_name()
+    dt = time.time() - t0
+    print name
+    print("Got and parsed data from get_name in {:g} seconds".format(dt))
+
+    t0 = time.time()
+    version = api.get_version()
+    dt = time.time() - t0
+    print version
+    print("Got and parsed data from get_version in {:g} seconds".format(dt))
+
+    t0 = time.time()
     genetic_code = api.get_genetic_code()
     dt = time.time() - t0
     print genetic_code
-    print("Got and parsed data in {:g} seconds".format(dt))
+    print("Got and parsed data from get_genetic_code in {:g} seconds".format(dt))
 
     t0 = time.time()
     aliases = api.get_aliases()
     dt = time.time() - t0
     print aliases
-    print("Got and parsed data in {:g} seconds".format(dt))
+    print("Got and parsed data from get_aliases in {:g} seconds".format(dt))
 
     t0 = time.time()
     domain = api.get_domain()
     dt = time.time() - t0
     print domain
-    print("Got and parsed data in {:g} seconds".format(dt))
+    print("Got and parsed data from get_domain in {:g} seconds".format(dt))
 
     try:
         t0 = time.time()
         kingdom = api.get_kingdom()
         dt = time.time() - t0
         print kingdom
-        print("Got and parsed data in {:g} seconds".format(dt))
+        print("Got and parsed data from get_kingdom in {:g} seconds".format(dt))
     except:
         pass
 
@@ -55,31 +93,31 @@ def test_client():
     taxonomic_id = api.get_taxonomic_id()
     dt = time.time() - t0
     print taxonomic_id
-    print("Got and parsed data in {:g} seconds".format(dt))
+    print("Got and parsed data from get_taxonomic_id in {:g} seconds".format(dt))
 
     t0 = time.time()
     scientific_lineage = api.get_scientific_lineage()
     dt = time.time() - t0
     print scientific_lineage
-    print("Got and parsed data in {:g} seconds".format(dt))
+    print("Got and parsed data from get_scientific_lineage in {:g} seconds".format(dt))
 
     t0 = time.time()
     genome_annotations = api.get_genome_annotations()
     dt = time.time() - t0
     print genome_annotations
-    print("Got and parsed data in {:g} seconds".format(dt))
+    print("Got and parsed data from get_genome_annotations in {:g} seconds".format(dt))
 
     t0 = time.time()
     parent = api.get_parent()
     dt = time.time() - t0
     print parent
-    print("Got and parsed data in {:g} seconds".format(dt))
+    print("Got and parsed data from get_parent in {:g} seconds".format(dt))
 
     t0 = time.time()
     children = api.get_children()
     dt = time.time() - t0
     print children
-    print("Got and parsed data in {:g} seconds".format(dt))
+    print("Got and parsed data from get_children in {:g} seconds".format(dt))
 
 
 if __name__ == '__main__':

@@ -119,11 +119,14 @@ class ObjectAPI(object):
         self._name = self._info["object_name"]
         self._typestring = self.ws_client.translate_to_MD5_types(
             [self._info["type_string"]]).values()[0]
-        self._version = self._info["version"]
+        self._version = str(self._info["version"])
         self._schema = None
         self._history = None
         self._provenance = None
         self._data = None
+
+        # always use a versioned reference to the data object
+        self.ref = self._info["object_reference_versioned"]
 
     def _init_ws_from_files(self, path):
         ext = '.msgpack'
@@ -172,28 +175,122 @@ class ObjectAPI(object):
         
         Returns:
           dict
-          """
-            
+            object_id
+            object_name
+            object_reference
+            object_reference_versioned
+            type_string
+            save_date
+            version
+            saved_by
+            workspace_id
+            workspace_name
+            object_checksum
+            object_size
+            object_metadata"""
+
         return self._info
 
     def get_history(self):
         """
         Retrieve the recorded history of this object describing how it has been modified.
+
+        Returns:
+          list<dict>
+            object_id
+            object_name
+            object_reference
+            object_reference_versioned
+            type_string
+            save_date
+            version
+            saved_by
+            workspace_id
+            workspace_name
+            object_checksum
+            object_size
+            object_metadata
         """
         
         if self._history == None:
-            self._history = self.ws_client.get_object_history({"ref": self.ref})
-        
+            history_list = self.ws_client.get_object_history({"ref": self.ref})
+
+            self._history = list()
+
+            for object_info in history_list:
+                self._history.append({
+                    "object_id": object_info[0],
+                    "object_name": object_info[1],
+                    "object_reference": "{0}/{1}".format(object_info[6],object_info[0]),
+                    "object_reference_versioned": "{0}/{1}/{2}".format(object_info[6],
+                                                                       object_info[0],
+                                                                       object_info[4]),
+                    "type_string": object_info[2],
+                    "save_date": object_info[3],
+                    "version": object_info[4],
+                    "saved_by": object_info[5],
+                    "workspace_id": object_info[6],
+                    "workspace_name": object_info[7],
+                    "object_checksum": object_info[8],
+                    "object_size": object_info[9],
+                    "object_metadata": object_info[10]})
+
         return self._history
     
     def get_provenance(self):
         """
         Retrieve the recorded provenance of this object describing how to recreate it.
+
+        Returns:
+          list<dict>
+            time
+            service_name
+            service_version
+            service_method
+            method_parameters
+            script_name
+            script_version
+            script_command_line
+            input_object_references
+            validated_object_references
+            intermediate_input_ids
+            intermediate_output_ids
+            external_data
+            description
         """
-        
+
         if self._provenance == None:
-            self._provenance = self.ws_client.get_object_provenance([{"ref": self.ref}])
-        
+            provenance_list = self.ws_client.get_object_provenance([{"ref": self.ref}])[0]["provenance"]
+
+            self._provenance = list()
+
+            copy_keys = {"time": "time",
+                         "service": "service_name",
+                         "service_ver": "service_version",
+                         "method": "service_method",
+                         "method_params": "method_parameters",
+                         "script": "script_name",
+                         "script_ver": "script_version",
+                         "script_command_line": "script_command_line",
+                         "input_ws_objects": "input_object_references",
+                         "resolved_ws_objects": "validated_object_references",
+                         "intermediate_incoming": "intermediate_input_ids",
+                         "intermediate_outgoing": "intermediate_output_ids",
+                         "external_data": "external_data",
+                         "description": "description"}
+
+            for object_provenance in provenance_list:
+                action = dict()
+
+                for k in copy_keys:
+                    if k in object_provenance:
+                        if isinstance(object_provenance[k], list) and len(object_provenance[k]) == 0:
+                            continue
+
+                        action[copy_keys[k]] = object_provenance[k]
+
+                self._provenance.append(action)
+
         return self._provenance
     
     def get_id(self):
@@ -204,7 +301,16 @@ class ObjectAPI(object):
           string"""
     
         return self._id
-    
+
+    def get_version(self):
+        """
+        Retrieve the version identifier for this object.
+
+        Returns:
+          string"""
+
+        return self._version
+
     def get_name(self):
         """
         Retrieve the name assigned to this object.
@@ -219,7 +325,7 @@ class ObjectAPI(object):
         Retrieve object data.
         
         Returns:
-          dict"""
+          dict (contents according to object type)"""
         
         if self._data == None:
             self._data = self.ws_client.get_objects([{"ref": self.ref}])[0]["data"]
@@ -231,7 +337,7 @@ class ObjectAPI(object):
         Retrieve a subset of data from this object, given a list of paths to the data elements.
         
         Returns:
-          dict"""
+          dict (contents according to object type and data requested)"""
 
         return self.ws_client.get_object_subset([{"ref": self.ref, 
                         "included": path_list}])[0]["data"]
@@ -241,7 +347,7 @@ class ObjectAPI(object):
         Retrieve a dictionary that indicates by type what objects are referring to this object.
         
         Returns:
-          dict"""
+          dict typestring -> object_reference"""
         
         referrers = self.ws_client.list_referencing_objects([{"ref": self.ref}])[0]
         
