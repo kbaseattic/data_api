@@ -1,50 +1,22 @@
 import setuptools
 import setuptools.command.install
+import logging
 import sys
 import os
 import subprocess
 import shutil
 import glob
 
+# Logging
 
-def filter_args():
-    setup_args = sys.argv[1:]
+logging.basicConfig()
+_log = logging.getLogger('setup')
 
-    if "--jupyter" in setup_args:
-        setup_args.remove("--jupyter")
-    
-    return setup_args
-
-
-def get_dependencies():
-    def parse_requirements(filename):
-        packages = list()
-    
-        with open(filename, 'r') as req_file:
-            req_lines = req_file.read().splitlines()
-        
-            for line in req_lines:
-                if line.strip() == "":
-                    pass
-                elif line.startswith("-r"):
-                    packages.extend(parse_requirements(line.split(" ")[-1]))
-                else:
-                    packages.append(line)
-        return packages
-
-    setup_args = sys.argv[1:]
-
-    if "--jupyter" in setup_args:
-        install_requires = parse_requirements(
-            os.path.join(os.path.dirname(__file__),"requirements-jupyter.txt"))
-    else:
-        install_requires = parse_requirements(
-            os.path.join(os.path.dirname(__file__),"requirements.txt"))
-
-    return install_requires
+# Globals
 
 version = open('VERSION').read().strip()
 packages = setuptools.find_packages("lib")
+g_with_jupyter = False
 
 server_languages = ["python_server"]
 client_languages = ["python", "javascript", "perl", "java"]
@@ -77,6 +49,57 @@ language_properties = {
         "copy_files": ["ServiceException.java", "taxonConstants.java", "thrift_service.java"]
     }
 }
+
+
+# Functions
+
+def filter_args():
+    global g_with_jupyter
+    setup_args = sys.argv[1:]
+
+    # TODO: Put this new option into --help output
+
+    if "--jupyter" in setup_args:
+        g_with_jupyter = True
+        setup_args.remove("--jupyter")
+
+    return setup_args
+
+
+def get_dependencies():
+    def parse_requirements(filename):
+        packages = list()
+    
+        with open(filename, 'r') as req_file:
+            req_lines = req_file.read().splitlines()
+        
+            for line in req_lines:
+                if line.strip() == "":
+                    pass
+                elif line.startswith("-r"):
+                    packages.extend(parse_requirements(line.split(" ")[-1]))
+                else:
+                    packages.append(line)
+        return packages
+
+    setup_args = sys.argv[1:]
+
+    if g_with_jupyter:
+        install_requires = parse_requirements(
+            os.path.join(os.path.dirname(__file__),"requirements-jupyter.txt"))
+        open('exclude-tests.txt', 'w').write('') # clear it
+    else:
+        _log.warn("--jupyter not specified, so using minimal install "
+                  "without packages in doekbase.data_api.interactive")
+        exclude_pkg = 'doekbase.data_api.interactive'
+        packages.remove(exclude_pkg)
+        install_requires = parse_requirements(
+            os.path.join(os.path.dirname(__file__),"requirements.txt"))
+        open('exclude-tests.txt', 'w')\
+            .write('lib/' + exclude_pkg.replace('.', '/') + '\n')
+        # clear it
+
+    return install_requires
 
 
 class BuildThriftClients(setuptools.Command):
@@ -196,7 +219,8 @@ config = {
                 "bin/data_api_benchmark.py",
                 "bin/dump_wsfile",
                 "bin/taxon_start_service.py",
-                "bin/taxon_client_driver.py"],
+                "bin/taxon_client_driver.py",
+                "bin/extract_thrift_docs"],
     "name": "doekbase_data_api",
     "entry_points": {
         'nose.plugins.0.10': [

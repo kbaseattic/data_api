@@ -6,6 +6,7 @@ as well as methods for retrieving individual contig sequences and gathering cont
 
 # Stdlib
 import abc
+import itertools
 import requests
 import re
 import string
@@ -17,6 +18,7 @@ except ImportError:
 
 # Local
 from doekbase.data_api.core import ObjectAPI
+from doekbase.data_api.util import PerfCollector, collect_performance
 
 CHUNK_SIZE = 2**30
 
@@ -24,6 +26,7 @@ _CONTIGSET_TYPES = ['KBaseGenomes.ContigSet']
 _ASSEMBLY_TYPES = ['KBaseGenomesCondensedPrototypeV2.Assembly']
 TYPES = _CONTIGSET_TYPES + _ASSEMBLY_TYPES
 
+g_stats = PerfCollector('AssemblyAPI')
 
 class AssemblyInterface(object):
     """API for the assembled sequences associated with a Genome Annotation.
@@ -36,7 +39,8 @@ class AssemblyInterface(object):
         """Retrieve the id for an Assembly.
 
         Returns:
-          id: string identifier for the Assembly"""
+          str: string identifier for the Assembly
+        """
         pass
 
     @abc.abstractmethod    
@@ -44,16 +48,17 @@ class AssemblyInterface(object):
         """Retrieve the GenomeAnnotations that refer to this Assembly.
         
         Returns:
-          list<GenomeAnnotationAPI>
+          list<GenomeAnnotationAPI>: List of GenomeAnnotationAPI objects
         """
         pass
     
     @abc.abstractmethod    
     def get_external_source_info(self):
-        """Retrieve the external source information associated with this Assembly.
+        """Retrieve the external source information for this Assembly.
         
         Returns:
-          id: string identifier for the Assembly"""        
+          str: string identifier for the Assembly
+        """
         pass
 
     @abc.abstractmethod    
@@ -61,9 +66,15 @@ class AssemblyInterface(object):
         """Retrieve the derived statistical information about this Assembly.
         
         Returns:
-          gc_content: total guanine and cytosine content, counting all G and C only
-          dna_size: total length of all dna sequence for this Assembly
-          num_contigs: total number of contiguous sequences in this Assembly"""        
+          dict: Statistics with the following keys and values:
+
+            gc_content : float
+                proportion of guanine (G) and cytosine (C) content
+            dna_size : int
+                total length of all dna sequences
+            num_contigs : int
+                total number of contiguous sequences
+        """
         pass
 
     @abc.abstractmethod    
@@ -71,7 +82,8 @@ class AssemblyInterface(object):
         """Retrieve the number of contiguous sequences in this Assembly.
         
         Returns:
-          int"""
+          int
+        """
         pass
 
     @abc.abstractmethod    
@@ -79,7 +91,8 @@ class AssemblyInterface(object):
         """Retrieve the total GC content for this Assembly.
         
         Returns:
-          float"""
+          float: Proportion of GC content, 0 <= x <= 1.
+        """
         pass
 
     @abc.abstractmethod    
@@ -87,23 +100,27 @@ class AssemblyInterface(object):
         """Retrieve the total DNA size for this Assembly.
         
         Returns:
-          int"""
+          int: Total DNA size
+        """
         pass
 
     @abc.abstractmethod    
     def get_contig_lengths(self, contig_id_list=None):
-        """Retrieve the ids for every contiguous sequence in this Assembly.
+        """Retrieve the length for every contiguous sequence.
         
         Returns:
-          dict<str>: <int>"""
+          dict<str,int>: Mapping of sequence identifiers to lengths.
+        """
         pass
 
     @abc.abstractmethod    
     def get_contig_gc_content(self, contig_id_list=None):
-        """Retrieve the total GC content for each contiguous sequence of this Assembly.
+        """Retrieve the total GC content for each contiguous sequence
+        of this Assembly.
         
         Returns:
-          dict<str>: float"""
+          dict<str,float>: Mapping of sequence identifiers to GC content.
+        """
         pass
 
     @abc.abstractmethod    
@@ -111,7 +128,8 @@ class AssemblyInterface(object):
         """Retrieve the ids for every contiguous sequence in this Assembly.
         
         Returns:
-          list<str>"""
+          list<str>: Sequence identifiers
+        """
         pass
 
     @abc.abstractmethod    
@@ -121,21 +139,25 @@ class AssemblyInterface(object):
         Args:
           contig_id_list: list<str>
         Returns:
-          dict
-          
-          dictionary of contigs, with contig id as key
-          contig value structure::
+          dict<str,dict>: dictionary of contigs, with contig id as key
+          and each value itself a dict with the following key/value pairs:
 
-              {
-                  'contig_id': string,
-                  'length': integer,
-                  'md5': string,
-                  'name': string,
-                  'description': string,
-                  'is_complete': 0 or 1,
-                  'is_circular': 0 or 1,
-                  'sequence': string
-              }
+          contig_id : str
+            the contig identifier
+          length : integer
+            length of the contig
+          md5 : string
+            hex-digest of MD5 hash of the contig's contents,
+          name : string
+            name of the contig
+          description : string
+            description of the contig
+          is_complete : int
+             0 if this contig is complete, 1 otherwise
+          is_circular : int
+             0 or 1
+          sequence : string
+             actual contents of the sequence for this contig
         """
         pass
 
@@ -195,6 +217,7 @@ class AssemblyAPI(ObjectAPI, AssemblyInterface):
 class _KBaseGenomes_ContigSet(ObjectAPI, AssemblyInterface):
     def __init__(self, services, token, ref):
         super(_KBaseGenomes_ContigSet, self).__init__(services, token, ref)
+        self._gc_pattern = re.compile(r'g|G|c|C')
 
     def get_assembly_id(self):
         return self.get_data_subset(path_list=["id"])["id"]
@@ -224,12 +247,10 @@ class _KBaseGenomes_ContigSet(ObjectAPI, AssemblyInterface):
 
     def get_stats(self):
         contigs = self.get_data()["contigs"]
-        
-        pattern = re.compile(r'g|G|c|C')
-        
+
         total_gc = 0
-        for c in contigs:
-            total_gc += len([s for s in re.finditer(pattern, c["sequence"])])
+        for i, c in enumerate(contigs):
+            total_gc += self._sequence_gc(i, c["sequence"])
         
         total_length = 0
         
@@ -256,13 +277,13 @@ class _KBaseGenomes_ContigSet(ObjectAPI, AssemblyInterface):
         
         total_gc = 0
         total_length = 0
-        for c in contigs:
+        for i, c in enumerate(contigs):
             if "length" in c:
                 total_length += c["length"]
             else:
                 total_length += len(c["sequence"])
             
-            total_gc += len([s for s in re.finditer(pattern, c["sequence"])])
+            total_gc += self._sequence_gc(i, c["sequence"])
         
         return total_gc/(total_length*1.0)
 
@@ -289,19 +310,20 @@ class _KBaseGenomes_ContigSet(ObjectAPI, AssemblyInterface):
     def get_contig_gc_content(self, contig_id_list=None):
         contigs = self.get_data()["contigs"]
         
-        pattern = re.compile(r'g|G|c|C')
         contigs_gc = dict()
         
         if contig_id_list is None:
             contig_id_list = [c["id"] for c in contigs]
                     
-        for c in contigs:
-            if "length" in c:
-                length = c["length"] * 1.0
-            else:
-                length = len(c["sequence"]) * 1.0
-            
-            contigs_gc[c["id"]] = len([s for s in re.finditer(pattern, c["sequence"])])/length
+        for i, c in enumerate(contigs):
+            if c["id"] in contig_id_list:
+                if "length" in c:
+                    length = c["length"]
+                else:
+                    length = len(c["sequence"])
+
+                contigs_gc[c["id"]] = (1. * self._sequence_gc(i, c['sequence'])
+                                       / length)
         
         return contigs_gc
 
@@ -309,56 +331,83 @@ class _KBaseGenomes_ContigSet(ObjectAPI, AssemblyInterface):
         contigs = self.get_data()["contigs"]
         return [c["id"] for c in contigs]
 
+    @collect_performance(g_stats, prefix='old.')
     def get_contigs(self, contig_id_list=None):
-        pattern = re.compile(r'g|G|c|C')
         contigs = dict()
 
         raw_contigs = self.get_data()["contigs"]
-    
-        if contig_id_list is None or len(contig_id_list) == 0:
-            matches = raw_contigs
-        else:
-            matches = [c for c in raw_contigs if c["id"] in contig_id_list]
-        
-        for c in matches:
-            contigs[c["id"]] = dict()
-            contigs[c["id"]]["contig_id"] = c["id"]
-            contigs[c["id"]]["sequence"] = c["sequence"]
-                            
-            if "length" in c:
-                contigs[c["id"]]["length"] = c["length"]
-            else:
-                contigs[c["id"]]["length"] = len(c["sequence"])
 
-            if "md5" in c:
-                contigs[c["id"]]["md5"] = c["md5"]
-            else:
-                contigs[c["id"]]["md5"] = hashlib.md5(c["sequence"].upper()).hexdigest()
-            
-            if "name" in c:
-                contigs[c["id"]]["name"] = c["name"]
-            else:
-                contigs[c["id"]]["name"] = None            
+        make_md5 = lambda x: hashlib.md5(x["sequence"].upper()).hexdigest()
 
-            if "description" in c:
-                contigs[c["id"]]["description"] = c["description"]
-            else:
-                contigs[c["id"]]["description"] = None
-                        
-            if "complete" in c:
-                contigs[c["id"]]["is_complete"] = c["complete"]
-            else:
-                contigs[c["id"]]["is_complete"] = 0
-            
-            if "replicon_geometry" in c:
-                contigs[c["id"]]["is_circular"] = c["replicon_geometry"]
-            else:
-                contigs[c["id"]]["is_circular"] = "Unknown"
-                
-            contigs[c["id"]]["gc_content"] = len([s for s in re.finditer(pattern, c["sequence"])])/(contigs[c["id"]]["length"] * 1.0)
-        
+        for i, c in enumerate(raw_contigs):
+            if contig_id_list and c['id'] not in contig_id_list:
+                continue
+            cid = {'contig_id': c['id'],
+                   'sequence': c['sequence'],
+                   'length': c.get('length', None) or len(c['sequence']),
+                   'md5': c.get('md5', None) or make_md5(c),
+                   'name': c.get('name', None),
+                   'description': c.get('description', None),
+                   'is_complete': c.get('complete', 0),
+                   'is_circular': c.get('replicon_geometry','Unkown')
+                   }
+
+            # OLD code superseded by code above and below:
+            #contigs[c["id"]] = dict()
+            #contigs[c["id"]]["contig_id"] = c["id"]
+            #contigs[c["id"]]["sequence"] = c["sequence"]
+            # if "length" in c:
+            #     contigs[c["id"]]["length"] = c["length"]
+            # else:
+            #     contigs[c["id"]]["length"] = len(c["sequence"])
+            #
+            # if "md5" in c:
+            #     contigs[c["id"]]["md5"] = c["md5"]
+            # else:
+            #     contigs[c["id"]]["md5"] = hashlib.md5(c["sequence"].upper()).hexdigest()
+            # if "name" in c:
+            #     contigs[c["id"]]["name"] = c["name"]
+            # else:
+            #     contigs[c["id"]]["name"] = None
+            #
+            # if "description" in c:
+            #     contigs[c["id"]]["description"] = c["description"]
+            # else:
+            #     contigs[c["id"]]["description"] = None
+            #
+            # if "complete" in c:
+            #     contigs[c["id"]]["is_complete"] = c["complete"]
+            # else:
+            #     contigs[c["id"]]["is_complete"] = 0
+            #
+            # if "replicon_geometry" in c:
+            #     contigs[c["id"]]["is_circular"] = c["replicon_geometry"]
+            # else:
+            #     contigs[c["id"]]["is_circular"] = "Unknown"
+
+            gc_count = self._sequence_gc(i, c['sequence'])
+            cid['gc_content'] = gc_count / cid['length'] * 1.0
+
+            contigs[c['id']] = cid
+
         return contigs            
 
+    def _sequence_gc(self, index, sequence):
+        """Get GC content for a sequence.
+
+            May refer to a cached value, if the cache is available.
+        """
+        self._current_sequence = sequence
+        name = 'gc-{:d}'.format(index)
+        r =  self._cache.get_derived_data(self._calc_sequence_gc, name)
+        return r
+
+    def _calc_sequence_gc(self):
+        """Calculate "G/C Content" by counting G's and C's in the
+           sequence and dividing the total by the sequence length.
+        """
+        matches = re.finditer(self._gc_pattern, self._current_sequence)
+        return sum(itertools.imap(lambda x: 1, matches))
 
 class _Prototype(ObjectAPI, AssemblyInterface):
     def __init__(self, services, token, ref):
@@ -418,6 +467,7 @@ class _Prototype(ObjectAPI, AssemblyInterface):
         contigs = self.get_data()["contigs"]
         return [contigs[c]["contig_id"] for c in contigs]
 
+    @collect_performance(g_stats, prefix='new.')
     def get_contigs(self, contig_id_list=None):
         data = self.get_data()
 

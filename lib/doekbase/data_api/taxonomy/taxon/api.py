@@ -21,47 +21,52 @@ TYPES = _GENOME_TYPES + _TAXON_TYPES
 
 
 class TaxonInterface(object):
-    """
-    Represents a Taxonomic Unit, e.g., species.
-    Built to support KBaseGenomesCondensedPrototypeV2.Taxon and KBaseGenomes.Genome.
-    """
+    """Represents a Taxonomic Unit, e.g., species.
 
+    Built to support KBaseGenomesCondensedPrototypeV2.Taxon and
+    KBaseGenomes.Genome.
+    """
     __metaclass__ = abc.ABCMeta
 
     @abc.abstractmethod
     def get_parent(self, ref_only=False):
-        """
-        Retrieve parent Taxon of this Taxon as a TaxonAPI object.
-        If this is accessing a Genome object, returns None.
+        """Retrieve parent Taxon.
 
+        Args:
+          ref_only (bool): Return the reference instead of the full
+                           TaxonAPI object.
         Returns:
-          TaxonAPI"""
+          TaxonAPI, or str: Parent Taxon, either as an object or a
+                    reference.
+
+        Raises:
+          AttributeError: If no Parent Taxon exists for this Taxon.
+         """
         pass
 
     @abc.abstractmethod
     def get_children(self, ref_only=False):
-        """
-        Retrieve the children Taxon of this Taxon as TaxonAPI objects.
+        """Retrieve the children Taxon of this Taxon as TaxonAPI objects.
         If this is accessing a Genome object, returns None.
 
         Returns:
-          list<TaxonAPI>"""
+          list<TaxonAPI>
+        """
         pass
 
     @abc.abstractmethod
     def get_genome_annotations(self, ref_only=False):
-        """
-        Retrieve the GenomeAnnotations that refer to this Taxon.
+        """Retrieve the GenomeAnnotations that refer to this Taxon.
         If this is accessing a Genome object, returns None.
 
         Returns:
-          list<GenomeAnnotationAPI>"""
+          list<GenomeAnnotationAPI>
+        """
         pass
 
     @abc.abstractmethod
     def get_scientific_lineage(self):
-        """
-        Retrieve the scientific lineage of this Taxon.
+        """Retrieve the scientific lineage of this Taxon.
 
         Returns:
           str
@@ -71,8 +76,7 @@ class TaxonInterface(object):
 
     @abc.abstractmethod
     def get_scientific_name(self):
-        """
-        Retrieve the scientific name of this Taxon.
+        """Retrieve the scientific name of this Taxon.
 
         Returns:
           str
@@ -82,20 +86,19 @@ class TaxonInterface(object):
 
     @abc.abstractmethod
     def get_taxonomic_id(self):
-        """
-        Retrieve the NCBI taxonomic id of this Taxon.
+        """Retrieve the NCBI taxonomic id of this Taxon.
         The KBaseGenomes.Genome type's closest representative is source_id.
 
-        Unknown == -1
-
         Returns:
-          int"""
+          int
+
+        Raises:
+          AttributeError: If the NCBI taxonomic id for this Taxon is not present."""
         pass
 
     @abc.abstractmethod
     def get_kingdom(self):
-        """
-        Retrieve the kingdom associated with this Taxonomic Unit.
+        """Retrieve the kingdom associated with this Taxonomic Unit.
 
         Returns:
           str"""
@@ -103,8 +106,7 @@ class TaxonInterface(object):
 
     @abc.abstractmethod
     def get_domain(self):
-        """
-        Retrieve the domain associated with this Taxonomic Unit.
+        """Retrieve the domain associated with this Taxonomic Unit.
 
         Returns:
           str"""
@@ -112,8 +114,7 @@ class TaxonInterface(object):
 
     @abc.abstractmethod
     def get_aliases(self):
-        """
-        Retrieve the aliases for this Taxonomic Unit.
+        """Retrieve the aliases for this Taxonomic Unit.
 
         Returns:
           list<str>"""
@@ -121,8 +122,7 @@ class TaxonInterface(object):
 
     @abc.abstractmethod
     def get_genetic_code(self):
-        """
-        Retrieve the genetic code for this Taxonomic Unit.
+        """Retrieve the genetic code for this Taxonomic Unit.
 
         Returns:
           int"""
@@ -236,6 +236,15 @@ class _Prototype(ObjectAPI, TaxonInterface):
         else:
             raise AttributeError
 
+    def __str__(self):
+        """Simple string representation, for debugging.
+        """
+        return 'Id: {}, Name: {}, Lineage: {}'.format(
+            self.get_taxonomic_id(),
+            self.get_scientific_name(),
+            self.get_scientific_lineage()
+        )
+
     def get_domain(self):
         return self.data["domain"]
 
@@ -298,6 +307,15 @@ class TaxonAPI(ObjectAPI, TaxonInterface):
     def get_genetic_code(self):
         return self.proxy.get_genetic_code()
 
+    def __str__(self):
+        """Simple string representation, for debugging.
+        """
+        return '[{}] Id: {}, Name: {}, Lineage: {}'.format(
+            type(self.proxy),
+            self.get_taxonomic_id(),
+            self.get_scientific_name(),
+            self.get_scientific_lineage()
+        )
 
 class TaxonClientAPI(TaxonInterface):
     def __init__(self, host='localhost', port=9090, token=None, ref=None):
