@@ -161,8 +161,8 @@ class ObjectAPI(object):
             self._info["object_reference_versioned"],
             is_public=global_read)
 
-        # always use a versioned reference to the data object
-        self.ref = self._info["object_reference_versioned"]
+        # TODO always use a versioned reference to the data object
+        #self.ref = self._info["object_reference_versioned"]
 
     @property
     def stats(self):
