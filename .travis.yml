@@ -5,17 +5,14 @@ python:
 cache:
   directories:
     - $HOME/.cache/pip
+    - $HOME/thrift
 
 before_install:
   - redis-server redis.conf &
-  - sudo apt-get update -qq
-  - sudo apt-get install -qq libboost-dev libboost-test-dev libboost-program-options-dev libevent-dev automake libtool flex bison pkg-config g++ libssl-dev libbit-vector-perl libclass-accessor-class-perl
-  - wget http://www.us.apache.org/dist/thrift/0.9.2/thrift-0.9.2.tar.gz
-  - tar xfz thrift-0.9.2.tar.gz
-  - cd thrift-0.9.2 && ./configure --without-ruby && sudo make install && cd ..
+  - if test -d $HOME/thrift/thrift-0.9.2; then export THRIFT_CACHED=1; else export THRIFT_CACHED=0; fi
+  - install_travis.sh
 
 install:
-  - touch exclude-tests.txt
   - pip install .
 
 script:
