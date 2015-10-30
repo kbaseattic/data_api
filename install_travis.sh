@@ -16,6 +16,7 @@ libbit-vector-perl libclass-accessor-class-perl
     cd -
 elif [ THRIFT_CACHED -eq 1 ]
     cd $HOME/thrift/thrift-0.9.2/
+    ./configure --without-ruby
     sudo make install
     cd -
 fi
