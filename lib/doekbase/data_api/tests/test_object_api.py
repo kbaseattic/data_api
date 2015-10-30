@@ -44,12 +44,10 @@ def test_get_info():
                  "object_size",
                  "object_metadata"]
 
-    assert isinstance(info, list) and len(info) > 0
-    for x in info:
-        assert isinstance(x, dict)
-        for k in info_keys:
-            assert k in x
-            # TODO assert type of each entry
+    assert isinstance(info, dict)
+    for k in info_keys:
+        assert k in x
+        # TODO assert type of each entry
 
 
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
@@ -58,7 +56,7 @@ def test_get_schema():
     schema = t.get_schema()
     _log.info("Output {}".format(schema))
 
-    assert isinstance(schema, list)
+    assert isinstance(schema, dict)
 
 
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
@@ -95,7 +93,7 @@ def test_get_id():
     object_id = t.get_id()
     _log.info("Output {}".format(object_id))
 
-    assert isinstance(object_id, int)
+    assert isinstance(object_id, (int, long) )
 
 
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
@@ -142,7 +140,7 @@ def test_get_referrers():
     referrers = t.get_referrers()
     _log.info("Output {}".format(referrers))
 
-    assert isinstance(referrers, list)
+    assert referrers is not None
 
 #TODO add test for copy method
 #def test_copy():
