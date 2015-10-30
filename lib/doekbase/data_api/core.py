@@ -308,7 +308,12 @@ class ObjectAPI(object):
         """
 
         if self._provenance == None:
-            provenance_list = self.ws_client.get_object_provenance([{"ref": self.ref}])[0]["provenance"]
+            result = self.ws_client.get_object_provenance([{"ref": self.ref}])
+
+            if len(result) > 0:
+                provenance_list = result[0]["provenance"]
+            else:
+                provenance_list = list()
 
             self._provenance = list()
 
