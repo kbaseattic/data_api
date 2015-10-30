@@ -92,7 +92,11 @@ def get_dependencies():
         _log.warn("--jupyter not specified, so using minimal install "
                   "without packages in doekbase.data_api.interactive")
         exclude_pkg = 'doekbase.data_api.interactive'
-        packages.remove(exclude_pkg)
+
+        global packages
+        if exclude_pkg in packages:
+            packages.remove(exclude_pkg)
+
         install_requires = parse_requirements(
             os.path.join(os.path.dirname(__file__),"requirements.txt"))
         open('exclude-tests.txt', 'w')\
