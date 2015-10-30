@@ -212,7 +212,8 @@ config = {
     "download_url": "https://github.com/kbase/data_api/stuff?download",
     "author_email": "mhenderson@lbl.gov",
     "version": version,
-    "setup_requires": ["six"],
+    "setup_requires": get_dependencies(),
+    "install_requires": get_dependencies(),
     "tests_require": ["nose", "nose-timer", "codecov"],
     "packages": packages,
     "scripts": ["bin/data_api_demo.py",
@@ -232,7 +233,6 @@ config = {
 
 setuptools.setup(package_dir = {'': 'lib'},
                  script_args = filter_args(),
-                 install_requires = get_dependencies(),
                  cmdclass = {'install': CustomInstall,
                              'build_thrift_clients': BuildThriftClients},
                  **config)
