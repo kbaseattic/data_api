@@ -310,9 +310,15 @@ class TaxonAPI(ObjectAPI, TaxonInterface):
     def __str__(self):
         """Simple string representation, for debugging.
         """
+
+        try:
+            tax_id = self.get_taxonomic_id()
+        except AttributeError:
+            tax_id = None
+
         return '[{}] Id: {}, Name: {}, Lineage: {}'.format(
             type(self.proxy),
-            self.get_taxonomic_id(),
+            tax_id,
             self.get_scientific_name(),
             self.get_scientific_lineage()
         )

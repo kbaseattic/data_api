@@ -46,7 +46,7 @@ def test_get_info():
 
     assert isinstance(info, dict)
     for k in info_keys:
-        assert k in x
+        assert k in info
         # TODO assert type of each entry
 
 
