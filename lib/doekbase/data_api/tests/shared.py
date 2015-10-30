@@ -36,7 +36,7 @@ g_redis_conf = os.environ.get('KB_REDIS_CONF', 'redis.conf')
 # Functions and classes
 
 def in_travis():
-    return os.environ.get('TRAVIS', 'pissoff') == 'true'
+    return os.environ.get('TRAVIS', 'false') == 'true'
 
 def get_services():
     svc = {"workspace_service_url": g_ws_url,
