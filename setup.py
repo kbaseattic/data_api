@@ -1,5 +1,5 @@
 import setuptools
-import setuptools.command.install.install as install
+from setuptools.command.install import install
 import logging
 import sys
 import os
