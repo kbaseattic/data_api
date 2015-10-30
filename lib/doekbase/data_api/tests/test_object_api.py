@@ -52,6 +52,7 @@ def test_get_info():
             # TODO assert type of each entry
 
 
+@skipUnless(shared.can_connect, 'Cannot connect to workspace')
 def test_get_schema():
     _log.info("Input {}".format(t))
     schema = t.get_schema()
@@ -60,6 +61,7 @@ def test_get_schema():
     assert isinstance(schema, list)
 
 
+@skipUnless(shared.can_connect, 'Cannot connect to workspace')
 def test_get_typestring():
     _log.info("Input {}".format(t))
     typestring = t.get_typestring()
@@ -69,6 +71,7 @@ def test_get_typestring():
     assert len(typestring) > 0
 
 
+@skipUnless(shared.can_connect, 'Cannot connect to workspace')
 def test_get_history():
     _log.info("Input {}".format(t))
     history = t.get_history()
@@ -77,6 +80,7 @@ def test_get_history():
     assert isinstance(history, list)
 
 
+@skipUnless(shared.can_connect, 'Cannot connect to workspace')
 def test_get_provenance():
     _log.info("Input {}".format(t))
     provenance = t.get_provenance()
@@ -85,6 +89,7 @@ def test_get_provenance():
     assert isinstance(provenance, list)
 
 
+@skipUnless(shared.can_connect, 'Cannot connect to workspace')
 def test_get_id():
     _log.info("Input {}".format(t))
     object_id = t.get_id()
@@ -93,6 +98,7 @@ def test_get_id():
     assert isinstance(object_id, int)
 
 
+@skipUnless(shared.can_connect, 'Cannot connect to workspace')
 def test_get_version():
     _log.info("Input {}".format(t))
     version = t.get_version()
@@ -101,6 +107,7 @@ def test_get_version():
     assert isinstance(version, basestring) or isinstance(version, unicode)
 
 
+@skipUnless(shared.can_connect, 'Cannot connect to workspace')
 def test_get_name():
     _log.info("Input {}".format(t))
     name = t.get_name()
@@ -110,6 +117,7 @@ def test_get_name():
     assert len(name) > 0
 
 
+@skipUnless(shared.can_connect, 'Cannot connect to workspace')
 def test_get_data():
     _log.info("Input {}".format(t))
     data = t.get_data()
@@ -118,6 +126,7 @@ def test_get_data():
     assert isinstance(data, dict)
 
 
+@skipUnless(shared.can_connect, 'Cannot connect to workspace')
 def test_get_data_subset():
     _log.info("Input {}".format(t))
     subset = t.get_data_subset(["scientific_name"])
@@ -127,6 +136,7 @@ def test_get_data_subset():
     assert "scientific_name" in subset
 
 
+@skipUnless(shared.can_connect, 'Cannot connect to workspace')
 def test_get_referrers():
     _log.info("Input {}".format(t))
     referrers = t.get_referrers()
