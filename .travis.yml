@@ -17,7 +17,7 @@ before_install:
 
 install:
   - pip install .
-  - echo "lib/doekbase/data_api/interactive \n" > exclude-tests.txt
+  - echo "lib/doekbase/data_api/interactive\n" > exclude-tests.txt
 
 script:
   - coverage run `which nosetests` -c nose.cfg -c $KB_NOSE_CFG
