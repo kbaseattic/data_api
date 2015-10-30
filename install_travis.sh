@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
-if [ THRIFT_CACHED -eq 0 ]
-then 
+if [ THRIFT_CACHED -eq 0 ]; then
     sudo apt-get update -qq
     sudo apt-get install -qq libboost-dev libboost-test-dev \
 libboost-program-options-dev libevent-dev automake libtool \
@@ -14,7 +13,7 @@ libbit-vector-perl libclass-accessor-class-perl
     ./configure --without-ruby
     sudo make install
     cd -
-elif [ THRIFT_CACHED -eq 1 ]
+elif [ THRIFT_CACHED -eq 1 ]; then
     cd $HOME/thrift/thrift-0.9.2/
     ./configure --without-ruby
     sudo make install
