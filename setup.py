@@ -152,14 +152,6 @@ class BuildThriftClients(setuptools.Command):
 
 class CustomInstall(install):
     """Custom install step for thrift generated code"""
-    user_options = install.user_options + [('jupyter', None, None)]
-
-    def initialize_options(self):
-        install.initialize_options(self)
-        self.jupyter = None
-
-    def finalize_options(self):
-        install.finalize_options(self)
 
     def run(self):
         start_path = os.path.join(os.path.abspath(os.path.dirname(__file__)),"thrift/specs")
