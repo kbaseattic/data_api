@@ -100,7 +100,7 @@ def get_dependencies():
         install_requires = parse_requirements(
             os.path.join(os.path.dirname(__file__),"requirements.txt"))
         open(os.path.join(os.path.dirname(__file__),'exclude-tests.txt'), 'w')\
-            .write('lib/' + exclude_pkg.replace('.', '/') + '\n')
+            .write('lib/' + exclude_pkg.replace('.', '/'))
         # clear it
 
     return install_requires
