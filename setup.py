@@ -87,7 +87,7 @@ def get_dependencies():
     if g_with_jupyter:
         install_requires = parse_requirements(
             os.path.join(os.path.dirname(__file__),"requirements-jupyter.txt"))
-        open('exclude-tests.txt', 'w').write('') # clear it
+        open(os.path.join(os.path.dirname(__file__),'exclude-tests.txt'), 'w').write('') # clear it
     else:
         _log.warn("--jupyter not specified, so using minimal install "
                   "without packages in doekbase.data_api.interactive")
@@ -99,7 +99,7 @@ def get_dependencies():
 
         install_requires = parse_requirements(
             os.path.join(os.path.dirname(__file__),"requirements.txt"))
-        open('exclude-tests.txt', 'w')\
+        open(os.path.join(os.path.dirname(__file__),'exclude-tests.txt'), 'w')\
             .write('lib/' + exclude_pkg.replace('.', '/') + '\n')
         # clear it
 
