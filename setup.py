@@ -217,7 +217,6 @@ config = {
     "author_email": "mhenderson@lbl.gov",
     "version": version,
     "setup_requires": get_dependencies(),
-    "install_requires": get_dependencies(),
     "tests_require": ["nose", "nose-timer", "codecov"],
     "packages": packages,
     "scripts": ["bin/data_api_demo.py",
