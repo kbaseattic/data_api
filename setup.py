@@ -237,6 +237,7 @@ config = {
 
 setuptools.setup(package_dir = {'': 'lib'},
                  script_args = filter_args(),
+                 install_requires = get_dependencies(),
                  cmdclass = {'install': CustomInstall,
                              'build_thrift_clients': BuildThriftClients},
                  **config)
