@@ -23,9 +23,7 @@ script:
   - coverage run `which nosetests` -c nose.cfg -c $KB_NOSE_CFG
   - coverage report
   - coverage xml
-  - pwd
-  - ls
-  - ls $HOME/build/kbase/data_api/
+  - cat coverage.xml
 
 env:
   - KB_REDIS_HOST=localhost; KB_NOSE_CFG=nose-local.cfg
