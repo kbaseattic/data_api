@@ -22,8 +22,6 @@ install:
 script:
   - coverage run `which nosetests` -c nose.cfg -c $KB_NOSE_CFG
   - coverage report
-  - coverage xml
-  - cat coverage.xml
 
 env:
   - KB_REDIS_HOST=localhost; KB_NOSE_CFG=nose-local.cfg
@@ -32,4 +30,4 @@ env:
 #  - KB_REDIS_HOST="";        KB_NOSE_CFG=nose-ci.cfg
 
 after_success:
-  - codecov
+  - coverage xml && codecov
