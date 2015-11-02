@@ -6,6 +6,7 @@ import os
 import subprocess
 import shutil
 import glob
+import traceback
 
 # Logging
 
@@ -105,6 +106,25 @@ def get_dependencies():
 
     return install_requires
 
+def call_command(command, is_thrift=False):
+    """Better exception when calling a command"""
+    try:
+        errno = subprocess.call(command)
+    except Exception as err:
+        if isinstance(command, list):
+            cstr = ' '.join(command)
+        else:
+            cstr = command
+        if is_thrift:
+            sys.stderr.write("==\nUnable to run `thrift` executable, is Apache "
+                             "Thrift installed? See https://thrift.apache.org/ "
+                             "for help\n==\n")
+            raise RuntimeError('Cannot run Thrift ({c}): {'
+                               'e}'.format(c=cstr, e=err))
+        else:
+            raise RuntimeError('Command "{c}" failed: {e}'.format(c=cstr,
+                                                                  e=err))
+    return errno
 
 class BuildThriftClients(setuptools.Command):
     """Build command for generating Thrift client code"""
@@ -120,6 +140,14 @@ class BuildThriftClients(setuptools.Command):
 
 
     def run(self):
+        try:
+            self._try_run()
+        except Exception as err:
+            print("ERROR in BuildThriftClients.run: {}".format(err))
+            #traceback.print_exc()
+            raise
+
+    def _try_run(self):
         for dirpath, dirnames, filenames in os.walk("thrift/specs"):
             for f in filenames:
                 if f.endswith(".thrift"):
@@ -128,7 +156,9 @@ class BuildThriftClients(setuptools.Command):
 
                     for target in client_languages:
                         command = ["thrift", "-r", "--gen", language_properties[target]["style"], spec_path]
-                        errno = subprocess.call(command)
+                        _log.info("{}: Thrift command = {}".format(target,
+                                                                   command))
+                        errno = call_command(command, is_thrift=True)
                         if errno != 0:
                             raise Exception("Thrift build for {} failed with : {}".format(target, errno))
 
@@ -154,6 +184,15 @@ class CustomInstall(install):
     """Custom install step for thrift generated code"""
 
     def run(self):
+        try:
+            self._try_run()
+        except Exception as err:
+            print("ERROR in CustomInstall.run: {}".format(err))
+            #traceback.print_exc()
+            raise
+
+    def _try_run(self):
+
         start_path = os.path.join(os.path.abspath(os.path.dirname(__file__)),"thrift/specs")
 
         for dirpath, dirnames, filenames in os.walk(start_path):
@@ -163,8 +202,9 @@ class CustomInstall(install):
                     spec_path = os.path.abspath(os.path.join(dirpath, f))
                     thrift_path = f.split(".")[0]
 
-                    command = ["thrift", "-r", "--gen", language_properties["python_server"]["style"], spec_path]
-                    errno = subprocess.call(command)
+                    command = ["thrift", "-r", "--gen", language_properties[
+                        "python_server"]["style"], spec_path]
+                    errno = call_command(command, is_thrift=True)
                     if errno != 0:
                         raise Exception("Thrift build for python service failed with : {}".format(errno))
 
@@ -185,7 +225,7 @@ class CustomInstall(install):
                     shutil.rmtree(language_properties["python_server"]["generated_dir"])
 
                     command = ["thrift", "-r", "--gen", language_properties["python"]["style"], spec_path]
-                    errno = subprocess.call(command)
+                    errno = call_command(command, is_thrift=True)
                     if errno != 0:
                         raise Exception("Thrift build for python client failed with : {}".format(errno))
 
