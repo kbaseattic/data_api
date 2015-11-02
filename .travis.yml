@@ -20,7 +20,9 @@ install:
   - echo "lib/doekbase/data_api/interactive" > exclude-tests.txt
 
 script:
-  - coverage run `which nosetests` -c nose.cfg -c $KB_NOSE_CFG
+  - coverage erase
+  - coverage run --parallel-mode `which nosetests` -c nose.cfg -c $KB_NOSE_CFG
+  - coverage combine
   - coverage report
 
 env:
