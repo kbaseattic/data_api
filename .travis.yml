@@ -32,4 +32,4 @@ env:
 #  - KB_REDIS_HOST="";        KB_NOSE_CFG=nose-ci.cfg
 
 after_success:
-  - coverage xml && codecov
+  - coverage xml && codecov -X gcov
