@@ -10,7 +10,6 @@ sudo: required
 
 before_install:
   - redis-server redis.conf &
-  - bash
   - sudo apt-get update -qq
   - >
     sudo apt-get install -qq libboost-dev libboost-test-dev
@@ -23,10 +22,10 @@ before_install:
   - ./configure --without-ruby
   - sudo make install
   - cd ..
-  - exit
 
 install:
   - python setup.py install
+  - pip install -r requirements.txt
 #  - echo "lib/doekbase/data_api/interactive" > exclude-tests.txt
 
 script:
