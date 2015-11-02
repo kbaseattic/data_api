@@ -26,10 +26,9 @@ before_install:
 install:
   - python setup.py install
   - pip install -r requirements.txt
-#  - echo "lib/doekbase/data_api/interactive" > exclude-tests.txt
 
 script:
-  - coverage run `which nosetests` -c nose.cfg -c $KB_NOSE_CFG --debug dataio,dataop
+  - coverage run `which nosetests` -c nose.cfg -c $KB_NOSE_CFG
   - coverage report
 
 env:
