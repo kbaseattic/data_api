@@ -215,7 +215,7 @@ config = {
     "download_url": "https://github.com/kbase/data_api/stuff?download",
     "author_email": "mhenderson@lbl.gov",
     "version": version,
-    "setup_requires": get_dependencies(),
+    "setup_requires": ["six"],
     "tests_require": ["nose", "nose-timer", "codecov"],
     "packages": packages,
     "scripts": ["bin/data_api_demo.py",
