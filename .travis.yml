@@ -37,4 +37,4 @@ env:
 #  - KB_REDIS_HOST="";        KB_NOSE_CFG=nose-ci.cfg
 
 after_success:
-  - codecov -X gcov
+  - codecov
