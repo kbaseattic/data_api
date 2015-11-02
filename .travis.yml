@@ -14,7 +14,6 @@ before_install:
   - export THRIFT_CACHED=0
   - if [ -d '$HOME/thrift/thrift-0.9.2' ]; then export THRIFT_CACHED=1; fi
   - bash install_travis.sh
-  - exit
 
 install:
   - python setup.py install
