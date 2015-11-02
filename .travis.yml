@@ -11,13 +11,22 @@ cache:
 
 before_install:
   - redis-server redis.conf &
-  - export THRIFT_CACHED=0
-  - if [ -d '$HOME/thrift/thrift-0.9.2' ]; then export THRIFT_CACHED=1; fi
-  - bash install_travis.sh
+  - sudo apt-get update -qq
+  - sudo apt-get install -qq libboost-dev libboost-test-dev \
+libboost-program-options-dev libevent-dev automake libtool \
+flex bison pkg-config g++ libssl-dev \
+libbit-vector-perl libclass-accessor-class-perl
+  - mkdir $HOME/thrift && cd $HOME/thrift
+  - wget http://www.us.apache.org/dist/thrift/0.9.2/thrift-0.9.2.tar.gz
+  - tar xfz thrift-0.9.2.tar.gz
+  - cd thrift-0.9.2
+  - ./configure --without-ruby
+  - sudo make install
+  - cd -
 
 install:
   - python setup.py install
-  - echo "lib/doekbase/data_api/interactive" > exclude-tests.txt
+#  - echo "lib/doekbase/data_api/interactive" > exclude-tests.txt
 
 script:
   - coverage run `which nosetests` -c nose.cfg -c $KB_NOSE_CFG --debug dataio,dataop
