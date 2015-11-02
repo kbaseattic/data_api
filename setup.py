@@ -205,8 +205,22 @@ class CustomInstall(install):
                         raise Exception("Unable to find thrift client generated files to copy!")
                     shutil.rmtree(language_properties["python"]["generated_dir"])
 
+        # adapted from http://stackoverflow.com/questions/14441955/how-to-perform-custom-build-steps-in-setup-py
+        ret = None
 
-        install.run(self)
+        if self.old_and_unmanageable or self.single_version_externally_managed:
+            ret = install.run(self)
+        else:
+            caller = sys._getframe(2)
+            caller_module = caller.f_globals.get('__name__','')
+            caller_name = caller.f_code.co_name
+
+            if caller_module != "distutils.dist" or caller_name != "run_commands":
+                install.run(self)
+            else:
+                self.do_egg_install()
+
+        return ret
 
 config = {
     "description": "KBase Data API",
