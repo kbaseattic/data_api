@@ -24,9 +24,9 @@ def main(cmdline):
     cwd = os.path.dirname(os.path.abspath(__file__))
     desc = __doc__.strip()
     parser = argparse.ArgumentParser(description=desc)
-    parser.add_argument('path', help='Path to file or directory. If path is'
+    parser.add_argument('paths', help='Paths to file or directory. If path is'
                                      'a directory, files will be matched'
-                                     'based on the extension.')
+                                     'based on the extension.', nargs='+')
     parser.add_argument('--ext', help='File extension for files to process '
                                       '(default=%(default)s)',
                         default='msgpack')
@@ -41,16 +41,17 @@ def main(cmdline):
 
     # Get list of objects to process
     paths = []
-    if os.path.isdir(args.path):
-        if args.ext[0] == '.':
-            ext = args.ext
+    for path in args.paths:
+        if os.path.isdir(path):
+            if args.ext[0] == '.':
+                ext = args.ext
+            else:
+                ext = '.' + args.ext
+            for p in os.listdir(path):
+                if p.endswith(ext):
+                    paths.append(os.path.join(path, p))
         else:
-            ext = '.' + args.ext
-        for p in os.listdir(args.path):
-            if p.endswith(ext):
-                paths.append(os.path.join(args.path, p))
-    else:
-        paths.append(args.path)
+            paths.append(path)
 
     # Extract references from each object
     numpaths = len(paths)
