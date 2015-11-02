@@ -23,6 +23,9 @@ script:
   - coverage run `which nosetests` -c nose.cfg -c $KB_NOSE_CFG --debug dataio,dataop
   - coverage report
   - cat .coverage
+  - coverage report
+  - coverage xml
+  - cat coverage.xml
 
 env:
   - KB_REDIS_HOST=localhost; KB_NOSE_CFG=nose-local.cfg
@@ -31,4 +34,4 @@ env:
 #  - KB_REDIS_HOST="";        KB_NOSE_CFG=nose-ci.cfg
 
 after_success:
-  - coverage xml && codecov -X gcov
+  - codecov -X gcov
