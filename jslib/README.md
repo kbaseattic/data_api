@@ -6,15 +6,21 @@ The JavaScript Data API is, like the Python API, custom wrapper code on top of t
 
 1. Clone the GitHub repository
 
-Follow instructions at: https://github.com/kbase/data_api, basically:
+    Follow instructions at: https://github.com/kbase/data_api, basically:
 
-    git clone https://github.com/kbase/data_api.git
+        git clone https://github.com/kbase/data_api.git
 
-Change directory to the top-level of the newly cloned repository when it completes.
+    Change directory to the top-level of the newly cloned repository when it completes.
 
-    cd data_api
+        cd data_api
 
-2. Update JavaScript dependencies
+2. (Optional; for core development) Install Python API and scripts. This will also build, and allow you to re-build, the Thrift stubs. There are two steps here, first installing Thrift itself and then installing Python libraries using the standard method (running the `setup.py` script).
+
+    a. Install Thrift. You can install from source on any platform. See the [Thrift homepage](https://thrift.apache.org/). On Mac OSX, you can use homebrew and simply do `brew install thrift`.
+    
+    b. Install the Python library. The simplest thing to do here is, from the top-level directory of the repo, run the command `python setup.py install`. That is really only sensible if you are in a virtual environment, which means that you use [virtualenv/virtualenvwrapper](http://virtualenvwrapper.readthedocs.org/en/latest/) or [anaconda](https://www.continuum.io/downloads) to create one first.
+
+3. Update JavaScript dependencies
 
     a. Change to the `jslib` directory and run the Node Package Manager (npm). 
     This downloads and installs a bunch of things, so it will take a couple of 
@@ -28,7 +34,7 @@ Change directory to the top-level of the newly cloned repository when it complet
         cd ..
         bower update
 
-3. Build JavaScript library. Change back down to the `jslib` directory and build the libraries with "grunt". Repeat this step every time you make changes to the local code.
+4. Build JavaScript library. Change back down to the `jslib` directory and build the libraries with "grunt". Repeat this step every time you make changes to the local code.
     
         cd jslib
         grunt build
