@@ -16,16 +16,12 @@ before_install:
   - ./install_travis.sh
 
 install:
-  - pip install .
+  - python setup.py install
   - echo "lib/doekbase/data_api/interactive" > exclude-tests.txt
 
 script:
   - coverage run `which nosetests` -c nose.cfg -c $KB_NOSE_CFG --debug dataio,dataop
   - coverage report
-  - cat .coverage
-  - coverage report
-  - coverage xml
-  - cat coverage.xml
 
 env:
   - KB_REDIS_HOST=localhost; KB_NOSE_CFG=nose-local.cfg
