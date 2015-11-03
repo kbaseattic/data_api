@@ -263,8 +263,10 @@ class CustomInstall(install):
             caller_name = caller.f_code.co_name
 
             if caller_module != "distutils.dist" or caller_name != "run_commands":
+                _log.debug('Not called from cmdline, do old-style install')
                 install.run(self)
             else:
+                _log.debug('Called from cmdline, doing "egg" install')
                 self.do_egg_install()
 
         return ret
