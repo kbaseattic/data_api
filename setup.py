@@ -1,17 +1,26 @@
+"""
+Setup script for data_api Python packages and scripts.
+"""
 import setuptools
 from setuptools.command.install import install
+
+import glob
 import logging
-import sys
 import os
 import subprocess
 import shutil
-import glob
-import traceback
+import sys
 
 # Logging
 
-logging.basicConfig()
+#logging.basicConfig()
 _log = logging.getLogger('setup')
+_h = logging.StreamHandler()
+_h.setFormatter(logging.Formatter('%(asctime)s %(levelname)-7s %(name)s: %('
+                                  'message)s'))
+_log.addHandler(_h)
+vb = sum([len(a) - 1 if a.startswith('-v') else 0 for a in sys.argv[1:]])
+_log.setLevel([logging.WARN, logging.INFO, logging.DEBUG][min(vb, 2)])
 
 # Globals
 
@@ -104,17 +113,16 @@ def get_dependencies():
             .write('lib/' + exclude_pkg.replace('.', '/'))
         # clear it
 
+    _log.debug('Install requirements: {}'.format(install_requires))
     return install_requires
 
 def call_command(command, is_thrift=False):
     """Better exception when calling a command"""
+    cstr = ' '.join(command) if isinstance(command, list) else command
+    _log.debug('Run command "{}"'.format(cstr))
     try:
         errno = subprocess.call(command)
     except Exception as err:
-        if isinstance(command, list):
-            cstr = ' '.join(command)
-        else:
-            cstr = command
         if is_thrift:
             sys.stderr.write("==\nUnable to run `thrift` executable, is Apache "
                              "Thrift installed? See https://thrift.apache.org/ "
@@ -140,43 +148,42 @@ class BuildThriftClients(setuptools.Command):
 
 
     def run(self):
+        _log.info('Build Thrift code')
         try:
             self._try_run()
         except Exception as err:
-            print("ERROR in BuildThriftClients.run: {}".format(err))
-            #traceback.print_exc()
+            _log.error("error in BuildThriftClients.run: {}".format(err))
             raise
 
     def _try_run(self):
         for dirpath, dirnames, filenames in os.walk("thrift/specs"):
-            for f in filenames:
-                if f.endswith(".thrift"):
-                    spec_path = os.path.abspath(os.path.join(dirpath, f))
-                    thrift_path = f.split(".")[0]
+            for f in filter(lambda _: _.endswith('.thrift'), filenames):
+                spec_path = os.path.abspath(os.path.join(dirpath, f))
+                thrift_path = f.split(".")[0]
 
-                    for target in client_languages:
-                        command = ["thrift", "-r", "--gen", language_properties[target]["style"], spec_path]
-                        _log.info("{}: Thrift command = {}".format(target,
-                                                                   command))
-                        errno = call_command(command, is_thrift=True)
-                        if errno != 0:
-                            raise Exception("Thrift build for {} failed with : {}".format(target, errno))
+                for target in client_languages:
+                    command = ["thrift", "-r", "--gen", language_properties[target]["style"], spec_path]
+                    _log.debug("{}: Thrift command = {}".format(target,
+                                                               command))
+                    errno = call_command(command, is_thrift=True)
+                    if errno != 0:
+                        raise Exception("Thrift build for {} failed with : {}".format(target, errno))
 
-                        generated_files = glob.glob(language_properties[target]["generated_dir"] + "/*/*")
+                    generated_files = glob.glob(language_properties[target]["generated_dir"] + "/*/*")
 
-                        if len(generated_files) == 0:
-                            generated_files = glob.glob(language_properties[target]["generated_dir"] + "/*")
+                    if len(generated_files) == 0:
+                        generated_files = glob.glob(language_properties[target]["generated_dir"] + "/*")
 
-                        copied = False
-                        for x in generated_files:
-                            for name in language_properties[target]["copy_files"]:
-                                if name in x:
-                                    destination = spec_path.rsplit("/",1)[0].replace("specs", "stubs/" + target)
-                                    shutil.copyfile(x, os.path.join(destination, name))
-                                    copied = True
-                        if not copied:
-                            raise Exception("Unable to find thrift generated files to copy!")
-                        shutil.rmtree(language_properties[target]["generated_dir"])
+                    copied = False
+                    for x in generated_files:
+                        for name in language_properties[target]["copy_files"]:
+                            if name in x:
+                                destination = spec_path.rsplit("/",1)[0].replace("specs", "stubs/" + target)
+                                shutil.copyfile(x, os.path.join(destination, name))
+                                copied = True
+                    if not copied:
+                        raise Exception("Unable to find thrift generated files to copy!")
+                    shutil.rmtree(language_properties[target]["generated_dir"])
 
 
 
@@ -184,11 +191,11 @@ class CustomInstall(install):
     """Custom install step for thrift generated code"""
 
     def run(self):
+        _log.info('Install Thrift code')
         try:
             self._try_run()
         except Exception as err:
-            print("ERROR in CustomInstall.run: {}".format(err))
-            #traceback.print_exc()
+            _log.error("error in CustomInstall.run: {}".format(err))
             raise
 
     def _try_run(self):

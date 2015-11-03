@@ -24,7 +24,7 @@ before_install:
   - cd ..
 
 install:
-  - python setup.py install
+  - python setup.py install -vv
 
 script:
   - coverage run `which nosetests` -c nose.cfg -c $KB_NOSE_CFG
