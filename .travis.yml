@@ -27,6 +27,7 @@ install:
   - python setup.py install -vv
 
 script:
+  - printf "PATH = $PATH \n"
   - coverage run `which nosetests` -c nose.cfg -c $KB_NOSE_CFG
   - coverage report
 
