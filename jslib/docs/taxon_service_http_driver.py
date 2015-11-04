@@ -5,8 +5,8 @@ import sys
 # Third-party
 from thrift.transport import TSocket
 from thrift.transport import TTransport
-from thrift.protocol import TBinaryProtocol
-from thrift.server import TServer
+from thrift.protocol import TJSONProtocol
+from thrift.server import THttpServer
 
 # Local
 from doekbase.data_api.taxonomy.taxon.service import thrift_service
@@ -26,11 +26,10 @@ def get_services_dict(ws=DEFAULT_WS_URL, shock=DEFAULT_SHOCK_URL):
 def taxon_service():
     handler = TaxonService(services=get_services_dict())
     processor = thrift_service.Processor(handler)
-    transport = TSocket.TServerSocket(port=9090)
-    tfactory = TTransport.TBufferedTransportFactory()
-    pfactory = TBinaryProtocol.TBinaryProtocolFactory()
+    pfactory = TJSONProtocol.TJSONProtocolFactory()
+    server_address = ('127.0.0.1', 9090)
 
-    server = TServer.TSimpleServer(processor, transport, tfactory, pfactory)
+    server = THttpServer.THttpServer(processor, server_address, pfactory)
     return server
 
 def main():

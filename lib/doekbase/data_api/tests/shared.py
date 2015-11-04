@@ -11,6 +11,7 @@ import os
 # Local
 from doekbase.data_api.core import ObjectAPI, g_ws_url, g_shock_url
 from doekbase.data_api.util import get_logger
+from doekbase.data_api import cache
 
 genome = "PrototypeReferenceGenomes/kb|g.166819"
 
@@ -23,7 +24,20 @@ except KeyError:
 _log = None
 services = None
 
+# Globals
+
+g_redis_host = os.environ.get('KB_REDIS_HOST', None)
+if g_redis_host == "":
+    g_redis_host = None
+g_redis_port = int(os.environ.get('KB_REDIS_PORT', '6379'))
+g_redis_bin = os.environ.get('KB_REDIS_BIN', '/usr/local/bin/redis-server')
+g_redis_conf = os.environ.get('KB_REDIS_CONF', 'redis.conf')
+
 # Functions and classes
+
+def in_travis():
+    return os.environ.get('TRAVIS', 'false') == 'true'
+
 def get_services():
     svc = {"workspace_service_url": g_ws_url,
             "shock_service_url": g_shock_url}
@@ -74,6 +88,11 @@ def setup():
     global _log, services
     _log = get_logger('doekbase.data_api.tests.shared')
     services = get_services()
+    if g_redis_host is not None:
+        cache.ObjectCache.cache_class = cache.RedisCache
+        cache.ObjectCache.cache_params = {
+            'redis_host': g_redis_host,
+            'redis_port': g_redis_port}
 
 def teardown():
     pass
