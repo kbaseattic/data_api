@@ -1,0 +1,3 @@
+#!/bin/bash
+
+kill $(cat /kb/deployment/services/dataapi/TaxonAPI.pid)
