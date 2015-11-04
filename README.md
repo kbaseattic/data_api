@@ -24,7 +24,7 @@ Develop branch status
 
 1. install virtualenv using your local installer::
 
-        apt-get install virtualenv
+        apt-get install python-virtualenv
 
 2. create a virtualenv environment to install the source to::
 
