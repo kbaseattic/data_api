@@ -17,9 +17,9 @@ deploy-client: deploy
 deploy:
 	rm -rf $(SERVICE_DIR)/venv
 	virtualenv $(SERVICE_DIR)/venv
-	. $(SERVICE_DIR)/venv/bin/activate && pip install -vvv .
 	cp $(SCRIPTS_DIR)/$(STARTUP_SCRIPT_NAME) $(SERVICE_DIR)/
 	rsync -avzP $(LBIN_DIR) $(SERVICE_DIR)/
+	. $(SERVICE_DIR)/venv/bin/activate && pip install -vvv .
 
 clean:
 	echo not implemented
