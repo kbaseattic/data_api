@@ -12,12 +12,15 @@ ANT = $(KB_RUNTIME)/ant/bin/ant
 
 default: deploy
 
+deploy-client: deploy
+
 deploy:
 	rm -rf $(SERVICE_DIR)/venv
 	virtualenv $(SERVICE_DIR)/venv
 	. $(SERVICE_DIR)/venv/bin/activate && pip install -vvv .
 	cp $(SCRIPTS_DIR)/start_service.sh $(SERVICE_DIR)/
 	rsync $(LBIN_DIR) $(SERVICE_DIR)/
+
 
 clean:
 	echo not implemented
