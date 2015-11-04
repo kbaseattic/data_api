@@ -5,6 +5,6 @@ export KB_DEPLOYMENT_CONFIG=$script_dir/deploy.cfg
 for api in taxon
 do
 # this doesn't yet capture stdout/stderr
-    echo starting service for $api
-    python $script_dir/bin/${api}_start_service.py &
+    echo starting service for $api (in foreground)
+    python $script_dir/bin/${api}_start_service.py
 done
