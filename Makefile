@@ -12,14 +12,15 @@ ANT = $(KB_RUNTIME)/ant/bin/ant
 
 default: deploy
 
-deploy-client: deploy
+# not really sure what to do with this target yet
+deploy-client: 
 
 deploy:
 	rm -rf $(SERVICE_DIR)/venv
 	virtualenv $(SERVICE_DIR)/venv
 	cp $(SCRIPTS_DIR)/$(STARTUP_SCRIPT_NAME) $(SERVICE_DIR)/
 	rsync -avzP $(LBIN_DIR) $(SERVICE_DIR)/
-	. $(SERVICE_DIR)/venv/bin/activate && pip install -vvv .
+	. $(SERVICE_DIR)/venv/bin/activate && pip install .
 
 clean:
 	echo not implemented
