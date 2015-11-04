@@ -19,8 +19,7 @@ deploy:
 	virtualenv $(SERVICE_DIR)/venv
 	. $(SERVICE_DIR)/venv/bin/activate && pip install -vvv .
 	cp $(SCRIPTS_DIR)/start_service.sh $(SERVICE_DIR)/
-	rsync $(LBIN_DIR) $(SERVICE_DIR)/
-
+	rsync -avzP $(LBIN_DIR) $(SERVICE_DIR)/
 
 clean:
 	echo not implemented
