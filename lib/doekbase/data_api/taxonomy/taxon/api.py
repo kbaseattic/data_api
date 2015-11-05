@@ -324,7 +324,7 @@ class TaxonAPI(ObjectAPI, TaxonInterface):
         )
 
 class TaxonClientAPI(TaxonInterface):
-    def __init__(self, host='localhost', port=9090, token=None, ref=None):
+    def __init__(self, host='localhost', port=9091, token=None, ref=None):
         from doekbase.data_api.taxonomy.taxon.service.interface import TaxonClientConnection
 
         #TODO add exception handling and better error messages here
@@ -464,7 +464,7 @@ class TaxonClientAPI(TaxonInterface):
             self.transport.open()
 
         try:
-            yield self.client.get_scientific_name(self._token, self.ref)
+            return self.client.get_scientific_name(self._token, self.ref)
         except Exception, e:
             raise
         finally:

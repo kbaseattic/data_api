@@ -401,7 +401,7 @@ class _KBaseGenomes_Genome(ObjectAPI, GenomeInterface):
         return TaxonAPI(self.services, token=self._token, ref=self.ref)
 
     def get_assembly(self):
-        from doekbase.data_api.sequence.assembly import AssemblyAPI
+        from doekbase.data_api.sequence.assembly.api import AssemblyAPI
         return AssemblyAPI(self.services, self._token, ref=self.get_data_subset(path_list=["contigset_ref"])["contigset_ref"])
 
     def get_feature_types(self):
@@ -957,7 +957,7 @@ class _Prototype(ObjectAPI, GenomeInterface):
         return TaxonAPI(self.services, token=self._token, ref=self.get_data_subset(path_list=["taxon_ref"])["taxon_ref"])
 
     def get_assembly(self):
-        from doekbase.data_api.sequence.assembly import AssemblyAPI
+        from doekbase.data_api.sequence.assembly.api import AssemblyAPI
         return AssemblyAPI(self.services, token=self._token, ref=self.get_data_subset(path_list=["assembly_ref"])["assembly_ref"])
 
     def get_feature_types(self):

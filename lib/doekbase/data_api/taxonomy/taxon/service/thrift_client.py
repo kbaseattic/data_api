@@ -3,7 +3,7 @@
 #
 # DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
 #
-#  options string: py:twisted
+#  options string: py:new_style
 #
 
 from thrift.Thrift import TType, TMessageType, TException, TApplicationException
@@ -16,197 +16,8 @@ try:
 except:
   fastbinary = None
 
-from zope.interface import Interface, implements
-from twisted.internet import defer
-from thrift.transport import TTwisted
 
-class Iface(Interface):
-  def get_info(token, ref):
-    """
-    Retrieve object info.
-
-
-    Parameters:
-     - token
-     - ref
-    """
-    pass
-
-  def get_history(token, ref):
-    """
-    Retrieve object history.
-
-
-    Parameters:
-     - token
-     - ref
-    """
-    pass
-
-  def get_provenance(token, ref):
-    """
-    Retrieve object provenance.
-
-
-    Parameters:
-     - token
-     - ref
-    """
-    pass
-
-  def get_id(token, ref):
-    """
-    Retrieve object identifier.
-
-
-    Parameters:
-     - token
-     - ref
-    """
-    pass
-
-  def get_name(token, ref):
-    """
-    Retrieve object name.
-
-
-    Parameters:
-     - token
-     - ref
-    """
-    pass
-
-  def get_version(token, ref):
-    """
-    Retrieve object version.
-
-
-    Parameters:
-     - token
-     - ref
-    """
-    pass
-
-  def get_parent(token, ref):
-    """
-    Retrieve parent Taxon.
-
-
-    Parameters:
-     - token
-     - ref
-    """
-    pass
-
-  def get_children(token, ref):
-    """
-    Retrieve children Taxon.
-
-
-    Parameters:
-     - token
-     - ref
-    """
-    pass
-
-  def get_genome_annotations(token, ref):
-    """
-    Retrieve associated GenomeAnnotation objects.
-
-
-    Parameters:
-     - token
-     - ref
-    """
-    pass
-
-  def get_scientific_lineage(token, ref):
-    """
-    Retrieve the scientific lineage.
-
-
-    Parameters:
-     - token
-     - ref
-    """
-    pass
-
-  def get_scientific_name(token, ref):
-    """
-    Retrieve the scientific name.
-
-
-    Parameters:
-     - token
-     - ref
-    """
-    pass
-
-  def get_taxonomic_id(token, ref):
-    """
-    Retrieve the taxonomic id.
-
-
-    Parameters:
-     - token
-     - ref
-    """
-    pass
-
-  def get_kingdom(token, ref):
-    """
-    Retrieve the kingdom.
-
-
-    Parameters:
-     - token
-     - ref
-    """
-    pass
-
-  def get_domain(token, ref):
-    """
-    Retrieve the domain.
-
-
-    Parameters:
-     - token
-     - ref
-    """
-    pass
-
-  def get_genetic_code(token, ref):
-    """
-    Retrieve the genetic code.
-
-
-    Parameters:
-     - token
-     - ref
-    """
-    pass
-
-  def get_aliases(token, ref):
-    """
-    Retrieve the aliases.
-
-
-    Parameters:
-     - token
-     - ref
-    """
-    pass
-
-
-class Client:
-  implements(Iface)
-
-  def __init__(self, transport, oprot_factory):
-    self._transport = transport
-    self._oprot_factory = oprot_factory
-    self._seqid = 0
-    self._reqs = {}
-
+class Iface(object):
   def get_info(self, token, ref):
     """
     Retrieve object info.
@@ -216,60 +27,7 @@ class Client:
      - token
      - ref
     """
-    seqid = self._seqid = self._seqid + 1
-    self._reqs[seqid] = defer.Deferred()
-
-    d = defer.maybeDeferred(self.send_get_info, token, ref)
-    d.addCallbacks(
-      callback=self.cb_send_get_info,
-      callbackArgs=(seqid,),
-      errback=self.eb_send_get_info,
-      errbackArgs=(seqid,))
-    return d
-
-  def cb_send_get_info(self, _, seqid):
-    return self._reqs[seqid]
-
-  def eb_send_get_info(self, f, seqid):
-    d = self._reqs.pop(seqid)
-    d.errback(f)
-    return d
-
-  def send_get_info(self, token, ref):
-    oprot = self._oprot_factory.getProtocol(self._transport)
-    oprot.writeMessageBegin('get_info', TMessageType.CALL, self._seqid)
-    args = get_info_args()
-    args.token = token
-    args.ref = ref
-    args.write(oprot)
-    oprot.writeMessageEnd()
-    oprot.trans.flush()
-
-  def recv_get_info(self, iprot, mtype, rseqid):
-    d = self._reqs.pop(rseqid)
-    if mtype == TMessageType.EXCEPTION:
-      x = TApplicationException()
-      x.read(iprot)
-      iprot.readMessageEnd()
-      return d.errback(x)
-    result = get_info_result()
-    result.read(iprot)
-    iprot.readMessageEnd()
-    if result.success is not None:
-      return d.callback(result.success)
-    if result.generic_exception is not None:
-      return d.errback(result.generic_exception)
-    if result.authorization_exception is not None:
-      return d.errback(result.authorization_exception)
-    if result.authentication_exception is not None:
-      return d.errback(result.authentication_exception)
-    if result.reference_exception is not None:
-      return d.errback(result.reference_exception)
-    if result.attribute_exception is not None:
-      return d.errback(result.attribute_exception)
-    if result.type_exception is not None:
-      return d.errback(result.type_exception)
-    return d.errback(TApplicationException(TApplicationException.MISSING_RESULT, "get_info failed: unknown result"))
+    pass
 
   def get_history(self, token, ref):
     """
@@ -280,60 +38,7 @@ class Client:
      - token
      - ref
     """
-    seqid = self._seqid = self._seqid + 1
-    self._reqs[seqid] = defer.Deferred()
-
-    d = defer.maybeDeferred(self.send_get_history, token, ref)
-    d.addCallbacks(
-      callback=self.cb_send_get_history,
-      callbackArgs=(seqid,),
-      errback=self.eb_send_get_history,
-      errbackArgs=(seqid,))
-    return d
-
-  def cb_send_get_history(self, _, seqid):
-    return self._reqs[seqid]
-
-  def eb_send_get_history(self, f, seqid):
-    d = self._reqs.pop(seqid)
-    d.errback(f)
-    return d
-
-  def send_get_history(self, token, ref):
-    oprot = self._oprot_factory.getProtocol(self._transport)
-    oprot.writeMessageBegin('get_history', TMessageType.CALL, self._seqid)
-    args = get_history_args()
-    args.token = token
-    args.ref = ref
-    args.write(oprot)
-    oprot.writeMessageEnd()
-    oprot.trans.flush()
-
-  def recv_get_history(self, iprot, mtype, rseqid):
-    d = self._reqs.pop(rseqid)
-    if mtype == TMessageType.EXCEPTION:
-      x = TApplicationException()
-      x.read(iprot)
-      iprot.readMessageEnd()
-      return d.errback(x)
-    result = get_history_result()
-    result.read(iprot)
-    iprot.readMessageEnd()
-    if result.success is not None:
-      return d.callback(result.success)
-    if result.generic_exception is not None:
-      return d.errback(result.generic_exception)
-    if result.authorization_exception is not None:
-      return d.errback(result.authorization_exception)
-    if result.authentication_exception is not None:
-      return d.errback(result.authentication_exception)
-    if result.reference_exception is not None:
-      return d.errback(result.reference_exception)
-    if result.attribute_exception is not None:
-      return d.errback(result.attribute_exception)
-    if result.type_exception is not None:
-      return d.errback(result.type_exception)
-    return d.errback(TApplicationException(TApplicationException.MISSING_RESULT, "get_history failed: unknown result"))
+    pass
 
   def get_provenance(self, token, ref):
     """
@@ -344,60 +49,7 @@ class Client:
      - token
      - ref
     """
-    seqid = self._seqid = self._seqid + 1
-    self._reqs[seqid] = defer.Deferred()
-
-    d = defer.maybeDeferred(self.send_get_provenance, token, ref)
-    d.addCallbacks(
-      callback=self.cb_send_get_provenance,
-      callbackArgs=(seqid,),
-      errback=self.eb_send_get_provenance,
-      errbackArgs=(seqid,))
-    return d
-
-  def cb_send_get_provenance(self, _, seqid):
-    return self._reqs[seqid]
-
-  def eb_send_get_provenance(self, f, seqid):
-    d = self._reqs.pop(seqid)
-    d.errback(f)
-    return d
-
-  def send_get_provenance(self, token, ref):
-    oprot = self._oprot_factory.getProtocol(self._transport)
-    oprot.writeMessageBegin('get_provenance', TMessageType.CALL, self._seqid)
-    args = get_provenance_args()
-    args.token = token
-    args.ref = ref
-    args.write(oprot)
-    oprot.writeMessageEnd()
-    oprot.trans.flush()
-
-  def recv_get_provenance(self, iprot, mtype, rseqid):
-    d = self._reqs.pop(rseqid)
-    if mtype == TMessageType.EXCEPTION:
-      x = TApplicationException()
-      x.read(iprot)
-      iprot.readMessageEnd()
-      return d.errback(x)
-    result = get_provenance_result()
-    result.read(iprot)
-    iprot.readMessageEnd()
-    if result.success is not None:
-      return d.callback(result.success)
-    if result.generic_exception is not None:
-      return d.errback(result.generic_exception)
-    if result.authorization_exception is not None:
-      return d.errback(result.authorization_exception)
-    if result.authentication_exception is not None:
-      return d.errback(result.authentication_exception)
-    if result.reference_exception is not None:
-      return d.errback(result.reference_exception)
-    if result.attribute_exception is not None:
-      return d.errback(result.attribute_exception)
-    if result.type_exception is not None:
-      return d.errback(result.type_exception)
-    return d.errback(TApplicationException(TApplicationException.MISSING_RESULT, "get_provenance failed: unknown result"))
+    pass
 
   def get_id(self, token, ref):
     """
@@ -408,60 +60,7 @@ class Client:
      - token
      - ref
     """
-    seqid = self._seqid = self._seqid + 1
-    self._reqs[seqid] = defer.Deferred()
-
-    d = defer.maybeDeferred(self.send_get_id, token, ref)
-    d.addCallbacks(
-      callback=self.cb_send_get_id,
-      callbackArgs=(seqid,),
-      errback=self.eb_send_get_id,
-      errbackArgs=(seqid,))
-    return d
-
-  def cb_send_get_id(self, _, seqid):
-    return self._reqs[seqid]
-
-  def eb_send_get_id(self, f, seqid):
-    d = self._reqs.pop(seqid)
-    d.errback(f)
-    return d
-
-  def send_get_id(self, token, ref):
-    oprot = self._oprot_factory.getProtocol(self._transport)
-    oprot.writeMessageBegin('get_id', TMessageType.CALL, self._seqid)
-    args = get_id_args()
-    args.token = token
-    args.ref = ref
-    args.write(oprot)
-    oprot.writeMessageEnd()
-    oprot.trans.flush()
-
-  def recv_get_id(self, iprot, mtype, rseqid):
-    d = self._reqs.pop(rseqid)
-    if mtype == TMessageType.EXCEPTION:
-      x = TApplicationException()
-      x.read(iprot)
-      iprot.readMessageEnd()
-      return d.errback(x)
-    result = get_id_result()
-    result.read(iprot)
-    iprot.readMessageEnd()
-    if result.success is not None:
-      return d.callback(result.success)
-    if result.generic_exception is not None:
-      return d.errback(result.generic_exception)
-    if result.authorization_exception is not None:
-      return d.errback(result.authorization_exception)
-    if result.authentication_exception is not None:
-      return d.errback(result.authentication_exception)
-    if result.reference_exception is not None:
-      return d.errback(result.reference_exception)
-    if result.attribute_exception is not None:
-      return d.errback(result.attribute_exception)
-    if result.type_exception is not None:
-      return d.errback(result.type_exception)
-    return d.errback(TApplicationException(TApplicationException.MISSING_RESULT, "get_id failed: unknown result"))
+    pass
 
   def get_name(self, token, ref):
     """
@@ -472,60 +71,7 @@ class Client:
      - token
      - ref
     """
-    seqid = self._seqid = self._seqid + 1
-    self._reqs[seqid] = defer.Deferred()
-
-    d = defer.maybeDeferred(self.send_get_name, token, ref)
-    d.addCallbacks(
-      callback=self.cb_send_get_name,
-      callbackArgs=(seqid,),
-      errback=self.eb_send_get_name,
-      errbackArgs=(seqid,))
-    return d
-
-  def cb_send_get_name(self, _, seqid):
-    return self._reqs[seqid]
-
-  def eb_send_get_name(self, f, seqid):
-    d = self._reqs.pop(seqid)
-    d.errback(f)
-    return d
-
-  def send_get_name(self, token, ref):
-    oprot = self._oprot_factory.getProtocol(self._transport)
-    oprot.writeMessageBegin('get_name', TMessageType.CALL, self._seqid)
-    args = get_name_args()
-    args.token = token
-    args.ref = ref
-    args.write(oprot)
-    oprot.writeMessageEnd()
-    oprot.trans.flush()
-
-  def recv_get_name(self, iprot, mtype, rseqid):
-    d = self._reqs.pop(rseqid)
-    if mtype == TMessageType.EXCEPTION:
-      x = TApplicationException()
-      x.read(iprot)
-      iprot.readMessageEnd()
-      return d.errback(x)
-    result = get_name_result()
-    result.read(iprot)
-    iprot.readMessageEnd()
-    if result.success is not None:
-      return d.callback(result.success)
-    if result.generic_exception is not None:
-      return d.errback(result.generic_exception)
-    if result.authorization_exception is not None:
-      return d.errback(result.authorization_exception)
-    if result.authentication_exception is not None:
-      return d.errback(result.authentication_exception)
-    if result.reference_exception is not None:
-      return d.errback(result.reference_exception)
-    if result.attribute_exception is not None:
-      return d.errback(result.attribute_exception)
-    if result.type_exception is not None:
-      return d.errback(result.type_exception)
-    return d.errback(TApplicationException(TApplicationException.MISSING_RESULT, "get_name failed: unknown result"))
+    pass
 
   def get_version(self, token, ref):
     """
@@ -536,60 +82,7 @@ class Client:
      - token
      - ref
     """
-    seqid = self._seqid = self._seqid + 1
-    self._reqs[seqid] = defer.Deferred()
-
-    d = defer.maybeDeferred(self.send_get_version, token, ref)
-    d.addCallbacks(
-      callback=self.cb_send_get_version,
-      callbackArgs=(seqid,),
-      errback=self.eb_send_get_version,
-      errbackArgs=(seqid,))
-    return d
-
-  def cb_send_get_version(self, _, seqid):
-    return self._reqs[seqid]
-
-  def eb_send_get_version(self, f, seqid):
-    d = self._reqs.pop(seqid)
-    d.errback(f)
-    return d
-
-  def send_get_version(self, token, ref):
-    oprot = self._oprot_factory.getProtocol(self._transport)
-    oprot.writeMessageBegin('get_version', TMessageType.CALL, self._seqid)
-    args = get_version_args()
-    args.token = token
-    args.ref = ref
-    args.write(oprot)
-    oprot.writeMessageEnd()
-    oprot.trans.flush()
-
-  def recv_get_version(self, iprot, mtype, rseqid):
-    d = self._reqs.pop(rseqid)
-    if mtype == TMessageType.EXCEPTION:
-      x = TApplicationException()
-      x.read(iprot)
-      iprot.readMessageEnd()
-      return d.errback(x)
-    result = get_version_result()
-    result.read(iprot)
-    iprot.readMessageEnd()
-    if result.success is not None:
-      return d.callback(result.success)
-    if result.generic_exception is not None:
-      return d.errback(result.generic_exception)
-    if result.authorization_exception is not None:
-      return d.errback(result.authorization_exception)
-    if result.authentication_exception is not None:
-      return d.errback(result.authentication_exception)
-    if result.reference_exception is not None:
-      return d.errback(result.reference_exception)
-    if result.attribute_exception is not None:
-      return d.errback(result.attribute_exception)
-    if result.type_exception is not None:
-      return d.errback(result.type_exception)
-    return d.errback(TApplicationException(TApplicationException.MISSING_RESULT, "get_version failed: unknown result"))
+    pass
 
   def get_parent(self, token, ref):
     """
@@ -600,60 +93,7 @@ class Client:
      - token
      - ref
     """
-    seqid = self._seqid = self._seqid + 1
-    self._reqs[seqid] = defer.Deferred()
-
-    d = defer.maybeDeferred(self.send_get_parent, token, ref)
-    d.addCallbacks(
-      callback=self.cb_send_get_parent,
-      callbackArgs=(seqid,),
-      errback=self.eb_send_get_parent,
-      errbackArgs=(seqid,))
-    return d
-
-  def cb_send_get_parent(self, _, seqid):
-    return self._reqs[seqid]
-
-  def eb_send_get_parent(self, f, seqid):
-    d = self._reqs.pop(seqid)
-    d.errback(f)
-    return d
-
-  def send_get_parent(self, token, ref):
-    oprot = self._oprot_factory.getProtocol(self._transport)
-    oprot.writeMessageBegin('get_parent', TMessageType.CALL, self._seqid)
-    args = get_parent_args()
-    args.token = token
-    args.ref = ref
-    args.write(oprot)
-    oprot.writeMessageEnd()
-    oprot.trans.flush()
-
-  def recv_get_parent(self, iprot, mtype, rseqid):
-    d = self._reqs.pop(rseqid)
-    if mtype == TMessageType.EXCEPTION:
-      x = TApplicationException()
-      x.read(iprot)
-      iprot.readMessageEnd()
-      return d.errback(x)
-    result = get_parent_result()
-    result.read(iprot)
-    iprot.readMessageEnd()
-    if result.success is not None:
-      return d.callback(result.success)
-    if result.generic_exception is not None:
-      return d.errback(result.generic_exception)
-    if result.authorization_exception is not None:
-      return d.errback(result.authorization_exception)
-    if result.authentication_exception is not None:
-      return d.errback(result.authentication_exception)
-    if result.reference_exception is not None:
-      return d.errback(result.reference_exception)
-    if result.attribute_exception is not None:
-      return d.errback(result.attribute_exception)
-    if result.type_exception is not None:
-      return d.errback(result.type_exception)
-    return d.errback(TApplicationException(TApplicationException.MISSING_RESULT, "get_parent failed: unknown result"))
+    pass
 
   def get_children(self, token, ref):
     """
@@ -664,60 +104,7 @@ class Client:
      - token
      - ref
     """
-    seqid = self._seqid = self._seqid + 1
-    self._reqs[seqid] = defer.Deferred()
-
-    d = defer.maybeDeferred(self.send_get_children, token, ref)
-    d.addCallbacks(
-      callback=self.cb_send_get_children,
-      callbackArgs=(seqid,),
-      errback=self.eb_send_get_children,
-      errbackArgs=(seqid,))
-    return d
-
-  def cb_send_get_children(self, _, seqid):
-    return self._reqs[seqid]
-
-  def eb_send_get_children(self, f, seqid):
-    d = self._reqs.pop(seqid)
-    d.errback(f)
-    return d
-
-  def send_get_children(self, token, ref):
-    oprot = self._oprot_factory.getProtocol(self._transport)
-    oprot.writeMessageBegin('get_children', TMessageType.CALL, self._seqid)
-    args = get_children_args()
-    args.token = token
-    args.ref = ref
-    args.write(oprot)
-    oprot.writeMessageEnd()
-    oprot.trans.flush()
-
-  def recv_get_children(self, iprot, mtype, rseqid):
-    d = self._reqs.pop(rseqid)
-    if mtype == TMessageType.EXCEPTION:
-      x = TApplicationException()
-      x.read(iprot)
-      iprot.readMessageEnd()
-      return d.errback(x)
-    result = get_children_result()
-    result.read(iprot)
-    iprot.readMessageEnd()
-    if result.success is not None:
-      return d.callback(result.success)
-    if result.generic_exception is not None:
-      return d.errback(result.generic_exception)
-    if result.authorization_exception is not None:
-      return d.errback(result.authorization_exception)
-    if result.authentication_exception is not None:
-      return d.errback(result.authentication_exception)
-    if result.reference_exception is not None:
-      return d.errback(result.reference_exception)
-    if result.attribute_exception is not None:
-      return d.errback(result.attribute_exception)
-    if result.type_exception is not None:
-      return d.errback(result.type_exception)
-    return d.errback(TApplicationException(TApplicationException.MISSING_RESULT, "get_children failed: unknown result"))
+    pass
 
   def get_genome_annotations(self, token, ref):
     """
@@ -728,60 +115,7 @@ class Client:
      - token
      - ref
     """
-    seqid = self._seqid = self._seqid + 1
-    self._reqs[seqid] = defer.Deferred()
-
-    d = defer.maybeDeferred(self.send_get_genome_annotations, token, ref)
-    d.addCallbacks(
-      callback=self.cb_send_get_genome_annotations,
-      callbackArgs=(seqid,),
-      errback=self.eb_send_get_genome_annotations,
-      errbackArgs=(seqid,))
-    return d
-
-  def cb_send_get_genome_annotations(self, _, seqid):
-    return self._reqs[seqid]
-
-  def eb_send_get_genome_annotations(self, f, seqid):
-    d = self._reqs.pop(seqid)
-    d.errback(f)
-    return d
-
-  def send_get_genome_annotations(self, token, ref):
-    oprot = self._oprot_factory.getProtocol(self._transport)
-    oprot.writeMessageBegin('get_genome_annotations', TMessageType.CALL, self._seqid)
-    args = get_genome_annotations_args()
-    args.token = token
-    args.ref = ref
-    args.write(oprot)
-    oprot.writeMessageEnd()
-    oprot.trans.flush()
-
-  def recv_get_genome_annotations(self, iprot, mtype, rseqid):
-    d = self._reqs.pop(rseqid)
-    if mtype == TMessageType.EXCEPTION:
-      x = TApplicationException()
-      x.read(iprot)
-      iprot.readMessageEnd()
-      return d.errback(x)
-    result = get_genome_annotations_result()
-    result.read(iprot)
-    iprot.readMessageEnd()
-    if result.success is not None:
-      return d.callback(result.success)
-    if result.generic_exception is not None:
-      return d.errback(result.generic_exception)
-    if result.authorization_exception is not None:
-      return d.errback(result.authorization_exception)
-    if result.authentication_exception is not None:
-      return d.errback(result.authentication_exception)
-    if result.reference_exception is not None:
-      return d.errback(result.reference_exception)
-    if result.attribute_exception is not None:
-      return d.errback(result.attribute_exception)
-    if result.type_exception is not None:
-      return d.errback(result.type_exception)
-    return d.errback(TApplicationException(TApplicationException.MISSING_RESULT, "get_genome_annotations failed: unknown result"))
+    pass
 
   def get_scientific_lineage(self, token, ref):
     """
@@ -792,60 +126,7 @@ class Client:
      - token
      - ref
     """
-    seqid = self._seqid = self._seqid + 1
-    self._reqs[seqid] = defer.Deferred()
-
-    d = defer.maybeDeferred(self.send_get_scientific_lineage, token, ref)
-    d.addCallbacks(
-      callback=self.cb_send_get_scientific_lineage,
-      callbackArgs=(seqid,),
-      errback=self.eb_send_get_scientific_lineage,
-      errbackArgs=(seqid,))
-    return d
-
-  def cb_send_get_scientific_lineage(self, _, seqid):
-    return self._reqs[seqid]
-
-  def eb_send_get_scientific_lineage(self, f, seqid):
-    d = self._reqs.pop(seqid)
-    d.errback(f)
-    return d
-
-  def send_get_scientific_lineage(self, token, ref):
-    oprot = self._oprot_factory.getProtocol(self._transport)
-    oprot.writeMessageBegin('get_scientific_lineage', TMessageType.CALL, self._seqid)
-    args = get_scientific_lineage_args()
-    args.token = token
-    args.ref = ref
-    args.write(oprot)
-    oprot.writeMessageEnd()
-    oprot.trans.flush()
-
-  def recv_get_scientific_lineage(self, iprot, mtype, rseqid):
-    d = self._reqs.pop(rseqid)
-    if mtype == TMessageType.EXCEPTION:
-      x = TApplicationException()
-      x.read(iprot)
-      iprot.readMessageEnd()
-      return d.errback(x)
-    result = get_scientific_lineage_result()
-    result.read(iprot)
-    iprot.readMessageEnd()
-    if result.success is not None:
-      return d.callback(result.success)
-    if result.generic_exception is not None:
-      return d.errback(result.generic_exception)
-    if result.authorization_exception is not None:
-      return d.errback(result.authorization_exception)
-    if result.authentication_exception is not None:
-      return d.errback(result.authentication_exception)
-    if result.reference_exception is not None:
-      return d.errback(result.reference_exception)
-    if result.attribute_exception is not None:
-      return d.errback(result.attribute_exception)
-    if result.type_exception is not None:
-      return d.errback(result.type_exception)
-    return d.errback(TApplicationException(TApplicationException.MISSING_RESULT, "get_scientific_lineage failed: unknown result"))
+    pass
 
   def get_scientific_name(self, token, ref):
     """
@@ -856,60 +137,7 @@ class Client:
      - token
      - ref
     """
-    seqid = self._seqid = self._seqid + 1
-    self._reqs[seqid] = defer.Deferred()
-
-    d = defer.maybeDeferred(self.send_get_scientific_name, token, ref)
-    d.addCallbacks(
-      callback=self.cb_send_get_scientific_name,
-      callbackArgs=(seqid,),
-      errback=self.eb_send_get_scientific_name,
-      errbackArgs=(seqid,))
-    return d
-
-  def cb_send_get_scientific_name(self, _, seqid):
-    return self._reqs[seqid]
-
-  def eb_send_get_scientific_name(self, f, seqid):
-    d = self._reqs.pop(seqid)
-    d.errback(f)
-    return d
-
-  def send_get_scientific_name(self, token, ref):
-    oprot = self._oprot_factory.getProtocol(self._transport)
-    oprot.writeMessageBegin('get_scientific_name', TMessageType.CALL, self._seqid)
-    args = get_scientific_name_args()
-    args.token = token
-    args.ref = ref
-    args.write(oprot)
-    oprot.writeMessageEnd()
-    oprot.trans.flush()
-
-  def recv_get_scientific_name(self, iprot, mtype, rseqid):
-    d = self._reqs.pop(rseqid)
-    if mtype == TMessageType.EXCEPTION:
-      x = TApplicationException()
-      x.read(iprot)
-      iprot.readMessageEnd()
-      return d.errback(x)
-    result = get_scientific_name_result()
-    result.read(iprot)
-    iprot.readMessageEnd()
-    if result.success is not None:
-      return d.callback(result.success)
-    if result.generic_exception is not None:
-      return d.errback(result.generic_exception)
-    if result.authorization_exception is not None:
-      return d.errback(result.authorization_exception)
-    if result.authentication_exception is not None:
-      return d.errback(result.authentication_exception)
-    if result.reference_exception is not None:
-      return d.errback(result.reference_exception)
-    if result.attribute_exception is not None:
-      return d.errback(result.attribute_exception)
-    if result.type_exception is not None:
-      return d.errback(result.type_exception)
-    return d.errback(TApplicationException(TApplicationException.MISSING_RESULT, "get_scientific_name failed: unknown result"))
+    pass
 
   def get_taxonomic_id(self, token, ref):
     """
@@ -920,60 +148,7 @@ class Client:
      - token
      - ref
     """
-    seqid = self._seqid = self._seqid + 1
-    self._reqs[seqid] = defer.Deferred()
-
-    d = defer.maybeDeferred(self.send_get_taxonomic_id, token, ref)
-    d.addCallbacks(
-      callback=self.cb_send_get_taxonomic_id,
-      callbackArgs=(seqid,),
-      errback=self.eb_send_get_taxonomic_id,
-      errbackArgs=(seqid,))
-    return d
-
-  def cb_send_get_taxonomic_id(self, _, seqid):
-    return self._reqs[seqid]
-
-  def eb_send_get_taxonomic_id(self, f, seqid):
-    d = self._reqs.pop(seqid)
-    d.errback(f)
-    return d
-
-  def send_get_taxonomic_id(self, token, ref):
-    oprot = self._oprot_factory.getProtocol(self._transport)
-    oprot.writeMessageBegin('get_taxonomic_id', TMessageType.CALL, self._seqid)
-    args = get_taxonomic_id_args()
-    args.token = token
-    args.ref = ref
-    args.write(oprot)
-    oprot.writeMessageEnd()
-    oprot.trans.flush()
-
-  def recv_get_taxonomic_id(self, iprot, mtype, rseqid):
-    d = self._reqs.pop(rseqid)
-    if mtype == TMessageType.EXCEPTION:
-      x = TApplicationException()
-      x.read(iprot)
-      iprot.readMessageEnd()
-      return d.errback(x)
-    result = get_taxonomic_id_result()
-    result.read(iprot)
-    iprot.readMessageEnd()
-    if result.success is not None:
-      return d.callback(result.success)
-    if result.generic_exception is not None:
-      return d.errback(result.generic_exception)
-    if result.authorization_exception is not None:
-      return d.errback(result.authorization_exception)
-    if result.authentication_exception is not None:
-      return d.errback(result.authentication_exception)
-    if result.reference_exception is not None:
-      return d.errback(result.reference_exception)
-    if result.attribute_exception is not None:
-      return d.errback(result.attribute_exception)
-    if result.type_exception is not None:
-      return d.errback(result.type_exception)
-    return d.errback(TApplicationException(TApplicationException.MISSING_RESULT, "get_taxonomic_id failed: unknown result"))
+    pass
 
   def get_kingdom(self, token, ref):
     """
@@ -984,60 +159,7 @@ class Client:
      - token
      - ref
     """
-    seqid = self._seqid = self._seqid + 1
-    self._reqs[seqid] = defer.Deferred()
-
-    d = defer.maybeDeferred(self.send_get_kingdom, token, ref)
-    d.addCallbacks(
-      callback=self.cb_send_get_kingdom,
-      callbackArgs=(seqid,),
-      errback=self.eb_send_get_kingdom,
-      errbackArgs=(seqid,))
-    return d
-
-  def cb_send_get_kingdom(self, _, seqid):
-    return self._reqs[seqid]
-
-  def eb_send_get_kingdom(self, f, seqid):
-    d = self._reqs.pop(seqid)
-    d.errback(f)
-    return d
-
-  def send_get_kingdom(self, token, ref):
-    oprot = self._oprot_factory.getProtocol(self._transport)
-    oprot.writeMessageBegin('get_kingdom', TMessageType.CALL, self._seqid)
-    args = get_kingdom_args()
-    args.token = token
-    args.ref = ref
-    args.write(oprot)
-    oprot.writeMessageEnd()
-    oprot.trans.flush()
-
-  def recv_get_kingdom(self, iprot, mtype, rseqid):
-    d = self._reqs.pop(rseqid)
-    if mtype == TMessageType.EXCEPTION:
-      x = TApplicationException()
-      x.read(iprot)
-      iprot.readMessageEnd()
-      return d.errback(x)
-    result = get_kingdom_result()
-    result.read(iprot)
-    iprot.readMessageEnd()
-    if result.success is not None:
-      return d.callback(result.success)
-    if result.generic_exception is not None:
-      return d.errback(result.generic_exception)
-    if result.authorization_exception is not None:
-      return d.errback(result.authorization_exception)
-    if result.authentication_exception is not None:
-      return d.errback(result.authentication_exception)
-    if result.reference_exception is not None:
-      return d.errback(result.reference_exception)
-    if result.attribute_exception is not None:
-      return d.errback(result.attribute_exception)
-    if result.type_exception is not None:
-      return d.errback(result.type_exception)
-    return d.errback(TApplicationException(TApplicationException.MISSING_RESULT, "get_kingdom failed: unknown result"))
+    pass
 
   def get_domain(self, token, ref):
     """
@@ -1048,60 +170,7 @@ class Client:
      - token
      - ref
     """
-    seqid = self._seqid = self._seqid + 1
-    self._reqs[seqid] = defer.Deferred()
-
-    d = defer.maybeDeferred(self.send_get_domain, token, ref)
-    d.addCallbacks(
-      callback=self.cb_send_get_domain,
-      callbackArgs=(seqid,),
-      errback=self.eb_send_get_domain,
-      errbackArgs=(seqid,))
-    return d
-
-  def cb_send_get_domain(self, _, seqid):
-    return self._reqs[seqid]
-
-  def eb_send_get_domain(self, f, seqid):
-    d = self._reqs.pop(seqid)
-    d.errback(f)
-    return d
-
-  def send_get_domain(self, token, ref):
-    oprot = self._oprot_factory.getProtocol(self._transport)
-    oprot.writeMessageBegin('get_domain', TMessageType.CALL, self._seqid)
-    args = get_domain_args()
-    args.token = token
-    args.ref = ref
-    args.write(oprot)
-    oprot.writeMessageEnd()
-    oprot.trans.flush()
-
-  def recv_get_domain(self, iprot, mtype, rseqid):
-    d = self._reqs.pop(rseqid)
-    if mtype == TMessageType.EXCEPTION:
-      x = TApplicationException()
-      x.read(iprot)
-      iprot.readMessageEnd()
-      return d.errback(x)
-    result = get_domain_result()
-    result.read(iprot)
-    iprot.readMessageEnd()
-    if result.success is not None:
-      return d.callback(result.success)
-    if result.generic_exception is not None:
-      return d.errback(result.generic_exception)
-    if result.authorization_exception is not None:
-      return d.errback(result.authorization_exception)
-    if result.authentication_exception is not None:
-      return d.errback(result.authentication_exception)
-    if result.reference_exception is not None:
-      return d.errback(result.reference_exception)
-    if result.attribute_exception is not None:
-      return d.errback(result.attribute_exception)
-    if result.type_exception is not None:
-      return d.errback(result.type_exception)
-    return d.errback(TApplicationException(TApplicationException.MISSING_RESULT, "get_domain failed: unknown result"))
+    pass
 
   def get_genetic_code(self, token, ref):
     """
@@ -1112,60 +181,7 @@ class Client:
      - token
      - ref
     """
-    seqid = self._seqid = self._seqid + 1
-    self._reqs[seqid] = defer.Deferred()
-
-    d = defer.maybeDeferred(self.send_get_genetic_code, token, ref)
-    d.addCallbacks(
-      callback=self.cb_send_get_genetic_code,
-      callbackArgs=(seqid,),
-      errback=self.eb_send_get_genetic_code,
-      errbackArgs=(seqid,))
-    return d
-
-  def cb_send_get_genetic_code(self, _, seqid):
-    return self._reqs[seqid]
-
-  def eb_send_get_genetic_code(self, f, seqid):
-    d = self._reqs.pop(seqid)
-    d.errback(f)
-    return d
-
-  def send_get_genetic_code(self, token, ref):
-    oprot = self._oprot_factory.getProtocol(self._transport)
-    oprot.writeMessageBegin('get_genetic_code', TMessageType.CALL, self._seqid)
-    args = get_genetic_code_args()
-    args.token = token
-    args.ref = ref
-    args.write(oprot)
-    oprot.writeMessageEnd()
-    oprot.trans.flush()
-
-  def recv_get_genetic_code(self, iprot, mtype, rseqid):
-    d = self._reqs.pop(rseqid)
-    if mtype == TMessageType.EXCEPTION:
-      x = TApplicationException()
-      x.read(iprot)
-      iprot.readMessageEnd()
-      return d.errback(x)
-    result = get_genetic_code_result()
-    result.read(iprot)
-    iprot.readMessageEnd()
-    if result.success is not None:
-      return d.callback(result.success)
-    if result.generic_exception is not None:
-      return d.errback(result.generic_exception)
-    if result.authorization_exception is not None:
-      return d.errback(result.authorization_exception)
-    if result.authentication_exception is not None:
-      return d.errback(result.authentication_exception)
-    if result.reference_exception is not None:
-      return d.errback(result.reference_exception)
-    if result.attribute_exception is not None:
-      return d.errback(result.attribute_exception)
-    if result.type_exception is not None:
-      return d.errback(result.type_exception)
-    return d.errback(TApplicationException(TApplicationException.MISSING_RESULT, "get_genetic_code failed: unknown result"))
+    pass
 
   def get_aliases(self, token, ref):
     """
@@ -1176,67 +192,788 @@ class Client:
      - token
      - ref
     """
-    seqid = self._seqid = self._seqid + 1
-    self._reqs[seqid] = defer.Deferred()
+    pass
 
-    d = defer.maybeDeferred(self.send_get_aliases, token, ref)
-    d.addCallbacks(
-      callback=self.cb_send_get_aliases,
-      callbackArgs=(seqid,),
-      errback=self.eb_send_get_aliases,
-      errbackArgs=(seqid,))
-    return d
 
-  def cb_send_get_aliases(self, _, seqid):
-    return self._reqs[seqid]
+class Client(Iface):
+  def __init__(self, iprot, oprot=None):
+    self._iprot = self._oprot = iprot
+    if oprot is not None:
+      self._oprot = oprot
+    self._seqid = 0
 
-  def eb_send_get_aliases(self, f, seqid):
-    d = self._reqs.pop(seqid)
-    d.errback(f)
-    return d
+  def get_info(self, token, ref):
+    """
+    Retrieve object info.
 
-  def send_get_aliases(self, token, ref):
-    oprot = self._oprot_factory.getProtocol(self._transport)
-    oprot.writeMessageBegin('get_aliases', TMessageType.CALL, self._seqid)
-    args = get_aliases_args()
+
+    Parameters:
+     - token
+     - ref
+    """
+    self.send_get_info(token, ref)
+    return self.recv_get_info()
+
+  def send_get_info(self, token, ref):
+    self._oprot.writeMessageBegin('get_info', TMessageType.CALL, self._seqid)
+    args = get_info_args()
     args.token = token
     args.ref = ref
-    args.write(oprot)
-    oprot.writeMessageEnd()
-    oprot.trans.flush()
+    args.write(self._oprot)
+    self._oprot.writeMessageEnd()
+    self._oprot.trans.flush()
 
-  def recv_get_aliases(self, iprot, mtype, rseqid):
-    d = self._reqs.pop(rseqid)
+  def recv_get_info(self):
+    iprot = self._iprot
+    (fname, mtype, rseqid) = iprot.readMessageBegin()
     if mtype == TMessageType.EXCEPTION:
       x = TApplicationException()
       x.read(iprot)
       iprot.readMessageEnd()
-      return d.errback(x)
+      raise x
+    result = get_info_result()
+    result.read(iprot)
+    iprot.readMessageEnd()
+    if result.success is not None:
+      return result.success
+    if result.generic_exception is not None:
+      raise result.generic_exception
+    if result.authorization_exception is not None:
+      raise result.authorization_exception
+    if result.authentication_exception is not None:
+      raise result.authentication_exception
+    if result.reference_exception is not None:
+      raise result.reference_exception
+    if result.attribute_exception is not None:
+      raise result.attribute_exception
+    if result.type_exception is not None:
+      raise result.type_exception
+    raise TApplicationException(TApplicationException.MISSING_RESULT, "get_info failed: unknown result");
+
+  def get_history(self, token, ref):
+    """
+    Retrieve object history.
+
+
+    Parameters:
+     - token
+     - ref
+    """
+    self.send_get_history(token, ref)
+    return self.recv_get_history()
+
+  def send_get_history(self, token, ref):
+    self._oprot.writeMessageBegin('get_history', TMessageType.CALL, self._seqid)
+    args = get_history_args()
+    args.token = token
+    args.ref = ref
+    args.write(self._oprot)
+    self._oprot.writeMessageEnd()
+    self._oprot.trans.flush()
+
+  def recv_get_history(self):
+    iprot = self._iprot
+    (fname, mtype, rseqid) = iprot.readMessageBegin()
+    if mtype == TMessageType.EXCEPTION:
+      x = TApplicationException()
+      x.read(iprot)
+      iprot.readMessageEnd()
+      raise x
+    result = get_history_result()
+    result.read(iprot)
+    iprot.readMessageEnd()
+    if result.success is not None:
+      return result.success
+    if result.generic_exception is not None:
+      raise result.generic_exception
+    if result.authorization_exception is not None:
+      raise result.authorization_exception
+    if result.authentication_exception is not None:
+      raise result.authentication_exception
+    if result.reference_exception is not None:
+      raise result.reference_exception
+    if result.attribute_exception is not None:
+      raise result.attribute_exception
+    if result.type_exception is not None:
+      raise result.type_exception
+    raise TApplicationException(TApplicationException.MISSING_RESULT, "get_history failed: unknown result");
+
+  def get_provenance(self, token, ref):
+    """
+    Retrieve object provenance.
+
+
+    Parameters:
+     - token
+     - ref
+    """
+    self.send_get_provenance(token, ref)
+    return self.recv_get_provenance()
+
+  def send_get_provenance(self, token, ref):
+    self._oprot.writeMessageBegin('get_provenance', TMessageType.CALL, self._seqid)
+    args = get_provenance_args()
+    args.token = token
+    args.ref = ref
+    args.write(self._oprot)
+    self._oprot.writeMessageEnd()
+    self._oprot.trans.flush()
+
+  def recv_get_provenance(self):
+    iprot = self._iprot
+    (fname, mtype, rseqid) = iprot.readMessageBegin()
+    if mtype == TMessageType.EXCEPTION:
+      x = TApplicationException()
+      x.read(iprot)
+      iprot.readMessageEnd()
+      raise x
+    result = get_provenance_result()
+    result.read(iprot)
+    iprot.readMessageEnd()
+    if result.success is not None:
+      return result.success
+    if result.generic_exception is not None:
+      raise result.generic_exception
+    if result.authorization_exception is not None:
+      raise result.authorization_exception
+    if result.authentication_exception is not None:
+      raise result.authentication_exception
+    if result.reference_exception is not None:
+      raise result.reference_exception
+    if result.attribute_exception is not None:
+      raise result.attribute_exception
+    if result.type_exception is not None:
+      raise result.type_exception
+    raise TApplicationException(TApplicationException.MISSING_RESULT, "get_provenance failed: unknown result");
+
+  def get_id(self, token, ref):
+    """
+    Retrieve object identifier.
+
+
+    Parameters:
+     - token
+     - ref
+    """
+    self.send_get_id(token, ref)
+    return self.recv_get_id()
+
+  def send_get_id(self, token, ref):
+    self._oprot.writeMessageBegin('get_id', TMessageType.CALL, self._seqid)
+    args = get_id_args()
+    args.token = token
+    args.ref = ref
+    args.write(self._oprot)
+    self._oprot.writeMessageEnd()
+    self._oprot.trans.flush()
+
+  def recv_get_id(self):
+    iprot = self._iprot
+    (fname, mtype, rseqid) = iprot.readMessageBegin()
+    if mtype == TMessageType.EXCEPTION:
+      x = TApplicationException()
+      x.read(iprot)
+      iprot.readMessageEnd()
+      raise x
+    result = get_id_result()
+    result.read(iprot)
+    iprot.readMessageEnd()
+    if result.success is not None:
+      return result.success
+    if result.generic_exception is not None:
+      raise result.generic_exception
+    if result.authorization_exception is not None:
+      raise result.authorization_exception
+    if result.authentication_exception is not None:
+      raise result.authentication_exception
+    if result.reference_exception is not None:
+      raise result.reference_exception
+    if result.attribute_exception is not None:
+      raise result.attribute_exception
+    if result.type_exception is not None:
+      raise result.type_exception
+    raise TApplicationException(TApplicationException.MISSING_RESULT, "get_id failed: unknown result");
+
+  def get_name(self, token, ref):
+    """
+    Retrieve object name.
+
+
+    Parameters:
+     - token
+     - ref
+    """
+    self.send_get_name(token, ref)
+    return self.recv_get_name()
+
+  def send_get_name(self, token, ref):
+    self._oprot.writeMessageBegin('get_name', TMessageType.CALL, self._seqid)
+    args = get_name_args()
+    args.token = token
+    args.ref = ref
+    args.write(self._oprot)
+    self._oprot.writeMessageEnd()
+    self._oprot.trans.flush()
+
+  def recv_get_name(self):
+    iprot = self._iprot
+    (fname, mtype, rseqid) = iprot.readMessageBegin()
+    if mtype == TMessageType.EXCEPTION:
+      x = TApplicationException()
+      x.read(iprot)
+      iprot.readMessageEnd()
+      raise x
+    result = get_name_result()
+    result.read(iprot)
+    iprot.readMessageEnd()
+    if result.success is not None:
+      return result.success
+    if result.generic_exception is not None:
+      raise result.generic_exception
+    if result.authorization_exception is not None:
+      raise result.authorization_exception
+    if result.authentication_exception is not None:
+      raise result.authentication_exception
+    if result.reference_exception is not None:
+      raise result.reference_exception
+    if result.attribute_exception is not None:
+      raise result.attribute_exception
+    if result.type_exception is not None:
+      raise result.type_exception
+    raise TApplicationException(TApplicationException.MISSING_RESULT, "get_name failed: unknown result");
+
+  def get_version(self, token, ref):
+    """
+    Retrieve object version.
+
+
+    Parameters:
+     - token
+     - ref
+    """
+    self.send_get_version(token, ref)
+    return self.recv_get_version()
+
+  def send_get_version(self, token, ref):
+    self._oprot.writeMessageBegin('get_version', TMessageType.CALL, self._seqid)
+    args = get_version_args()
+    args.token = token
+    args.ref = ref
+    args.write(self._oprot)
+    self._oprot.writeMessageEnd()
+    self._oprot.trans.flush()
+
+  def recv_get_version(self):
+    iprot = self._iprot
+    (fname, mtype, rseqid) = iprot.readMessageBegin()
+    if mtype == TMessageType.EXCEPTION:
+      x = TApplicationException()
+      x.read(iprot)
+      iprot.readMessageEnd()
+      raise x
+    result = get_version_result()
+    result.read(iprot)
+    iprot.readMessageEnd()
+    if result.success is not None:
+      return result.success
+    if result.generic_exception is not None:
+      raise result.generic_exception
+    if result.authorization_exception is not None:
+      raise result.authorization_exception
+    if result.authentication_exception is not None:
+      raise result.authentication_exception
+    if result.reference_exception is not None:
+      raise result.reference_exception
+    if result.attribute_exception is not None:
+      raise result.attribute_exception
+    if result.type_exception is not None:
+      raise result.type_exception
+    raise TApplicationException(TApplicationException.MISSING_RESULT, "get_version failed: unknown result");
+
+  def get_parent(self, token, ref):
+    """
+    Retrieve parent Taxon.
+
+
+    Parameters:
+     - token
+     - ref
+    """
+    self.send_get_parent(token, ref)
+    return self.recv_get_parent()
+
+  def send_get_parent(self, token, ref):
+    self._oprot.writeMessageBegin('get_parent', TMessageType.CALL, self._seqid)
+    args = get_parent_args()
+    args.token = token
+    args.ref = ref
+    args.write(self._oprot)
+    self._oprot.writeMessageEnd()
+    self._oprot.trans.flush()
+
+  def recv_get_parent(self):
+    iprot = self._iprot
+    (fname, mtype, rseqid) = iprot.readMessageBegin()
+    if mtype == TMessageType.EXCEPTION:
+      x = TApplicationException()
+      x.read(iprot)
+      iprot.readMessageEnd()
+      raise x
+    result = get_parent_result()
+    result.read(iprot)
+    iprot.readMessageEnd()
+    if result.success is not None:
+      return result.success
+    if result.generic_exception is not None:
+      raise result.generic_exception
+    if result.authorization_exception is not None:
+      raise result.authorization_exception
+    if result.authentication_exception is not None:
+      raise result.authentication_exception
+    if result.reference_exception is not None:
+      raise result.reference_exception
+    if result.attribute_exception is not None:
+      raise result.attribute_exception
+    if result.type_exception is not None:
+      raise result.type_exception
+    raise TApplicationException(TApplicationException.MISSING_RESULT, "get_parent failed: unknown result");
+
+  def get_children(self, token, ref):
+    """
+    Retrieve children Taxon.
+
+
+    Parameters:
+     - token
+     - ref
+    """
+    self.send_get_children(token, ref)
+    return self.recv_get_children()
+
+  def send_get_children(self, token, ref):
+    self._oprot.writeMessageBegin('get_children', TMessageType.CALL, self._seqid)
+    args = get_children_args()
+    args.token = token
+    args.ref = ref
+    args.write(self._oprot)
+    self._oprot.writeMessageEnd()
+    self._oprot.trans.flush()
+
+  def recv_get_children(self):
+    iprot = self._iprot
+    (fname, mtype, rseqid) = iprot.readMessageBegin()
+    if mtype == TMessageType.EXCEPTION:
+      x = TApplicationException()
+      x.read(iprot)
+      iprot.readMessageEnd()
+      raise x
+    result = get_children_result()
+    result.read(iprot)
+    iprot.readMessageEnd()
+    if result.success is not None:
+      return result.success
+    if result.generic_exception is not None:
+      raise result.generic_exception
+    if result.authorization_exception is not None:
+      raise result.authorization_exception
+    if result.authentication_exception is not None:
+      raise result.authentication_exception
+    if result.reference_exception is not None:
+      raise result.reference_exception
+    if result.attribute_exception is not None:
+      raise result.attribute_exception
+    if result.type_exception is not None:
+      raise result.type_exception
+    raise TApplicationException(TApplicationException.MISSING_RESULT, "get_children failed: unknown result");
+
+  def get_genome_annotations(self, token, ref):
+    """
+    Retrieve associated GenomeAnnotation objects.
+
+
+    Parameters:
+     - token
+     - ref
+    """
+    self.send_get_genome_annotations(token, ref)
+    return self.recv_get_genome_annotations()
+
+  def send_get_genome_annotations(self, token, ref):
+    self._oprot.writeMessageBegin('get_genome_annotations', TMessageType.CALL, self._seqid)
+    args = get_genome_annotations_args()
+    args.token = token
+    args.ref = ref
+    args.write(self._oprot)
+    self._oprot.writeMessageEnd()
+    self._oprot.trans.flush()
+
+  def recv_get_genome_annotations(self):
+    iprot = self._iprot
+    (fname, mtype, rseqid) = iprot.readMessageBegin()
+    if mtype == TMessageType.EXCEPTION:
+      x = TApplicationException()
+      x.read(iprot)
+      iprot.readMessageEnd()
+      raise x
+    result = get_genome_annotations_result()
+    result.read(iprot)
+    iprot.readMessageEnd()
+    if result.success is not None:
+      return result.success
+    if result.generic_exception is not None:
+      raise result.generic_exception
+    if result.authorization_exception is not None:
+      raise result.authorization_exception
+    if result.authentication_exception is not None:
+      raise result.authentication_exception
+    if result.reference_exception is not None:
+      raise result.reference_exception
+    if result.attribute_exception is not None:
+      raise result.attribute_exception
+    if result.type_exception is not None:
+      raise result.type_exception
+    raise TApplicationException(TApplicationException.MISSING_RESULT, "get_genome_annotations failed: unknown result");
+
+  def get_scientific_lineage(self, token, ref):
+    """
+    Retrieve the scientific lineage.
+
+
+    Parameters:
+     - token
+     - ref
+    """
+    self.send_get_scientific_lineage(token, ref)
+    return self.recv_get_scientific_lineage()
+
+  def send_get_scientific_lineage(self, token, ref):
+    self._oprot.writeMessageBegin('get_scientific_lineage', TMessageType.CALL, self._seqid)
+    args = get_scientific_lineage_args()
+    args.token = token
+    args.ref = ref
+    args.write(self._oprot)
+    self._oprot.writeMessageEnd()
+    self._oprot.trans.flush()
+
+  def recv_get_scientific_lineage(self):
+    iprot = self._iprot
+    (fname, mtype, rseqid) = iprot.readMessageBegin()
+    if mtype == TMessageType.EXCEPTION:
+      x = TApplicationException()
+      x.read(iprot)
+      iprot.readMessageEnd()
+      raise x
+    result = get_scientific_lineage_result()
+    result.read(iprot)
+    iprot.readMessageEnd()
+    if result.success is not None:
+      return result.success
+    if result.generic_exception is not None:
+      raise result.generic_exception
+    if result.authorization_exception is not None:
+      raise result.authorization_exception
+    if result.authentication_exception is not None:
+      raise result.authentication_exception
+    if result.reference_exception is not None:
+      raise result.reference_exception
+    if result.attribute_exception is not None:
+      raise result.attribute_exception
+    if result.type_exception is not None:
+      raise result.type_exception
+    raise TApplicationException(TApplicationException.MISSING_RESULT, "get_scientific_lineage failed: unknown result");
+
+  def get_scientific_name(self, token, ref):
+    """
+    Retrieve the scientific name.
+
+
+    Parameters:
+     - token
+     - ref
+    """
+    self.send_get_scientific_name(token, ref)
+    return self.recv_get_scientific_name()
+
+  def send_get_scientific_name(self, token, ref):
+    self._oprot.writeMessageBegin('get_scientific_name', TMessageType.CALL, self._seqid)
+    args = get_scientific_name_args()
+    args.token = token
+    args.ref = ref
+    args.write(self._oprot)
+    self._oprot.writeMessageEnd()
+    self._oprot.trans.flush()
+
+  def recv_get_scientific_name(self):
+    iprot = self._iprot
+    (fname, mtype, rseqid) = iprot.readMessageBegin()
+    if mtype == TMessageType.EXCEPTION:
+      x = TApplicationException()
+      x.read(iprot)
+      iprot.readMessageEnd()
+      raise x
+    result = get_scientific_name_result()
+    result.read(iprot)
+    iprot.readMessageEnd()
+    if result.success is not None:
+      return result.success
+    if result.generic_exception is not None:
+      raise result.generic_exception
+    if result.authorization_exception is not None:
+      raise result.authorization_exception
+    if result.authentication_exception is not None:
+      raise result.authentication_exception
+    if result.reference_exception is not None:
+      raise result.reference_exception
+    if result.attribute_exception is not None:
+      raise result.attribute_exception
+    if result.type_exception is not None:
+      raise result.type_exception
+    raise TApplicationException(TApplicationException.MISSING_RESULT, "get_scientific_name failed: unknown result");
+
+  def get_taxonomic_id(self, token, ref):
+    """
+    Retrieve the taxonomic id.
+
+
+    Parameters:
+     - token
+     - ref
+    """
+    self.send_get_taxonomic_id(token, ref)
+    return self.recv_get_taxonomic_id()
+
+  def send_get_taxonomic_id(self, token, ref):
+    self._oprot.writeMessageBegin('get_taxonomic_id', TMessageType.CALL, self._seqid)
+    args = get_taxonomic_id_args()
+    args.token = token
+    args.ref = ref
+    args.write(self._oprot)
+    self._oprot.writeMessageEnd()
+    self._oprot.trans.flush()
+
+  def recv_get_taxonomic_id(self):
+    iprot = self._iprot
+    (fname, mtype, rseqid) = iprot.readMessageBegin()
+    if mtype == TMessageType.EXCEPTION:
+      x = TApplicationException()
+      x.read(iprot)
+      iprot.readMessageEnd()
+      raise x
+    result = get_taxonomic_id_result()
+    result.read(iprot)
+    iprot.readMessageEnd()
+    if result.success is not None:
+      return result.success
+    if result.generic_exception is not None:
+      raise result.generic_exception
+    if result.authorization_exception is not None:
+      raise result.authorization_exception
+    if result.authentication_exception is not None:
+      raise result.authentication_exception
+    if result.reference_exception is not None:
+      raise result.reference_exception
+    if result.attribute_exception is not None:
+      raise result.attribute_exception
+    if result.type_exception is not None:
+      raise result.type_exception
+    raise TApplicationException(TApplicationException.MISSING_RESULT, "get_taxonomic_id failed: unknown result");
+
+  def get_kingdom(self, token, ref):
+    """
+    Retrieve the kingdom.
+
+
+    Parameters:
+     - token
+     - ref
+    """
+    self.send_get_kingdom(token, ref)
+    return self.recv_get_kingdom()
+
+  def send_get_kingdom(self, token, ref):
+    self._oprot.writeMessageBegin('get_kingdom', TMessageType.CALL, self._seqid)
+    args = get_kingdom_args()
+    args.token = token
+    args.ref = ref
+    args.write(self._oprot)
+    self._oprot.writeMessageEnd()
+    self._oprot.trans.flush()
+
+  def recv_get_kingdom(self):
+    iprot = self._iprot
+    (fname, mtype, rseqid) = iprot.readMessageBegin()
+    if mtype == TMessageType.EXCEPTION:
+      x = TApplicationException()
+      x.read(iprot)
+      iprot.readMessageEnd()
+      raise x
+    result = get_kingdom_result()
+    result.read(iprot)
+    iprot.readMessageEnd()
+    if result.success is not None:
+      return result.success
+    if result.generic_exception is not None:
+      raise result.generic_exception
+    if result.authorization_exception is not None:
+      raise result.authorization_exception
+    if result.authentication_exception is not None:
+      raise result.authentication_exception
+    if result.reference_exception is not None:
+      raise result.reference_exception
+    if result.attribute_exception is not None:
+      raise result.attribute_exception
+    if result.type_exception is not None:
+      raise result.type_exception
+    raise TApplicationException(TApplicationException.MISSING_RESULT, "get_kingdom failed: unknown result");
+
+  def get_domain(self, token, ref):
+    """
+    Retrieve the domain.
+
+
+    Parameters:
+     - token
+     - ref
+    """
+    self.send_get_domain(token, ref)
+    return self.recv_get_domain()
+
+  def send_get_domain(self, token, ref):
+    self._oprot.writeMessageBegin('get_domain', TMessageType.CALL, self._seqid)
+    args = get_domain_args()
+    args.token = token
+    args.ref = ref
+    args.write(self._oprot)
+    self._oprot.writeMessageEnd()
+    self._oprot.trans.flush()
+
+  def recv_get_domain(self):
+    iprot = self._iprot
+    (fname, mtype, rseqid) = iprot.readMessageBegin()
+    if mtype == TMessageType.EXCEPTION:
+      x = TApplicationException()
+      x.read(iprot)
+      iprot.readMessageEnd()
+      raise x
+    result = get_domain_result()
+    result.read(iprot)
+    iprot.readMessageEnd()
+    if result.success is not None:
+      return result.success
+    if result.generic_exception is not None:
+      raise result.generic_exception
+    if result.authorization_exception is not None:
+      raise result.authorization_exception
+    if result.authentication_exception is not None:
+      raise result.authentication_exception
+    if result.reference_exception is not None:
+      raise result.reference_exception
+    if result.attribute_exception is not None:
+      raise result.attribute_exception
+    if result.type_exception is not None:
+      raise result.type_exception
+    raise TApplicationException(TApplicationException.MISSING_RESULT, "get_domain failed: unknown result");
+
+  def get_genetic_code(self, token, ref):
+    """
+    Retrieve the genetic code.
+
+
+    Parameters:
+     - token
+     - ref
+    """
+    self.send_get_genetic_code(token, ref)
+    return self.recv_get_genetic_code()
+
+  def send_get_genetic_code(self, token, ref):
+    self._oprot.writeMessageBegin('get_genetic_code', TMessageType.CALL, self._seqid)
+    args = get_genetic_code_args()
+    args.token = token
+    args.ref = ref
+    args.write(self._oprot)
+    self._oprot.writeMessageEnd()
+    self._oprot.trans.flush()
+
+  def recv_get_genetic_code(self):
+    iprot = self._iprot
+    (fname, mtype, rseqid) = iprot.readMessageBegin()
+    if mtype == TMessageType.EXCEPTION:
+      x = TApplicationException()
+      x.read(iprot)
+      iprot.readMessageEnd()
+      raise x
+    result = get_genetic_code_result()
+    result.read(iprot)
+    iprot.readMessageEnd()
+    if result.success is not None:
+      return result.success
+    if result.generic_exception is not None:
+      raise result.generic_exception
+    if result.authorization_exception is not None:
+      raise result.authorization_exception
+    if result.authentication_exception is not None:
+      raise result.authentication_exception
+    if result.reference_exception is not None:
+      raise result.reference_exception
+    if result.attribute_exception is not None:
+      raise result.attribute_exception
+    if result.type_exception is not None:
+      raise result.type_exception
+    raise TApplicationException(TApplicationException.MISSING_RESULT, "get_genetic_code failed: unknown result");
+
+  def get_aliases(self, token, ref):
+    """
+    Retrieve the aliases.
+
+
+    Parameters:
+     - token
+     - ref
+    """
+    self.send_get_aliases(token, ref)
+    return self.recv_get_aliases()
+
+  def send_get_aliases(self, token, ref):
+    self._oprot.writeMessageBegin('get_aliases', TMessageType.CALL, self._seqid)
+    args = get_aliases_args()
+    args.token = token
+    args.ref = ref
+    args.write(self._oprot)
+    self._oprot.writeMessageEnd()
+    self._oprot.trans.flush()
+
+  def recv_get_aliases(self):
+    iprot = self._iprot
+    (fname, mtype, rseqid) = iprot.readMessageBegin()
+    if mtype == TMessageType.EXCEPTION:
+      x = TApplicationException()
+      x.read(iprot)
+      iprot.readMessageEnd()
+      raise x
     result = get_aliases_result()
     result.read(iprot)
     iprot.readMessageEnd()
     if result.success is not None:
-      return d.callback(result.success)
+      return result.success
     if result.generic_exception is not None:
-      return d.errback(result.generic_exception)
+      raise result.generic_exception
     if result.authorization_exception is not None:
-      return d.errback(result.authorization_exception)
+      raise result.authorization_exception
     if result.authentication_exception is not None:
-      return d.errback(result.authentication_exception)
+      raise result.authentication_exception
     if result.reference_exception is not None:
-      return d.errback(result.reference_exception)
+      raise result.reference_exception
     if result.attribute_exception is not None:
-      return d.errback(result.attribute_exception)
+      raise result.attribute_exception
     if result.type_exception is not None:
-      return d.errback(result.type_exception)
-    return d.errback(TApplicationException(TApplicationException.MISSING_RESULT, "get_aliases failed: unknown result"))
+      raise result.type_exception
+    raise TApplicationException(TApplicationException.MISSING_RESULT, "get_aliases failed: unknown result");
 
 
-class Processor(TProcessor):
-  implements(Iface)
-
+class Processor(Iface, TProcessor):
   def __init__(self, handler):
-    self._handler = Iface(handler)
+    self._handler = handler
     self._processMap = {}
     self._processMap["get_info"] = Processor.process_get_info
     self._processMap["get_history"] = Processor.process_get_history
@@ -1265,30 +1002,18 @@ class Processor(TProcessor):
       x.write(oprot)
       oprot.writeMessageEnd()
       oprot.trans.flush()
-      return defer.succeed(None)
+      return
     else:
-      return self._processMap[name](self, seqid, iprot, oprot)
+      self._processMap[name](self, seqid, iprot, oprot)
+    return True
 
   def process_get_info(self, seqid, iprot, oprot):
     args = get_info_args()
     args.read(iprot)
     iprot.readMessageEnd()
     result = get_info_result()
-    d = defer.maybeDeferred(self._handler.get_info, args.token, args.ref)
-    d.addCallback(self.write_results_success_get_info, result, seqid, oprot)
-    d.addErrback(self.write_results_exception_get_info, result, seqid, oprot)
-    return d
-
-  def write_results_success_get_info(self, success, result, seqid, oprot):
-    result.success = success
-    oprot.writeMessageBegin("get_info", TMessageType.REPLY, seqid)
-    result.write(oprot)
-    oprot.writeMessageEnd()
-    oprot.trans.flush()
-
-  def write_results_exception_get_info(self, error, result, seqid, oprot):
     try:
-      error.raiseException()
+      result.success = self._handler.get_info(args.token, args.ref)
     except ServiceException, generic_exception:
       result.generic_exception = generic_exception
     except AuthorizationException, authorization_exception:
@@ -1311,21 +1036,8 @@ class Processor(TProcessor):
     args.read(iprot)
     iprot.readMessageEnd()
     result = get_history_result()
-    d = defer.maybeDeferred(self._handler.get_history, args.token, args.ref)
-    d.addCallback(self.write_results_success_get_history, result, seqid, oprot)
-    d.addErrback(self.write_results_exception_get_history, result, seqid, oprot)
-    return d
-
-  def write_results_success_get_history(self, success, result, seqid, oprot):
-    result.success = success
-    oprot.writeMessageBegin("get_history", TMessageType.REPLY, seqid)
-    result.write(oprot)
-    oprot.writeMessageEnd()
-    oprot.trans.flush()
-
-  def write_results_exception_get_history(self, error, result, seqid, oprot):
     try:
-      error.raiseException()
+      result.success = self._handler.get_history(args.token, args.ref)
     except ServiceException, generic_exception:
       result.generic_exception = generic_exception
     except AuthorizationException, authorization_exception:
@@ -1348,21 +1060,8 @@ class Processor(TProcessor):
     args.read(iprot)
     iprot.readMessageEnd()
     result = get_provenance_result()
-    d = defer.maybeDeferred(self._handler.get_provenance, args.token, args.ref)
-    d.addCallback(self.write_results_success_get_provenance, result, seqid, oprot)
-    d.addErrback(self.write_results_exception_get_provenance, result, seqid, oprot)
-    return d
-
-  def write_results_success_get_provenance(self, success, result, seqid, oprot):
-    result.success = success
-    oprot.writeMessageBegin("get_provenance", TMessageType.REPLY, seqid)
-    result.write(oprot)
-    oprot.writeMessageEnd()
-    oprot.trans.flush()
-
-  def write_results_exception_get_provenance(self, error, result, seqid, oprot):
     try:
-      error.raiseException()
+      result.success = self._handler.get_provenance(args.token, args.ref)
     except ServiceException, generic_exception:
       result.generic_exception = generic_exception
     except AuthorizationException, authorization_exception:
@@ -1385,21 +1084,8 @@ class Processor(TProcessor):
     args.read(iprot)
     iprot.readMessageEnd()
     result = get_id_result()
-    d = defer.maybeDeferred(self._handler.get_id, args.token, args.ref)
-    d.addCallback(self.write_results_success_get_id, result, seqid, oprot)
-    d.addErrback(self.write_results_exception_get_id, result, seqid, oprot)
-    return d
-
-  def write_results_success_get_id(self, success, result, seqid, oprot):
-    result.success = success
-    oprot.writeMessageBegin("get_id", TMessageType.REPLY, seqid)
-    result.write(oprot)
-    oprot.writeMessageEnd()
-    oprot.trans.flush()
-
-  def write_results_exception_get_id(self, error, result, seqid, oprot):
     try:
-      error.raiseException()
+      result.success = self._handler.get_id(args.token, args.ref)
     except ServiceException, generic_exception:
       result.generic_exception = generic_exception
     except AuthorizationException, authorization_exception:
@@ -1422,21 +1108,8 @@ class Processor(TProcessor):
     args.read(iprot)
     iprot.readMessageEnd()
     result = get_name_result()
-    d = defer.maybeDeferred(self._handler.get_name, args.token, args.ref)
-    d.addCallback(self.write_results_success_get_name, result, seqid, oprot)
-    d.addErrback(self.write_results_exception_get_name, result, seqid, oprot)
-    return d
-
-  def write_results_success_get_name(self, success, result, seqid, oprot):
-    result.success = success
-    oprot.writeMessageBegin("get_name", TMessageType.REPLY, seqid)
-    result.write(oprot)
-    oprot.writeMessageEnd()
-    oprot.trans.flush()
-
-  def write_results_exception_get_name(self, error, result, seqid, oprot):
     try:
-      error.raiseException()
+      result.success = self._handler.get_name(args.token, args.ref)
     except ServiceException, generic_exception:
       result.generic_exception = generic_exception
     except AuthorizationException, authorization_exception:
@@ -1459,21 +1132,8 @@ class Processor(TProcessor):
     args.read(iprot)
     iprot.readMessageEnd()
     result = get_version_result()
-    d = defer.maybeDeferred(self._handler.get_version, args.token, args.ref)
-    d.addCallback(self.write_results_success_get_version, result, seqid, oprot)
-    d.addErrback(self.write_results_exception_get_version, result, seqid, oprot)
-    return d
-
-  def write_results_success_get_version(self, success, result, seqid, oprot):
-    result.success = success
-    oprot.writeMessageBegin("get_version", TMessageType.REPLY, seqid)
-    result.write(oprot)
-    oprot.writeMessageEnd()
-    oprot.trans.flush()
-
-  def write_results_exception_get_version(self, error, result, seqid, oprot):
     try:
-      error.raiseException()
+      result.success = self._handler.get_version(args.token, args.ref)
     except ServiceException, generic_exception:
       result.generic_exception = generic_exception
     except AuthorizationException, authorization_exception:
@@ -1496,21 +1156,8 @@ class Processor(TProcessor):
     args.read(iprot)
     iprot.readMessageEnd()
     result = get_parent_result()
-    d = defer.maybeDeferred(self._handler.get_parent, args.token, args.ref)
-    d.addCallback(self.write_results_success_get_parent, result, seqid, oprot)
-    d.addErrback(self.write_results_exception_get_parent, result, seqid, oprot)
-    return d
-
-  def write_results_success_get_parent(self, success, result, seqid, oprot):
-    result.success = success
-    oprot.writeMessageBegin("get_parent", TMessageType.REPLY, seqid)
-    result.write(oprot)
-    oprot.writeMessageEnd()
-    oprot.trans.flush()
-
-  def write_results_exception_get_parent(self, error, result, seqid, oprot):
     try:
-      error.raiseException()
+      result.success = self._handler.get_parent(args.token, args.ref)
     except ServiceException, generic_exception:
       result.generic_exception = generic_exception
     except AuthorizationException, authorization_exception:
@@ -1533,21 +1180,8 @@ class Processor(TProcessor):
     args.read(iprot)
     iprot.readMessageEnd()
     result = get_children_result()
-    d = defer.maybeDeferred(self._handler.get_children, args.token, args.ref)
-    d.addCallback(self.write_results_success_get_children, result, seqid, oprot)
-    d.addErrback(self.write_results_exception_get_children, result, seqid, oprot)
-    return d
-
-  def write_results_success_get_children(self, success, result, seqid, oprot):
-    result.success = success
-    oprot.writeMessageBegin("get_children", TMessageType.REPLY, seqid)
-    result.write(oprot)
-    oprot.writeMessageEnd()
-    oprot.trans.flush()
-
-  def write_results_exception_get_children(self, error, result, seqid, oprot):
     try:
-      error.raiseException()
+      result.success = self._handler.get_children(args.token, args.ref)
     except ServiceException, generic_exception:
       result.generic_exception = generic_exception
     except AuthorizationException, authorization_exception:
@@ -1570,21 +1204,8 @@ class Processor(TProcessor):
     args.read(iprot)
     iprot.readMessageEnd()
     result = get_genome_annotations_result()
-    d = defer.maybeDeferred(self._handler.get_genome_annotations, args.token, args.ref)
-    d.addCallback(self.write_results_success_get_genome_annotations, result, seqid, oprot)
-    d.addErrback(self.write_results_exception_get_genome_annotations, result, seqid, oprot)
-    return d
-
-  def write_results_success_get_genome_annotations(self, success, result, seqid, oprot):
-    result.success = success
-    oprot.writeMessageBegin("get_genome_annotations", TMessageType.REPLY, seqid)
-    result.write(oprot)
-    oprot.writeMessageEnd()
-    oprot.trans.flush()
-
-  def write_results_exception_get_genome_annotations(self, error, result, seqid, oprot):
     try:
-      error.raiseException()
+      result.success = self._handler.get_genome_annotations(args.token, args.ref)
     except ServiceException, generic_exception:
       result.generic_exception = generic_exception
     except AuthorizationException, authorization_exception:
@@ -1607,21 +1228,8 @@ class Processor(TProcessor):
     args.read(iprot)
     iprot.readMessageEnd()
     result = get_scientific_lineage_result()
-    d = defer.maybeDeferred(self._handler.get_scientific_lineage, args.token, args.ref)
-    d.addCallback(self.write_results_success_get_scientific_lineage, result, seqid, oprot)
-    d.addErrback(self.write_results_exception_get_scientific_lineage, result, seqid, oprot)
-    return d
-
-  def write_results_success_get_scientific_lineage(self, success, result, seqid, oprot):
-    result.success = success
-    oprot.writeMessageBegin("get_scientific_lineage", TMessageType.REPLY, seqid)
-    result.write(oprot)
-    oprot.writeMessageEnd()
-    oprot.trans.flush()
-
-  def write_results_exception_get_scientific_lineage(self, error, result, seqid, oprot):
     try:
-      error.raiseException()
+      result.success = self._handler.get_scientific_lineage(args.token, args.ref)
     except ServiceException, generic_exception:
       result.generic_exception = generic_exception
     except AuthorizationException, authorization_exception:
@@ -1644,21 +1252,8 @@ class Processor(TProcessor):
     args.read(iprot)
     iprot.readMessageEnd()
     result = get_scientific_name_result()
-    d = defer.maybeDeferred(self._handler.get_scientific_name, args.token, args.ref)
-    d.addCallback(self.write_results_success_get_scientific_name, result, seqid, oprot)
-    d.addErrback(self.write_results_exception_get_scientific_name, result, seqid, oprot)
-    return d
-
-  def write_results_success_get_scientific_name(self, success, result, seqid, oprot):
-    result.success = success
-    oprot.writeMessageBegin("get_scientific_name", TMessageType.REPLY, seqid)
-    result.write(oprot)
-    oprot.writeMessageEnd()
-    oprot.trans.flush()
-
-  def write_results_exception_get_scientific_name(self, error, result, seqid, oprot):
     try:
-      error.raiseException()
+      result.success = self._handler.get_scientific_name(args.token, args.ref)
     except ServiceException, generic_exception:
       result.generic_exception = generic_exception
     except AuthorizationException, authorization_exception:
@@ -1681,21 +1276,8 @@ class Processor(TProcessor):
     args.read(iprot)
     iprot.readMessageEnd()
     result = get_taxonomic_id_result()
-    d = defer.maybeDeferred(self._handler.get_taxonomic_id, args.token, args.ref)
-    d.addCallback(self.write_results_success_get_taxonomic_id, result, seqid, oprot)
-    d.addErrback(self.write_results_exception_get_taxonomic_id, result, seqid, oprot)
-    return d
-
-  def write_results_success_get_taxonomic_id(self, success, result, seqid, oprot):
-    result.success = success
-    oprot.writeMessageBegin("get_taxonomic_id", TMessageType.REPLY, seqid)
-    result.write(oprot)
-    oprot.writeMessageEnd()
-    oprot.trans.flush()
-
-  def write_results_exception_get_taxonomic_id(self, error, result, seqid, oprot):
     try:
-      error.raiseException()
+      result.success = self._handler.get_taxonomic_id(args.token, args.ref)
     except ServiceException, generic_exception:
       result.generic_exception = generic_exception
     except AuthorizationException, authorization_exception:
@@ -1718,21 +1300,8 @@ class Processor(TProcessor):
     args.read(iprot)
     iprot.readMessageEnd()
     result = get_kingdom_result()
-    d = defer.maybeDeferred(self._handler.get_kingdom, args.token, args.ref)
-    d.addCallback(self.write_results_success_get_kingdom, result, seqid, oprot)
-    d.addErrback(self.write_results_exception_get_kingdom, result, seqid, oprot)
-    return d
-
-  def write_results_success_get_kingdom(self, success, result, seqid, oprot):
-    result.success = success
-    oprot.writeMessageBegin("get_kingdom", TMessageType.REPLY, seqid)
-    result.write(oprot)
-    oprot.writeMessageEnd()
-    oprot.trans.flush()
-
-  def write_results_exception_get_kingdom(self, error, result, seqid, oprot):
     try:
-      error.raiseException()
+      result.success = self._handler.get_kingdom(args.token, args.ref)
     except ServiceException, generic_exception:
       result.generic_exception = generic_exception
     except AuthorizationException, authorization_exception:
@@ -1755,21 +1324,8 @@ class Processor(TProcessor):
     args.read(iprot)
     iprot.readMessageEnd()
     result = get_domain_result()
-    d = defer.maybeDeferred(self._handler.get_domain, args.token, args.ref)
-    d.addCallback(self.write_results_success_get_domain, result, seqid, oprot)
-    d.addErrback(self.write_results_exception_get_domain, result, seqid, oprot)
-    return d
-
-  def write_results_success_get_domain(self, success, result, seqid, oprot):
-    result.success = success
-    oprot.writeMessageBegin("get_domain", TMessageType.REPLY, seqid)
-    result.write(oprot)
-    oprot.writeMessageEnd()
-    oprot.trans.flush()
-
-  def write_results_exception_get_domain(self, error, result, seqid, oprot):
     try:
-      error.raiseException()
+      result.success = self._handler.get_domain(args.token, args.ref)
     except ServiceException, generic_exception:
       result.generic_exception = generic_exception
     except AuthorizationException, authorization_exception:
@@ -1792,21 +1348,8 @@ class Processor(TProcessor):
     args.read(iprot)
     iprot.readMessageEnd()
     result = get_genetic_code_result()
-    d = defer.maybeDeferred(self._handler.get_genetic_code, args.token, args.ref)
-    d.addCallback(self.write_results_success_get_genetic_code, result, seqid, oprot)
-    d.addErrback(self.write_results_exception_get_genetic_code, result, seqid, oprot)
-    return d
-
-  def write_results_success_get_genetic_code(self, success, result, seqid, oprot):
-    result.success = success
-    oprot.writeMessageBegin("get_genetic_code", TMessageType.REPLY, seqid)
-    result.write(oprot)
-    oprot.writeMessageEnd()
-    oprot.trans.flush()
-
-  def write_results_exception_get_genetic_code(self, error, result, seqid, oprot):
     try:
-      error.raiseException()
+      result.success = self._handler.get_genetic_code(args.token, args.ref)
     except ServiceException, generic_exception:
       result.generic_exception = generic_exception
     except AuthorizationException, authorization_exception:
@@ -1829,21 +1372,8 @@ class Processor(TProcessor):
     args.read(iprot)
     iprot.readMessageEnd()
     result = get_aliases_result()
-    d = defer.maybeDeferred(self._handler.get_aliases, args.token, args.ref)
-    d.addCallback(self.write_results_success_get_aliases, result, seqid, oprot)
-    d.addErrback(self.write_results_exception_get_aliases, result, seqid, oprot)
-    return d
-
-  def write_results_success_get_aliases(self, success, result, seqid, oprot):
-    result.success = success
-    oprot.writeMessageBegin("get_aliases", TMessageType.REPLY, seqid)
-    result.write(oprot)
-    oprot.writeMessageEnd()
-    oprot.trans.flush()
-
-  def write_results_exception_get_aliases(self, error, result, seqid, oprot):
     try:
-      error.raiseException()
+      result.success = self._handler.get_aliases(args.token, args.ref)
     except ServiceException, generic_exception:
       result.generic_exception = generic_exception
     except AuthorizationException, authorization_exception:
@@ -1864,7 +1394,7 @@ class Processor(TProcessor):
 
 # HELPER FUNCTIONS AND STRUCTURES
 
-class get_info_args:
+class get_info_args(object):
   """
   Attributes:
    - token
@@ -1942,7 +1472,7 @@ class get_info_args:
   def __ne__(self, other):
     return not (self == other)
 
-class get_info_result:
+class get_info_result(object):
   """
   Attributes:
    - success
@@ -2091,7 +1621,7 @@ class get_info_result:
   def __ne__(self, other):
     return not (self == other)
 
-class get_history_args:
+class get_history_args(object):
   """
   Attributes:
    - token
@@ -2169,7 +1699,7 @@ class get_history_args:
   def __ne__(self, other):
     return not (self == other)
 
-class get_history_result:
+class get_history_result(object):
   """
   Attributes:
    - success
@@ -2326,7 +1856,7 @@ class get_history_result:
   def __ne__(self, other):
     return not (self == other)
 
-class get_provenance_args:
+class get_provenance_args(object):
   """
   Attributes:
    - token
@@ -2404,7 +1934,7 @@ class get_provenance_args:
   def __ne__(self, other):
     return not (self == other)
 
-class get_provenance_result:
+class get_provenance_result(object):
   """
   Attributes:
    - success
@@ -2561,7 +2091,7 @@ class get_provenance_result:
   def __ne__(self, other):
     return not (self == other)
 
-class get_id_args:
+class get_id_args(object):
   """
   Attributes:
    - token
@@ -2639,7 +2169,7 @@ class get_id_args:
   def __ne__(self, other):
     return not (self == other)
 
-class get_id_result:
+class get_id_result(object):
   """
   Attributes:
    - success
@@ -2787,7 +2317,7 @@ class get_id_result:
   def __ne__(self, other):
     return not (self == other)
 
-class get_name_args:
+class get_name_args(object):
   """
   Attributes:
    - token
@@ -2865,7 +2395,7 @@ class get_name_args:
   def __ne__(self, other):
     return not (self == other)
 
-class get_name_result:
+class get_name_result(object):
   """
   Attributes:
    - success
@@ -3013,7 +2543,7 @@ class get_name_result:
   def __ne__(self, other):
     return not (self == other)
 
-class get_version_args:
+class get_version_args(object):
   """
   Attributes:
    - token
@@ -3091,7 +2621,7 @@ class get_version_args:
   def __ne__(self, other):
     return not (self == other)
 
-class get_version_result:
+class get_version_result(object):
   """
   Attributes:
    - success
@@ -3239,7 +2769,7 @@ class get_version_result:
   def __ne__(self, other):
     return not (self == other)
 
-class get_parent_args:
+class get_parent_args(object):
   """
   Attributes:
    - token
@@ -3317,7 +2847,7 @@ class get_parent_args:
   def __ne__(self, other):
     return not (self == other)
 
-class get_parent_result:
+class get_parent_result(object):
   """
   Attributes:
    - success
@@ -3465,7 +2995,7 @@ class get_parent_result:
   def __ne__(self, other):
     return not (self == other)
 
-class get_children_args:
+class get_children_args(object):
   """
   Attributes:
    - token
@@ -3543,7 +3073,7 @@ class get_children_args:
   def __ne__(self, other):
     return not (self == other)
 
-class get_children_result:
+class get_children_result(object):
   """
   Attributes:
    - success
@@ -3699,7 +3229,7 @@ class get_children_result:
   def __ne__(self, other):
     return not (self == other)
 
-class get_genome_annotations_args:
+class get_genome_annotations_args(object):
   """
   Attributes:
    - token
@@ -3777,7 +3307,7 @@ class get_genome_annotations_args:
   def __ne__(self, other):
     return not (self == other)
 
-class get_genome_annotations_result:
+class get_genome_annotations_result(object):
   """
   Attributes:
    - success
@@ -3933,7 +3463,7 @@ class get_genome_annotations_result:
   def __ne__(self, other):
     return not (self == other)
 
-class get_scientific_lineage_args:
+class get_scientific_lineage_args(object):
   """
   Attributes:
    - token
@@ -4011,7 +3541,7 @@ class get_scientific_lineage_args:
   def __ne__(self, other):
     return not (self == other)
 
-class get_scientific_lineage_result:
+class get_scientific_lineage_result(object):
   """
   Attributes:
    - success
@@ -4167,7 +3697,7 @@ class get_scientific_lineage_result:
   def __ne__(self, other):
     return not (self == other)
 
-class get_scientific_name_args:
+class get_scientific_name_args(object):
   """
   Attributes:
    - token
@@ -4245,7 +3775,7 @@ class get_scientific_name_args:
   def __ne__(self, other):
     return not (self == other)
 
-class get_scientific_name_result:
+class get_scientific_name_result(object):
   """
   Attributes:
    - success
@@ -4393,7 +3923,7 @@ class get_scientific_name_result:
   def __ne__(self, other):
     return not (self == other)
 
-class get_taxonomic_id_args:
+class get_taxonomic_id_args(object):
   """
   Attributes:
    - token
@@ -4471,7 +4001,7 @@ class get_taxonomic_id_args:
   def __ne__(self, other):
     return not (self == other)
 
-class get_taxonomic_id_result:
+class get_taxonomic_id_result(object):
   """
   Attributes:
    - success
@@ -4619,7 +4149,7 @@ class get_taxonomic_id_result:
   def __ne__(self, other):
     return not (self == other)
 
-class get_kingdom_args:
+class get_kingdom_args(object):
   """
   Attributes:
    - token
@@ -4697,7 +4227,7 @@ class get_kingdom_args:
   def __ne__(self, other):
     return not (self == other)
 
-class get_kingdom_result:
+class get_kingdom_result(object):
   """
   Attributes:
    - success
@@ -4845,7 +4375,7 @@ class get_kingdom_result:
   def __ne__(self, other):
     return not (self == other)
 
-class get_domain_args:
+class get_domain_args(object):
   """
   Attributes:
    - token
@@ -4923,7 +4453,7 @@ class get_domain_args:
   def __ne__(self, other):
     return not (self == other)
 
-class get_domain_result:
+class get_domain_result(object):
   """
   Attributes:
    - success
@@ -5071,7 +4601,7 @@ class get_domain_result:
   def __ne__(self, other):
     return not (self == other)
 
-class get_genetic_code_args:
+class get_genetic_code_args(object):
   """
   Attributes:
    - token
@@ -5149,7 +4679,7 @@ class get_genetic_code_args:
   def __ne__(self, other):
     return not (self == other)
 
-class get_genetic_code_result:
+class get_genetic_code_result(object):
   """
   Attributes:
    - success
@@ -5297,7 +4827,7 @@ class get_genetic_code_result:
   def __ne__(self, other):
     return not (self == other)
 
-class get_aliases_args:
+class get_aliases_args(object):
   """
   Attributes:
    - token
@@ -5375,7 +4905,7 @@ class get_aliases_args:
   def __ne__(self, other):
     return not (self == other)
 
-class get_aliases_result:
+class get_aliases_result(object):
   """
   Attributes:
    - success

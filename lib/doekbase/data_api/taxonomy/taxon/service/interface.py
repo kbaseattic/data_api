@@ -3,10 +3,8 @@ import traceback
 
 # Third-party
 import zope.interface
-from twisted.internet.defer import inlineCallbacks
 
-from thrift import Thrift
-from thrift.transport import TSocket
+from thrift.transport import THttpClient
 from thrift.transport import TTransport
 from thrift.protocol import TBinaryProtocol
 
@@ -22,14 +20,13 @@ class TaxonClientConnection(object):
     """
     Provides a client connection to the running Taxon API service.
     """
-    def __init__(self, host='localhost', port=9090):
+    def __init__(self, host='localhost', port=9091):
         self.client = None
         self.transport = None
         self.protocol = None
 
         try:
-            socket = TSocket.TSocket(host, port)
-            self.transport = TTransport.TFramedTransport(socket)
+            self.transport = THttpClient.THttpClient("http://" + host + ":" + str(port))
             self.protocol = TBinaryProtocol.TBinaryProtocol(self.transport)
             self.client = thrift_client.Client(self.protocol)
         except TTransport.TTransportException as err:
@@ -112,8 +109,8 @@ class TaxonService:
         try:
             taxon_api = TaxonAPI(self.services, token, ref)
             return taxon_api.get_parent(ref_only=True)
-        except AttributeError:
-            raise ttypes.AttributeException()
+        except AttributeError, e:
+            raise ttypes.AttributeException(e.message)
         except Exception, e:
             raise ttypes.ServiceException(e.message, traceback.print_exc(), "get_parent", {"ref": str(ref)})
 

@@ -8,8 +8,8 @@ from thrift.transport import TTwisted
 from thrift.protocol import TBinaryProtocol
 
 # Local
-from doekbase.data_api.taxonomy.taxon.service import thrift_service
-from doekbase.data_api.taxonomy.taxon.service.interface import TaxonService
+from doekbase.data_api.sequence.assembly.service import thrift_service
+from doekbase.data_api.sequence.assembly.service.interface import AssemblyService
 from doekbase.data_api.util import get_logger
 
 DEFAULT_WS_URL = 'https://ci.kbase.us/services/ws/'
@@ -23,11 +23,11 @@ def get_services_dict(ws=DEFAULT_WS_URL, shock=DEFAULT_SHOCK_URL):
 
 #TODO respond to kill signals
 #TODO on HUP reload of config
-def start_service(services = None, host = 'localhost', port = 9101):
+def start_service(services = None, host = 'localhost', port = 9102):
     if services is None:
         services = get_services_dict()
 
-    handler = TaxonService(services)
+    handler = AssemblyService(services)
     processor = thrift_service.Processor(handler)
     pfactory = TBinaryProtocol.TBinaryProtocolFactory()
     resource = TTwisted.ThriftResource(processor, pfactory, pfactory)

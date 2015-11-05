@@ -5,9 +5,8 @@ import logging
 from unittest import skipUnless
 
 from . import shared
-
 from doekbase.data_api.annotation.genome_annotation import GenomeAnnotationAPI
-from doekbase.data_api.sequence.assembly import AssemblyAPI
+from doekbase.data_api.sequence.assembly.api import AssemblyAPI
 from doekbase.data_api.taxonomy.taxon.api import TaxonAPI
 
 _log = logging.getLogger(__name__)

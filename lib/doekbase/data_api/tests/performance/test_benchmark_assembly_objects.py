@@ -5,7 +5,7 @@ import datetime
 import json
 
 import doekbase.data_api.annotation.genome_annotation
-import doekbase.data_api.sequence.assembly
+import doekbase.data_api.sequence.assembly.api
 
 MB = 2**20 * 1.0
 

@@ -44,7 +44,7 @@ class AssemblyInterface(object):
         pass
 
     @abc.abstractmethod    
-    def get_genome_annotations(self):
+    def get_genome_annotations(self, ref_only=False):
         """Retrieve the GenomeAnnotations that refer to this Assembly.
         
         Returns:
@@ -183,8 +183,8 @@ class AssemblyAPI(ObjectAPI, AssemblyInterface):
     def get_assembly_id(self):
         return self.proxy.get_assembly_id()
 
-    def get_genome_annotations(self):
-        return self.proxy.get_genome_annotations()
+    def get_genome_annotations(self, ref_only=False):
+        return self.proxy.get_genome_annotations(ref_only)
     
     def get_external_source_info(self):
         return self.proxy.get_external_source_info()
@@ -222,18 +222,27 @@ class _KBaseGenomes_ContigSet(ObjectAPI, AssemblyInterface):
     def get_assembly_id(self):
         return self.get_data_subset(path_list=["id"])["id"]
     
-    def get_genome_annotations(self):
+    def get_genome_annotations(self, ref_only=False):
         from doekbase.data_api.annotation.genome_annotation import TYPES as genome_annotation_types
         from doekbase.data_api.annotation.genome_annotation import GenomeAnnotationAPI
-        annotations = list()
         referrers = self.get_referrers()
-        for x in referrers:
-            if x.split("-")[0] in genome_annotation_types:
-                for ref in referrers[x]:
-                    annotations.append(
-                        GenomeAnnotationAPI(self.services, self._token, ref)
-                    )
-        return annotations
+
+        if ref_only:
+            annotation_refs = list()
+            for x in referrers:
+                if x.split("-")[0] in genome_annotation_types:
+                    for ref in referrers[x]:
+                        annotation_refs.append(ref)
+            return annotation_refs
+        else:
+            annotations = list()
+            for x in referrers:
+                if x.split("-")[0] in genome_annotation_types:
+                    for ref in referrers[x]:
+                        annotations.append(
+                            GenomeAnnotationAPI(self.services, self._token, ref)
+                        )
+            return annotations
     
     def get_external_source_info(self):
         data = self.get_data_subset(path_list=["source","source_id"])
@@ -416,20 +425,27 @@ class _Prototype(ObjectAPI, AssemblyInterface):
     def get_assembly_id(self):
         return self.get_data_subset(path_list=["assembly_id"])["assembly_id"]        
 
-    def get_genome_annotations(self):
+    def get_genome_annotations(self, ref_only=False):
         import doekbase.data_api.annotation.genome_annotation
         
         referrers = self.get_referrers()
 
-        annotations = list()
-        for object_type in referrers:
-            if object_type.split('-')[0] in doekbase.data_api.annotation.genome_annotation.TYPES:
-                for x in referrers[object_type]:
-                    annotations.append(doekbase.data_api.annotation.genome_annotation.GenomeAnnotationAPI(
-                        self.services, self._token, ref=x))
-        
-        return annotations
-    
+        if ref_only:
+            annotation_refs = list()
+            for object_type in referrers:
+                if object_type.split('-')[0] in doekbase.data_api.annotation.genome_annotation.TYPES:
+                    for x in referrers[object_type]:
+                        annotation_refs.append(x)
+            return annotation_refs
+        else:
+            annotations = list()
+            for object_type in referrers:
+                if object_type.split('-')[0] in doekbase.data_api.annotation.genome_annotation.TYPES:
+                    for x in referrers[object_type]:
+                        annotations.append(doekbase.data_api.annotation.genome_annotation.GenomeAnnotationAPI(
+                            self.services, self._token, ref=x))
+            return annotations
+
     def get_external_source_info(self):
         return self.get_data_subset(path_list=["external_source",
                                                "external_source_id",
@@ -546,3 +562,136 @@ class _Prototype(ObjectAPI, AssemblyInterface):
                 outContigs[c]["sequence"] = fetch_contig(contigs[c]["start_position"],contigs[c]["num_bytes"])
 
         return outContigs
+
+
+class AssemblyClientAPI(AssemblyInterface):
+    def __init__(self, host='localhost', port=9092, token=None, ref=None):
+        from doekbase.data_api.sequence.assembly.service.interface import AssemblyClientConnection
+
+        # TODO add exception handling and better error messages here
+        self.host = host
+        self.port = port
+        self.transport, self.client = AssemblyClientConnection(host, port).get_client()
+        self.ref = ref
+        self._token = token
+
+    def get_assembly_id(self):
+        if not self.transport.isOpen():
+            self.transport.open()
+
+        try:
+            return self.client.get_assembly_id(self._token, self.ref)
+        except Exception, e:
+            raise
+        finally:
+            self.transport.close()
+
+    def get_genome_annotations(self, ref_only=True):
+        if not self.transport.isOpen():
+            self.transport.open()
+
+        try:
+            return self.client.get_genome_annotations(self._token, self.ref)
+        except Exception, e:
+            raise
+        finally:
+            self.transport.close()
+
+    def get_external_source_info(self):
+        if not self.transport.isOpen():
+            self.transport.open()
+
+        try:
+            return self.client.get_external_source_info(self._token, self.ref)
+        except Exception, e:
+            raise
+        finally:
+            self.transport.close()
+
+    def get_stats(self):
+        if not self.transport.isOpen():
+            self.transport.open()
+
+        try:
+            return self.client.get_stats(self._token, self.ref)
+        except Exception, e:
+            raise
+        finally:
+            self.transport.close()
+
+    def get_number_contigs(self):
+        if not self.transport.isOpen():
+            self.transport.open()
+
+        try:
+            return self.client.get_number_contigs(self._token, self.ref)
+        except Exception, e:
+            raise
+        finally:
+            self.transport.close()
+
+    def get_gc_content(self):
+        if not self.transport.isOpen():
+            self.transport.open()
+
+        try:
+            return self.client.get_gc_content(self._token, self.ref)
+        except Exception, e:
+            raise
+        finally:
+            self.transport.close()
+
+    def get_dna_size(self):
+        if not self.transport.isOpen():
+            self.transport.open()
+
+        try:
+            return self.client.get_dna_size(self._token, self.ref)
+        except Exception, e:
+            raise
+        finally:
+            self.transport.close()
+
+    def get_contig_ids(self):
+        if not self.transport.isOpen():
+            self.transport.open()
+
+        try:
+            return self.client.get_contig_ids(self._token, self.ref)
+        except Exception, e:
+            raise
+        finally:
+            self.transport.close()
+
+    def get_contig_lengths(self, contig_id_list=None):
+        if not self.transport.isOpen():
+            self.transport.open()
+
+        try:
+            return self.client.get_contig_lengths(self._token, self.ref, contig_id_list)
+        except Exception, e:
+            raise
+        finally:
+            self.transport.close()
+
+    def get_contig_gc_content(self, contig_id_list=None):
+        if not self.transport.isOpen():
+            self.transport.open()
+
+        try:
+            return self.client.get_contig_gc_content(self._token, self.ref, contig_id_list)
+        except Exception, e:
+            raise
+        finally:
+            self.transport.close()
+
+    def get_contigs(self, contig_id_list=None):
+        if not self.transport.isOpen():
+            self.transport.open()
+
+        try:
+            return self.client.get_contigs(self._token, self.ref, contig_id_list)
+        except Exception, e:
+            raise
+        finally:
+            self.transport.close()

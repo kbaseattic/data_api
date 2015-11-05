@@ -1,5 +1,4 @@
 import setuptools
-from setuptools.command.install import install
 import logging
 import sys
 import os
@@ -36,7 +35,7 @@ language_properties = {
     "javascript": {
         "style": "js:jquery",
         "generated_dir": "gen-js",
-        "copy_files": ["taxon_types.js", "thrift_service.js"]
+        "copy_files": ["*"]
     },
     "perl": {
         "style": "perl",
@@ -46,7 +45,7 @@ language_properties = {
     "java": {
         "style": "java:sorted_containers",
         "generated_dir": "gen-java",
-        "copy_files": ["ServiceException.java", "taxonConstants.java", "thrift_service.java"]
+        "copy_files": ["*"]
     }
 }
 
@@ -127,6 +126,9 @@ class BuildThriftClients(setuptools.Command):
                     thrift_path = f.split(".")[0]
 
                     for target in client_languages:
+                        if os.path.exists(language_properties[target]["generated_dir"]):
+                            shutil.rmtree(language_properties[target]["generated_dir"])
+
                         command = ["thrift", "-r", "--gen", language_properties[target]["style"], spec_path]
                         errno = subprocess.call(command)
                         if errno != 0:
@@ -138,20 +140,40 @@ class BuildThriftClients(setuptools.Command):
                             generated_files = glob.glob(language_properties[target]["generated_dir"] + "/*")
 
                         copied = False
-                        for x in generated_files:
-                            for name in language_properties[target]["copy_files"]:
-                                if name in x:
-                                    destination = spec_path.rsplit("/",1)[0].replace("specs", "stubs/" + target)
-                                    shutil.copyfile(x, os.path.join(destination, name))
-                                    copied = True
+                        if language_properties[target]["copy_files"] == ["*"]:
+                            destination = spec_path.rsplit("/",1)[0].replace("specs", "stubs/" + target)
+                            for name in generated_files:
+                                source = os.path.basename(name)
+                                shutil.copyfile(x, os.path.join(destination, source))
+                                copied = True
+                        else:
+                            for x in generated_files:
+                                for name in language_properties[target]["copy_files"]:
+                                    if name == os.path.basename(x):
+                                        destination = spec_path.rsplit("/",1)[0].replace("specs", "stubs/" + target)
+                                        shutil.copyfile(x, os.path.join(destination, name))
+                                        copied = True
+
                         if not copied:
                             raise Exception("Unable to find thrift generated files to copy!")
-                        shutil.rmtree(language_properties[target]["generated_dir"])
+
+        for target in client_languages:
+            shutil.rmtree(language_properties[target]["generated_dir"])
 
 
 
-class CustomInstall(install):
-    """Custom install step for thrift generated code"""
+class BuildThriftServers(setuptools.Command):
+    """Build command for generating Thrift server code"""
+
+    user_options = []
+
+    def initialize_options(self):
+        pass
+
+
+    def finalize_options(self):
+        pass
+
 
     def run(self):
         start_path = os.path.join(os.path.abspath(os.path.dirname(__file__)),"thrift/specs")
@@ -205,22 +227,6 @@ class CustomInstall(install):
                         raise Exception("Unable to find thrift client generated files to copy!")
                     shutil.rmtree(language_properties["python"]["generated_dir"])
 
-        # adapted from http://stackoverflow.com/questions/14441955/how-to-perform-custom-build-steps-in-setup-py
-        ret = None
-
-        if self.old_and_unmanageable or self.single_version_externally_managed:
-            ret = install.run(self)
-        else:
-            caller = sys._getframe(2)
-            caller_module = caller.f_globals.get('__name__','')
-            caller_name = caller.f_code.co_name
-
-            if caller_module != "distutils.dist" or caller_name != "run_commands":
-                install.run(self)
-            else:
-                self.do_egg_install()
-
-        return ret
 
 config = {
     "description": "KBase Data API",
@@ -235,6 +241,8 @@ config = {
     "scripts": ["bin/data_api_demo.py",
                 "bin/data_api_benchmark.py",
                 "bin/dump_wsfile",
+                "bin/assembly_start_service.py",
+                "bin/assembly_client_driver.py",
                 "bin/taxon_start_service.py",
                 "bin/taxon_client_driver.py",
                 "bin/extract_thrift_docs"],
@@ -250,6 +258,6 @@ config = {
 setuptools.setup(package_dir = {'': 'lib'},
                  script_args = filter_args(),
                  install_requires = get_dependencies(),
-                 cmdclass = {'install': CustomInstall,
+                 cmdclass = {'build_thrift_servers': BuildThriftServers,
                              'build_thrift_clients': BuildThriftClients},
                  **config)
