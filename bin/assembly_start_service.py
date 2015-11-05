@@ -11,17 +11,17 @@ import lockfile
 import lockfile.pidlockfile
 
 # local
-from doekbase.data_api.taxonomy.taxon.service import driver
+from doekbase.data_api.sequence.assembly.service import driver
 
-# TODO add logging and syslog support
+
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--port", help="port to listen on", type=int, default=9101)
+    parser.add_argument("--port", help="port to listen on", type=int, default=9102)
     parser.add_argument("--kbase-url", help="prod, next, ci, localhost, dir", default="dir")
     parser.add_argument("--pidfile", help="path to pidfile to use")
     args = parser.parse_args()
 
-    pidfilename = "TaxonAPI.pid"
+    pidfilename = "AssemblyAPI.pid"
     if args.pidfile:
         pidfilename = args.pidfile
 

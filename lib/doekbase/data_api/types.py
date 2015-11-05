@@ -11,7 +11,7 @@ import re
 from enum import  Enum # requires enum34
 
 # Local
-from doekbase.data_api.sequence.assembly import AssemblyAPI
+from doekbase.data_api.sequence.assembly.api import AssemblyAPI
 from doekbase.data_api.annotation.genome_annotation import GenomeAnnotationAPI
 from doekbase.data_api.taxonomy.taxon.api import TaxonAPI
 from doekbase.data_api.core import ObjectAPI
