@@ -1,6 +1,7 @@
 #!/bin/bash
 script_dir=$(dirname "$(readlink -f "$0")")
 export KB_DEPLOYMENT_CONFIG=$script_dir/deploy.cfg
+source $script_dir/venv/bin/activate
 
 for api in taxon
 do
