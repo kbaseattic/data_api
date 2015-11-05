@@ -22,9 +22,9 @@ Develop branch status
 
 #quickstart instructions
 
-1. install virtualenv using your local installer::
+1. install virtualenv and python development libraries using your local installer::
 
-        apt-get install virtualenv
+        apt-get install python-dev python-virtualenv
 
 2. create a virtualenv environment to install the source to::
 
