@@ -18,7 +18,7 @@ deploy-client:
 deploy:
 	rm -rf $(SERVICE_DIR)/venv
 	virtualenv $(SERVICE_DIR)/venv
-	cp $(SCRIPTS_DIR)/$(STARTUP_SCRIPT_NAME) $(SERVICE_DIR)/
+	cp $(SCRIPTS_DIR)/start_service $(SCRIPTS_DIR)/stop_service (SERVICE_DIR)/
 	rsync -avzP $(LBIN_DIR) $(SERVICE_DIR)/
 	. $(SERVICE_DIR)/venv/bin/activate && pip install .
 
