@@ -49,7 +49,7 @@ def main():
         #signal.signal(signal.SIGHUP, driver.reload_config())
 
         try:
-            driver.start_service(port=args.port)
+            driver.start_service(port=args.port,host='')
         finally:
             pidfile.release()
     except lockfile.LockFailed:
