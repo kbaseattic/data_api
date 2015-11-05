@@ -5,7 +5,5 @@ source $script_dir/venv/bin/activate
 
 for api in taxon
 do
-# this doesn't yet capture stdout/stderr
-    echo starting service for $api
     daemonize -c $script_dir -o $script_dir/stdout -e $script_dir/stderr -a -v $script_dir/venv/bin/python $script_dir/bin/${api}_start_service.py
 done
