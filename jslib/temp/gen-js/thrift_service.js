@@ -7,6 +7,1505 @@
 
 //HELPER FUNCTIONS AND STRUCTURES
 
+taxon.thrift_service_get_info_args = function(args) {
+  this.token = null;
+  this.ref = null;
+  if (args) {
+    if (args.token !== undefined) {
+      this.token = args.token;
+    }
+    if (args.ref !== undefined) {
+      this.ref = args.ref;
+    }
+  }
+};
+taxon.thrift_service_get_info_args.prototype = {};
+taxon.thrift_service_get_info_args.prototype.read = function(input) {
+  input.readStructBegin();
+  while (true)
+  {
+    var ret = input.readFieldBegin();
+    var fname = ret.fname;
+    var ftype = ret.ftype;
+    var fid = ret.fid;
+    if (ftype == Thrift.Type.STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 1:
+      if (ftype == Thrift.Type.STRING) {
+        this.token = input.readString().value;
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 2:
+      if (ftype == Thrift.Type.STRING) {
+        this.ref = input.readString().value;
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      default:
+        input.skip(ftype);
+    }
+    input.readFieldEnd();
+  }
+  input.readStructEnd();
+  return;
+};
+
+taxon.thrift_service_get_info_args.prototype.write = function(output) {
+  output.writeStructBegin('thrift_service_get_info_args');
+  if (this.token !== null && this.token !== undefined) {
+    output.writeFieldBegin('token', Thrift.Type.STRING, 1);
+    output.writeString(this.token);
+    output.writeFieldEnd();
+  }
+  if (this.ref !== null && this.ref !== undefined) {
+    output.writeFieldBegin('ref', Thrift.Type.STRING, 2);
+    output.writeString(this.ref);
+    output.writeFieldEnd();
+  }
+  output.writeFieldStop();
+  output.writeStructEnd();
+  return;
+};
+
+taxon.thrift_service_get_info_result = function(args) {
+  this.success = null;
+  this.generic_exception = null;
+  this.authorization_exception = null;
+  this.authentication_exception = null;
+  this.reference_exception = null;
+  this.attribute_exception = null;
+  this.type_exception = null;
+  if (args instanceof taxon.ServiceException) {
+    this.generic_exception = args;
+    return;
+  }
+  if (args instanceof taxon.AuthorizationException) {
+    this.authorization_exception = args;
+    return;
+  }
+  if (args instanceof taxon.AuthenticationException) {
+    this.authentication_exception = args;
+    return;
+  }
+  if (args instanceof taxon.ObjectReferenceException) {
+    this.reference_exception = args;
+    return;
+  }
+  if (args instanceof taxon.AttributeException) {
+    this.attribute_exception = args;
+    return;
+  }
+  if (args instanceof taxon.TypeException) {
+    this.type_exception = args;
+    return;
+  }
+  if (args) {
+    if (args.success !== undefined) {
+      this.success = args.success;
+    }
+    if (args.generic_exception !== undefined) {
+      this.generic_exception = args.generic_exception;
+    }
+    if (args.authorization_exception !== undefined) {
+      this.authorization_exception = args.authorization_exception;
+    }
+    if (args.authentication_exception !== undefined) {
+      this.authentication_exception = args.authentication_exception;
+    }
+    if (args.reference_exception !== undefined) {
+      this.reference_exception = args.reference_exception;
+    }
+    if (args.attribute_exception !== undefined) {
+      this.attribute_exception = args.attribute_exception;
+    }
+    if (args.type_exception !== undefined) {
+      this.type_exception = args.type_exception;
+    }
+  }
+};
+taxon.thrift_service_get_info_result.prototype = {};
+taxon.thrift_service_get_info_result.prototype.read = function(input) {
+  input.readStructBegin();
+  while (true)
+  {
+    var ret = input.readFieldBegin();
+    var fname = ret.fname;
+    var ftype = ret.ftype;
+    var fid = ret.fid;
+    if (ftype == Thrift.Type.STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 0:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.success = new taxon.ObjectInfo();
+        this.success.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 1:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.generic_exception = new taxon.ServiceException();
+        this.generic_exception.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 2:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.authorization_exception = new taxon.AuthorizationException();
+        this.authorization_exception.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 3:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.authentication_exception = new taxon.AuthenticationException();
+        this.authentication_exception.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 4:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.reference_exception = new taxon.ObjectReferenceException();
+        this.reference_exception.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 5:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.attribute_exception = new taxon.AttributeException();
+        this.attribute_exception.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 6:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.type_exception = new taxon.TypeException();
+        this.type_exception.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      default:
+        input.skip(ftype);
+    }
+    input.readFieldEnd();
+  }
+  input.readStructEnd();
+  return;
+};
+
+taxon.thrift_service_get_info_result.prototype.write = function(output) {
+  output.writeStructBegin('thrift_service_get_info_result');
+  if (this.success !== null && this.success !== undefined) {
+    output.writeFieldBegin('success', Thrift.Type.STRUCT, 0);
+    this.success.write(output);
+    output.writeFieldEnd();
+  }
+  if (this.generic_exception !== null && this.generic_exception !== undefined) {
+    output.writeFieldBegin('generic_exception', Thrift.Type.STRUCT, 1);
+    this.generic_exception.write(output);
+    output.writeFieldEnd();
+  }
+  if (this.authorization_exception !== null && this.authorization_exception !== undefined) {
+    output.writeFieldBegin('authorization_exception', Thrift.Type.STRUCT, 2);
+    this.authorization_exception.write(output);
+    output.writeFieldEnd();
+  }
+  if (this.authentication_exception !== null && this.authentication_exception !== undefined) {
+    output.writeFieldBegin('authentication_exception', Thrift.Type.STRUCT, 3);
+    this.authentication_exception.write(output);
+    output.writeFieldEnd();
+  }
+  if (this.reference_exception !== null && this.reference_exception !== undefined) {
+    output.writeFieldBegin('reference_exception', Thrift.Type.STRUCT, 4);
+    this.reference_exception.write(output);
+    output.writeFieldEnd();
+  }
+  if (this.attribute_exception !== null && this.attribute_exception !== undefined) {
+    output.writeFieldBegin('attribute_exception', Thrift.Type.STRUCT, 5);
+    this.attribute_exception.write(output);
+    output.writeFieldEnd();
+  }
+  if (this.type_exception !== null && this.type_exception !== undefined) {
+    output.writeFieldBegin('type_exception', Thrift.Type.STRUCT, 6);
+    this.type_exception.write(output);
+    output.writeFieldEnd();
+  }
+  output.writeFieldStop();
+  output.writeStructEnd();
+  return;
+};
+
+taxon.thrift_service_get_history_args = function(args) {
+  this.token = null;
+  this.ref = null;
+  if (args) {
+    if (args.token !== undefined) {
+      this.token = args.token;
+    }
+    if (args.ref !== undefined) {
+      this.ref = args.ref;
+    }
+  }
+};
+taxon.thrift_service_get_history_args.prototype = {};
+taxon.thrift_service_get_history_args.prototype.read = function(input) {
+  input.readStructBegin();
+  while (true)
+  {
+    var ret = input.readFieldBegin();
+    var fname = ret.fname;
+    var ftype = ret.ftype;
+    var fid = ret.fid;
+    if (ftype == Thrift.Type.STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 1:
+      if (ftype == Thrift.Type.STRING) {
+        this.token = input.readString().value;
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 2:
+      if (ftype == Thrift.Type.STRING) {
+        this.ref = input.readString().value;
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      default:
+        input.skip(ftype);
+    }
+    input.readFieldEnd();
+  }
+  input.readStructEnd();
+  return;
+};
+
+taxon.thrift_service_get_history_args.prototype.write = function(output) {
+  output.writeStructBegin('thrift_service_get_history_args');
+  if (this.token !== null && this.token !== undefined) {
+    output.writeFieldBegin('token', Thrift.Type.STRING, 1);
+    output.writeString(this.token);
+    output.writeFieldEnd();
+  }
+  if (this.ref !== null && this.ref !== undefined) {
+    output.writeFieldBegin('ref', Thrift.Type.STRING, 2);
+    output.writeString(this.ref);
+    output.writeFieldEnd();
+  }
+  output.writeFieldStop();
+  output.writeStructEnd();
+  return;
+};
+
+taxon.thrift_service_get_history_result = function(args) {
+  this.success = null;
+  this.generic_exception = null;
+  this.authorization_exception = null;
+  this.authentication_exception = null;
+  this.reference_exception = null;
+  this.attribute_exception = null;
+  this.type_exception = null;
+  if (args instanceof taxon.ServiceException) {
+    this.generic_exception = args;
+    return;
+  }
+  if (args instanceof taxon.AuthorizationException) {
+    this.authorization_exception = args;
+    return;
+  }
+  if (args instanceof taxon.AuthenticationException) {
+    this.authentication_exception = args;
+    return;
+  }
+  if (args instanceof taxon.ObjectReferenceException) {
+    this.reference_exception = args;
+    return;
+  }
+  if (args instanceof taxon.AttributeException) {
+    this.attribute_exception = args;
+    return;
+  }
+  if (args instanceof taxon.TypeException) {
+    this.type_exception = args;
+    return;
+  }
+  if (args) {
+    if (args.success !== undefined) {
+      this.success = args.success;
+    }
+    if (args.generic_exception !== undefined) {
+      this.generic_exception = args.generic_exception;
+    }
+    if (args.authorization_exception !== undefined) {
+      this.authorization_exception = args.authorization_exception;
+    }
+    if (args.authentication_exception !== undefined) {
+      this.authentication_exception = args.authentication_exception;
+    }
+    if (args.reference_exception !== undefined) {
+      this.reference_exception = args.reference_exception;
+    }
+    if (args.attribute_exception !== undefined) {
+      this.attribute_exception = args.attribute_exception;
+    }
+    if (args.type_exception !== undefined) {
+      this.type_exception = args.type_exception;
+    }
+  }
+};
+taxon.thrift_service_get_history_result.prototype = {};
+taxon.thrift_service_get_history_result.prototype.read = function(input) {
+  input.readStructBegin();
+  while (true)
+  {
+    var ret = input.readFieldBegin();
+    var fname = ret.fname;
+    var ftype = ret.ftype;
+    var fid = ret.fid;
+    if (ftype == Thrift.Type.STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 0:
+      if (ftype == Thrift.Type.LIST) {
+        var _size76 = 0;
+        var _rtmp380;
+        this.success = [];
+        var _etype79 = 0;
+        _rtmp380 = input.readListBegin();
+        _etype79 = _rtmp380.etype;
+        _size76 = _rtmp380.size;
+        for (var _i81 = 0; _i81 < _size76; ++_i81)
+        {
+          var elem82 = null;
+          elem82 = new taxon.ObjectInfo();
+          elem82.read(input);
+          this.success.push(elem82);
+        }
+        input.readListEnd();
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 1:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.generic_exception = new taxon.ServiceException();
+        this.generic_exception.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 2:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.authorization_exception = new taxon.AuthorizationException();
+        this.authorization_exception.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 3:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.authentication_exception = new taxon.AuthenticationException();
+        this.authentication_exception.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 4:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.reference_exception = new taxon.ObjectReferenceException();
+        this.reference_exception.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 5:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.attribute_exception = new taxon.AttributeException();
+        this.attribute_exception.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 6:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.type_exception = new taxon.TypeException();
+        this.type_exception.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      default:
+        input.skip(ftype);
+    }
+    input.readFieldEnd();
+  }
+  input.readStructEnd();
+  return;
+};
+
+taxon.thrift_service_get_history_result.prototype.write = function(output) {
+  output.writeStructBegin('thrift_service_get_history_result');
+  if (this.success !== null && this.success !== undefined) {
+    output.writeFieldBegin('success', Thrift.Type.LIST, 0);
+    output.writeListBegin(Thrift.Type.STRUCT, this.success.length);
+    for (var iter83 in this.success)
+    {
+      if (this.success.hasOwnProperty(iter83))
+      {
+        iter83 = this.success[iter83];
+        iter83.write(output);
+      }
+    }
+    output.writeListEnd();
+    output.writeFieldEnd();
+  }
+  if (this.generic_exception !== null && this.generic_exception !== undefined) {
+    output.writeFieldBegin('generic_exception', Thrift.Type.STRUCT, 1);
+    this.generic_exception.write(output);
+    output.writeFieldEnd();
+  }
+  if (this.authorization_exception !== null && this.authorization_exception !== undefined) {
+    output.writeFieldBegin('authorization_exception', Thrift.Type.STRUCT, 2);
+    this.authorization_exception.write(output);
+    output.writeFieldEnd();
+  }
+  if (this.authentication_exception !== null && this.authentication_exception !== undefined) {
+    output.writeFieldBegin('authentication_exception', Thrift.Type.STRUCT, 3);
+    this.authentication_exception.write(output);
+    output.writeFieldEnd();
+  }
+  if (this.reference_exception !== null && this.reference_exception !== undefined) {
+    output.writeFieldBegin('reference_exception', Thrift.Type.STRUCT, 4);
+    this.reference_exception.write(output);
+    output.writeFieldEnd();
+  }
+  if (this.attribute_exception !== null && this.attribute_exception !== undefined) {
+    output.writeFieldBegin('attribute_exception', Thrift.Type.STRUCT, 5);
+    this.attribute_exception.write(output);
+    output.writeFieldEnd();
+  }
+  if (this.type_exception !== null && this.type_exception !== undefined) {
+    output.writeFieldBegin('type_exception', Thrift.Type.STRUCT, 6);
+    this.type_exception.write(output);
+    output.writeFieldEnd();
+  }
+  output.writeFieldStop();
+  output.writeStructEnd();
+  return;
+};
+
+taxon.thrift_service_get_provenance_args = function(args) {
+  this.token = null;
+  this.ref = null;
+  if (args) {
+    if (args.token !== undefined) {
+      this.token = args.token;
+    }
+    if (args.ref !== undefined) {
+      this.ref = args.ref;
+    }
+  }
+};
+taxon.thrift_service_get_provenance_args.prototype = {};
+taxon.thrift_service_get_provenance_args.prototype.read = function(input) {
+  input.readStructBegin();
+  while (true)
+  {
+    var ret = input.readFieldBegin();
+    var fname = ret.fname;
+    var ftype = ret.ftype;
+    var fid = ret.fid;
+    if (ftype == Thrift.Type.STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 1:
+      if (ftype == Thrift.Type.STRING) {
+        this.token = input.readString().value;
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 2:
+      if (ftype == Thrift.Type.STRING) {
+        this.ref = input.readString().value;
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      default:
+        input.skip(ftype);
+    }
+    input.readFieldEnd();
+  }
+  input.readStructEnd();
+  return;
+};
+
+taxon.thrift_service_get_provenance_args.prototype.write = function(output) {
+  output.writeStructBegin('thrift_service_get_provenance_args');
+  if (this.token !== null && this.token !== undefined) {
+    output.writeFieldBegin('token', Thrift.Type.STRING, 1);
+    output.writeString(this.token);
+    output.writeFieldEnd();
+  }
+  if (this.ref !== null && this.ref !== undefined) {
+    output.writeFieldBegin('ref', Thrift.Type.STRING, 2);
+    output.writeString(this.ref);
+    output.writeFieldEnd();
+  }
+  output.writeFieldStop();
+  output.writeStructEnd();
+  return;
+};
+
+taxon.thrift_service_get_provenance_result = function(args) {
+  this.success = null;
+  this.generic_exception = null;
+  this.authorization_exception = null;
+  this.authentication_exception = null;
+  this.reference_exception = null;
+  this.attribute_exception = null;
+  this.type_exception = null;
+  if (args instanceof taxon.ServiceException) {
+    this.generic_exception = args;
+    return;
+  }
+  if (args instanceof taxon.AuthorizationException) {
+    this.authorization_exception = args;
+    return;
+  }
+  if (args instanceof taxon.AuthenticationException) {
+    this.authentication_exception = args;
+    return;
+  }
+  if (args instanceof taxon.ObjectReferenceException) {
+    this.reference_exception = args;
+    return;
+  }
+  if (args instanceof taxon.AttributeException) {
+    this.attribute_exception = args;
+    return;
+  }
+  if (args instanceof taxon.TypeException) {
+    this.type_exception = args;
+    return;
+  }
+  if (args) {
+    if (args.success !== undefined) {
+      this.success = args.success;
+    }
+    if (args.generic_exception !== undefined) {
+      this.generic_exception = args.generic_exception;
+    }
+    if (args.authorization_exception !== undefined) {
+      this.authorization_exception = args.authorization_exception;
+    }
+    if (args.authentication_exception !== undefined) {
+      this.authentication_exception = args.authentication_exception;
+    }
+    if (args.reference_exception !== undefined) {
+      this.reference_exception = args.reference_exception;
+    }
+    if (args.attribute_exception !== undefined) {
+      this.attribute_exception = args.attribute_exception;
+    }
+    if (args.type_exception !== undefined) {
+      this.type_exception = args.type_exception;
+    }
+  }
+};
+taxon.thrift_service_get_provenance_result.prototype = {};
+taxon.thrift_service_get_provenance_result.prototype.read = function(input) {
+  input.readStructBegin();
+  while (true)
+  {
+    var ret = input.readFieldBegin();
+    var fname = ret.fname;
+    var ftype = ret.ftype;
+    var fid = ret.fid;
+    if (ftype == Thrift.Type.STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 0:
+      if (ftype == Thrift.Type.LIST) {
+        var _size84 = 0;
+        var _rtmp388;
+        this.success = [];
+        var _etype87 = 0;
+        _rtmp388 = input.readListBegin();
+        _etype87 = _rtmp388.etype;
+        _size84 = _rtmp388.size;
+        for (var _i89 = 0; _i89 < _size84; ++_i89)
+        {
+          var elem90 = null;
+          elem90 = new taxon.ObjectProvenanceAction();
+          elem90.read(input);
+          this.success.push(elem90);
+        }
+        input.readListEnd();
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 1:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.generic_exception = new taxon.ServiceException();
+        this.generic_exception.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 2:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.authorization_exception = new taxon.AuthorizationException();
+        this.authorization_exception.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 3:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.authentication_exception = new taxon.AuthenticationException();
+        this.authentication_exception.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 4:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.reference_exception = new taxon.ObjectReferenceException();
+        this.reference_exception.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 5:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.attribute_exception = new taxon.AttributeException();
+        this.attribute_exception.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 6:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.type_exception = new taxon.TypeException();
+        this.type_exception.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      default:
+        input.skip(ftype);
+    }
+    input.readFieldEnd();
+  }
+  input.readStructEnd();
+  return;
+};
+
+taxon.thrift_service_get_provenance_result.prototype.write = function(output) {
+  output.writeStructBegin('thrift_service_get_provenance_result');
+  if (this.success !== null && this.success !== undefined) {
+    output.writeFieldBegin('success', Thrift.Type.LIST, 0);
+    output.writeListBegin(Thrift.Type.STRUCT, this.success.length);
+    for (var iter91 in this.success)
+    {
+      if (this.success.hasOwnProperty(iter91))
+      {
+        iter91 = this.success[iter91];
+        iter91.write(output);
+      }
+    }
+    output.writeListEnd();
+    output.writeFieldEnd();
+  }
+  if (this.generic_exception !== null && this.generic_exception !== undefined) {
+    output.writeFieldBegin('generic_exception', Thrift.Type.STRUCT, 1);
+    this.generic_exception.write(output);
+    output.writeFieldEnd();
+  }
+  if (this.authorization_exception !== null && this.authorization_exception !== undefined) {
+    output.writeFieldBegin('authorization_exception', Thrift.Type.STRUCT, 2);
+    this.authorization_exception.write(output);
+    output.writeFieldEnd();
+  }
+  if (this.authentication_exception !== null && this.authentication_exception !== undefined) {
+    output.writeFieldBegin('authentication_exception', Thrift.Type.STRUCT, 3);
+    this.authentication_exception.write(output);
+    output.writeFieldEnd();
+  }
+  if (this.reference_exception !== null && this.reference_exception !== undefined) {
+    output.writeFieldBegin('reference_exception', Thrift.Type.STRUCT, 4);
+    this.reference_exception.write(output);
+    output.writeFieldEnd();
+  }
+  if (this.attribute_exception !== null && this.attribute_exception !== undefined) {
+    output.writeFieldBegin('attribute_exception', Thrift.Type.STRUCT, 5);
+    this.attribute_exception.write(output);
+    output.writeFieldEnd();
+  }
+  if (this.type_exception !== null && this.type_exception !== undefined) {
+    output.writeFieldBegin('type_exception', Thrift.Type.STRUCT, 6);
+    this.type_exception.write(output);
+    output.writeFieldEnd();
+  }
+  output.writeFieldStop();
+  output.writeStructEnd();
+  return;
+};
+
+taxon.thrift_service_get_id_args = function(args) {
+  this.token = null;
+  this.ref = null;
+  if (args) {
+    if (args.token !== undefined) {
+      this.token = args.token;
+    }
+    if (args.ref !== undefined) {
+      this.ref = args.ref;
+    }
+  }
+};
+taxon.thrift_service_get_id_args.prototype = {};
+taxon.thrift_service_get_id_args.prototype.read = function(input) {
+  input.readStructBegin();
+  while (true)
+  {
+    var ret = input.readFieldBegin();
+    var fname = ret.fname;
+    var ftype = ret.ftype;
+    var fid = ret.fid;
+    if (ftype == Thrift.Type.STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 1:
+      if (ftype == Thrift.Type.STRING) {
+        this.token = input.readString().value;
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 2:
+      if (ftype == Thrift.Type.STRING) {
+        this.ref = input.readString().value;
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      default:
+        input.skip(ftype);
+    }
+    input.readFieldEnd();
+  }
+  input.readStructEnd();
+  return;
+};
+
+taxon.thrift_service_get_id_args.prototype.write = function(output) {
+  output.writeStructBegin('thrift_service_get_id_args');
+  if (this.token !== null && this.token !== undefined) {
+    output.writeFieldBegin('token', Thrift.Type.STRING, 1);
+    output.writeString(this.token);
+    output.writeFieldEnd();
+  }
+  if (this.ref !== null && this.ref !== undefined) {
+    output.writeFieldBegin('ref', Thrift.Type.STRING, 2);
+    output.writeString(this.ref);
+    output.writeFieldEnd();
+  }
+  output.writeFieldStop();
+  output.writeStructEnd();
+  return;
+};
+
+taxon.thrift_service_get_id_result = function(args) {
+  this.success = null;
+  this.generic_exception = null;
+  this.authorization_exception = null;
+  this.authentication_exception = null;
+  this.reference_exception = null;
+  this.attribute_exception = null;
+  this.type_exception = null;
+  if (args instanceof taxon.ServiceException) {
+    this.generic_exception = args;
+    return;
+  }
+  if (args instanceof taxon.AuthorizationException) {
+    this.authorization_exception = args;
+    return;
+  }
+  if (args instanceof taxon.AuthenticationException) {
+    this.authentication_exception = args;
+    return;
+  }
+  if (args instanceof taxon.ObjectReferenceException) {
+    this.reference_exception = args;
+    return;
+  }
+  if (args instanceof taxon.AttributeException) {
+    this.attribute_exception = args;
+    return;
+  }
+  if (args instanceof taxon.TypeException) {
+    this.type_exception = args;
+    return;
+  }
+  if (args) {
+    if (args.success !== undefined) {
+      this.success = args.success;
+    }
+    if (args.generic_exception !== undefined) {
+      this.generic_exception = args.generic_exception;
+    }
+    if (args.authorization_exception !== undefined) {
+      this.authorization_exception = args.authorization_exception;
+    }
+    if (args.authentication_exception !== undefined) {
+      this.authentication_exception = args.authentication_exception;
+    }
+    if (args.reference_exception !== undefined) {
+      this.reference_exception = args.reference_exception;
+    }
+    if (args.attribute_exception !== undefined) {
+      this.attribute_exception = args.attribute_exception;
+    }
+    if (args.type_exception !== undefined) {
+      this.type_exception = args.type_exception;
+    }
+  }
+};
+taxon.thrift_service_get_id_result.prototype = {};
+taxon.thrift_service_get_id_result.prototype.read = function(input) {
+  input.readStructBegin();
+  while (true)
+  {
+    var ret = input.readFieldBegin();
+    var fname = ret.fname;
+    var ftype = ret.ftype;
+    var fid = ret.fid;
+    if (ftype == Thrift.Type.STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 0:
+      if (ftype == Thrift.Type.I64) {
+        this.success = input.readI64().value;
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 1:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.generic_exception = new taxon.ServiceException();
+        this.generic_exception.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 2:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.authorization_exception = new taxon.AuthorizationException();
+        this.authorization_exception.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 3:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.authentication_exception = new taxon.AuthenticationException();
+        this.authentication_exception.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 4:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.reference_exception = new taxon.ObjectReferenceException();
+        this.reference_exception.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 5:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.attribute_exception = new taxon.AttributeException();
+        this.attribute_exception.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 6:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.type_exception = new taxon.TypeException();
+        this.type_exception.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      default:
+        input.skip(ftype);
+    }
+    input.readFieldEnd();
+  }
+  input.readStructEnd();
+  return;
+};
+
+taxon.thrift_service_get_id_result.prototype.write = function(output) {
+  output.writeStructBegin('thrift_service_get_id_result');
+  if (this.success !== null && this.success !== undefined) {
+    output.writeFieldBegin('success', Thrift.Type.I64, 0);
+    output.writeI64(this.success);
+    output.writeFieldEnd();
+  }
+  if (this.generic_exception !== null && this.generic_exception !== undefined) {
+    output.writeFieldBegin('generic_exception', Thrift.Type.STRUCT, 1);
+    this.generic_exception.write(output);
+    output.writeFieldEnd();
+  }
+  if (this.authorization_exception !== null && this.authorization_exception !== undefined) {
+    output.writeFieldBegin('authorization_exception', Thrift.Type.STRUCT, 2);
+    this.authorization_exception.write(output);
+    output.writeFieldEnd();
+  }
+  if (this.authentication_exception !== null && this.authentication_exception !== undefined) {
+    output.writeFieldBegin('authentication_exception', Thrift.Type.STRUCT, 3);
+    this.authentication_exception.write(output);
+    output.writeFieldEnd();
+  }
+  if (this.reference_exception !== null && this.reference_exception !== undefined) {
+    output.writeFieldBegin('reference_exception', Thrift.Type.STRUCT, 4);
+    this.reference_exception.write(output);
+    output.writeFieldEnd();
+  }
+  if (this.attribute_exception !== null && this.attribute_exception !== undefined) {
+    output.writeFieldBegin('attribute_exception', Thrift.Type.STRUCT, 5);
+    this.attribute_exception.write(output);
+    output.writeFieldEnd();
+  }
+  if (this.type_exception !== null && this.type_exception !== undefined) {
+    output.writeFieldBegin('type_exception', Thrift.Type.STRUCT, 6);
+    this.type_exception.write(output);
+    output.writeFieldEnd();
+  }
+  output.writeFieldStop();
+  output.writeStructEnd();
+  return;
+};
+
+taxon.thrift_service_get_name_args = function(args) {
+  this.token = null;
+  this.ref = null;
+  if (args) {
+    if (args.token !== undefined) {
+      this.token = args.token;
+    }
+    if (args.ref !== undefined) {
+      this.ref = args.ref;
+    }
+  }
+};
+taxon.thrift_service_get_name_args.prototype = {};
+taxon.thrift_service_get_name_args.prototype.read = function(input) {
+  input.readStructBegin();
+  while (true)
+  {
+    var ret = input.readFieldBegin();
+    var fname = ret.fname;
+    var ftype = ret.ftype;
+    var fid = ret.fid;
+    if (ftype == Thrift.Type.STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 1:
+      if (ftype == Thrift.Type.STRING) {
+        this.token = input.readString().value;
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 2:
+      if (ftype == Thrift.Type.STRING) {
+        this.ref = input.readString().value;
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      default:
+        input.skip(ftype);
+    }
+    input.readFieldEnd();
+  }
+  input.readStructEnd();
+  return;
+};
+
+taxon.thrift_service_get_name_args.prototype.write = function(output) {
+  output.writeStructBegin('thrift_service_get_name_args');
+  if (this.token !== null && this.token !== undefined) {
+    output.writeFieldBegin('token', Thrift.Type.STRING, 1);
+    output.writeString(this.token);
+    output.writeFieldEnd();
+  }
+  if (this.ref !== null && this.ref !== undefined) {
+    output.writeFieldBegin('ref', Thrift.Type.STRING, 2);
+    output.writeString(this.ref);
+    output.writeFieldEnd();
+  }
+  output.writeFieldStop();
+  output.writeStructEnd();
+  return;
+};
+
+taxon.thrift_service_get_name_result = function(args) {
+  this.success = null;
+  this.generic_exception = null;
+  this.authorization_exception = null;
+  this.authentication_exception = null;
+  this.reference_exception = null;
+  this.attribute_exception = null;
+  this.type_exception = null;
+  if (args instanceof taxon.ServiceException) {
+    this.generic_exception = args;
+    return;
+  }
+  if (args instanceof taxon.AuthorizationException) {
+    this.authorization_exception = args;
+    return;
+  }
+  if (args instanceof taxon.AuthenticationException) {
+    this.authentication_exception = args;
+    return;
+  }
+  if (args instanceof taxon.ObjectReferenceException) {
+    this.reference_exception = args;
+    return;
+  }
+  if (args instanceof taxon.AttributeException) {
+    this.attribute_exception = args;
+    return;
+  }
+  if (args instanceof taxon.TypeException) {
+    this.type_exception = args;
+    return;
+  }
+  if (args) {
+    if (args.success !== undefined) {
+      this.success = args.success;
+    }
+    if (args.generic_exception !== undefined) {
+      this.generic_exception = args.generic_exception;
+    }
+    if (args.authorization_exception !== undefined) {
+      this.authorization_exception = args.authorization_exception;
+    }
+    if (args.authentication_exception !== undefined) {
+      this.authentication_exception = args.authentication_exception;
+    }
+    if (args.reference_exception !== undefined) {
+      this.reference_exception = args.reference_exception;
+    }
+    if (args.attribute_exception !== undefined) {
+      this.attribute_exception = args.attribute_exception;
+    }
+    if (args.type_exception !== undefined) {
+      this.type_exception = args.type_exception;
+    }
+  }
+};
+taxon.thrift_service_get_name_result.prototype = {};
+taxon.thrift_service_get_name_result.prototype.read = function(input) {
+  input.readStructBegin();
+  while (true)
+  {
+    var ret = input.readFieldBegin();
+    var fname = ret.fname;
+    var ftype = ret.ftype;
+    var fid = ret.fid;
+    if (ftype == Thrift.Type.STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 0:
+      if (ftype == Thrift.Type.STRING) {
+        this.success = input.readString().value;
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 1:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.generic_exception = new taxon.ServiceException();
+        this.generic_exception.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 2:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.authorization_exception = new taxon.AuthorizationException();
+        this.authorization_exception.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 3:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.authentication_exception = new taxon.AuthenticationException();
+        this.authentication_exception.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 4:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.reference_exception = new taxon.ObjectReferenceException();
+        this.reference_exception.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 5:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.attribute_exception = new taxon.AttributeException();
+        this.attribute_exception.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 6:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.type_exception = new taxon.TypeException();
+        this.type_exception.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      default:
+        input.skip(ftype);
+    }
+    input.readFieldEnd();
+  }
+  input.readStructEnd();
+  return;
+};
+
+taxon.thrift_service_get_name_result.prototype.write = function(output) {
+  output.writeStructBegin('thrift_service_get_name_result');
+  if (this.success !== null && this.success !== undefined) {
+    output.writeFieldBegin('success', Thrift.Type.STRING, 0);
+    output.writeString(this.success);
+    output.writeFieldEnd();
+  }
+  if (this.generic_exception !== null && this.generic_exception !== undefined) {
+    output.writeFieldBegin('generic_exception', Thrift.Type.STRUCT, 1);
+    this.generic_exception.write(output);
+    output.writeFieldEnd();
+  }
+  if (this.authorization_exception !== null && this.authorization_exception !== undefined) {
+    output.writeFieldBegin('authorization_exception', Thrift.Type.STRUCT, 2);
+    this.authorization_exception.write(output);
+    output.writeFieldEnd();
+  }
+  if (this.authentication_exception !== null && this.authentication_exception !== undefined) {
+    output.writeFieldBegin('authentication_exception', Thrift.Type.STRUCT, 3);
+    this.authentication_exception.write(output);
+    output.writeFieldEnd();
+  }
+  if (this.reference_exception !== null && this.reference_exception !== undefined) {
+    output.writeFieldBegin('reference_exception', Thrift.Type.STRUCT, 4);
+    this.reference_exception.write(output);
+    output.writeFieldEnd();
+  }
+  if (this.attribute_exception !== null && this.attribute_exception !== undefined) {
+    output.writeFieldBegin('attribute_exception', Thrift.Type.STRUCT, 5);
+    this.attribute_exception.write(output);
+    output.writeFieldEnd();
+  }
+  if (this.type_exception !== null && this.type_exception !== undefined) {
+    output.writeFieldBegin('type_exception', Thrift.Type.STRUCT, 6);
+    this.type_exception.write(output);
+    output.writeFieldEnd();
+  }
+  output.writeFieldStop();
+  output.writeStructEnd();
+  return;
+};
+
+taxon.thrift_service_get_version_args = function(args) {
+  this.token = null;
+  this.ref = null;
+  if (args) {
+    if (args.token !== undefined) {
+      this.token = args.token;
+    }
+    if (args.ref !== undefined) {
+      this.ref = args.ref;
+    }
+  }
+};
+taxon.thrift_service_get_version_args.prototype = {};
+taxon.thrift_service_get_version_args.prototype.read = function(input) {
+  input.readStructBegin();
+  while (true)
+  {
+    var ret = input.readFieldBegin();
+    var fname = ret.fname;
+    var ftype = ret.ftype;
+    var fid = ret.fid;
+    if (ftype == Thrift.Type.STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 1:
+      if (ftype == Thrift.Type.STRING) {
+        this.token = input.readString().value;
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 2:
+      if (ftype == Thrift.Type.STRING) {
+        this.ref = input.readString().value;
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      default:
+        input.skip(ftype);
+    }
+    input.readFieldEnd();
+  }
+  input.readStructEnd();
+  return;
+};
+
+taxon.thrift_service_get_version_args.prototype.write = function(output) {
+  output.writeStructBegin('thrift_service_get_version_args');
+  if (this.token !== null && this.token !== undefined) {
+    output.writeFieldBegin('token', Thrift.Type.STRING, 1);
+    output.writeString(this.token);
+    output.writeFieldEnd();
+  }
+  if (this.ref !== null && this.ref !== undefined) {
+    output.writeFieldBegin('ref', Thrift.Type.STRING, 2);
+    output.writeString(this.ref);
+    output.writeFieldEnd();
+  }
+  output.writeFieldStop();
+  output.writeStructEnd();
+  return;
+};
+
+taxon.thrift_service_get_version_result = function(args) {
+  this.success = null;
+  this.generic_exception = null;
+  this.authorization_exception = null;
+  this.authentication_exception = null;
+  this.reference_exception = null;
+  this.attribute_exception = null;
+  this.type_exception = null;
+  if (args instanceof taxon.ServiceException) {
+    this.generic_exception = args;
+    return;
+  }
+  if (args instanceof taxon.AuthorizationException) {
+    this.authorization_exception = args;
+    return;
+  }
+  if (args instanceof taxon.AuthenticationException) {
+    this.authentication_exception = args;
+    return;
+  }
+  if (args instanceof taxon.ObjectReferenceException) {
+    this.reference_exception = args;
+    return;
+  }
+  if (args instanceof taxon.AttributeException) {
+    this.attribute_exception = args;
+    return;
+  }
+  if (args instanceof taxon.TypeException) {
+    this.type_exception = args;
+    return;
+  }
+  if (args) {
+    if (args.success !== undefined) {
+      this.success = args.success;
+    }
+    if (args.generic_exception !== undefined) {
+      this.generic_exception = args.generic_exception;
+    }
+    if (args.authorization_exception !== undefined) {
+      this.authorization_exception = args.authorization_exception;
+    }
+    if (args.authentication_exception !== undefined) {
+      this.authentication_exception = args.authentication_exception;
+    }
+    if (args.reference_exception !== undefined) {
+      this.reference_exception = args.reference_exception;
+    }
+    if (args.attribute_exception !== undefined) {
+      this.attribute_exception = args.attribute_exception;
+    }
+    if (args.type_exception !== undefined) {
+      this.type_exception = args.type_exception;
+    }
+  }
+};
+taxon.thrift_service_get_version_result.prototype = {};
+taxon.thrift_service_get_version_result.prototype.read = function(input) {
+  input.readStructBegin();
+  while (true)
+  {
+    var ret = input.readFieldBegin();
+    var fname = ret.fname;
+    var ftype = ret.ftype;
+    var fid = ret.fid;
+    if (ftype == Thrift.Type.STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 0:
+      if (ftype == Thrift.Type.STRING) {
+        this.success = input.readString().value;
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 1:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.generic_exception = new taxon.ServiceException();
+        this.generic_exception.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 2:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.authorization_exception = new taxon.AuthorizationException();
+        this.authorization_exception.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 3:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.authentication_exception = new taxon.AuthenticationException();
+        this.authentication_exception.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 4:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.reference_exception = new taxon.ObjectReferenceException();
+        this.reference_exception.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 5:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.attribute_exception = new taxon.AttributeException();
+        this.attribute_exception.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 6:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.type_exception = new taxon.TypeException();
+        this.type_exception.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      default:
+        input.skip(ftype);
+    }
+    input.readFieldEnd();
+  }
+  input.readStructEnd();
+  return;
+};
+
+taxon.thrift_service_get_version_result.prototype.write = function(output) {
+  output.writeStructBegin('thrift_service_get_version_result');
+  if (this.success !== null && this.success !== undefined) {
+    output.writeFieldBegin('success', Thrift.Type.STRING, 0);
+    output.writeString(this.success);
+    output.writeFieldEnd();
+  }
+  if (this.generic_exception !== null && this.generic_exception !== undefined) {
+    output.writeFieldBegin('generic_exception', Thrift.Type.STRUCT, 1);
+    this.generic_exception.write(output);
+    output.writeFieldEnd();
+  }
+  if (this.authorization_exception !== null && this.authorization_exception !== undefined) {
+    output.writeFieldBegin('authorization_exception', Thrift.Type.STRUCT, 2);
+    this.authorization_exception.write(output);
+    output.writeFieldEnd();
+  }
+  if (this.authentication_exception !== null && this.authentication_exception !== undefined) {
+    output.writeFieldBegin('authentication_exception', Thrift.Type.STRUCT, 3);
+    this.authentication_exception.write(output);
+    output.writeFieldEnd();
+  }
+  if (this.reference_exception !== null && this.reference_exception !== undefined) {
+    output.writeFieldBegin('reference_exception', Thrift.Type.STRUCT, 4);
+    this.reference_exception.write(output);
+    output.writeFieldEnd();
+  }
+  if (this.attribute_exception !== null && this.attribute_exception !== undefined) {
+    output.writeFieldBegin('attribute_exception', Thrift.Type.STRUCT, 5);
+    this.attribute_exception.write(output);
+    output.writeFieldEnd();
+  }
+  if (this.type_exception !== null && this.type_exception !== undefined) {
+    output.writeFieldBegin('type_exception', Thrift.Type.STRUCT, 6);
+    this.type_exception.write(output);
+    output.writeFieldEnd();
+  }
+  output.writeFieldStop();
+  output.writeStructEnd();
+  return;
+};
+
 taxon.thrift_service_get_parent_args = function(args) {
   this.token = null;
   this.ref = null;
@@ -75,17 +1574,57 @@ taxon.thrift_service_get_parent_args.prototype.write = function(output) {
 
 taxon.thrift_service_get_parent_result = function(args) {
   this.success = null;
-  this.failure = null;
+  this.generic_exception = null;
+  this.authorization_exception = null;
+  this.authentication_exception = null;
+  this.reference_exception = null;
+  this.attribute_exception = null;
+  this.type_exception = null;
   if (args instanceof taxon.ServiceException) {
-    this.failure = args;
+    this.generic_exception = args;
+    return;
+  }
+  if (args instanceof taxon.AuthorizationException) {
+    this.authorization_exception = args;
+    return;
+  }
+  if (args instanceof taxon.AuthenticationException) {
+    this.authentication_exception = args;
+    return;
+  }
+  if (args instanceof taxon.ObjectReferenceException) {
+    this.reference_exception = args;
+    return;
+  }
+  if (args instanceof taxon.AttributeException) {
+    this.attribute_exception = args;
+    return;
+  }
+  if (args instanceof taxon.TypeException) {
+    this.type_exception = args;
     return;
   }
   if (args) {
     if (args.success !== undefined) {
       this.success = args.success;
     }
-    if (args.failure !== undefined) {
-      this.failure = args.failure;
+    if (args.generic_exception !== undefined) {
+      this.generic_exception = args.generic_exception;
+    }
+    if (args.authorization_exception !== undefined) {
+      this.authorization_exception = args.authorization_exception;
+    }
+    if (args.authentication_exception !== undefined) {
+      this.authentication_exception = args.authentication_exception;
+    }
+    if (args.reference_exception !== undefined) {
+      this.reference_exception = args.reference_exception;
+    }
+    if (args.attribute_exception !== undefined) {
+      this.attribute_exception = args.attribute_exception;
+    }
+    if (args.type_exception !== undefined) {
+      this.type_exception = args.type_exception;
     }
   }
 };
@@ -112,8 +1651,48 @@ taxon.thrift_service_get_parent_result.prototype.read = function(input) {
       break;
       case 1:
       if (ftype == Thrift.Type.STRUCT) {
-        this.failure = new taxon.ServiceException();
-        this.failure.read(input);
+        this.generic_exception = new taxon.ServiceException();
+        this.generic_exception.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 2:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.authorization_exception = new taxon.AuthorizationException();
+        this.authorization_exception.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 3:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.authentication_exception = new taxon.AuthenticationException();
+        this.authentication_exception.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 4:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.reference_exception = new taxon.ObjectReferenceException();
+        this.reference_exception.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 5:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.attribute_exception = new taxon.AttributeException();
+        this.attribute_exception.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 6:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.type_exception = new taxon.TypeException();
+        this.type_exception.read(input);
       } else {
         input.skip(ftype);
       }
@@ -134,9 +1713,34 @@ taxon.thrift_service_get_parent_result.prototype.write = function(output) {
     output.writeString(this.success);
     output.writeFieldEnd();
   }
-  if (this.failure !== null && this.failure !== undefined) {
-    output.writeFieldBegin('failure', Thrift.Type.STRUCT, 1);
-    this.failure.write(output);
+  if (this.generic_exception !== null && this.generic_exception !== undefined) {
+    output.writeFieldBegin('generic_exception', Thrift.Type.STRUCT, 1);
+    this.generic_exception.write(output);
+    output.writeFieldEnd();
+  }
+  if (this.authorization_exception !== null && this.authorization_exception !== undefined) {
+    output.writeFieldBegin('authorization_exception', Thrift.Type.STRUCT, 2);
+    this.authorization_exception.write(output);
+    output.writeFieldEnd();
+  }
+  if (this.authentication_exception !== null && this.authentication_exception !== undefined) {
+    output.writeFieldBegin('authentication_exception', Thrift.Type.STRUCT, 3);
+    this.authentication_exception.write(output);
+    output.writeFieldEnd();
+  }
+  if (this.reference_exception !== null && this.reference_exception !== undefined) {
+    output.writeFieldBegin('reference_exception', Thrift.Type.STRUCT, 4);
+    this.reference_exception.write(output);
+    output.writeFieldEnd();
+  }
+  if (this.attribute_exception !== null && this.attribute_exception !== undefined) {
+    output.writeFieldBegin('attribute_exception', Thrift.Type.STRUCT, 5);
+    this.attribute_exception.write(output);
+    output.writeFieldEnd();
+  }
+  if (this.type_exception !== null && this.type_exception !== undefined) {
+    output.writeFieldBegin('type_exception', Thrift.Type.STRUCT, 6);
+    this.type_exception.write(output);
     output.writeFieldEnd();
   }
   output.writeFieldStop();
@@ -212,17 +1816,57 @@ taxon.thrift_service_get_children_args.prototype.write = function(output) {
 
 taxon.thrift_service_get_children_result = function(args) {
   this.success = null;
-  this.failure = null;
+  this.generic_exception = null;
+  this.authorization_exception = null;
+  this.authentication_exception = null;
+  this.reference_exception = null;
+  this.attribute_exception = null;
+  this.type_exception = null;
   if (args instanceof taxon.ServiceException) {
-    this.failure = args;
+    this.generic_exception = args;
+    return;
+  }
+  if (args instanceof taxon.AuthorizationException) {
+    this.authorization_exception = args;
+    return;
+  }
+  if (args instanceof taxon.AuthenticationException) {
+    this.authentication_exception = args;
+    return;
+  }
+  if (args instanceof taxon.ObjectReferenceException) {
+    this.reference_exception = args;
+    return;
+  }
+  if (args instanceof taxon.AttributeException) {
+    this.attribute_exception = args;
+    return;
+  }
+  if (args instanceof taxon.TypeException) {
+    this.type_exception = args;
     return;
   }
   if (args) {
     if (args.success !== undefined) {
       this.success = args.success;
     }
-    if (args.failure !== undefined) {
-      this.failure = args.failure;
+    if (args.generic_exception !== undefined) {
+      this.generic_exception = args.generic_exception;
+    }
+    if (args.authorization_exception !== undefined) {
+      this.authorization_exception = args.authorization_exception;
+    }
+    if (args.authentication_exception !== undefined) {
+      this.authentication_exception = args.authentication_exception;
+    }
+    if (args.reference_exception !== undefined) {
+      this.reference_exception = args.reference_exception;
+    }
+    if (args.attribute_exception !== undefined) {
+      this.attribute_exception = args.attribute_exception;
+    }
+    if (args.type_exception !== undefined) {
+      this.type_exception = args.type_exception;
     }
   }
 };
@@ -242,18 +1886,18 @@ taxon.thrift_service_get_children_result.prototype.read = function(input) {
     {
       case 0:
       if (ftype == Thrift.Type.LIST) {
-        var _size10 = 0;
-        var _rtmp314;
+        var _size92 = 0;
+        var _rtmp396;
         this.success = [];
-        var _etype13 = 0;
-        _rtmp314 = input.readListBegin();
-        _etype13 = _rtmp314.etype;
-        _size10 = _rtmp314.size;
-        for (var _i15 = 0; _i15 < _size10; ++_i15)
+        var _etype95 = 0;
+        _rtmp396 = input.readListBegin();
+        _etype95 = _rtmp396.etype;
+        _size92 = _rtmp396.size;
+        for (var _i97 = 0; _i97 < _size92; ++_i97)
         {
-          var elem16 = null;
-          elem16 = input.readString().value;
-          this.success.push(elem16);
+          var elem98 = null;
+          elem98 = input.readString().value;
+          this.success.push(elem98);
         }
         input.readListEnd();
       } else {
@@ -262,8 +1906,48 @@ taxon.thrift_service_get_children_result.prototype.read = function(input) {
       break;
       case 1:
       if (ftype == Thrift.Type.STRUCT) {
-        this.failure = new taxon.ServiceException();
-        this.failure.read(input);
+        this.generic_exception = new taxon.ServiceException();
+        this.generic_exception.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 2:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.authorization_exception = new taxon.AuthorizationException();
+        this.authorization_exception.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 3:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.authentication_exception = new taxon.AuthenticationException();
+        this.authentication_exception.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 4:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.reference_exception = new taxon.ObjectReferenceException();
+        this.reference_exception.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 5:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.attribute_exception = new taxon.AttributeException();
+        this.attribute_exception.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 6:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.type_exception = new taxon.TypeException();
+        this.type_exception.read(input);
       } else {
         input.skip(ftype);
       }
@@ -282,20 +1966,45 @@ taxon.thrift_service_get_children_result.prototype.write = function(output) {
   if (this.success !== null && this.success !== undefined) {
     output.writeFieldBegin('success', Thrift.Type.LIST, 0);
     output.writeListBegin(Thrift.Type.STRING, this.success.length);
-    for (var iter17 in this.success)
+    for (var iter99 in this.success)
     {
-      if (this.success.hasOwnProperty(iter17))
+      if (this.success.hasOwnProperty(iter99))
       {
-        iter17 = this.success[iter17];
-        output.writeString(iter17);
+        iter99 = this.success[iter99];
+        output.writeString(iter99);
       }
     }
     output.writeListEnd();
     output.writeFieldEnd();
   }
-  if (this.failure !== null && this.failure !== undefined) {
-    output.writeFieldBegin('failure', Thrift.Type.STRUCT, 1);
-    this.failure.write(output);
+  if (this.generic_exception !== null && this.generic_exception !== undefined) {
+    output.writeFieldBegin('generic_exception', Thrift.Type.STRUCT, 1);
+    this.generic_exception.write(output);
+    output.writeFieldEnd();
+  }
+  if (this.authorization_exception !== null && this.authorization_exception !== undefined) {
+    output.writeFieldBegin('authorization_exception', Thrift.Type.STRUCT, 2);
+    this.authorization_exception.write(output);
+    output.writeFieldEnd();
+  }
+  if (this.authentication_exception !== null && this.authentication_exception !== undefined) {
+    output.writeFieldBegin('authentication_exception', Thrift.Type.STRUCT, 3);
+    this.authentication_exception.write(output);
+    output.writeFieldEnd();
+  }
+  if (this.reference_exception !== null && this.reference_exception !== undefined) {
+    output.writeFieldBegin('reference_exception', Thrift.Type.STRUCT, 4);
+    this.reference_exception.write(output);
+    output.writeFieldEnd();
+  }
+  if (this.attribute_exception !== null && this.attribute_exception !== undefined) {
+    output.writeFieldBegin('attribute_exception', Thrift.Type.STRUCT, 5);
+    this.attribute_exception.write(output);
+    output.writeFieldEnd();
+  }
+  if (this.type_exception !== null && this.type_exception !== undefined) {
+    output.writeFieldBegin('type_exception', Thrift.Type.STRUCT, 6);
+    this.type_exception.write(output);
     output.writeFieldEnd();
   }
   output.writeFieldStop();
@@ -371,17 +2080,57 @@ taxon.thrift_service_get_genome_annotations_args.prototype.write = function(outp
 
 taxon.thrift_service_get_genome_annotations_result = function(args) {
   this.success = null;
-  this.failure = null;
+  this.generic_exception = null;
+  this.authorization_exception = null;
+  this.authentication_exception = null;
+  this.reference_exception = null;
+  this.attribute_exception = null;
+  this.type_exception = null;
   if (args instanceof taxon.ServiceException) {
-    this.failure = args;
+    this.generic_exception = args;
+    return;
+  }
+  if (args instanceof taxon.AuthorizationException) {
+    this.authorization_exception = args;
+    return;
+  }
+  if (args instanceof taxon.AuthenticationException) {
+    this.authentication_exception = args;
+    return;
+  }
+  if (args instanceof taxon.ObjectReferenceException) {
+    this.reference_exception = args;
+    return;
+  }
+  if (args instanceof taxon.AttributeException) {
+    this.attribute_exception = args;
+    return;
+  }
+  if (args instanceof taxon.TypeException) {
+    this.type_exception = args;
     return;
   }
   if (args) {
     if (args.success !== undefined) {
       this.success = args.success;
     }
-    if (args.failure !== undefined) {
-      this.failure = args.failure;
+    if (args.generic_exception !== undefined) {
+      this.generic_exception = args.generic_exception;
+    }
+    if (args.authorization_exception !== undefined) {
+      this.authorization_exception = args.authorization_exception;
+    }
+    if (args.authentication_exception !== undefined) {
+      this.authentication_exception = args.authentication_exception;
+    }
+    if (args.reference_exception !== undefined) {
+      this.reference_exception = args.reference_exception;
+    }
+    if (args.attribute_exception !== undefined) {
+      this.attribute_exception = args.attribute_exception;
+    }
+    if (args.type_exception !== undefined) {
+      this.type_exception = args.type_exception;
     }
   }
 };
@@ -401,18 +2150,18 @@ taxon.thrift_service_get_genome_annotations_result.prototype.read = function(inp
     {
       case 0:
       if (ftype == Thrift.Type.LIST) {
-        var _size18 = 0;
-        var _rtmp322;
+        var _size100 = 0;
+        var _rtmp3104;
         this.success = [];
-        var _etype21 = 0;
-        _rtmp322 = input.readListBegin();
-        _etype21 = _rtmp322.etype;
-        _size18 = _rtmp322.size;
-        for (var _i23 = 0; _i23 < _size18; ++_i23)
+        var _etype103 = 0;
+        _rtmp3104 = input.readListBegin();
+        _etype103 = _rtmp3104.etype;
+        _size100 = _rtmp3104.size;
+        for (var _i105 = 0; _i105 < _size100; ++_i105)
         {
-          var elem24 = null;
-          elem24 = input.readString().value;
-          this.success.push(elem24);
+          var elem106 = null;
+          elem106 = input.readString().value;
+          this.success.push(elem106);
         }
         input.readListEnd();
       } else {
@@ -421,8 +2170,48 @@ taxon.thrift_service_get_genome_annotations_result.prototype.read = function(inp
       break;
       case 1:
       if (ftype == Thrift.Type.STRUCT) {
-        this.failure = new taxon.ServiceException();
-        this.failure.read(input);
+        this.generic_exception = new taxon.ServiceException();
+        this.generic_exception.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 2:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.authorization_exception = new taxon.AuthorizationException();
+        this.authorization_exception.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 3:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.authentication_exception = new taxon.AuthenticationException();
+        this.authentication_exception.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 4:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.reference_exception = new taxon.ObjectReferenceException();
+        this.reference_exception.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 5:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.attribute_exception = new taxon.AttributeException();
+        this.attribute_exception.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 6:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.type_exception = new taxon.TypeException();
+        this.type_exception.read(input);
       } else {
         input.skip(ftype);
       }
@@ -441,20 +2230,45 @@ taxon.thrift_service_get_genome_annotations_result.prototype.write = function(ou
   if (this.success !== null && this.success !== undefined) {
     output.writeFieldBegin('success', Thrift.Type.LIST, 0);
     output.writeListBegin(Thrift.Type.STRING, this.success.length);
-    for (var iter25 in this.success)
+    for (var iter107 in this.success)
     {
-      if (this.success.hasOwnProperty(iter25))
+      if (this.success.hasOwnProperty(iter107))
       {
-        iter25 = this.success[iter25];
-        output.writeString(iter25);
+        iter107 = this.success[iter107];
+        output.writeString(iter107);
       }
     }
     output.writeListEnd();
     output.writeFieldEnd();
   }
-  if (this.failure !== null && this.failure !== undefined) {
-    output.writeFieldBegin('failure', Thrift.Type.STRUCT, 1);
-    this.failure.write(output);
+  if (this.generic_exception !== null && this.generic_exception !== undefined) {
+    output.writeFieldBegin('generic_exception', Thrift.Type.STRUCT, 1);
+    this.generic_exception.write(output);
+    output.writeFieldEnd();
+  }
+  if (this.authorization_exception !== null && this.authorization_exception !== undefined) {
+    output.writeFieldBegin('authorization_exception', Thrift.Type.STRUCT, 2);
+    this.authorization_exception.write(output);
+    output.writeFieldEnd();
+  }
+  if (this.authentication_exception !== null && this.authentication_exception !== undefined) {
+    output.writeFieldBegin('authentication_exception', Thrift.Type.STRUCT, 3);
+    this.authentication_exception.write(output);
+    output.writeFieldEnd();
+  }
+  if (this.reference_exception !== null && this.reference_exception !== undefined) {
+    output.writeFieldBegin('reference_exception', Thrift.Type.STRUCT, 4);
+    this.reference_exception.write(output);
+    output.writeFieldEnd();
+  }
+  if (this.attribute_exception !== null && this.attribute_exception !== undefined) {
+    output.writeFieldBegin('attribute_exception', Thrift.Type.STRUCT, 5);
+    this.attribute_exception.write(output);
+    output.writeFieldEnd();
+  }
+  if (this.type_exception !== null && this.type_exception !== undefined) {
+    output.writeFieldBegin('type_exception', Thrift.Type.STRUCT, 6);
+    this.type_exception.write(output);
     output.writeFieldEnd();
   }
   output.writeFieldStop();
@@ -530,17 +2344,57 @@ taxon.thrift_service_get_scientific_lineage_args.prototype.write = function(outp
 
 taxon.thrift_service_get_scientific_lineage_result = function(args) {
   this.success = null;
-  this.failure = null;
+  this.generic_exception = null;
+  this.authorization_exception = null;
+  this.authentication_exception = null;
+  this.reference_exception = null;
+  this.attribute_exception = null;
+  this.type_exception = null;
   if (args instanceof taxon.ServiceException) {
-    this.failure = args;
+    this.generic_exception = args;
+    return;
+  }
+  if (args instanceof taxon.AuthorizationException) {
+    this.authorization_exception = args;
+    return;
+  }
+  if (args instanceof taxon.AuthenticationException) {
+    this.authentication_exception = args;
+    return;
+  }
+  if (args instanceof taxon.ObjectReferenceException) {
+    this.reference_exception = args;
+    return;
+  }
+  if (args instanceof taxon.AttributeException) {
+    this.attribute_exception = args;
+    return;
+  }
+  if (args instanceof taxon.TypeException) {
+    this.type_exception = args;
     return;
   }
   if (args) {
     if (args.success !== undefined) {
       this.success = args.success;
     }
-    if (args.failure !== undefined) {
-      this.failure = args.failure;
+    if (args.generic_exception !== undefined) {
+      this.generic_exception = args.generic_exception;
+    }
+    if (args.authorization_exception !== undefined) {
+      this.authorization_exception = args.authorization_exception;
+    }
+    if (args.authentication_exception !== undefined) {
+      this.authentication_exception = args.authentication_exception;
+    }
+    if (args.reference_exception !== undefined) {
+      this.reference_exception = args.reference_exception;
+    }
+    if (args.attribute_exception !== undefined) {
+      this.attribute_exception = args.attribute_exception;
+    }
+    if (args.type_exception !== undefined) {
+      this.type_exception = args.type_exception;
     }
   }
 };
@@ -559,16 +2413,69 @@ taxon.thrift_service_get_scientific_lineage_result.prototype.read = function(inp
     switch (fid)
     {
       case 0:
-      if (ftype == Thrift.Type.STRING) {
-        this.success = input.readString().value;
+      if (ftype == Thrift.Type.LIST) {
+        var _size108 = 0;
+        var _rtmp3112;
+        this.success = [];
+        var _etype111 = 0;
+        _rtmp3112 = input.readListBegin();
+        _etype111 = _rtmp3112.etype;
+        _size108 = _rtmp3112.size;
+        for (var _i113 = 0; _i113 < _size108; ++_i113)
+        {
+          var elem114 = null;
+          elem114 = input.readString().value;
+          this.success.push(elem114);
+        }
+        input.readListEnd();
       } else {
         input.skip(ftype);
       }
       break;
       case 1:
       if (ftype == Thrift.Type.STRUCT) {
-        this.failure = new taxon.ServiceException();
-        this.failure.read(input);
+        this.generic_exception = new taxon.ServiceException();
+        this.generic_exception.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 2:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.authorization_exception = new taxon.AuthorizationException();
+        this.authorization_exception.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 3:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.authentication_exception = new taxon.AuthenticationException();
+        this.authentication_exception.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 4:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.reference_exception = new taxon.ObjectReferenceException();
+        this.reference_exception.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 5:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.attribute_exception = new taxon.AttributeException();
+        this.attribute_exception.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 6:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.type_exception = new taxon.TypeException();
+        this.type_exception.read(input);
       } else {
         input.skip(ftype);
       }
@@ -585,13 +2492,47 @@ taxon.thrift_service_get_scientific_lineage_result.prototype.read = function(inp
 taxon.thrift_service_get_scientific_lineage_result.prototype.write = function(output) {
   output.writeStructBegin('thrift_service_get_scientific_lineage_result');
   if (this.success !== null && this.success !== undefined) {
-    output.writeFieldBegin('success', Thrift.Type.STRING, 0);
-    output.writeString(this.success);
+    output.writeFieldBegin('success', Thrift.Type.LIST, 0);
+    output.writeListBegin(Thrift.Type.STRING, this.success.length);
+    for (var iter115 in this.success)
+    {
+      if (this.success.hasOwnProperty(iter115))
+      {
+        iter115 = this.success[iter115];
+        output.writeString(iter115);
+      }
+    }
+    output.writeListEnd();
     output.writeFieldEnd();
   }
-  if (this.failure !== null && this.failure !== undefined) {
-    output.writeFieldBegin('failure', Thrift.Type.STRUCT, 1);
-    this.failure.write(output);
+  if (this.generic_exception !== null && this.generic_exception !== undefined) {
+    output.writeFieldBegin('generic_exception', Thrift.Type.STRUCT, 1);
+    this.generic_exception.write(output);
+    output.writeFieldEnd();
+  }
+  if (this.authorization_exception !== null && this.authorization_exception !== undefined) {
+    output.writeFieldBegin('authorization_exception', Thrift.Type.STRUCT, 2);
+    this.authorization_exception.write(output);
+    output.writeFieldEnd();
+  }
+  if (this.authentication_exception !== null && this.authentication_exception !== undefined) {
+    output.writeFieldBegin('authentication_exception', Thrift.Type.STRUCT, 3);
+    this.authentication_exception.write(output);
+    output.writeFieldEnd();
+  }
+  if (this.reference_exception !== null && this.reference_exception !== undefined) {
+    output.writeFieldBegin('reference_exception', Thrift.Type.STRUCT, 4);
+    this.reference_exception.write(output);
+    output.writeFieldEnd();
+  }
+  if (this.attribute_exception !== null && this.attribute_exception !== undefined) {
+    output.writeFieldBegin('attribute_exception', Thrift.Type.STRUCT, 5);
+    this.attribute_exception.write(output);
+    output.writeFieldEnd();
+  }
+  if (this.type_exception !== null && this.type_exception !== undefined) {
+    output.writeFieldBegin('type_exception', Thrift.Type.STRUCT, 6);
+    this.type_exception.write(output);
     output.writeFieldEnd();
   }
   output.writeFieldStop();
@@ -667,17 +2608,57 @@ taxon.thrift_service_get_scientific_name_args.prototype.write = function(output)
 
 taxon.thrift_service_get_scientific_name_result = function(args) {
   this.success = null;
-  this.failure = null;
+  this.generic_exception = null;
+  this.authorization_exception = null;
+  this.authentication_exception = null;
+  this.reference_exception = null;
+  this.attribute_exception = null;
+  this.type_exception = null;
   if (args instanceof taxon.ServiceException) {
-    this.failure = args;
+    this.generic_exception = args;
+    return;
+  }
+  if (args instanceof taxon.AuthorizationException) {
+    this.authorization_exception = args;
+    return;
+  }
+  if (args instanceof taxon.AuthenticationException) {
+    this.authentication_exception = args;
+    return;
+  }
+  if (args instanceof taxon.ObjectReferenceException) {
+    this.reference_exception = args;
+    return;
+  }
+  if (args instanceof taxon.AttributeException) {
+    this.attribute_exception = args;
+    return;
+  }
+  if (args instanceof taxon.TypeException) {
+    this.type_exception = args;
     return;
   }
   if (args) {
     if (args.success !== undefined) {
       this.success = args.success;
     }
-    if (args.failure !== undefined) {
-      this.failure = args.failure;
+    if (args.generic_exception !== undefined) {
+      this.generic_exception = args.generic_exception;
+    }
+    if (args.authorization_exception !== undefined) {
+      this.authorization_exception = args.authorization_exception;
+    }
+    if (args.authentication_exception !== undefined) {
+      this.authentication_exception = args.authentication_exception;
+    }
+    if (args.reference_exception !== undefined) {
+      this.reference_exception = args.reference_exception;
+    }
+    if (args.attribute_exception !== undefined) {
+      this.attribute_exception = args.attribute_exception;
+    }
+    if (args.type_exception !== undefined) {
+      this.type_exception = args.type_exception;
     }
   }
 };
@@ -704,8 +2685,48 @@ taxon.thrift_service_get_scientific_name_result.prototype.read = function(input)
       break;
       case 1:
       if (ftype == Thrift.Type.STRUCT) {
-        this.failure = new taxon.ServiceException();
-        this.failure.read(input);
+        this.generic_exception = new taxon.ServiceException();
+        this.generic_exception.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 2:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.authorization_exception = new taxon.AuthorizationException();
+        this.authorization_exception.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 3:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.authentication_exception = new taxon.AuthenticationException();
+        this.authentication_exception.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 4:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.reference_exception = new taxon.ObjectReferenceException();
+        this.reference_exception.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 5:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.attribute_exception = new taxon.AttributeException();
+        this.attribute_exception.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 6:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.type_exception = new taxon.TypeException();
+        this.type_exception.read(input);
       } else {
         input.skip(ftype);
       }
@@ -726,9 +2747,34 @@ taxon.thrift_service_get_scientific_name_result.prototype.write = function(outpu
     output.writeString(this.success);
     output.writeFieldEnd();
   }
-  if (this.failure !== null && this.failure !== undefined) {
-    output.writeFieldBegin('failure', Thrift.Type.STRUCT, 1);
-    this.failure.write(output);
+  if (this.generic_exception !== null && this.generic_exception !== undefined) {
+    output.writeFieldBegin('generic_exception', Thrift.Type.STRUCT, 1);
+    this.generic_exception.write(output);
+    output.writeFieldEnd();
+  }
+  if (this.authorization_exception !== null && this.authorization_exception !== undefined) {
+    output.writeFieldBegin('authorization_exception', Thrift.Type.STRUCT, 2);
+    this.authorization_exception.write(output);
+    output.writeFieldEnd();
+  }
+  if (this.authentication_exception !== null && this.authentication_exception !== undefined) {
+    output.writeFieldBegin('authentication_exception', Thrift.Type.STRUCT, 3);
+    this.authentication_exception.write(output);
+    output.writeFieldEnd();
+  }
+  if (this.reference_exception !== null && this.reference_exception !== undefined) {
+    output.writeFieldBegin('reference_exception', Thrift.Type.STRUCT, 4);
+    this.reference_exception.write(output);
+    output.writeFieldEnd();
+  }
+  if (this.attribute_exception !== null && this.attribute_exception !== undefined) {
+    output.writeFieldBegin('attribute_exception', Thrift.Type.STRUCT, 5);
+    this.attribute_exception.write(output);
+    output.writeFieldEnd();
+  }
+  if (this.type_exception !== null && this.type_exception !== undefined) {
+    output.writeFieldBegin('type_exception', Thrift.Type.STRUCT, 6);
+    this.type_exception.write(output);
     output.writeFieldEnd();
   }
   output.writeFieldStop();
@@ -804,17 +2850,57 @@ taxon.thrift_service_get_taxonomic_id_args.prototype.write = function(output) {
 
 taxon.thrift_service_get_taxonomic_id_result = function(args) {
   this.success = null;
-  this.failure = null;
+  this.generic_exception = null;
+  this.authorization_exception = null;
+  this.authentication_exception = null;
+  this.reference_exception = null;
+  this.attribute_exception = null;
+  this.type_exception = null;
   if (args instanceof taxon.ServiceException) {
-    this.failure = args;
+    this.generic_exception = args;
+    return;
+  }
+  if (args instanceof taxon.AuthorizationException) {
+    this.authorization_exception = args;
+    return;
+  }
+  if (args instanceof taxon.AuthenticationException) {
+    this.authentication_exception = args;
+    return;
+  }
+  if (args instanceof taxon.ObjectReferenceException) {
+    this.reference_exception = args;
+    return;
+  }
+  if (args instanceof taxon.AttributeException) {
+    this.attribute_exception = args;
+    return;
+  }
+  if (args instanceof taxon.TypeException) {
+    this.type_exception = args;
     return;
   }
   if (args) {
     if (args.success !== undefined) {
       this.success = args.success;
     }
-    if (args.failure !== undefined) {
-      this.failure = args.failure;
+    if (args.generic_exception !== undefined) {
+      this.generic_exception = args.generic_exception;
+    }
+    if (args.authorization_exception !== undefined) {
+      this.authorization_exception = args.authorization_exception;
+    }
+    if (args.authentication_exception !== undefined) {
+      this.authentication_exception = args.authentication_exception;
+    }
+    if (args.reference_exception !== undefined) {
+      this.reference_exception = args.reference_exception;
+    }
+    if (args.attribute_exception !== undefined) {
+      this.attribute_exception = args.attribute_exception;
+    }
+    if (args.type_exception !== undefined) {
+      this.type_exception = args.type_exception;
     }
   }
 };
@@ -841,8 +2927,48 @@ taxon.thrift_service_get_taxonomic_id_result.prototype.read = function(input) {
       break;
       case 1:
       if (ftype == Thrift.Type.STRUCT) {
-        this.failure = new taxon.ServiceException();
-        this.failure.read(input);
+        this.generic_exception = new taxon.ServiceException();
+        this.generic_exception.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 2:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.authorization_exception = new taxon.AuthorizationException();
+        this.authorization_exception.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 3:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.authentication_exception = new taxon.AuthenticationException();
+        this.authentication_exception.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 4:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.reference_exception = new taxon.ObjectReferenceException();
+        this.reference_exception.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 5:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.attribute_exception = new taxon.AttributeException();
+        this.attribute_exception.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 6:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.type_exception = new taxon.TypeException();
+        this.type_exception.read(input);
       } else {
         input.skip(ftype);
       }
@@ -863,9 +2989,34 @@ taxon.thrift_service_get_taxonomic_id_result.prototype.write = function(output) 
     output.writeI32(this.success);
     output.writeFieldEnd();
   }
-  if (this.failure !== null && this.failure !== undefined) {
-    output.writeFieldBegin('failure', Thrift.Type.STRUCT, 1);
-    this.failure.write(output);
+  if (this.generic_exception !== null && this.generic_exception !== undefined) {
+    output.writeFieldBegin('generic_exception', Thrift.Type.STRUCT, 1);
+    this.generic_exception.write(output);
+    output.writeFieldEnd();
+  }
+  if (this.authorization_exception !== null && this.authorization_exception !== undefined) {
+    output.writeFieldBegin('authorization_exception', Thrift.Type.STRUCT, 2);
+    this.authorization_exception.write(output);
+    output.writeFieldEnd();
+  }
+  if (this.authentication_exception !== null && this.authentication_exception !== undefined) {
+    output.writeFieldBegin('authentication_exception', Thrift.Type.STRUCT, 3);
+    this.authentication_exception.write(output);
+    output.writeFieldEnd();
+  }
+  if (this.reference_exception !== null && this.reference_exception !== undefined) {
+    output.writeFieldBegin('reference_exception', Thrift.Type.STRUCT, 4);
+    this.reference_exception.write(output);
+    output.writeFieldEnd();
+  }
+  if (this.attribute_exception !== null && this.attribute_exception !== undefined) {
+    output.writeFieldBegin('attribute_exception', Thrift.Type.STRUCT, 5);
+    this.attribute_exception.write(output);
+    output.writeFieldEnd();
+  }
+  if (this.type_exception !== null && this.type_exception !== undefined) {
+    output.writeFieldBegin('type_exception', Thrift.Type.STRUCT, 6);
+    this.type_exception.write(output);
     output.writeFieldEnd();
   }
   output.writeFieldStop();
@@ -941,17 +3092,57 @@ taxon.thrift_service_get_kingdom_args.prototype.write = function(output) {
 
 taxon.thrift_service_get_kingdom_result = function(args) {
   this.success = null;
-  this.failure = null;
+  this.generic_exception = null;
+  this.authorization_exception = null;
+  this.authentication_exception = null;
+  this.reference_exception = null;
+  this.attribute_exception = null;
+  this.type_exception = null;
   if (args instanceof taxon.ServiceException) {
-    this.failure = args;
+    this.generic_exception = args;
+    return;
+  }
+  if (args instanceof taxon.AuthorizationException) {
+    this.authorization_exception = args;
+    return;
+  }
+  if (args instanceof taxon.AuthenticationException) {
+    this.authentication_exception = args;
+    return;
+  }
+  if (args instanceof taxon.ObjectReferenceException) {
+    this.reference_exception = args;
+    return;
+  }
+  if (args instanceof taxon.AttributeException) {
+    this.attribute_exception = args;
+    return;
+  }
+  if (args instanceof taxon.TypeException) {
+    this.type_exception = args;
     return;
   }
   if (args) {
     if (args.success !== undefined) {
       this.success = args.success;
     }
-    if (args.failure !== undefined) {
-      this.failure = args.failure;
+    if (args.generic_exception !== undefined) {
+      this.generic_exception = args.generic_exception;
+    }
+    if (args.authorization_exception !== undefined) {
+      this.authorization_exception = args.authorization_exception;
+    }
+    if (args.authentication_exception !== undefined) {
+      this.authentication_exception = args.authentication_exception;
+    }
+    if (args.reference_exception !== undefined) {
+      this.reference_exception = args.reference_exception;
+    }
+    if (args.attribute_exception !== undefined) {
+      this.attribute_exception = args.attribute_exception;
+    }
+    if (args.type_exception !== undefined) {
+      this.type_exception = args.type_exception;
     }
   }
 };
@@ -978,8 +3169,48 @@ taxon.thrift_service_get_kingdom_result.prototype.read = function(input) {
       break;
       case 1:
       if (ftype == Thrift.Type.STRUCT) {
-        this.failure = new taxon.ServiceException();
-        this.failure.read(input);
+        this.generic_exception = new taxon.ServiceException();
+        this.generic_exception.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 2:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.authorization_exception = new taxon.AuthorizationException();
+        this.authorization_exception.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 3:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.authentication_exception = new taxon.AuthenticationException();
+        this.authentication_exception.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 4:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.reference_exception = new taxon.ObjectReferenceException();
+        this.reference_exception.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 5:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.attribute_exception = new taxon.AttributeException();
+        this.attribute_exception.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 6:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.type_exception = new taxon.TypeException();
+        this.type_exception.read(input);
       } else {
         input.skip(ftype);
       }
@@ -1000,9 +3231,34 @@ taxon.thrift_service_get_kingdom_result.prototype.write = function(output) {
     output.writeString(this.success);
     output.writeFieldEnd();
   }
-  if (this.failure !== null && this.failure !== undefined) {
-    output.writeFieldBegin('failure', Thrift.Type.STRUCT, 1);
-    this.failure.write(output);
+  if (this.generic_exception !== null && this.generic_exception !== undefined) {
+    output.writeFieldBegin('generic_exception', Thrift.Type.STRUCT, 1);
+    this.generic_exception.write(output);
+    output.writeFieldEnd();
+  }
+  if (this.authorization_exception !== null && this.authorization_exception !== undefined) {
+    output.writeFieldBegin('authorization_exception', Thrift.Type.STRUCT, 2);
+    this.authorization_exception.write(output);
+    output.writeFieldEnd();
+  }
+  if (this.authentication_exception !== null && this.authentication_exception !== undefined) {
+    output.writeFieldBegin('authentication_exception', Thrift.Type.STRUCT, 3);
+    this.authentication_exception.write(output);
+    output.writeFieldEnd();
+  }
+  if (this.reference_exception !== null && this.reference_exception !== undefined) {
+    output.writeFieldBegin('reference_exception', Thrift.Type.STRUCT, 4);
+    this.reference_exception.write(output);
+    output.writeFieldEnd();
+  }
+  if (this.attribute_exception !== null && this.attribute_exception !== undefined) {
+    output.writeFieldBegin('attribute_exception', Thrift.Type.STRUCT, 5);
+    this.attribute_exception.write(output);
+    output.writeFieldEnd();
+  }
+  if (this.type_exception !== null && this.type_exception !== undefined) {
+    output.writeFieldBegin('type_exception', Thrift.Type.STRUCT, 6);
+    this.type_exception.write(output);
     output.writeFieldEnd();
   }
   output.writeFieldStop();
@@ -1078,17 +3334,57 @@ taxon.thrift_service_get_domain_args.prototype.write = function(output) {
 
 taxon.thrift_service_get_domain_result = function(args) {
   this.success = null;
-  this.failure = null;
+  this.generic_exception = null;
+  this.authorization_exception = null;
+  this.authentication_exception = null;
+  this.reference_exception = null;
+  this.attribute_exception = null;
+  this.type_exception = null;
   if (args instanceof taxon.ServiceException) {
-    this.failure = args;
+    this.generic_exception = args;
+    return;
+  }
+  if (args instanceof taxon.AuthorizationException) {
+    this.authorization_exception = args;
+    return;
+  }
+  if (args instanceof taxon.AuthenticationException) {
+    this.authentication_exception = args;
+    return;
+  }
+  if (args instanceof taxon.ObjectReferenceException) {
+    this.reference_exception = args;
+    return;
+  }
+  if (args instanceof taxon.AttributeException) {
+    this.attribute_exception = args;
+    return;
+  }
+  if (args instanceof taxon.TypeException) {
+    this.type_exception = args;
     return;
   }
   if (args) {
     if (args.success !== undefined) {
       this.success = args.success;
     }
-    if (args.failure !== undefined) {
-      this.failure = args.failure;
+    if (args.generic_exception !== undefined) {
+      this.generic_exception = args.generic_exception;
+    }
+    if (args.authorization_exception !== undefined) {
+      this.authorization_exception = args.authorization_exception;
+    }
+    if (args.authentication_exception !== undefined) {
+      this.authentication_exception = args.authentication_exception;
+    }
+    if (args.reference_exception !== undefined) {
+      this.reference_exception = args.reference_exception;
+    }
+    if (args.attribute_exception !== undefined) {
+      this.attribute_exception = args.attribute_exception;
+    }
+    if (args.type_exception !== undefined) {
+      this.type_exception = args.type_exception;
     }
   }
 };
@@ -1115,8 +3411,48 @@ taxon.thrift_service_get_domain_result.prototype.read = function(input) {
       break;
       case 1:
       if (ftype == Thrift.Type.STRUCT) {
-        this.failure = new taxon.ServiceException();
-        this.failure.read(input);
+        this.generic_exception = new taxon.ServiceException();
+        this.generic_exception.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 2:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.authorization_exception = new taxon.AuthorizationException();
+        this.authorization_exception.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 3:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.authentication_exception = new taxon.AuthenticationException();
+        this.authentication_exception.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 4:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.reference_exception = new taxon.ObjectReferenceException();
+        this.reference_exception.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 5:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.attribute_exception = new taxon.AttributeException();
+        this.attribute_exception.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 6:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.type_exception = new taxon.TypeException();
+        this.type_exception.read(input);
       } else {
         input.skip(ftype);
       }
@@ -1137,9 +3473,34 @@ taxon.thrift_service_get_domain_result.prototype.write = function(output) {
     output.writeString(this.success);
     output.writeFieldEnd();
   }
-  if (this.failure !== null && this.failure !== undefined) {
-    output.writeFieldBegin('failure', Thrift.Type.STRUCT, 1);
-    this.failure.write(output);
+  if (this.generic_exception !== null && this.generic_exception !== undefined) {
+    output.writeFieldBegin('generic_exception', Thrift.Type.STRUCT, 1);
+    this.generic_exception.write(output);
+    output.writeFieldEnd();
+  }
+  if (this.authorization_exception !== null && this.authorization_exception !== undefined) {
+    output.writeFieldBegin('authorization_exception', Thrift.Type.STRUCT, 2);
+    this.authorization_exception.write(output);
+    output.writeFieldEnd();
+  }
+  if (this.authentication_exception !== null && this.authentication_exception !== undefined) {
+    output.writeFieldBegin('authentication_exception', Thrift.Type.STRUCT, 3);
+    this.authentication_exception.write(output);
+    output.writeFieldEnd();
+  }
+  if (this.reference_exception !== null && this.reference_exception !== undefined) {
+    output.writeFieldBegin('reference_exception', Thrift.Type.STRUCT, 4);
+    this.reference_exception.write(output);
+    output.writeFieldEnd();
+  }
+  if (this.attribute_exception !== null && this.attribute_exception !== undefined) {
+    output.writeFieldBegin('attribute_exception', Thrift.Type.STRUCT, 5);
+    this.attribute_exception.write(output);
+    output.writeFieldEnd();
+  }
+  if (this.type_exception !== null && this.type_exception !== undefined) {
+    output.writeFieldBegin('type_exception', Thrift.Type.STRUCT, 6);
+    this.type_exception.write(output);
     output.writeFieldEnd();
   }
   output.writeFieldStop();
@@ -1215,17 +3576,57 @@ taxon.thrift_service_get_genetic_code_args.prototype.write = function(output) {
 
 taxon.thrift_service_get_genetic_code_result = function(args) {
   this.success = null;
-  this.failure = null;
+  this.generic_exception = null;
+  this.authorization_exception = null;
+  this.authentication_exception = null;
+  this.reference_exception = null;
+  this.attribute_exception = null;
+  this.type_exception = null;
   if (args instanceof taxon.ServiceException) {
-    this.failure = args;
+    this.generic_exception = args;
+    return;
+  }
+  if (args instanceof taxon.AuthorizationException) {
+    this.authorization_exception = args;
+    return;
+  }
+  if (args instanceof taxon.AuthenticationException) {
+    this.authentication_exception = args;
+    return;
+  }
+  if (args instanceof taxon.ObjectReferenceException) {
+    this.reference_exception = args;
+    return;
+  }
+  if (args instanceof taxon.AttributeException) {
+    this.attribute_exception = args;
+    return;
+  }
+  if (args instanceof taxon.TypeException) {
+    this.type_exception = args;
     return;
   }
   if (args) {
     if (args.success !== undefined) {
       this.success = args.success;
     }
-    if (args.failure !== undefined) {
-      this.failure = args.failure;
+    if (args.generic_exception !== undefined) {
+      this.generic_exception = args.generic_exception;
+    }
+    if (args.authorization_exception !== undefined) {
+      this.authorization_exception = args.authorization_exception;
+    }
+    if (args.authentication_exception !== undefined) {
+      this.authentication_exception = args.authentication_exception;
+    }
+    if (args.reference_exception !== undefined) {
+      this.reference_exception = args.reference_exception;
+    }
+    if (args.attribute_exception !== undefined) {
+      this.attribute_exception = args.attribute_exception;
+    }
+    if (args.type_exception !== undefined) {
+      this.type_exception = args.type_exception;
     }
   }
 };
@@ -1244,16 +3645,56 @@ taxon.thrift_service_get_genetic_code_result.prototype.read = function(input) {
     switch (fid)
     {
       case 0:
-      if (ftype == Thrift.Type.BYTE) {
-        this.success = input.readByte().value;
+      if (ftype == Thrift.Type.I32) {
+        this.success = input.readI32().value;
       } else {
         input.skip(ftype);
       }
       break;
       case 1:
       if (ftype == Thrift.Type.STRUCT) {
-        this.failure = new taxon.ServiceException();
-        this.failure.read(input);
+        this.generic_exception = new taxon.ServiceException();
+        this.generic_exception.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 2:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.authorization_exception = new taxon.AuthorizationException();
+        this.authorization_exception.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 3:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.authentication_exception = new taxon.AuthenticationException();
+        this.authentication_exception.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 4:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.reference_exception = new taxon.ObjectReferenceException();
+        this.reference_exception.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 5:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.attribute_exception = new taxon.AttributeException();
+        this.attribute_exception.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 6:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.type_exception = new taxon.TypeException();
+        this.type_exception.read(input);
       } else {
         input.skip(ftype);
       }
@@ -1270,13 +3711,38 @@ taxon.thrift_service_get_genetic_code_result.prototype.read = function(input) {
 taxon.thrift_service_get_genetic_code_result.prototype.write = function(output) {
   output.writeStructBegin('thrift_service_get_genetic_code_result');
   if (this.success !== null && this.success !== undefined) {
-    output.writeFieldBegin('success', Thrift.Type.BYTE, 0);
-    output.writeByte(this.success);
+    output.writeFieldBegin('success', Thrift.Type.I32, 0);
+    output.writeI32(this.success);
     output.writeFieldEnd();
   }
-  if (this.failure !== null && this.failure !== undefined) {
-    output.writeFieldBegin('failure', Thrift.Type.STRUCT, 1);
-    this.failure.write(output);
+  if (this.generic_exception !== null && this.generic_exception !== undefined) {
+    output.writeFieldBegin('generic_exception', Thrift.Type.STRUCT, 1);
+    this.generic_exception.write(output);
+    output.writeFieldEnd();
+  }
+  if (this.authorization_exception !== null && this.authorization_exception !== undefined) {
+    output.writeFieldBegin('authorization_exception', Thrift.Type.STRUCT, 2);
+    this.authorization_exception.write(output);
+    output.writeFieldEnd();
+  }
+  if (this.authentication_exception !== null && this.authentication_exception !== undefined) {
+    output.writeFieldBegin('authentication_exception', Thrift.Type.STRUCT, 3);
+    this.authentication_exception.write(output);
+    output.writeFieldEnd();
+  }
+  if (this.reference_exception !== null && this.reference_exception !== undefined) {
+    output.writeFieldBegin('reference_exception', Thrift.Type.STRUCT, 4);
+    this.reference_exception.write(output);
+    output.writeFieldEnd();
+  }
+  if (this.attribute_exception !== null && this.attribute_exception !== undefined) {
+    output.writeFieldBegin('attribute_exception', Thrift.Type.STRUCT, 5);
+    this.attribute_exception.write(output);
+    output.writeFieldEnd();
+  }
+  if (this.type_exception !== null && this.type_exception !== undefined) {
+    output.writeFieldBegin('type_exception', Thrift.Type.STRUCT, 6);
+    this.type_exception.write(output);
     output.writeFieldEnd();
   }
   output.writeFieldStop();
@@ -1352,17 +3818,57 @@ taxon.thrift_service_get_aliases_args.prototype.write = function(output) {
 
 taxon.thrift_service_get_aliases_result = function(args) {
   this.success = null;
-  this.failure = null;
+  this.generic_exception = null;
+  this.authorization_exception = null;
+  this.authentication_exception = null;
+  this.reference_exception = null;
+  this.attribute_exception = null;
+  this.type_exception = null;
   if (args instanceof taxon.ServiceException) {
-    this.failure = args;
+    this.generic_exception = args;
+    return;
+  }
+  if (args instanceof taxon.AuthorizationException) {
+    this.authorization_exception = args;
+    return;
+  }
+  if (args instanceof taxon.AuthenticationException) {
+    this.authentication_exception = args;
+    return;
+  }
+  if (args instanceof taxon.ObjectReferenceException) {
+    this.reference_exception = args;
+    return;
+  }
+  if (args instanceof taxon.AttributeException) {
+    this.attribute_exception = args;
+    return;
+  }
+  if (args instanceof taxon.TypeException) {
+    this.type_exception = args;
     return;
   }
   if (args) {
     if (args.success !== undefined) {
       this.success = args.success;
     }
-    if (args.failure !== undefined) {
-      this.failure = args.failure;
+    if (args.generic_exception !== undefined) {
+      this.generic_exception = args.generic_exception;
+    }
+    if (args.authorization_exception !== undefined) {
+      this.authorization_exception = args.authorization_exception;
+    }
+    if (args.authentication_exception !== undefined) {
+      this.authentication_exception = args.authentication_exception;
+    }
+    if (args.reference_exception !== undefined) {
+      this.reference_exception = args.reference_exception;
+    }
+    if (args.attribute_exception !== undefined) {
+      this.attribute_exception = args.attribute_exception;
+    }
+    if (args.type_exception !== undefined) {
+      this.type_exception = args.type_exception;
     }
   }
 };
@@ -1382,18 +3888,18 @@ taxon.thrift_service_get_aliases_result.prototype.read = function(input) {
     {
       case 0:
       if (ftype == Thrift.Type.LIST) {
-        var _size26 = 0;
-        var _rtmp330;
+        var _size116 = 0;
+        var _rtmp3120;
         this.success = [];
-        var _etype29 = 0;
-        _rtmp330 = input.readListBegin();
-        _etype29 = _rtmp330.etype;
-        _size26 = _rtmp330.size;
-        for (var _i31 = 0; _i31 < _size26; ++_i31)
+        var _etype119 = 0;
+        _rtmp3120 = input.readListBegin();
+        _etype119 = _rtmp3120.etype;
+        _size116 = _rtmp3120.size;
+        for (var _i121 = 0; _i121 < _size116; ++_i121)
         {
-          var elem32 = null;
-          elem32 = input.readString().value;
-          this.success.push(elem32);
+          var elem122 = null;
+          elem122 = input.readString().value;
+          this.success.push(elem122);
         }
         input.readListEnd();
       } else {
@@ -1402,8 +3908,48 @@ taxon.thrift_service_get_aliases_result.prototype.read = function(input) {
       break;
       case 1:
       if (ftype == Thrift.Type.STRUCT) {
-        this.failure = new taxon.ServiceException();
-        this.failure.read(input);
+        this.generic_exception = new taxon.ServiceException();
+        this.generic_exception.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 2:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.authorization_exception = new taxon.AuthorizationException();
+        this.authorization_exception.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 3:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.authentication_exception = new taxon.AuthenticationException();
+        this.authentication_exception.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 4:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.reference_exception = new taxon.ObjectReferenceException();
+        this.reference_exception.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 5:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.attribute_exception = new taxon.AttributeException();
+        this.attribute_exception.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 6:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.type_exception = new taxon.TypeException();
+        this.type_exception.read(input);
       } else {
         input.skip(ftype);
       }
@@ -1422,20 +3968,45 @@ taxon.thrift_service_get_aliases_result.prototype.write = function(output) {
   if (this.success !== null && this.success !== undefined) {
     output.writeFieldBegin('success', Thrift.Type.LIST, 0);
     output.writeListBegin(Thrift.Type.STRING, this.success.length);
-    for (var iter33 in this.success)
+    for (var iter123 in this.success)
     {
-      if (this.success.hasOwnProperty(iter33))
+      if (this.success.hasOwnProperty(iter123))
       {
-        iter33 = this.success[iter33];
-        output.writeString(iter33);
+        iter123 = this.success[iter123];
+        output.writeString(iter123);
       }
     }
     output.writeListEnd();
     output.writeFieldEnd();
   }
-  if (this.failure !== null && this.failure !== undefined) {
-    output.writeFieldBegin('failure', Thrift.Type.STRUCT, 1);
-    this.failure.write(output);
+  if (this.generic_exception !== null && this.generic_exception !== undefined) {
+    output.writeFieldBegin('generic_exception', Thrift.Type.STRUCT, 1);
+    this.generic_exception.write(output);
+    output.writeFieldEnd();
+  }
+  if (this.authorization_exception !== null && this.authorization_exception !== undefined) {
+    output.writeFieldBegin('authorization_exception', Thrift.Type.STRUCT, 2);
+    this.authorization_exception.write(output);
+    output.writeFieldEnd();
+  }
+  if (this.authentication_exception !== null && this.authentication_exception !== undefined) {
+    output.writeFieldBegin('authentication_exception', Thrift.Type.STRUCT, 3);
+    this.authentication_exception.write(output);
+    output.writeFieldEnd();
+  }
+  if (this.reference_exception !== null && this.reference_exception !== undefined) {
+    output.writeFieldBegin('reference_exception', Thrift.Type.STRUCT, 4);
+    this.reference_exception.write(output);
+    output.writeFieldEnd();
+  }
+  if (this.attribute_exception !== null && this.attribute_exception !== undefined) {
+    output.writeFieldBegin('attribute_exception', Thrift.Type.STRUCT, 5);
+    this.attribute_exception.write(output);
+    output.writeFieldEnd();
+  }
+  if (this.type_exception !== null && this.type_exception !== undefined) {
+    output.writeFieldBegin('type_exception', Thrift.Type.STRUCT, 6);
+    this.type_exception.write(output);
     output.writeFieldEnd();
   }
   output.writeFieldStop();
@@ -1449,6 +4020,360 @@ taxon.thrift_serviceClient = function(input, output) {
     this.seqid = 0;
 };
 taxon.thrift_serviceClient.prototype = {};
+taxon.thrift_serviceClient.prototype.get_info = function(token, ref, callback) {
+  if (callback === undefined) {
+    this.send_get_info(token, ref);
+    return this.recv_get_info();
+  } else {
+    var postData = this.send_get_info(token, ref, true);
+    return this.output.getTransport()
+      .jqRequest(this, postData, arguments, this.recv_get_info);
+  }
+};
+
+taxon.thrift_serviceClient.prototype.send_get_info = function(token, ref, callback) {
+  this.output.writeMessageBegin('get_info', Thrift.MessageType.CALL, this.seqid);
+  var args = new taxon.thrift_service_get_info_args();
+  args.token = token;
+  args.ref = ref;
+  args.write(this.output);
+  this.output.writeMessageEnd();
+  return this.output.getTransport().flush(callback);
+};
+
+taxon.thrift_serviceClient.prototype.recv_get_info = function() {
+  var ret = this.input.readMessageBegin();
+  var fname = ret.fname;
+  var mtype = ret.mtype;
+  var rseqid = ret.rseqid;
+  if (mtype == Thrift.MessageType.EXCEPTION) {
+    var x = new Thrift.TApplicationException();
+    x.read(this.input);
+    this.input.readMessageEnd();
+    throw x;
+  }
+  var result = new taxon.thrift_service_get_info_result();
+  result.read(this.input);
+  this.input.readMessageEnd();
+
+  if (null !== result.generic_exception) {
+    throw result.generic_exception;
+  }
+  if (null !== result.authorization_exception) {
+    throw result.authorization_exception;
+  }
+  if (null !== result.authentication_exception) {
+    throw result.authentication_exception;
+  }
+  if (null !== result.reference_exception) {
+    throw result.reference_exception;
+  }
+  if (null !== result.attribute_exception) {
+    throw result.attribute_exception;
+  }
+  if (null !== result.type_exception) {
+    throw result.type_exception;
+  }
+  if (null !== result.success) {
+    return result.success;
+  }
+  throw 'get_info failed: unknown result';
+};
+taxon.thrift_serviceClient.prototype.get_history = function(token, ref, callback) {
+  if (callback === undefined) {
+    this.send_get_history(token, ref);
+    return this.recv_get_history();
+  } else {
+    var postData = this.send_get_history(token, ref, true);
+    return this.output.getTransport()
+      .jqRequest(this, postData, arguments, this.recv_get_history);
+  }
+};
+
+taxon.thrift_serviceClient.prototype.send_get_history = function(token, ref, callback) {
+  this.output.writeMessageBegin('get_history', Thrift.MessageType.CALL, this.seqid);
+  var args = new taxon.thrift_service_get_history_args();
+  args.token = token;
+  args.ref = ref;
+  args.write(this.output);
+  this.output.writeMessageEnd();
+  return this.output.getTransport().flush(callback);
+};
+
+taxon.thrift_serviceClient.prototype.recv_get_history = function() {
+  var ret = this.input.readMessageBegin();
+  var fname = ret.fname;
+  var mtype = ret.mtype;
+  var rseqid = ret.rseqid;
+  if (mtype == Thrift.MessageType.EXCEPTION) {
+    var x = new Thrift.TApplicationException();
+    x.read(this.input);
+    this.input.readMessageEnd();
+    throw x;
+  }
+  var result = new taxon.thrift_service_get_history_result();
+  result.read(this.input);
+  this.input.readMessageEnd();
+
+  if (null !== result.generic_exception) {
+    throw result.generic_exception;
+  }
+  if (null !== result.authorization_exception) {
+    throw result.authorization_exception;
+  }
+  if (null !== result.authentication_exception) {
+    throw result.authentication_exception;
+  }
+  if (null !== result.reference_exception) {
+    throw result.reference_exception;
+  }
+  if (null !== result.attribute_exception) {
+    throw result.attribute_exception;
+  }
+  if (null !== result.type_exception) {
+    throw result.type_exception;
+  }
+  if (null !== result.success) {
+    return result.success;
+  }
+  throw 'get_history failed: unknown result';
+};
+taxon.thrift_serviceClient.prototype.get_provenance = function(token, ref, callback) {
+  if (callback === undefined) {
+    this.send_get_provenance(token, ref);
+    return this.recv_get_provenance();
+  } else {
+    var postData = this.send_get_provenance(token, ref, true);
+    return this.output.getTransport()
+      .jqRequest(this, postData, arguments, this.recv_get_provenance);
+  }
+};
+
+taxon.thrift_serviceClient.prototype.send_get_provenance = function(token, ref, callback) {
+  this.output.writeMessageBegin('get_provenance', Thrift.MessageType.CALL, this.seqid);
+  var args = new taxon.thrift_service_get_provenance_args();
+  args.token = token;
+  args.ref = ref;
+  args.write(this.output);
+  this.output.writeMessageEnd();
+  return this.output.getTransport().flush(callback);
+};
+
+taxon.thrift_serviceClient.prototype.recv_get_provenance = function() {
+  var ret = this.input.readMessageBegin();
+  var fname = ret.fname;
+  var mtype = ret.mtype;
+  var rseqid = ret.rseqid;
+  if (mtype == Thrift.MessageType.EXCEPTION) {
+    var x = new Thrift.TApplicationException();
+    x.read(this.input);
+    this.input.readMessageEnd();
+    throw x;
+  }
+  var result = new taxon.thrift_service_get_provenance_result();
+  result.read(this.input);
+  this.input.readMessageEnd();
+
+  if (null !== result.generic_exception) {
+    throw result.generic_exception;
+  }
+  if (null !== result.authorization_exception) {
+    throw result.authorization_exception;
+  }
+  if (null !== result.authentication_exception) {
+    throw result.authentication_exception;
+  }
+  if (null !== result.reference_exception) {
+    throw result.reference_exception;
+  }
+  if (null !== result.attribute_exception) {
+    throw result.attribute_exception;
+  }
+  if (null !== result.type_exception) {
+    throw result.type_exception;
+  }
+  if (null !== result.success) {
+    return result.success;
+  }
+  throw 'get_provenance failed: unknown result';
+};
+taxon.thrift_serviceClient.prototype.get_id = function(token, ref, callback) {
+  if (callback === undefined) {
+    this.send_get_id(token, ref);
+    return this.recv_get_id();
+  } else {
+    var postData = this.send_get_id(token, ref, true);
+    return this.output.getTransport()
+      .jqRequest(this, postData, arguments, this.recv_get_id);
+  }
+};
+
+taxon.thrift_serviceClient.prototype.send_get_id = function(token, ref, callback) {
+  this.output.writeMessageBegin('get_id', Thrift.MessageType.CALL, this.seqid);
+  var args = new taxon.thrift_service_get_id_args();
+  args.token = token;
+  args.ref = ref;
+  args.write(this.output);
+  this.output.writeMessageEnd();
+  return this.output.getTransport().flush(callback);
+};
+
+taxon.thrift_serviceClient.prototype.recv_get_id = function() {
+  var ret = this.input.readMessageBegin();
+  var fname = ret.fname;
+  var mtype = ret.mtype;
+  var rseqid = ret.rseqid;
+  if (mtype == Thrift.MessageType.EXCEPTION) {
+    var x = new Thrift.TApplicationException();
+    x.read(this.input);
+    this.input.readMessageEnd();
+    throw x;
+  }
+  var result = new taxon.thrift_service_get_id_result();
+  result.read(this.input);
+  this.input.readMessageEnd();
+
+  if (null !== result.generic_exception) {
+    throw result.generic_exception;
+  }
+  if (null !== result.authorization_exception) {
+    throw result.authorization_exception;
+  }
+  if (null !== result.authentication_exception) {
+    throw result.authentication_exception;
+  }
+  if (null !== result.reference_exception) {
+    throw result.reference_exception;
+  }
+  if (null !== result.attribute_exception) {
+    throw result.attribute_exception;
+  }
+  if (null !== result.type_exception) {
+    throw result.type_exception;
+  }
+  if (null !== result.success) {
+    return result.success;
+  }
+  throw 'get_id failed: unknown result';
+};
+taxon.thrift_serviceClient.prototype.get_name = function(token, ref, callback) {
+  if (callback === undefined) {
+    this.send_get_name(token, ref);
+    return this.recv_get_name();
+  } else {
+    var postData = this.send_get_name(token, ref, true);
+    return this.output.getTransport()
+      .jqRequest(this, postData, arguments, this.recv_get_name);
+  }
+};
+
+taxon.thrift_serviceClient.prototype.send_get_name = function(token, ref, callback) {
+  this.output.writeMessageBegin('get_name', Thrift.MessageType.CALL, this.seqid);
+  var args = new taxon.thrift_service_get_name_args();
+  args.token = token;
+  args.ref = ref;
+  args.write(this.output);
+  this.output.writeMessageEnd();
+  return this.output.getTransport().flush(callback);
+};
+
+taxon.thrift_serviceClient.prototype.recv_get_name = function() {
+  var ret = this.input.readMessageBegin();
+  var fname = ret.fname;
+  var mtype = ret.mtype;
+  var rseqid = ret.rseqid;
+  if (mtype == Thrift.MessageType.EXCEPTION) {
+    var x = new Thrift.TApplicationException();
+    x.read(this.input);
+    this.input.readMessageEnd();
+    throw x;
+  }
+  var result = new taxon.thrift_service_get_name_result();
+  result.read(this.input);
+  this.input.readMessageEnd();
+
+  if (null !== result.generic_exception) {
+    throw result.generic_exception;
+  }
+  if (null !== result.authorization_exception) {
+    throw result.authorization_exception;
+  }
+  if (null !== result.authentication_exception) {
+    throw result.authentication_exception;
+  }
+  if (null !== result.reference_exception) {
+    throw result.reference_exception;
+  }
+  if (null !== result.attribute_exception) {
+    throw result.attribute_exception;
+  }
+  if (null !== result.type_exception) {
+    throw result.type_exception;
+  }
+  if (null !== result.success) {
+    return result.success;
+  }
+  throw 'get_name failed: unknown result';
+};
+taxon.thrift_serviceClient.prototype.get_version = function(token, ref, callback) {
+  if (callback === undefined) {
+    this.send_get_version(token, ref);
+    return this.recv_get_version();
+  } else {
+    var postData = this.send_get_version(token, ref, true);
+    return this.output.getTransport()
+      .jqRequest(this, postData, arguments, this.recv_get_version);
+  }
+};
+
+taxon.thrift_serviceClient.prototype.send_get_version = function(token, ref, callback) {
+  this.output.writeMessageBegin('get_version', Thrift.MessageType.CALL, this.seqid);
+  var args = new taxon.thrift_service_get_version_args();
+  args.token = token;
+  args.ref = ref;
+  args.write(this.output);
+  this.output.writeMessageEnd();
+  return this.output.getTransport().flush(callback);
+};
+
+taxon.thrift_serviceClient.prototype.recv_get_version = function() {
+  var ret = this.input.readMessageBegin();
+  var fname = ret.fname;
+  var mtype = ret.mtype;
+  var rseqid = ret.rseqid;
+  if (mtype == Thrift.MessageType.EXCEPTION) {
+    var x = new Thrift.TApplicationException();
+    x.read(this.input);
+    this.input.readMessageEnd();
+    throw x;
+  }
+  var result = new taxon.thrift_service_get_version_result();
+  result.read(this.input);
+  this.input.readMessageEnd();
+
+  if (null !== result.generic_exception) {
+    throw result.generic_exception;
+  }
+  if (null !== result.authorization_exception) {
+    throw result.authorization_exception;
+  }
+  if (null !== result.authentication_exception) {
+    throw result.authentication_exception;
+  }
+  if (null !== result.reference_exception) {
+    throw result.reference_exception;
+  }
+  if (null !== result.attribute_exception) {
+    throw result.attribute_exception;
+  }
+  if (null !== result.type_exception) {
+    throw result.type_exception;
+  }
+  if (null !== result.success) {
+    return result.success;
+  }
+  throw 'get_version failed: unknown result';
+};
 taxon.thrift_serviceClient.prototype.get_parent = function(token, ref, callback) {
   if (callback === undefined) {
     this.send_get_parent(token, ref);
@@ -1485,8 +4410,23 @@ taxon.thrift_serviceClient.prototype.recv_get_parent = function() {
   result.read(this.input);
   this.input.readMessageEnd();
 
-  if (null !== result.failure) {
-    throw result.failure;
+  if (null !== result.generic_exception) {
+    throw result.generic_exception;
+  }
+  if (null !== result.authorization_exception) {
+    throw result.authorization_exception;
+  }
+  if (null !== result.authentication_exception) {
+    throw result.authentication_exception;
+  }
+  if (null !== result.reference_exception) {
+    throw result.reference_exception;
+  }
+  if (null !== result.attribute_exception) {
+    throw result.attribute_exception;
+  }
+  if (null !== result.type_exception) {
+    throw result.type_exception;
   }
   if (null !== result.success) {
     return result.success;
@@ -1529,8 +4469,23 @@ taxon.thrift_serviceClient.prototype.recv_get_children = function() {
   result.read(this.input);
   this.input.readMessageEnd();
 
-  if (null !== result.failure) {
-    throw result.failure;
+  if (null !== result.generic_exception) {
+    throw result.generic_exception;
+  }
+  if (null !== result.authorization_exception) {
+    throw result.authorization_exception;
+  }
+  if (null !== result.authentication_exception) {
+    throw result.authentication_exception;
+  }
+  if (null !== result.reference_exception) {
+    throw result.reference_exception;
+  }
+  if (null !== result.attribute_exception) {
+    throw result.attribute_exception;
+  }
+  if (null !== result.type_exception) {
+    throw result.type_exception;
   }
   if (null !== result.success) {
     return result.success;
@@ -1573,8 +4528,23 @@ taxon.thrift_serviceClient.prototype.recv_get_genome_annotations = function() {
   result.read(this.input);
   this.input.readMessageEnd();
 
-  if (null !== result.failure) {
-    throw result.failure;
+  if (null !== result.generic_exception) {
+    throw result.generic_exception;
+  }
+  if (null !== result.authorization_exception) {
+    throw result.authorization_exception;
+  }
+  if (null !== result.authentication_exception) {
+    throw result.authentication_exception;
+  }
+  if (null !== result.reference_exception) {
+    throw result.reference_exception;
+  }
+  if (null !== result.attribute_exception) {
+    throw result.attribute_exception;
+  }
+  if (null !== result.type_exception) {
+    throw result.type_exception;
   }
   if (null !== result.success) {
     return result.success;
@@ -1617,8 +4587,23 @@ taxon.thrift_serviceClient.prototype.recv_get_scientific_lineage = function() {
   result.read(this.input);
   this.input.readMessageEnd();
 
-  if (null !== result.failure) {
-    throw result.failure;
+  if (null !== result.generic_exception) {
+    throw result.generic_exception;
+  }
+  if (null !== result.authorization_exception) {
+    throw result.authorization_exception;
+  }
+  if (null !== result.authentication_exception) {
+    throw result.authentication_exception;
+  }
+  if (null !== result.reference_exception) {
+    throw result.reference_exception;
+  }
+  if (null !== result.attribute_exception) {
+    throw result.attribute_exception;
+  }
+  if (null !== result.type_exception) {
+    throw result.type_exception;
   }
   if (null !== result.success) {
     return result.success;
@@ -1661,8 +4646,23 @@ taxon.thrift_serviceClient.prototype.recv_get_scientific_name = function() {
   result.read(this.input);
   this.input.readMessageEnd();
 
-  if (null !== result.failure) {
-    throw result.failure;
+  if (null !== result.generic_exception) {
+    throw result.generic_exception;
+  }
+  if (null !== result.authorization_exception) {
+    throw result.authorization_exception;
+  }
+  if (null !== result.authentication_exception) {
+    throw result.authentication_exception;
+  }
+  if (null !== result.reference_exception) {
+    throw result.reference_exception;
+  }
+  if (null !== result.attribute_exception) {
+    throw result.attribute_exception;
+  }
+  if (null !== result.type_exception) {
+    throw result.type_exception;
   }
   if (null !== result.success) {
     return result.success;
@@ -1705,8 +4705,23 @@ taxon.thrift_serviceClient.prototype.recv_get_taxonomic_id = function() {
   result.read(this.input);
   this.input.readMessageEnd();
 
-  if (null !== result.failure) {
-    throw result.failure;
+  if (null !== result.generic_exception) {
+    throw result.generic_exception;
+  }
+  if (null !== result.authorization_exception) {
+    throw result.authorization_exception;
+  }
+  if (null !== result.authentication_exception) {
+    throw result.authentication_exception;
+  }
+  if (null !== result.reference_exception) {
+    throw result.reference_exception;
+  }
+  if (null !== result.attribute_exception) {
+    throw result.attribute_exception;
+  }
+  if (null !== result.type_exception) {
+    throw result.type_exception;
   }
   if (null !== result.success) {
     return result.success;
@@ -1749,8 +4764,23 @@ taxon.thrift_serviceClient.prototype.recv_get_kingdom = function() {
   result.read(this.input);
   this.input.readMessageEnd();
 
-  if (null !== result.failure) {
-    throw result.failure;
+  if (null !== result.generic_exception) {
+    throw result.generic_exception;
+  }
+  if (null !== result.authorization_exception) {
+    throw result.authorization_exception;
+  }
+  if (null !== result.authentication_exception) {
+    throw result.authentication_exception;
+  }
+  if (null !== result.reference_exception) {
+    throw result.reference_exception;
+  }
+  if (null !== result.attribute_exception) {
+    throw result.attribute_exception;
+  }
+  if (null !== result.type_exception) {
+    throw result.type_exception;
   }
   if (null !== result.success) {
     return result.success;
@@ -1793,8 +4823,23 @@ taxon.thrift_serviceClient.prototype.recv_get_domain = function() {
   result.read(this.input);
   this.input.readMessageEnd();
 
-  if (null !== result.failure) {
-    throw result.failure;
+  if (null !== result.generic_exception) {
+    throw result.generic_exception;
+  }
+  if (null !== result.authorization_exception) {
+    throw result.authorization_exception;
+  }
+  if (null !== result.authentication_exception) {
+    throw result.authentication_exception;
+  }
+  if (null !== result.reference_exception) {
+    throw result.reference_exception;
+  }
+  if (null !== result.attribute_exception) {
+    throw result.attribute_exception;
+  }
+  if (null !== result.type_exception) {
+    throw result.type_exception;
   }
   if (null !== result.success) {
     return result.success;
@@ -1837,8 +4882,23 @@ taxon.thrift_serviceClient.prototype.recv_get_genetic_code = function() {
   result.read(this.input);
   this.input.readMessageEnd();
 
-  if (null !== result.failure) {
-    throw result.failure;
+  if (null !== result.generic_exception) {
+    throw result.generic_exception;
+  }
+  if (null !== result.authorization_exception) {
+    throw result.authorization_exception;
+  }
+  if (null !== result.authentication_exception) {
+    throw result.authentication_exception;
+  }
+  if (null !== result.reference_exception) {
+    throw result.reference_exception;
+  }
+  if (null !== result.attribute_exception) {
+    throw result.attribute_exception;
+  }
+  if (null !== result.type_exception) {
+    throw result.type_exception;
   }
   if (null !== result.success) {
     return result.success;
@@ -1881,8 +4941,23 @@ taxon.thrift_serviceClient.prototype.recv_get_aliases = function() {
   result.read(this.input);
   this.input.readMessageEnd();
 
-  if (null !== result.failure) {
-    throw result.failure;
+  if (null !== result.generic_exception) {
+    throw result.generic_exception;
+  }
+  if (null !== result.authorization_exception) {
+    throw result.authorization_exception;
+  }
+  if (null !== result.authentication_exception) {
+    throw result.authentication_exception;
+  }
+  if (null !== result.reference_exception) {
+    throw result.reference_exception;
+  }
+  if (null !== result.attribute_exception) {
+    throw result.attribute_exception;
+  }
+  if (null !== result.type_exception) {
+    throw result.type_exception;
   }
   if (null !== result.success) {
     return result.success;

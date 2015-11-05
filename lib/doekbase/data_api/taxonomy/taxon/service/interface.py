@@ -18,6 +18,8 @@ from doekbase.data_api.taxonomy.taxon.service import ttypes
 
 import doekbase.data_api.util
 
+_log = doekbase.data_api.util.get_logger("TaxonService")
+
 class TaxonClientConnection(object):
     """
     Provides a client connection to the running Taxon API service.

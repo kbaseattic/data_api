@@ -29,6 +29,8 @@ The JavaScript Data API is, like the Python API, custom wrapper code on top of t
         cd jslib
         npm install
 
+    If you have run `npm install` before, and there is nothing to do, you may just see a warning like "npm WARN package.json kbase-data-api-js@0.0.1 No repository field.". This is normal and harmless and you can ignore it.
+    
     b. Change to the top-level directory and run "bower" to update JS libraries. Again, you will get some output, but this should run much faster than the previous step.
     
         cd ..
@@ -65,15 +67,24 @@ The JavaScript Data API is, like the Python API, custom wrapper code on top of t
     
     e. For local testing, change the `taxonUrl` to something that is in the `test_resources/data` directory. For testing against a CI or production KBase installation, the default is probably fine. To get a list of available Taxon object IDs, you can use the utility program in the `bin` directory called `print_msgpack_ref`:
     
-        /bin/print_msgpack_ref test_resources/data/*taxon.msgpack
+        ./bin/print_msgpack_ref test_resources/data/*taxon.msgpack
     The identifier in the second column is what you should put inthe `objectRef` field in the `test.yml` file.
     
     **Important: Do NOT add the modified file to any git commits!** Doing so will make your username and password public information. In particular, do not use `git commit -a`, since this would automatically add it.
     
-3. Install your changes. Run `grunt build` again to copy the new config file into the build.
+3. Install your changes. Run `grunt build` again to copy the new config file into the build. *Note:* You need to _re-run_ `grunt build` after any changes to the configuration file.
 
-4. Access the test pages in `runtime/build/htdocs/`: `index.html` provides pointers to all the available pages.
+4. Run a web server to serve the test pages. There are of course many ways to do this. The important thing to know is that the root of the documents served should be `jslib/runtime/build`. Here are some suggestions:
 
+    a. Run a simple Python HTTP server from that directory:
+
+            cd jslib/runtime/build
+            python -m SimpleHTTPServer 
+
+    You can access the index page served by opening a web browser to "localhost:8000/htdocs/", e.g. from the shell:
+    
+        open -a Google\ Chrome 'http://localhost:8000/htdocs'
+    
 ## Testing
 
 Testing is configured for Karma and Jasmine. Code coverage not currently set up. All test artifacts are in the test directory.
