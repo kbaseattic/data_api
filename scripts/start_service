@@ -7,5 +7,5 @@ for api in taxon
 do
 # this doesn't yet capture stdout/stderr
     echo starting service for $api in foreground
-    python $script_dir/bin/${api}_start_service.py
+    python $script_dir/bin/${api}_start_service.py &
 done
