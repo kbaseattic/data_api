@@ -24,7 +24,6 @@ deploy-lib:
 
 deploy-service-scripts:
 	cp $(SCRIPTS_DIR)/start_service $(SCRIPTS_DIR)/stop_service $(SERVICE_DIR)/
-	rsync -avzP $(LBIN_DIR) $(SERVICE_DIR)/
 
 clean:
 	echo not implemented

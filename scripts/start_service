@@ -10,6 +10,6 @@ source $script_dir/venv/bin/activate
 
 for api in taxon
 do
-    echo daemonize -c $script_dir -o $script_dir/stdout -e $script_dir/stderr -a -v $script_dir/venv/bin/python -u $script_dir/bin/${api}_start_service.py --config $KB_DEPLOYMENT_CONFIG
-    daemonize -c $script_dir -o $script_dir/stdout -e $script_dir/stderr -a -v $script_dir/venv/bin/python -u $script_dir/bin/${api}_start_service.py --config $KB_DEPLOYMENT_CONFIG
+    echo daemonize -c $script_dir -o $script_dir/stdout -e $script_dir/stderr -a -v $script_dir/venv/bin/python -u $script_dir/venv/bin/${api}_start_service.py --config $KB_DEPLOYMENT_CONFIG
+    daemonize -c $script_dir -o $script_dir/stdout -e $script_dir/stderr -a -v $script_dir/venv/bin/python -u $script_dir/venv/bin/${api}_start_service.py --config $KB_DEPLOYMENT_CONFIG
 done
