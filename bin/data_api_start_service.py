@@ -9,14 +9,15 @@ import logging
 import os
 import sys
 import ConfigParser
-#import signal
 
 # 3rd party
 import lockfile
 import lockfile.pidlockfile
 
 # local
-from doekbase.data_api.taxonomy.taxon.service import driver
+from doekbase.data_api import cache
+
+SERVICE_NAMES = ["object", "taxon", "assembly", "genomeannotation"]
 
 # Logging
 # TODO: add syslog support
@@ -27,19 +28,13 @@ g_log.addHandler(_hnd)
 
 def main():
 
-    service_name = 'taxon'
-    global_stanza_name = 'data_api'
-    service_stanza_name = service_name + '_api'
-    # set defaults if nothing is set anywhere
-    services = None
-    pidfilename = service_name+"API.pid"
-    service_port=9101
-
     parser = argparse.ArgumentParser()
-    parser.add_argument("--config", help="path to configuration file")
-    parser.add_argument("--port", help="port to listen on (default " + str(service_port) + ")", type=int)
-    # not sure how best to handle this, seems not to be used currently
-    parser.add_argument("--kbase-url", help="prod, next, ci, localhost, dir", default="dir")
+    parser.add_argument("--config", help="path to configuration file", required=True)
+    parser.add_argument("--service",
+                        help="service name to start, one of {}".format(SERVICE_NAMES),
+                        required=True)
+    parser.add_argument("--port", help="port to listen on", type=int)
+    parser.add_argument("--kbase_url", help="prod, next, ci, localhost, dir", default="dir")
     parser.add_argument("--pidfile", help="path to pidfile to use")
     parser.add_argument('--verbose', '-v', dest='vb', action="count", default=0,
                         help="Print more verbose messages to standard error. "
@@ -57,6 +52,20 @@ def main():
     config = ConfigParser.ConfigParser()
     if args.config:
         config.read(args.config)
+
+    if args.service not in SERVICE_NAMES:
+        print "Unrecognized service name {}".format(args.service)
+        sys.exit(1)
+
+    global_stanza_name = 'data_api' + ".kbase." + args.kbase_url
+    service_stanza_name = args.service + '_api'
+    # set defaults if nothing is set anywhere
+    services = None
+    pidfilename = args.service + "API.pid"
+    service_port = None
+    redis_host = None
+    redis_port = None
+
     # get config
     if config.has_section(global_stanza_name):
         print "Reading global config from file " + args.config + " and stanza " + global_stanza_name
@@ -64,6 +73,13 @@ def main():
         shock = config.get(global_stanza_name,'shock_service_url')
         services = {'workspace_service_url': ws,
             'shock_service_url': shock}
+
+        try:
+            redis_host = config.get(global_stanza_name, 'redis_host')
+            redis_port = config.get(global_stanza_name, 'redis_port')
+        except ConfigParser.Error, e:
+            redis_host = None
+            redis_port = None
     if config.has_section(service_stanza_name):
         print "Reading " + service_name + " config from file " + args.config + " and stanza " + service_stanza_name
         if config.has_option(service_stanza_name,'service-port'):
@@ -76,6 +92,12 @@ def main():
         pidfilename = args.pidfile
     if args.port:
         service_port=args.port
+
+    if redis_host is not None and redis_port is not None:
+        print "Activating REDIS at host:{} port:{}".format(redis_host,redis_port)
+        cache.ObjectCache.cache_class = cache.RedisCache
+        cache.ObjectCache.cache_params = {'redis_host': redis_host, 'redis_port': redis_port}
+
 
     # test that the pidfile is not already locked with a running process
     pidfile = lockfile.pidlockfile.PIDLockFile(pidfilename, timeout=-1)
@@ -109,6 +131,14 @@ def main():
                                                                   pid))
         try:
             print "starting service on port " + str(service_port)
+
+            if args.service == "taxon":
+                from doekbase.data_api.taxonomy.taxon.service import driver
+            elif args.service == "assembly":
+                from doekbase.data_api.sequence.assembly.service import driver
+            else:
+                raise Exception("Service not activated: {}".format(args.service))
+
             driver.start_service(services=services,port=service_port,host='')
         finally:
             pidfile.release()
