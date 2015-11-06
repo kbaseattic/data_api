@@ -2,8 +2,6 @@
 Setup script for data_api Python packages and scripts.
 """
 import setuptools
-from setuptools.command.install import install
-
 import glob
 import logging
 import os
@@ -31,33 +29,43 @@ g_with_jupyter = False
 server_languages = ["python_server"]
 client_languages = ["python", "javascript", "perl", "java"]
 
-language_properties = {
-    "python_server": {
+class BuildAttr(object):
+    """Attributes for building Thrift clients and servers.
+    This wrapper class greatly improves the aesthetics of the code.
+    """
+    def __init__(self, values):
+        self.style = values['style']
+        self.generated_dir = values['generated_dir']
+        self.copy_files = values['copy_files']
+        self.rename_files = values.get('rename_files', {})
+
+thrift_build = {
+    "python_server": BuildAttr({
         "style": "py:twisted",
         "generated_dir": "gen-py.twisted",
         "copy_files": ["constants.py", "ttypes.py", "thrift_service.py"]
-    },
-    "python": {
+    }),
+    "python": BuildAttr({
         "style": "py:new_style",
         "generated_dir": "gen-py",
         "copy_files": ["constants.py", "ttypes.py", "thrift_service.py"],
         "rename_files": {"thrift_service.py": "thrift_client.py"}
-    },
-    "javascript": {
+    }),
+    "javascript": BuildAttr({
         "style": "js:jquery",
         "generated_dir": "gen-js",
-        "copy_files": ["taxon_types.js", "thrift_service.js"]
-    },
-    "perl": {
+        "copy_files": ["*"]
+    }),
+    "perl": BuildAttr({
         "style": "perl",
         "generated_dir": "gen-perl",
         "copy_files": ["Constants.pm", "Types.pm", "thrift_service.pm"]
-    },
-    "java": {
+    }),
+    "java": BuildAttr({
         "style": "java:sorted_containers",
         "generated_dir": "gen-java",
-        "copy_files": ["ServiceException.java", "taxonConstants.java", "thrift_service.java"]
-    }
+        "copy_files": ["*"]
+    })
 }
 
 
@@ -78,7 +86,7 @@ def filter_args():
 
 def get_dependencies():
     def parse_requirements(filename):
-        packages = list()
+        pkg = list()
     
         with open(filename, 'r') as req_file:
             req_lines = req_file.read().splitlines()
@@ -87,10 +95,10 @@ def get_dependencies():
                 if line.strip() == "":
                     pass
                 elif line.startswith("-r"):
-                    packages.extend(parse_requirements(line.split(" ")[-1]))
+                    pkg.extend(parse_requirements(line.split(" ")[-1]))
                 else:
-                    packages.append(line)
-        return packages
+                    pkg.append(line)
+        return pkg
 
     setup_args = sys.argv[1:]
 
@@ -117,7 +125,7 @@ def get_dependencies():
     return install_requires
 
 def call_command(command, is_thrift=False):
-    """Better exception when calling a command"""
+    """Better exception when calling a command."""
     cstr = ' '.join(command) if isinstance(command, list) else command
     _log.debug('Run command "{}"'.format(cstr))
     try:
@@ -159,36 +167,65 @@ class BuildThriftClients(setuptools.Command):
         for dirpath, dirnames, filenames in os.walk("thrift/specs"):
             for f in filter(lambda _: _.endswith('.thrift'), filenames):
                 spec_path = os.path.abspath(os.path.join(dirpath, f))
-                thrift_path = f.split(".")[0]
-
-                for target in client_languages:
-                    command = ["thrift", "-r", "--gen", language_properties[target]["style"], spec_path]
-                    _log.debug("{}: Thrift command = {}".format(target,
-                                                               command))
-                    errno = call_command(command, is_thrift=True)
+                # Process each language
+                for lang in client_languages:
+                    settings = thrift_build[lang]  # settings for current lang.
+                    # Remove old generated files, if any
+                    if os.path.exists(settings.generated_dir):
+                        shutil.rmtree(settings.generated_dir)
+                    # Run Thrift compiler to generate new stubs
+                    cmd = ["thrift", "-r", "--gen", settings.style,
+                               spec_path]
+                    _log.debug("{}: Thrift command = {}".format(lang, cmd))
+                    errno = call_command(cmd, is_thrift=True)
                     if errno != 0:
-                        raise Exception("Thrift build for {} failed with : {}".format(target, errno))
-
-                    generated_files = glob.glob(language_properties[target]["generated_dir"] + "/*/*")
-
+                        raise Exception("Thrift build for {} failed with : {}"
+                                        .format(lang, errno))
+                    # Get a list of all generated stub files
+                    generated_files = glob.glob(settings.generated_dir + " \
+                                                                     ""/*/*")
                     if len(generated_files) == 0:
-                        generated_files = glob.glob(language_properties[target]["generated_dir"] + "/*")
-
+                        generated_files = glob.glob(thrift_build[lang]["generated_dir"] + "/*")
+                    # Copy generated files to their final place in the tree
                     copied = False
-                    for x in generated_files:
-                        for name in language_properties[target]["copy_files"]:
-                            if name in x:
-                                destination = spec_path.rsplit("/",1)[0].replace("specs", "stubs/" + target)
-                                shutil.copyfile(x, os.path.join(destination, name))
-                                copied = True
+                    if settings.copy_files == ["*"]:
+                        destination = spec_path.rsplit("/",1)[0].replace(
+                            "specs", "stubs/" + lang)
+                        for name in generated_files:
+                            source = os.path.basename(name)
+                            shutil.copyfile(name, os.path.join(destination,
+                                                            source))
+                        copied = len(generated_files) > 0
+                    else:
+                        for x in generated_files:
+                            for name in settings.copy_files:
+                                if name == os.path.basename(x):
+                                    destination = spec_path.rsplit("/",1)[0]\
+                                        .replace("specs", "stubs/" + lang)
+                                    shutil.copyfile(x, os.path.join(destination,
+                                                                    name))
+                                    copied = True
                     if not copied:
-                        raise Exception("Unable to find thrift generated files to copy!")
-                    shutil.rmtree(language_properties[target]["generated_dir"])
+                        raise Exception("Unable to find thrift-generated "
+                                        "files to copy!")
+        # Remove original generated directories
+        for lang in client_languages:
+            settings = thrift_build[lang]
+            shutil.rmtree(settings.generated_dir)
 
 
+class BuildThriftServers(setuptools.Command):
+    """Build command for generating Thrift server code"""
 
-class CustomInstall(install):
-    """Custom install step for thrift generated code"""
+    user_options = []
+
+    def initialize_options(self):
+        pass
+
+
+    def finalize_options(self):
+        pass
+
 
     def run(self):
         _log.info('Install Thrift code')
@@ -199,77 +236,66 @@ class CustomInstall(install):
             raise
 
     def _try_run(self):
-
         start_path = os.path.join(os.path.abspath(os.path.dirname(__file__)),"thrift/specs")
 
+        settings = thrift_build['python_server']
         for dirpath, dirnames, filenames in os.walk(start_path):
             for f in filenames:
                 if f.endswith(".thrift"):
                     #TODO - modify version string in .thrift before code generation
                     spec_path = os.path.abspath(os.path.join(dirpath, f))
-                    thrift_path = f.split(".")[0]
 
-                    command = ["thrift", "-r", "--gen", language_properties[
-                        "python_server"]["style"], spec_path]
+                    command = ["thrift", "-r", "--gen", settings.style,
+                               spec_path]
                     errno = call_command(command, is_thrift=True)
                     if errno != 0:
                         raise Exception("Thrift build for python service failed with : {}".format(errno))
 
-                    generated_files = glob.glob(language_properties["python_server"]["generated_dir"] + "/*/*")
+                    generated_files = glob.glob(settings.generated_dir + "/*/*")
 
                     if len(generated_files) == 0:
-                        generated_files = glob.glob(language_properties["python_server"]["generated_dir"] + "/*")
+                        generated_files = glob.glob(settings.generated_dir +
+                                                    "/*")
 
                     copied = False
                     for x in generated_files:
-                        for name in language_properties["python_server"]["copy_files"]:
+                        for name in settings.copy_files:
                             if name in x:
                                 destination = os.path.join(dirpath.replace("thrift/specs", "lib/doekbase/data_api") + "/service/", name)
                                 shutil.copyfile(x, destination)
                                 copied = True
                     if not copied:
                         raise Exception("Unable to find thrift service generated files to copy!")
-                    shutil.rmtree(language_properties["python_server"]["generated_dir"])
+                    shutil.rmtree(settings.generated_dir)
 
-                    command = ["thrift", "-r", "--gen", language_properties["python"]["style"], spec_path]
+                    command = ["thrift", "-r", "--gen", settings.style,
+                              spec_path]
                     errno = call_command(command, is_thrift=True)
                     if errno != 0:
                         raise Exception("Thrift build for python client failed with : {}".format(errno))
 
-                    generated_files = glob.glob(language_properties["python"]["generated_dir"] + "/*/*")
+                    generated_files = glob.glob(settings.generated_dir + \
+                        "/*/*")
 
                     if len(generated_files) == 0:
-                        generated_files = glob.glob(language_properties["python"]["generated_dir"] + "/*")
+                        generated_files = glob.glob(settings.generated_dir
+                        + \
+                            "/*")
 
                     renamed = False
                     for x in generated_files:
-                        for name in language_properties["python"]["rename_files"]:
+                        for name in settings.rename_files:
                             if name in x:
-                                destination = os.path.join(dirpath.replace("thrift/specs", "lib/doekbase/data_api") + "/service/", language_properties["python"]["rename_files"][name])
+                                destination = os.path.join(dirpath.replace(
+                                    "thrift/specs", "lib/doekbase/data_api") +
+                                                           "/service/",
+                                                           settings.rename_files[name])
                                 shutil.copyfile(x, destination)
                                 renamed = True
                     if not renamed:
                         raise Exception("Unable to find thrift client generated files to copy!")
-                    shutil.rmtree(language_properties["python"]["generated_dir"])
+                    shutil.rmtree(settings.generated_dir)
 
-        # adapted from http://stackoverflow.com/questions/14441955/how-to-perform-custom-build-steps-in-setup-py
-        ret = None
-
-        if self.old_and_unmanageable or self.single_version_externally_managed:
-            ret = install.run(self)
-        else:
-            caller = sys._getframe(2)
-            caller_module = caller.f_globals.get('__name__','')
-            caller_name = caller.f_code.co_name
-
-            if caller_module != "distutils.dist" or caller_name != "run_commands":
-                _log.debug('Not called from cmdline, do old-style install')
-                install.run(self)
-            else:
-                _log.debug('Called from cmdline, doing "egg" install')
-                self.do_egg_install()
-
-        return ret
 
 config = {
     "description": "KBase Data API",
@@ -284,6 +310,8 @@ config = {
     "scripts": ["bin/data_api_demo.py",
                 "bin/data_api_benchmark.py",
                 "bin/dump_wsfile",
+                "bin/assembly_start_service.py",
+                "bin/assembly_client_driver.py",
                 "bin/taxon_start_service.py",
                 "bin/taxon_client_driver.py",
                 "bin/extract_thrift_docs"],
@@ -299,6 +327,6 @@ config = {
 setuptools.setup(package_dir = {'': 'lib'},
                  script_args = filter_args(),
                  install_requires = get_dependencies(),
-                 cmdclass = {'install': CustomInstall,
+                 cmdclass = {'build_thrift_servers': BuildThriftServers,
                              'build_thrift_clients': BuildThriftClients},
                  **config)
