@@ -1,9 +1,15 @@
 #!/bin/bash
 script_dir=$(dirname "$(readlink -f "$0")")
-export KB_DEPLOYMENT_CONFIG=$script_dir/deploy.cfg
+
+if [ -z $KB_DEPLOYMENT_CONFIG ]
+then
+    export KB_DEPLOYMENT_CONFIG=$KB_TOP/deployment.cfg
+fi
+
 source $script_dir/venv/bin/activate
 
 for api in taxon
 do
-    daemonize -c $script_dir -o $script_dir/stdout -e $script_dir/stderr -a -v $script_dir/venv/bin/python $script_dir/bin/${api}_start_service.py
+    echo daemonize -c $script_dir -o $script_dir/stdout -e $script_dir/stderr -a -v $script_dir/venv/bin/python -u $script_dir/bin/${api}_start_service.py --config $KB_DEPLOYMENT_CONFIG
+    daemonize -c $script_dir -o $script_dir/stdout -e $script_dir/stderr -a -v $script_dir/venv/bin/python -u $script_dir/bin/${api}_start_service.py --config $KB_DEPLOYMENT_CONFIG
 done

@@ -1,8 +1,16 @@
 #!/bin/bash
 
 script_dir=$(dirname "$(readlink -f "$0")")
-export KB_DEPLOYMENT_CONFIG=$script_dir/deploy.cfg
+if [ -z $KB_DEPLOYMENT_CONFIG ]
+then
+    export KB_DEPLOYMENT_CONFIG=$KB_TOP/deployment.cfg
+fi
+
 source $script_dir/venv/bin/activate
 
-kill $(cat $script_dir/TaxonAPI.pid)
+for pidfile in $script_dir/*.pid
+do
+    echo killing PID from pid file $pidfile
+    kill $(cat $pidfile)
+done
 
