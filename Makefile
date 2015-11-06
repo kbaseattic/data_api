@@ -1,4 +1,4 @@
-SERVICE = dataapi
+SERVICE = data_api
 SERVICE_CAPS = dataApi
 LIB_DIR = lib
 SCRIPTS_DIR = scripts
@@ -15,12 +15,15 @@ default: deploy
 # not really sure what to do with this target yet
 deploy-client: 
 
-deploy:
+deploy: deploy-service-scripts deploy-lib
+
+deploy-lib:
 	rm -rf $(SERVICE_DIR)/venv
 	virtualenv $(SERVICE_DIR)/venv
-	cp $(SCRIPTS_DIR)/start_service $(SCRIPTS_DIR)/stop_service $(SERVICE_DIR)/
-	rsync -avzP $(LBIN_DIR) $(SERVICE_DIR)/
 	. $(SERVICE_DIR)/venv/bin/activate && pip install .
+
+deploy-service-scripts:
+	cp $(SCRIPTS_DIR)/start_service $(SCRIPTS_DIR)/stop_service $(SERVICE_DIR)/
 
 clean:
 	echo not implemented
