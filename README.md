@@ -22,12 +22,17 @@ Develop branch status
 
 #quickstart instructions
 
+0. Clone data_api repo
+
+        git clone https://github.com/kbase/data_api/
+
 1. install virtualenv and python development libraries using your local installer::
 
         apt-get install python-dev python-virtualenv
 
 2. create a virtualenv environment to install the source to::
-
+        
+        cd data_api
         virtualenv venv
 
 3. activate the virtualenv::
@@ -36,11 +41,19 @@ Develop branch status
 
 4. pip install this package to your virtualenv
 
-        pip install data_api
+        pip install ../data_api
 
 5. set your `KB_AUTH_TOKEN` to your token string. In a KBase environment use `kbase-login` to retrieve a token, and check your `.kbase_config`. Once you have the value, run this command in the bash shell:
 
         export KB_AUTH_TOKEN="<value-you-grabbed>"
+
+6. Install example data
+
+
+7. Set redis host env variable
+
+        KB_REDIS_HOST=""
+
 
 6. run tests to verify your install is working:
 
