@@ -22,7 +22,7 @@ Develop branch status
 
 #quickstart instructions
 
-0. Clone data_api repo
+0. Clone data_api repo:
 
         git clone https://github.com/kbase/data_api/
 
@@ -30,34 +30,41 @@ Develop branch status
 
         apt-get install python-dev python-virtualenv
 
-2. create a virtualenv environment to install the source to::
+2. create a virtualenv environment to install the source to:
         
         cd data_api
         virtualenv venv
 
-3. activate the virtualenv::
+3. activate the virtualenv:
 
         source venv/bin/activate
 
-4. pip install this package to your virtualenv
+4. pip install this package to your virtualenv:
 
         pip install ../data_api
 
 5. set your `KB_AUTH_TOKEN` to your token string. In a KBase environment use `kbase-login` to retrieve a token, and check your `.kbase_config`. Once you have the value, run this command in the bash shell:
 
-        export KB_AUTH_TOKEN="<value-you-grabbed>"
+        kbase-login
+        export KB_AUTH_TOKEN=$(kbase-whoami -t)
 
-6. Install example data
 
+    or in narrative interface code cell:
 
-7. Set redis host env variable
+        import os
+        os.environ["KB_AUTH_TOKEN"]
+
+6. Install example data:
+
+        See [Test data](README.md#test-data)
+
+7. Set redis host env variable:
 
         KB_REDIS_HOST=""
 
-
 6. run tests to verify your install is working:
 
-        nosetests doekbase.data_api 
+        nosetests -s doekbase.data_api 
 
 You can run `pip install data_api/ --upgrade` if you have edited files
 locally and want to test them out without having to reset the virtualenv.
