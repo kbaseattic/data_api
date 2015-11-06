@@ -15,7 +15,7 @@ default: deploy
 # not really sure what to do with this target yet
 deploy-client: 
 
-deploy: deploy-service-scripts deploy-lib
+deploy: deploy-lib deploy-service-scripts
 
 deploy-lib:
 	rm -rf $(SERVICE_DIR)/venv
