@@ -565,13 +565,12 @@ class _Prototype(ObjectAPI, AssemblyInterface):
 
 
 class AssemblyClientAPI(AssemblyInterface):
-    def __init__(self, host='localhost', port=9092, token=None, ref=None):
+    def __init__(self, url=None, token=None, ref=None):
         from doekbase.data_api.sequence.assembly.service.interface import AssemblyClientConnection
 
         # TODO add exception handling and better error messages here
-        self.host = host
-        self.port = port
-        self.transport, self.client = AssemblyClientConnection(host, port).get_client()
+        self.url = url
+        self.transport, self.client = AssemblyClientConnection(url).get_client()
         self.ref = ref
         self._token = token
 

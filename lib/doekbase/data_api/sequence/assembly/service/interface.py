@@ -20,13 +20,13 @@ class AssemblyClientConnection(object):
     """
     Provides a client connection to the running Assembly API service.
     """
-    def __init__(self, host='localhost', port=9092):
+    def __init__(self, url="http://localhost:9102"):
         self.client = None
         self.transport = None
         self.protocol = None
 
         try:
-            self.transport = THttpClient.THttpClient("http://" + host + ":" + str(port))
+            self.transport = THttpClient.THttpClient(url)
             self.protocol = TBinaryProtocol.TBinaryProtocol(self.transport)
             self.client = thrift_client.Client(self.protocol)
         except TTransport.TTransportException as err:
@@ -60,8 +60,7 @@ class AssemblyService:
         except AttributeError, e:
             raise ttypes.AttributeException(e.message)
         except Exception, e:
-            raise ttypes.ServiceException(e.message, traceback.print_exc(),
-                                          "get_assembly_id", {"ref": str(ref)})
+            raise ttypes.ServiceException(e.message, traceback.print_exc(), {"ref": str(ref)})
 
     def get_genome_annotations(self, token=None, ref=None):
         try:
@@ -70,8 +69,7 @@ class AssemblyService:
 
             return result
         except Exception, e:
-            raise ttypes.ServiceException(e.message, traceback.print_exc(),
-                                          "get_genome_annotations", {"ref": str(ref)})
+            raise ttypes.ServiceException(e.message, traceback.print_exc(), {"ref": str(ref)})
 
     def get_external_source_info(self, token=None, ref=None):
         try:
@@ -80,8 +78,7 @@ class AssemblyService:
 
             return ttypes.AssemblyExternalSourceInfo(**result)
         except Exception, e:
-            raise ttypes.ServiceException(e.message, traceback.print_exc(),
-                                          "get_external_source_info", {"ref": str(ref)})
+            raise ttypes.ServiceException(e.message, traceback.print_exc(), {"ref": str(ref)})
 
     def get_stats(self, token=None, ref=None):
         try:
@@ -90,8 +87,7 @@ class AssemblyService:
 
             return ttypes.AssemblyStats(**result)
         except Exception, e:
-            raise ttypes.ServiceException(e.message, traceback.print_exc(),
-                                          "get_stats", {"ref": str(ref)})
+            raise ttypes.ServiceException(e.message, traceback.print_exc(), {"ref": str(ref)})
 
     def get_number_contigs(self, token=None, ref=None):
         try:
@@ -100,8 +96,7 @@ class AssemblyService:
 
             return result
         except Exception, e:
-            raise ttypes.ServiceException(e.message, traceback.print_exc(),
-                                          "get_number_contigs", {"ref": str(ref)})
+            raise ttypes.ServiceException(e.message, traceback.print_exc(), {"ref": str(ref)})
 
     def get_gc_content(self, token=None, ref=None):
         try:
@@ -110,8 +105,7 @@ class AssemblyService:
 
             return result
         except Exception, e:
-            raise ttypes.ServiceException(e.message, traceback.print_exc(),
-                                          "get_gc_content", {"ref": str(ref)})
+            raise ttypes.ServiceException(e.message, traceback.print_exc(), {"ref": str(ref)})
 
     def get_dna_size(self, token=None, ref=None):
         try:
@@ -120,8 +114,7 @@ class AssemblyService:
 
             return result
         except Exception, e:
-            raise ttypes.ServiceException(e.message, traceback.print_exc(),
-                                          "get_dna_size", {"ref": str(ref)})
+            raise ttypes.ServiceException(e.message, traceback.print_exc(), {"ref": str(ref)})
 
     def get_contig_ids(self, token=None, ref=None):
         try:
@@ -130,8 +123,7 @@ class AssemblyService:
 
             return result
         except Exception, e:
-            raise ttypes.ServiceException(e.message, traceback.print_exc(),
-                                          "get_contig_ids", {"ref": str(ref)})
+            raise ttypes.ServiceException(e.message, traceback.print_exc(), {"ref": str(ref)})
 
     def get_contig_lengths(self, token=None, ref=None, contig_id_list=None):
         try:
@@ -144,8 +136,7 @@ class AssemblyService:
 
             return result
         except Exception, e:
-            raise ttypes.ServiceException(e.message, traceback.print_exc(),
-                                          "get_contig_ids", {"ref": str(ref)})
+            raise ttypes.ServiceException(e.message, traceback.print_exc(), {"ref": str(ref)})
 
     def get_contig_gc_content(self, token=None, ref=None, contig_id_list=None):
         try:
@@ -158,8 +149,7 @@ class AssemblyService:
 
             return result
         except Exception, e:
-            raise ttypes.ServiceException(e.message, traceback.print_exc(),
-                                          "get_contig_ids", {"ref": str(ref)})
+            raise ttypes.ServiceException(e.message, traceback.print_exc(), {"ref": str(ref)})
 
     def get_contigs(self, token=None, ref=None, contig_id_list=None):
         try:
@@ -172,6 +162,5 @@ class AssemblyService:
 
             return {x: ttypes.AssemblyContig(**result[x]) for x in result}
         except Exception, e:
-            raise ttypes.ServiceException(e.message, traceback.print_exc(),
-                                          "get_contig_ids", {"ref": str(ref)})
+            raise ttypes.ServiceException(e.message, traceback.print_exc(), {"ref": str(ref)})
 

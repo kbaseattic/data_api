@@ -14,15 +14,12 @@ from doekbase.data_api.sequence.assembly.api import AssemblyClientAPI
 def test_client():
     ap = argparse.ArgumentParser()
     ap.add_argument('--ref', default='PrototypeReferenceGenomes/kb|g.166819_assembly', help='Object reference ID, e.g. 1019/4/1')
-    ap.add_argument('--host', dest='host', default='localhost',
-                    metavar='ADDR', help='Remote server host '
+    ap.add_argument('--url', dest='url', default='http://localhost:9102',
+                    metavar='URL', help='Remote server url '
                                          '(default=%(default)s)')
-    ap.add_argument('--port', dest='port', default=9102,
-                    metavar='PORT', help='Remote server port '
-                                         '(default=%(default)d)')
     args = ap.parse_args()
 
-    api = AssemblyClientAPI(args.host, args.port, os.environ["KB_AUTH_TOKEN"], args.ref)
+    api = AssemblyClientAPI(args.url, os.environ["KB_AUTH_TOKEN"], args.ref)
 
     print("Getting data..")
 
