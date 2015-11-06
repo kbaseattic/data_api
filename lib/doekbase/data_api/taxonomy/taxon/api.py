@@ -11,7 +11,7 @@ import abc
 
 # Local
 from doekbase.data_api.core import ObjectAPI
-from doekbase.data_api.util import get_logger
+from doekbase.data_api.util import get_logger, logged
 
 _log = get_logger(__file__)
 
@@ -323,7 +323,11 @@ class TaxonAPI(ObjectAPI, TaxonInterface):
             self.get_scientific_lineage()
         )
 
+_tc_log = get_logger('TaxonClientAPI')
+
 class TaxonClientAPI(TaxonInterface):
+
+    @logged(_tc_log, log_name='init')
     def __init__(self, url=None, token=None, ref=None):
         from doekbase.data_api.taxonomy.taxon.service.interface import TaxonClientConnection
 
@@ -333,6 +337,7 @@ class TaxonClientAPI(TaxonInterface):
         self.ref = ref
         self._token = token
 
+    @logged(_tc_log)
     def get_info(self):
         if not self.transport.isOpen():
             self.transport.open()
@@ -344,6 +349,7 @@ class TaxonClientAPI(TaxonInterface):
         finally:
             self.transport.close()
 
+    @logged(_tc_log)
     def get_history(self):
         if not self.transport.isOpen():
             self.transport.open()
@@ -355,6 +361,7 @@ class TaxonClientAPI(TaxonInterface):
         finally:
             self.transport.close()
 
+    @logged(_tc_log)
     def get_provenance(self):
         if not self.transport.isOpen():
             self.transport.open()
@@ -366,6 +373,7 @@ class TaxonClientAPI(TaxonInterface):
         finally:
             self.transport.close()
 
+    @logged(_tc_log)
     def get_id(self):
         if not self.transport.isOpen():
             self.transport.open()
@@ -377,6 +385,7 @@ class TaxonClientAPI(TaxonInterface):
         finally:
             self.transport.close()
 
+    @logged(_tc_log)
     def get_name(self):
         if not self.transport.isOpen():
             self.transport.open()
@@ -388,6 +397,7 @@ class TaxonClientAPI(TaxonInterface):
         finally:
             self.transport.close()
 
+    @logged(_tc_log)
     def get_version(self):
         if not self.transport.isOpen():
             self.transport.open()
@@ -399,6 +409,7 @@ class TaxonClientAPI(TaxonInterface):
         finally:
             self.transport.close()
 
+    @logged(_tc_log)
     def get_parent(self, ref_only=False):
         if not self.transport.isOpen():
             self.transport.open()
@@ -415,6 +426,7 @@ class TaxonClientAPI(TaxonInterface):
         else:
             return TaxonClientAPI(self.url, self._token, parent_ref)
 
+    @logged(_tc_log)
     def get_children(self, ref_only=False):
         if not self.transport.isOpen():
                 self.transport.open()
@@ -435,6 +447,7 @@ class TaxonClientAPI(TaxonInterface):
 
             return children
 
+    @logged(_tc_log)
     def get_genome_annotations(self, ref_only=False):
         if not self.transport.isOpen():
             self.transport.open()
@@ -446,6 +459,7 @@ class TaxonClientAPI(TaxonInterface):
         finally:
             self.transport.close()
 
+    @logged(_tc_log)
     def get_scientific_lineage(self):
         if not self.transport.isOpen():
             self.transport.open()
@@ -457,6 +471,7 @@ class TaxonClientAPI(TaxonInterface):
         finally:
             self.transport.close()
 
+    @logged(_tc_log)
     def get_scientific_name(self):
         if not self.transport.isOpen():
             self.transport.open()
@@ -468,6 +483,7 @@ class TaxonClientAPI(TaxonInterface):
         finally:
             self.transport.close()
 
+    @logged(_tc_log)
     def get_taxonomic_id(self):
         if not self.transport.isOpen():
             self.transport.open()
@@ -479,6 +495,7 @@ class TaxonClientAPI(TaxonInterface):
         finally:
             self.transport.close()
 
+    @logged(_tc_log)
     def get_kingdom(self):
         if not self.transport.isOpen():
             self.transport.open()
@@ -490,6 +507,7 @@ class TaxonClientAPI(TaxonInterface):
         finally:
             self.transport.close()
 
+    @logged(_tc_log)
     def get_domain(self):
         if not self.transport.isOpen():
             self.transport.open()
@@ -501,6 +519,7 @@ class TaxonClientAPI(TaxonInterface):
         finally:
             self.transport.close()
 
+    @logged(_tc_log)
     def get_aliases(self):
         if not self.transport.isOpen():
             self.transport.open()
@@ -512,6 +531,7 @@ class TaxonClientAPI(TaxonInterface):
         finally:
             self.transport.close()
 
+    @logged(_tc_log)
     def get_genetic_code(self):
         if not self.transport.isOpen():
             self.transport.open()
