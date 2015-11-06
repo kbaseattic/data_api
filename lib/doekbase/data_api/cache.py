@@ -12,9 +12,11 @@ __date__ = '9/26/15'
 import hashlib
 import logging
 import os
+import time
 import uuid
 # Third-party
 from dogpile.cache import make_region
+import redis
 # Local
 from doekbase.data_api.util import PerfCollector, get_logger
 
@@ -100,6 +102,8 @@ class ObjectCache(object):
     This class provides some basic performance information
     for each of its operations.
     """
+    # Maximum timeout to fetch a cached value, in seconds
+    MAX_FETCH_TIMEOUT = 5
 
     # You can set these at the class level, and they will
     # be used for parameters of the same name to the constructor
@@ -141,8 +145,7 @@ class ObjectCache(object):
         """Get data from cache or the callee's method.
         """
         self._stats.start_event('cache.get_data', self._key)
-        data = self._cache.get_or_create(self._key, parent_method,
-                                         should_cache_fn=self._should_cache)
+        data = self._cache.get_or_create(self._key, parent_method)
         self._stats.end_event('cache.get_data', self._key)
         return data
 
@@ -160,9 +163,35 @@ class ObjectCache(object):
         # creator function, currying path_list arg.
         creator = lambda : parent_method(path_list=path_list)
         # get from cache, or create
-        data = self._cache.get_or_create(key, creator,
-                                         should_cache_fn=self._should_cache)
+        data = self.cache_get_or_create(key, creator)
         self._stats.end_event('cache.get_data_subset', self._key)
+        return data
+
+    def cache_get_or_create(self, key, creator):
+        """Get from cache, or create, with extra logic to handle
+        a Redis server that is not yet fully up and running.
+
+        Args:
+            key (str): Cache item key
+            creator (function): Called to create the item if not found
+        Return:
+            (object) value Will return a value unless MAX_FETCH_TIMEOUT
+            seconds is exceeded
+        Raises:
+            RuntimeError: on timeout
+        """
+        kw = dict(should_cache_fn=self._should_cache)
+        data, total_sleep = None, 0
+        while data is None and total_sleep < self.MAX_FETCH_TIMEOUT:
+            try:
+                data = self._cache.get_or_create(key, creator, **kw)
+            except redis.BusyLoadingError:
+                _log.warn('Redis is busy, sleep for 0.1s and try again')
+                time.sleep(0.1)
+                total_sleep += 0.1
+        if data is None and total_sleep >= self.MAX_FETCH_TIMEOUT:
+            raise RuntimeError('Timeout while fetching {} from cache'
+                               .format(key))
         return data
 
     def _should_cache(self, data):

@@ -25,10 +25,13 @@ logformat = '%(levelname)s %(message)s'
 
 g_running_nosetests = None
 
-def get_logger(name):
+def get_logger(name=''):
     global g_running_nosetests
-    if not name.startswith('doekbase.'):
-        name = 'doekbase.' + name
+    if not name.startswith('doekbase'):
+        if name == '':
+            name = 'doekbase'
+        else:
+            name = 'doekbase.' + name
     # If we are running in nose, nest under there so nose -v options
     # can apply to us. Cache the result of checking for nose in a global var.
     if g_running_nosetests is None:  # haven't checked yet
@@ -37,8 +40,16 @@ def get_logger(name):
          name = 'nose.' + name
     # create logger
     logger = logging.getLogger(name)
-#    logger.propagate = 1
+    logger.propagate = 1
     return logger
+
+def basic_config(level=logging.INFO):
+    log = get_logger()
+    log.setLevel(level)
+    h = logging.StreamHandler()
+    h.setFormatter(logging.Formatter(logformat))
+    log.addHandler(h)
+    return log
 
 class Timer(object):
     def __init__(self):
@@ -56,8 +67,21 @@ class Timer(object):
     def pop(self):
         return self._timings.pop()
 
+#TODO turn example below into a test
 def logged(logger, log_level=logging.INFO, log_name=None, **kw):
     """Wrap a method/function in a log start/end message.
+
+    Example usage. Given the following code::
+
+        @logged(g_log, log_name='hello')
+        def hello_world(self, what):
+            sys.stderr.write("hello {} world\n". format(what))
+
+    Then the statement ``hello_world("dumb")`` should print output like::
+
+        2015-08-26T01:02:30.123456 hello.begin
+        hello dumb world
+        2015-08-26T01:02:30.654321 hello.end
     """
     def real_decorator(method, logger_name=logger.name):
         # choose name for logged event
@@ -314,3 +338,31 @@ def collect_performance(perf_collector, prefix='', suffix=''):
         return method_wrapper
 
     return real_decorator
+
+def get_msgpack_object_ref(path):
+    """Get object-id ref for object in messagepack-encoded file.
+
+    Args:
+        (str) path: Full path to file.
+    Returns:
+        (str) reference, in form A/B/C e.g. '93/111124/2'
+    Raises:
+        IOError if the file cannot be opened.
+        ValueError if the data in the file cannot be decoded.
+        KeyError if the reference field is not found in the data.
+    """
+    import msgpack
+    try:
+        f = open(path)
+    except IOError as err:
+        raise IOError('Cannot open file for reading: {}'.format(path))
+    try:
+        t = msgpack.load(f)
+    except Exception as err:
+        raise ValueError('Cannot decode messagepack data in path "{}": {}'
+                         ''.format(path, err))
+    try:
+        ref = t['ref']
+    except KeyError:
+        raise KeyError('Field "ref" not found in object at "{}"'.format(path))
+    return ref

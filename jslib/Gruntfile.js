@@ -48,6 +48,9 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-bower-task');
     grunt.loadNpmTasks('grunt-jsdoc');
     grunt.loadNpmTasks('grunt-markdown');
+    // these 2 are for local debugging
+    grunt.loadNpmTasks('grunt-connect');
+    grunt.loadNpmTasks('grunt-open');
 
     /*
      *
@@ -425,6 +428,22 @@ module.exports = function (grunt) {
                     }
                 }
             }
+        },
+        open: {
+           dev: {
+               path: 'http://localhost:8000/htdocs/'
+           }
+        },
+
+        connect: {
+           server: {
+               port: 8000,
+               base: 'runtime/build',
+               keepalive: false,
+               onCreateServer: function (server, connect, options) {
+                   console.log('created...');
+               }
+           }
         }
     });
 
@@ -449,4 +468,12 @@ module.exports = function (grunt) {
             //'copy:thriftLib',
             //'copy:thriftBinaryLib'
     ]);
+
+
+    // Starts a little server and runs the app in a page.
+    // Should be run after 'grunt build'.
+   grunt.registerTask('preview', [
+       'open:dev',
+       'connect'
+   ]);
 };
