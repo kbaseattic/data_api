@@ -1,3 +1,9 @@
+"""
+Run Taxon service.
+"""
+__author__ = "Erik Pearson, Dan Gunter <dkgunter@lbl.gov>"
+__date__ = "2014-10-28"
+
 # Stdlib
 import logging
 import sys
