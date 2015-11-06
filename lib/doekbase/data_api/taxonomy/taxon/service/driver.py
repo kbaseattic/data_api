@@ -1,11 +1,8 @@
 # Stdlib
-import logging
-import sys
-import argparse
 
 # Third-party
-import signal
 import twisted.internet
+import twisted.web
 
 from thrift.transport import TTwisted
 from thrift.protocol import TBinaryProtocol
@@ -33,9 +30,10 @@ def start_service(services = None, host = 'localhost', port = 9101):
     handler = TaxonService(services)
     processor = thrift_service.Processor(handler)
     pfactory = TBinaryProtocol.TBinaryProtocolFactory()
-    server = twisted.internet.reactor.listenTCP(port,
-                                                TTwisted.ThriftServerFactory(processor, pfactory),
-                                                interface=host)
+    resource = TTwisted.ThriftResource(processor, pfactory, pfactory)
+    site = twisted.web.server.Site(resource = resource)
+    server = twisted.internet.reactor.listenTCP(port, site, interface=host)
+
     _log.info('Starting the server...')
     twisted.internet.reactor.run()
     _log.info('Server stopped.')

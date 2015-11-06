@@ -324,16 +324,14 @@ class TaxonAPI(ObjectAPI, TaxonInterface):
         )
 
 class TaxonClientAPI(TaxonInterface):
-    def __init__(self, host='localhost', port=9090, token=None, ref=None):
+    def __init__(self, url=None, token=None, ref=None):
         from doekbase.data_api.taxonomy.taxon.service.interface import TaxonClientConnection
 
         #TODO add exception handling and better error messages here
-        self.host = host
-        self.port = port
-        self.transport, self.client = TaxonClientConnection(host, port).get_client()
+        self.url = url
+        self.transport, self.client = TaxonClientConnection(url).get_client()
         self.ref = ref
         self._token = token
-
 
     def get_info(self):
         if not self.transport.isOpen():
@@ -415,7 +413,7 @@ class TaxonClientAPI(TaxonInterface):
         if ref_only:
             return parent_ref
         else:
-            return TaxonClientAPI(self.host, self.port, self._token, parent_ref)
+            return TaxonClientAPI(self.url, self._token, parent_ref)
 
     def get_children(self, ref_only=False):
         if not self.transport.isOpen():
@@ -433,7 +431,7 @@ class TaxonClientAPI(TaxonInterface):
         else:
             children = list()
             for x in children_refs:
-                children.append(TaxonClientAPI(self.host, self.port, self._token, x))
+                children.append(TaxonClientAPI(self.url, self._token, x))
 
             return children
 
@@ -464,7 +462,7 @@ class TaxonClientAPI(TaxonInterface):
             self.transport.open()
 
         try:
-            yield self.client.get_scientific_name(self._token, self.ref)
+            return self.client.get_scientific_name(self._token, self.ref)
         except Exception, e:
             raise
         finally:

@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 import sys
 import os
-import json
 import pprint
 
 paths = sys.path[:]
@@ -10,7 +9,7 @@ lib_path = sorted([(x, len(os.path.commonprefix([x, my_location]))) for x in pat
 sys.path.insert(1,lib_path)
 
 import doekbase.data_api.core
-import doekbase.data_api.sequence.assembly
+import doekbase.data_api.sequence.assembly.api
 import doekbase.data_api.taxonomy.taxon.api
 import doekbase.data_api.annotation.genome_annotation
 
