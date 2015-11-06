@@ -43,13 +43,13 @@ thrift_build = {
     "python_server": BuildAttr({
         "style": "py:twisted",
         "generated_dir": "gen-py.twisted",
-        "copy_files": ["constants.py", "ttypes.py", "thrift_service.py"]
+        "copy_files": ["constants.py", "ttypes.py", "thrift_service.py"],
+        "rename_files": {"thrift_service.py": "thrift_client.py"}
     }),
     "python": BuildAttr({
         "style": "py:new_style",
         "generated_dir": "gen-py",
         "copy_files": ["constants.py", "ttypes.py", "thrift_service.py"],
-        "rename_files": {"thrift_service.py": "thrift_client.py"}
     }),
     "javascript": BuildAttr({
         "style": "js:jquery",
@@ -182,10 +182,10 @@ class BuildThriftClients(setuptools.Command):
                         raise Exception("Thrift build for {} failed with : {}"
                                         .format(lang, errno))
                     # Get a list of all generated stub files
-                    generated_files = glob.glob(settings.generated_dir + " \
-                                                                     ""/*/*")
+                    generated_files = glob.glob(settings.generated_dir + "/*/*")
                     if len(generated_files) == 0:
-                        generated_files = glob.glob(thrift_build[lang]["generated_dir"] + "/*")
+                        generated_files = glob.glob(thrift_build[
+                                                        lang].generated_dir + "/*")
                     # Copy generated files to their final place in the tree
                     copied = False
                     if settings.copy_files == ["*"]:
@@ -204,7 +204,7 @@ class BuildThriftClients(setuptools.Command):
                                         .replace("specs", "stubs/" + lang)
                                     shutil.copyfile(x, os.path.join(destination,
                                                                     name))
-                                    copied = True
+                                copied = True
                     if not copied:
                         raise Exception("Unable to find thrift-generated "
                                         "files to copy!")
@@ -261,18 +261,22 @@ class BuildThriftServers(setuptools.Command):
                     for x in generated_files:
                         for name in settings.copy_files:
                             if name in x:
-                                destination = os.path.join(dirpath.replace("thrift/specs", "lib/doekbase/data_api") + "/service/", name)
+                                destination = os.path.join(dirpath.replace(
+                                    "thrift/specs", "lib/doekbase/data_api")
+                                                           + "/service/", name)
                                 shutil.copyfile(x, destination)
                                 copied = True
                     if not copied:
-                        raise Exception("Unable to find thrift service generated files to copy!")
+                        raise Exception("Unable to find thrift service generated"
+                                        " files to copy!")
                     shutil.rmtree(settings.generated_dir)
 
                     command = ["thrift", "-r", "--gen", settings.style,
                               spec_path]
                     errno = call_command(command, is_thrift=True)
                     if errno != 0:
-                        raise Exception("Thrift build for python client failed with : {}".format(errno))
+                        raise Exception("Thrift build for python client failed "
+                                        "with : {}".format(errno))
 
                     generated_files = glob.glob(settings.generated_dir + \
                         "/*/*")
@@ -293,7 +297,8 @@ class BuildThriftServers(setuptools.Command):
                                 shutil.copyfile(x, destination)
                                 renamed = True
                     if not renamed:
-                        raise Exception("Unable to find thrift client generated files to copy!")
+                        raise Exception("Unable to find thrift client generated"
+                                        " files to copy!")
                     shutil.rmtree(settings.generated_dir)
 
 
