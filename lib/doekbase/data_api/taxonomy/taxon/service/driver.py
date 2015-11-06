@@ -15,7 +15,8 @@ from doekbase.data_api.util import get_logger
 DEFAULT_WS_URL = 'https://ci.kbase.us/services/ws/'
 DEFAULT_SHOCK_URL = 'https://ci.kbase.us/services/shock-api/'
 
-_log = get_logger('thrift')  # set up a logger for Thrift messages
+# set up a logger for Thrift messages
+_log = get_logger('taxon_service')
 
 def get_services_dict(ws=DEFAULT_WS_URL, shock=DEFAULT_SHOCK_URL):
     return {'workspace_service_url': ws,

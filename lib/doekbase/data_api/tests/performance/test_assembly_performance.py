@@ -12,9 +12,10 @@ import json
 import logging
 import os
 import subprocess
-import sys
+import time
 import unittest
-
+# Third-party
+import redis
 # Local
 from doekbase.data_api.util import get_logger
 from doekbase.data_api.annotation import genome_annotation as ga_api
@@ -66,8 +67,23 @@ def control_redis(start=False, stop=False):
             g_redis_process = subprocess.Popen([shared.g_redis_bin,
                                                 shared.g_redis_conf],
                                                close_fds=True)
+            wait_for_redis_to_start(shared.g_redis_host, shared.g_redis_port)
         else:
             _log.info('Start Redis server: Redis server already running')
+
+def wait_for_redis_to_start(host, port):
+    max_wait = 5
+    elapsed = 0
+    success = False
+    while not success and (elapsed < max_wait):
+        try:
+            redis.Redis(host=host, port=port).ping()
+            success = True
+        except redis.ConnectionError:
+            time.sleep(0.1)
+            elapsed += 0.1
+    if not success:
+        raise RuntimeError("Cannot connect to Redis")
 
 def set_redis(flag):
     """Set Redis to on/off.
@@ -112,25 +128,9 @@ class TestPerformance(unittest.TestCase):
         self.public_workspace_id = 641
         self.genomes_order = ["kb|g.244916", "kb|g.0", "kb|g.3899",
                              "kb|g.140106"]
-        self.genomes = {"kb|g.244916": "641/5/1",
-                       "kb|g.0": "641/2/1",
-                       "kb|g.3899":  "641/7/1",
-                       "kb|g.140106": "641/3/1"}
-        self.fetch_contigs = {"kb|g.3899": ["kb|g.3899.c.2", "kb|g.3899.c.5"],
-                             "kb|g.0": ["kb|g.0.c.1"],
-                             "kb|g.244916": ["kb|g.244916.c.0"],
-                             "kb|g.140106": ["kb|g.140106.c.0",
-                                             "kb|g.140106.c.10",
-                                             "kb|g.140106.c.100",
-                                             "kb|g.140106.c.1000",
-                                             "kb|g.140106.c.10000",
-                                             "kb|g.140106.c.100000",
-                                             "kb|g.140106.c.200000",
-                                             "kb|g.140106.c.300000",
-                                             "kb|g.140106.c.400000",
-                                             "kb|g.140106.c.500000",
-                                             "kb|g.140106.c.600000",
-                                             "kb|g.140106.c.700000"]}
+        self.genomes = {'kb|g.166819': '1013/340/4'}
+        self.fetch_contigs = {'kb|g.166819': ['kb|g.166819.c.{:d}'.format(i)
+                              for i in (2, 5)]}
         opath = __name__ + '.csv'
         opath = os.path.realpath(opath)
         ofile = WriteNow(open(opath, 'w'))
@@ -161,6 +161,7 @@ class TestPerformance(unittest.TestCase):
                     shared.get_services(),
                     shared.token,
                     ref)
+                print("@@ REDIS={}".format(redis_flag))
                 asm_obj = ga_obj.get_assembly()
                 for type_, obj in (('assembly', asm_obj),):
                     for operation in ('SUBSET', 'ALL'):
