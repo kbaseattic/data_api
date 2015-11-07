@@ -35,15 +35,18 @@ def get_protein_fasta(data):
 
 
 
+def run():
+    genomeref = "PrototypeReferenceGenomes/kb|g.3899"
+    genome = ObjectAPI(services, token=token, ref=genomeref)
+    genome_annotation = GenomeAnnotationAPI(services, token, ref=genomeref)
+        
+    proteins= genome_annotation.get_proteins()
+    fasta = get_protein_fasta(proteins)
 
-genomeref = "PrototypeReferenceGenomes/kb|g.3899"
-genome = ObjectAPI(services, token=token, ref=genomeref)
-genome_annotation = GenomeAnnotationAPI(services, token, ref=genomeref)
-    
-proteins= genome_annotation.get_proteins()
-fasta = get_protein_fasta(proteins)
+    outfile = '3899_prot.fasta'
+    print outfile
+    with open(outfile, 'w') as f:
+        f.write(fasta)
 
-outfile = '3899_prot.fasta'
-print outfile
-with open(outfile, 'w') as f:
-    f.write(fasta)
+
+run()
