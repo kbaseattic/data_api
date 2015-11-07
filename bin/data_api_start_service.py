@@ -33,9 +33,9 @@ def main():
     parser.add_argument("--port", help="port to listen on", type=int)
     parser.add_argument("--kbase_url", help="prod, next, ci, localhost, dir", default="dir")
     parser.add_argument("--pidfile", help="path to pidfile to use")
-    parser.add_argument('--verbose', '-v', dest='vb', action="count", default=0,
+    parser.add_argument('--verbose', '-v', dest='vb', action="count", default=1,
                         help="Print more verbose messages to standard error. "
-                             "Repeatable. (default=ERROR)")
+                             "Repeatable. (default=INFO)")
 
     args = parser.parse_args()
 
@@ -49,7 +49,7 @@ def main():
         config.read(args.config)
 
     if args.service not in SERVICE_NAMES:
-        print "Unrecognized service name {}".format(args.service)
+        logger.info("Unrecognized service name {}".format(args.service))
         return 1
 
     service_name = args.service
@@ -92,7 +92,7 @@ def main():
         service_port=args.port
 
     if redis_host is not None and redis_port is not None:
-        logger.info("Activating REDIS at host:{} port:{}".format(redis_host,redis_port))
+        logger.info("Activating REDIS at host:{} port:{}".format(redis_host, redis_port))
         cache.ObjectCache.cache_class = cache.RedisCache
         cache.ObjectCache.cache_params = {'redis_host': redis_host, 'redis_port': redis_port}
 
@@ -125,11 +125,8 @@ def main():
         #TODO set up signal handling for HUP, KILL
         #signal.signal(signal.SIGHUP, driver.reload_config())
 
-        logger.info("Starting service: port={:d}, PID={:d}".format(args.port,
-                                                                  pid))
+        logger.info("Starting service: port={:d}, PID={:d}".format(service_port, pid))
         try:
-            print "starting service on port " + str(service_port)
-
             if service_name == "taxon":
                 from doekbase.data_api.taxonomy.taxon.service import driver
             elif service_name == "assembly":
