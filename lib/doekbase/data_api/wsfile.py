@@ -304,14 +304,15 @@ class WorkspaceFile(object):
     def ver(self):
         return self.VERSION
 
+    def get_children(self):
+        return []
+
     # ___ Internal methods ___
 
     def _get_oid(self, ref):
         if ref in self._oids:
             return self._oids[ref]
-        n = len(self._oids)
-        pfx = abs(hash(ref))
-        new_oid = int('{:d}{:04d}'.format(pfx, n + 1))
+        new_oid = len(self._oids)
         self._oids[ref] = new_oid
         return new_oid
 
@@ -349,11 +350,12 @@ class WorkspaceFile(object):
 		8: string chsum, 9: int size, 10: usermeta meta
         """
         assert re.match(NUMERIC_REF_PAT, ref)  # require numeric ref
-        ver = '1'
+        wsid = int(ref.split('/')[0])
+        ver = int(ref.split('/')[-1])
         return (self._get_oid(ref), record['name'],
                 record['type'], datetime.isoformat(datetime.now()),
-                record['type'] + '/' + ver, None,
-                ver, None,
+                ver, 'joe',
+                wsid, record['name'],
                 '0', 0, {}
                 )
     def _make_object(self, record, ref, data=None):
