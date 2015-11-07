@@ -17,6 +17,7 @@ import logging
 import msgpack
 import os
 import re
+import sys
 # Third-party
 import mongomock as mm
 # Local
@@ -312,7 +313,7 @@ class WorkspaceFile(object):
     def _get_oid(self, ref):
         if ref in self._oids:
             return self._oids[ref]
-        new_oid = len(self._oids)
+        new_oid = (len(self._oids) + abs(hash(ref))) % sys.maxint
         self._oids[ref] = new_oid
         return new_oid
 
