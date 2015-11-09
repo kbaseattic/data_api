@@ -125,7 +125,7 @@ def main():
         #TODO set up signal handling for HUP, KILL
         #signal.signal(signal.SIGHUP, driver.reload_config())
 
-        logger.info("Starting service: port={:d}, PID={:d}".format(service_port, pid))
+        logger.info("Starting service: port={:d}, PID={:d}".format(service_port, int(pid)))
         try:
             if service_name == "taxon":
                 from doekbase.data_api.taxonomy.taxon.service import driver
