@@ -89,7 +89,7 @@ def main():
     if args.pidfile:
         pidfilename = args.pidfile
     if args.port:
-        service_port=args.port
+        service_port = args.port
 
     if redis_host is not None and redis_port is not None:
         logger.info("Activating REDIS at host:{} port:{}".format(redis_host, redis_port))
@@ -125,7 +125,7 @@ def main():
         #TODO set up signal handling for HUP, KILL
         #signal.signal(signal.SIGHUP, driver.reload_config())
 
-        logger.info("Starting service: port={:d}, PID={:d}".format(service_port, int(pid)))
+        logger.info("Starting service: port={}, PID={}".format(service_port, pid))
         try:
             if service_name == "taxon":
                 from doekbase.data_api.taxonomy.taxon.service import driver
