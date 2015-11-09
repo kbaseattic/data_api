@@ -134,7 +134,7 @@ def main():
             else:
                 raise Exception("Service not activated: {}".format(service_name))
 
-            driver.start_service(services=services,port=service_port,host='')
+            driver.start_service(services=services,port=int(service_port),host='')
         finally:
             pidfile.release()
     except lockfile.LockFailed:
