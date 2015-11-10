@@ -48,9 +48,10 @@ Below are example(s) in Python and, "real soon now", in JavaScript.
 Python examples
 +++++++++++++++
 
-Example: Fetch all proteins for a gene
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Example: Write proteins as a FASTA file
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. literalinclude:: ../lib/doekbase/data_api/tests/examples/genome_annotation_api.py
     :linenos:
-    :pyobject: get_proteins_for_gene
+    :pyobject: proteins_to_fasta
+
