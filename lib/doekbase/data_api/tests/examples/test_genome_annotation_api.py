@@ -7,7 +7,7 @@ __author__ = 'Dan Gunter <dkgunter@lbl.gov>'
 __date__ = '10/14/15'
 
 import os
-from proteins_to_fasta import *
+from genome_annotation_api import *
 from doekbase.data_api.tests import shared
 
 temp_files = []
