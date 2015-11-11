@@ -438,6 +438,10 @@ class TaxonClientAPI(TaxonInterface):
         finally:
             self.transport.close()
 
+        print("@@ children_refs (1) => {}".format(children_refs))
+        children_refs = list(children_refs)
+        print("@@ children_refs (2) => {}".format(children_refs))
+
         if ref_only:
             return children_refs
         else:

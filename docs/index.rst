@@ -10,7 +10,8 @@
     assembly_api
     taxon_api
     developer
-    API Reference <_source/modules>
+    
+TODO: API Reference <_modules/index.html>
 
 KBase Data API documentation
 ============================
@@ -38,7 +39,7 @@ The Data API is multi-language, with the primary language implementation being P
 Install
 -------
 
-You can download the latest release of the Data API from the `release page on github https://github.com/kbase/data_api/releases`_. It is generally recommended that you install packages in a virtual environment.
+You can download the latest release of the Data API from the [release page on github](https://github.com/kbase/data_api/releases). It is generally recommended that you install packages in a virtual environment.
 
 1. Install virtualenv using your local installer e.g., apt-get install virtualenv
 

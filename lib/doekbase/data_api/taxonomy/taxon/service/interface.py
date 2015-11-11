@@ -30,7 +30,9 @@ class TaxonClientConnection(object):
         try:
             self.transport = THttpClient.THttpClient(url)
             self.protocol = TBinaryProtocol.TBinaryProtocol(self.transport)
-            self.client = thrift_client.Client(self.protocol)
+            #self.client = thrift_client.Client(self.protocol)
+            self.client = thrift_client.Client(self.transport,
+                                               TBinaryProtocol.TBinaryProtocolFactory())
         except TTransport.TTransportException as err:
             print('{}'.format(err.message))
             raise RuntimeError('Cannot connect to remote Thrift service at {}:{:d}'
