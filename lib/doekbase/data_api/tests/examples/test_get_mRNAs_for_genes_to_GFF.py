@@ -6,9 +6,8 @@ Advanced data API examples.
 __author__ = 'Marcin Joachimiak <mjoachimiak@lbl.gov>'
 __date__ = '11/06/15'
 
-from doekbase.data_api.tests.examples.taxon_api import *
 from doekbase.data_api.tests import shared
-import doekbase.data_api.tests.examples.get_mRNAs_for_genes_to_GFF
+from doekbase.data_api.tests.examples.get_mRNAs_for_genes_to_GFF import *
 
 
 def setup():

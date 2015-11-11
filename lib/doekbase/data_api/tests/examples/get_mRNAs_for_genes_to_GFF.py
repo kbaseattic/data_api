@@ -4,10 +4,7 @@ __author__ = 'Marcin Joachimiak <mjoachimiak@lbl.gov>'
 __date__ = '11/06/15'
 
 import doekbase.data_api
-from doekbase.data_api.taxonomy.taxon.api import TaxonAPI
 from doekbase.data_api.annotation.genome_annotation import GenomeAnnotationAPI
-from doekbase.data_api.sequence.assembly.api import AssemblyAPI
-from doekbase.data_api.core import ObjectAPI
 import time
 import os
 

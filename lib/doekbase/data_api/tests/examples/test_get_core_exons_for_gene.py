@@ -6,9 +6,8 @@ Advanced data API examples.
 __author__ = 'Marcin Joachimiak <mjoachimiak@lbl.gov>'
 __date__ = '11/06/15'
 
-from doekbase.data_api.tests.examples.taxon_api import *
 from doekbase.data_api.tests import shared
-import doekbase.data_api.tests.examples.get_core_exons_for_gene
+from doekbase.data_api.tests.examples.get_core_exons_for_gene import *
 
 
 def setup():
