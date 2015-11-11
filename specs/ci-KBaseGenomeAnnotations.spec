@@ -43,6 +43,15 @@ typedef structure {
 
 
 /*
+The TaxonLookup holds scientific names or taxon aliases as the key, and the value is the taxonomy id.  This is populated by the names.dmp file from NCBI.
+
+*/
+typedef structure {
+  mapping<string scientific_name_alias, string taxonomy_id> taxon_lookup;
+} TaxonLookup;
+
+
+/*
 The TaxonSet object holds references to 1 or more taxons.  It can be used generically to hold multiple taxons.
 However the main usage will be to hold a list of children taxons.
 
