@@ -1,16 +1,12 @@
+
+__author__ = 'Marcin Joachimiak <mjoachimiak@lbl.gov>'
+__date__ = '11/06/15'
+
 import doekbase.data_api
 from doekbase.data_api.taxonomy.taxon.api import TaxonAPI
 from doekbase.data_api.annotation.genome_annotation import GenomeAnnotationAPI
 from doekbase.data_api.sequence.assembly.api import AssemblyAPI
 from doekbase.data_api.core import ObjectAPI
-
-
-services = {"workspace_service_url": "https://ci.kbase.us/services/ws/",
-            "shock_service_url": "https://ci.kbase.us/services/shock-api/"}
-
-
-import os
-token = os.environ["KB_AUTH_TOKEN"]
 
 
 def get_aliases (data):
@@ -33,20 +29,21 @@ def get_protein_fasta(data):
         string += ">" + keys  +" " + function + " " + aliases + " " + "\n" + sequence +  "\n"
     return string
 
+def run(ws_url='https://ci.kbase.us/services/ws/'):
 
-
-def run():
     genomeref = "PrototypeReferenceGenomes/kb|g.3899"
-    genome = ObjectAPI(services, token=token, ref=genomeref)
+    genome = ObjectAPI(services = {"workspace_service_url": ws_url}, token=os.environ.get('KB_AUTH_TOKEN'), ref=genomeref)
     genome_annotation = GenomeAnnotationAPI(services, token, ref=genomeref)
         
     proteins= genome_annotation.get_proteins()
     fasta = get_protein_fasta(proteins)
 
     outfile = '3899_prot.fasta'
-    print outfile
+    
     with open(outfile, 'w') as f:
         f.write(fasta)
 
 
-run()
+
+if __name__ == __main__”:
+    run()

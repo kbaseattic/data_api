@@ -8,8 +8,7 @@ __date__ = '11/06/15'
 
 from doekbase.data_api.tests.examples.taxon_api import *
 from doekbase.data_api.tests import shared
-import doekbase.data_api.tests.examples.proteins_to_fasta
-import proteins_to_fasta
+import doekbase.data_api.tests.examples.test_get_mRNAs_for_gene_to_GFF
 
 
 def setup():
@@ -17,5 +16,5 @@ def setup():
 
 def test_examples():
     url = shared.services['workspace_service_url']
-    proteins_to_fasta.run(url)
+    test_get_mRNAs_for_gene_to_GFF.run(url)
 
