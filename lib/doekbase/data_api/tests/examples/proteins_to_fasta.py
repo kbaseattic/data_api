@@ -7,7 +7,7 @@ from doekbase.data_api.taxonomy.taxon.api import TaxonAPI
 from doekbase.data_api.annotation.genome_annotation import GenomeAnnotationAPI
 from doekbase.data_api.sequence.assembly.api import AssemblyAPI
 from doekbase.data_api.core import ObjectAPI
-
+import os
 
 def get_aliases (data):
     string=""
@@ -32,8 +32,7 @@ def get_protein_fasta(data):
 def run(ws_url='https://ci.kbase.us/services/ws/'):
 
     genomeref = "PrototypeReferenceGenomes/kb|g.3899"
-    genome = ObjectAPI(services = {"workspace_service_url": ws_url}, token=os.environ.get('KB_AUTH_TOKEN'), ref=genomeref)
-    genome_annotation = GenomeAnnotationAPI(services, token, ref=genomeref)
+    genome_annotation = GenomeAnnotationAPI(services = {"workspace_service_url": ws_url}, token=os.environ.get('KB_AUTH_TOKEN'), ref=genomeref)
         
     proteins= genome_annotation.get_proteins()
     fasta = get_protein_fasta(proteins)
@@ -45,5 +44,5 @@ def run(ws_url='https://ci.kbase.us/services/ws/'):
 
 
 
-if __name__ == __main__”:
+if __name__ == '__main__':
     run()

@@ -11,42 +11,42 @@ import time
 import os
 
 
-def get_core_exons(gene):
+def get_core_exons(gene, genome_annotation):
     t0 = time.time()
     listmrna=genome_annotation.get_mrna_by_gene([gene])[gene]    
     t1 = time.time()
-    print "get_mrna_by_gene " , (t1-t0)
+    print "get_mrna_by_gene " , (t1-t0), "s"
     print listmrna
 
     t0 = time.time()
     listcds=genome_annotation.get_cds_by_gene([gene])[gene] 
     t1 = time.time()
-    print "get_cds_by_gene " , (t1-t0)   
+    print "get_cds_by_gene " , (t1-t0), "s"   
 
     t0 = time.time()
     mrna_cds=genome_annotation.get_cds_by_mrna(listmrna)
     t1 = time.time()
-    print "get_cds_by_mrna " , (t1-t0)
+    print "get_cds_by_mrna " , (t1-t0), "s"
 
     t0 = time.time()
     gene_location=genome_annotation.get_feature_locations([gene]) 
     t1 = time.time()
-    print "get_feature_locations " , (t1-t0)
+    print "get_feature_locations " , (t1-t0), "s"
 
     t0 = time.time()
     mrna_location=genome_annotation.get_feature_locations(listmrna) 
     t1 = time.time()
-    print "get_feature_locations " , (t1-t0)
+    print "get_feature_locations " , (t1-t0), "s"
 
     t0 = time.time()
     cds_location=genome_annotation.get_feature_locations(listcds) 
     t1 = time.time()
-    print "get_feature_locations " , (t1-t0)
+    print "get_feature_locations " , (t1-t0), "s"
 
     t0 = time.time()
     cds_mrna=genome_annotation.get_mrna_by_cds(listcds)
     t1 = time.time()
-    print "get_mrna_by_cds " , (t1-t0)
+    print "get_mrna_by_cds " , (t1-t0), "s"
 
     mRNA_count=len(listmrna)
 
@@ -82,15 +82,14 @@ def get_core_exons(gene):
 def run(ws_url='https://ci.kbase.us/services/ws/'):
 
     genomeref = "PrototypeReferenceGenomes/kb|g.166828"
-    genome = ObjectAPI(services = {"workspace_service_url": ws_url}, token=os.environ.get('KB_AUTH_TOKEN'), ref=genomeref)
-    genome_annotation = GenomeAnnotationAPI(services, token, ref=genomeref)
+    genome_annotation = GenomeAnnotationAPI(services = {"workspace_service_url": ws_url}, token=os.environ.get('KB_AUTH_TOKEN'), ref=genomeref)
     gene='kb|g.166828.locus.15345'    
-    exons=get_core_exons(gene)
+    exons=get_core_exons(gene, genome_annotation)
 
     print "Core exon(s) found in all mRNAs for gene "+gene
     print exons
 
 
 
-if __name__ == __main__”:
+if __name__ == '__main__':
     run()
