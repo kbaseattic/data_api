@@ -13,7 +13,7 @@ from doekbase.data_api.taxonomy.taxon.api import TaxonClientAPI
 
 def test_client():
     ap = argparse.ArgumentParser()
-    ap.add_argument('--ref', default='ReferenceTaxons/83333_taxon', help='Object reference ID, e.g. 1019/4/1')
+    ap.add_argument('--ref', default='ReferenceTaxons/242159_taxon', help='Object reference ID, e.g. 1019/4/1')
     ap.add_argument('--url', dest='url', default='http://localhost:9101',
                     metavar='URL', help='Remote server url '
                                          '(default=%(default)s)')
