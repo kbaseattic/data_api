@@ -31,7 +31,7 @@ def main():
                         help="service name to start, one of {}".format(SERVICE_NAMES),
                         required=True)
     parser.add_argument("--port", help="port to listen on", type=int)
-    parser.add_argument("--kbase_url", help="prod, next, ci, localhost, dir", default="dir")
+    parser.add_argument("--kbase_url", help="prod, next, ci, localhost, dir_cache, dir_nocache", default="dir_nocache")
     parser.add_argument("--pidfile", help="path to pidfile to use")
     parser.add_argument('--verbose', '-v', dest='vb', action="count", default=1,
                         help="Print more verbose messages to standard error. "

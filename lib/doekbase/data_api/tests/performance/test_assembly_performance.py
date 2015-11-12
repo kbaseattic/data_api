@@ -67,7 +67,7 @@ def control_redis(start=False, stop=False):
             g_redis_process = subprocess.Popen([shared.g_redis_bin,
                                                 shared.g_redis_conf],
                                                close_fds=True)
-            wait_for_redis_to_start(shared.g_redis_host, shared.g_redis_port)
+            wait_for_redis_to_start(shared.services["redis_host"], shared.services["redis_port"])
         else:
             _log.info('Start Redis server: Redis server already running')
 
@@ -98,8 +98,8 @@ def set_redis(flag):
         control_redis(start=True)
         cache.ObjectCache.cache_class = cache.RedisCache
         cache.ObjectCache.cache_params = {
-            'redis_host': shared.g_redis_host,
-            'redis_port': shared.g_redis_port}
+            'redis_host': shared.services["redis_host"],
+            'redis_port': shared.services["redis_port"]}
     else:
         control_redis(stop=True)
         cache.ObjectCache.cache_class = cache.NullCache
@@ -119,8 +119,10 @@ class WriteNow(object):
 # ----------------------------------------------------
 
 g_travis = shared.in_travis()
+g_nocache = shared.get_services()["redis_host"] is None
 
 @unittest.skipIf(g_travis, "Do not run in TravisCI")
+@unittest.skipIf(g_nocache, "Do not run if caching is disabled")
 class TestPerformance(unittest.TestCase):
 
     def setUp(self):
