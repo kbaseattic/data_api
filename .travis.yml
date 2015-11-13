@@ -35,7 +35,7 @@ before_script:
 script:
   - printf "PATH = $PATH \n"
   - coverage run `which nosetests` -c nose.cfg -c $KB_NOSE_CFG
-  - coverage report
+  - coverage report --skip-covered --omit="*/service/*"
 
 env:
   - KB_REDIS_HOST=localhost; KB_NOSE_CFG=nose-local.cfg
