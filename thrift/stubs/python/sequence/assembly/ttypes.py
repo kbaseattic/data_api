@@ -747,6 +747,7 @@ class AssemblyContig(object):
    - contig_id
    - sequence
    - length
+   - gc_content
    - md5
    - name
    - description
@@ -759,17 +760,19 @@ class AssemblyContig(object):
     (1, TType.STRING, 'contig_id', None, None, ), # 1
     (2, TType.STRING, 'sequence', None, None, ), # 2
     (3, TType.I64, 'length', None, None, ), # 3
-    (4, TType.STRING, 'md5', None, None, ), # 4
-    (5, TType.STRING, 'name', None, None, ), # 5
-    (6, TType.STRING, 'description', None, None, ), # 6
-    (7, TType.BOOL, 'is_complete', None, None, ), # 7
-    (8, TType.BOOL, 'is_circular', None, None, ), # 8
+    (4, TType.DOUBLE, 'gc_content', None, None, ), # 4
+    (5, TType.STRING, 'md5', None, None, ), # 5
+    (6, TType.STRING, 'name', None, None, ), # 6
+    (7, TType.STRING, 'description', None, None, ), # 7
+    (8, TType.BOOL, 'is_complete', None, None, ), # 8
+    (9, TType.BOOL, 'is_circular', None, None, ), # 9
   )
 
-  def __init__(self, contig_id=None, sequence=None, length=None, md5=None, name=None, description=None, is_complete=None, is_circular=None,):
+  def __init__(self, contig_id=None, sequence=None, length=None, gc_content=None, md5=None, name=None, description=None, is_complete=None, is_circular=None,):
     self.contig_id = contig_id
     self.sequence = sequence
     self.length = length
+    self.gc_content = gc_content
     self.md5 = md5
     self.name = name
     self.description = description
@@ -801,26 +804,31 @@ class AssemblyContig(object):
         else:
           iprot.skip(ftype)
       elif fid == 4:
-        if ftype == TType.STRING:
-          self.md5 = iprot.readString();
+        if ftype == TType.DOUBLE:
+          self.gc_content = iprot.readDouble();
         else:
           iprot.skip(ftype)
       elif fid == 5:
         if ftype == TType.STRING:
-          self.name = iprot.readString();
+          self.md5 = iprot.readString();
         else:
           iprot.skip(ftype)
       elif fid == 6:
         if ftype == TType.STRING:
-          self.description = iprot.readString();
+          self.name = iprot.readString();
         else:
           iprot.skip(ftype)
       elif fid == 7:
+        if ftype == TType.STRING:
+          self.description = iprot.readString();
+        else:
+          iprot.skip(ftype)
+      elif fid == 8:
         if ftype == TType.BOOL:
           self.is_complete = iprot.readBool();
         else:
           iprot.skip(ftype)
-      elif fid == 8:
+      elif fid == 9:
         if ftype == TType.BOOL:
           self.is_circular = iprot.readBool();
         else:
@@ -847,24 +855,28 @@ class AssemblyContig(object):
       oprot.writeFieldBegin('length', TType.I64, 3)
       oprot.writeI64(self.length)
       oprot.writeFieldEnd()
+    if self.gc_content is not None:
+      oprot.writeFieldBegin('gc_content', TType.DOUBLE, 4)
+      oprot.writeDouble(self.gc_content)
+      oprot.writeFieldEnd()
     if self.md5 is not None:
-      oprot.writeFieldBegin('md5', TType.STRING, 4)
+      oprot.writeFieldBegin('md5', TType.STRING, 5)
       oprot.writeString(self.md5)
       oprot.writeFieldEnd()
     if self.name is not None:
-      oprot.writeFieldBegin('name', TType.STRING, 5)
+      oprot.writeFieldBegin('name', TType.STRING, 6)
       oprot.writeString(self.name)
       oprot.writeFieldEnd()
     if self.description is not None:
-      oprot.writeFieldBegin('description', TType.STRING, 6)
+      oprot.writeFieldBegin('description', TType.STRING, 7)
       oprot.writeString(self.description)
       oprot.writeFieldEnd()
     if self.is_complete is not None:
-      oprot.writeFieldBegin('is_complete', TType.BOOL, 7)
+      oprot.writeFieldBegin('is_complete', TType.BOOL, 8)
       oprot.writeBool(self.is_complete)
       oprot.writeFieldEnd()
     if self.is_circular is not None:
-      oprot.writeFieldBegin('is_circular', TType.BOOL, 8)
+      oprot.writeFieldBegin('is_circular', TType.BOOL, 9)
       oprot.writeBool(self.is_circular)
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
@@ -879,6 +891,7 @@ class AssemblyContig(object):
     value = (value * 31) ^ hash(self.contig_id)
     value = (value * 31) ^ hash(self.sequence)
     value = (value * 31) ^ hash(self.length)
+    value = (value * 31) ^ hash(self.gc_content)
     value = (value * 31) ^ hash(self.md5)
     value = (value * 31) ^ hash(self.name)
     value = (value * 31) ^ hash(self.description)

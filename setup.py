@@ -39,17 +39,23 @@ class BuildAttr(object):
         self.copy_files = values['copy_files']
         self.rename_files = values.get('rename_files', {})
 
+# There are two sets of python code generated.
+# The python server code is twisted based and contains an async client.
+# The default python client code is synchronous and not based on twisted.
+# When building the server code, we generate both sets of code and then rename
+# the generated synchronous code to thrift_client.py to not overwrite the
+# twisted service code.
 thrift_build = {
     "python_server": BuildAttr({
         "style": "py:twisted",
         "generated_dir": "gen-py.twisted",
         "copy_files": ["constants.py", "ttypes.py", "thrift_service.py"],
-        "rename_files": {"thrift_service.py": "thrift_client.py"}
     }),
     "python": BuildAttr({
         "style": "py:new_style",
         "generated_dir": "gen-py",
         "copy_files": ["constants.py", "ttypes.py", "thrift_service.py"],
+        "rename_files": {"thrift_service.py": "thrift_client.py"}
     }),
     "javascript": BuildAttr({
         "style": "js:jquery",
@@ -238,10 +244,11 @@ class BuildThriftServers(setuptools.Command):
     def _try_run(self):
         start_path = os.path.join(os.path.abspath(os.path.dirname(__file__)),"thrift/specs")
 
-        settings = thrift_build['python_server']
         for dirpath, dirnames, filenames in os.walk(start_path):
             for f in filenames:
                 if f.endswith(".thrift"):
+                    # first generate all the twisted server code
+                    settings = thrift_build['python_server']
                     #TODO - modify version string in .thrift before code generation
                     spec_path = os.path.abspath(os.path.join(dirpath, f))
 
@@ -256,7 +263,7 @@ class BuildThriftServers(setuptools.Command):
                     if len(generated_files) == 0:
                         generated_files = glob.glob(settings.generated_dir +
                                                     "/*")
-
+                    # now copy the generated server files to the target
                     copied = False
                     for x in generated_files:
                         for name in settings.copy_files:
@@ -271,6 +278,8 @@ class BuildThriftServers(setuptools.Command):
                                         " files to copy!")
                     shutil.rmtree(settings.generated_dir)
 
+                    # generate the client code
+                    settings = thrift_build['python']
                     command = ["thrift", "-r", "--gen", settings.style,
                               spec_path]
                     errno = call_command(command, is_thrift=True)
@@ -286,6 +295,7 @@ class BuildThriftServers(setuptools.Command):
                         + \
                             "/*")
 
+                    # rename the thrift_service.py generated to thrift_client.py
                     renamed = False
                     for x in generated_files:
                         for name in settings.rename_files:

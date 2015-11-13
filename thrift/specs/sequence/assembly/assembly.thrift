@@ -56,11 +56,12 @@ struct AssemblyContig {
     1: string contig_id;
     2: string sequence;
     3: i64 length;
-    4: string md5;
-    5: string name;
-    6: string description;
-    7: bool is_complete;
-    8: bool is_circular;
+    4: double gc_content;
+    5: string md5;
+    6: string name;
+    7: string description;
+    8: bool is_complete;
+    9: bool is_circular;
 }
 
 
