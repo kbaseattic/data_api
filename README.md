@@ -20,47 +20,71 @@ Develop branch status
 [![Coverage Status](http://codecov.io/github/kbase/data_api/coverage.svg?branch=develop)](http://codecov.io/github/kbase/data_api?branch=master)
 ![Coverage Graph](http://codecov.io/github/kbase/data_api/branch.svg?branch=develop&time=1y)
 
+##### Table of Contents
+- [Quickstart install instructions](#quickstart-instructions-for-installation)
+- [Documentation](#documentation)
+- [Examples](#examples)
+- [Information for developers modifying Data API](#for-developers)
+
+
 #quickstart instructions for installation
 
-0. Clone data_api repo:
+1. Clone data_api repo:
 
         git clone https://github.com/kbase/data_api/
 
-1. Install virtualenv and python development libraries using your local installer:
+2. Install virtualenv and python development libraries using your local installer:
+
+   **Note:** KBase currently only supports Python 2.7.X
+
+   - Linux
+       * Debian/Ubuntu:
 
         apt-get install python-dev python-virtualenv
+        
+       * Redhat/CentOS: 
 
-2. Create a virtualenv environment to install the source to:
+        yum install python-devel
+        pip install virtualenv
+
+   - OS X:
+      * Homebrew: 
+
+        brew install python python-config
+        pip install virtualenv
+
+      * Macports: 
+
+        port install python
+        pip install virtualenv
+
+3. Create a virtualenv environment to install the source to:
         
         virtualenv venv
 
-3. Activate the virtualenv:
+4. Activate the virtualenv:
+
+    **Note:** You can exit the virtualenv shell when you are finished using data_api with `deactivate`.
 
         source venv/bin/activate
 
-4. pip install this package to your virtualenv:
+5. pip install this package to your virtualenv:
 
         pip install data_api
 
-   You can exit the virtualenv shell when you are finished using data_api with "deactivate".
-
-5. If you installed data_api in a KBase environment, set your `KB_AUTH_TOKEN` to your token string.
+6. If you installed data_api in a KBase environment, set your `KB_AUTH_TOKEN` to your token string.
    If you are installing to a non-KBase environment, you will need to get your token elsewhere and set it manually.
-   You can retrieve a token from a Narrative code cell using the following:
-   
+       * From a Narrative code cell:
+
         import os
         token = os.environ.get("KB_AUTH_TOKEN")
 
-   In an installed KBase shell environment use `kbase-login` to retrieve a token.
+       * In an installed KBase shell environment:
 
         kbase-login
-
-   Now check your `.kbase_config` to make sure you obtained a token.
-    
+        #check your `.kbase_config` to make sure you obtained a token.
         cat ~/.kbase_config
-   
-   Once you have a valid token, run this command in the bash shell:
-
+        #now store your token in the shell environment
         export KB_AUTH_TOKEN=$(kbase-whoami -t)
 
 # Documentation
@@ -74,15 +98,13 @@ To install ipython/jupyter dependencies for the examples:
 
     pip install -r data_api/requirements-jupyter.txt
 
+**Note:** This step requires the installation of large packages such as numpy,
+and can take many tens of minutes to complete.
+
 You can view examples using a local ipython/jupyter notebook:
 
     ipython notebook examples/notebooks/data_api-display.ipynb 
     
-You can also view these notebooks from nbviewer.
-
-[Simple Taxon example](http://nbviewer.ipython.org/github/kbase/data_api/blob/develop/examples/notebooks/see-taxon-run.ipynb)
-[Genome data plots](http://nbviewer.ipython.org/github/kbase/data_api/blob/develop/examples/notebooks/plot_genome_data.ipynb)
-
 # For developers
 
 ## Versioning and Changelog
@@ -107,9 +129,15 @@ Record changes in a human-readable format in the `CHANGELOG` at the root level. 
 
 The full test suite requires either a network connection and authorization for the KBase Workspace and Shock, 
 or a local copy of test data for use by the file-based workspace and Shock implementations. Even if you have 
-network access and auth tokens, the file-based tests may be preferable because they are faster, self-consistent, and do not add any load to the services. The test data does require one extra setup step, described here.
+network access and auth tokens, the file-based tests may be preferable because they are faster, self-consistent, 
+and do not add any load to the services. The test data does require one extra setup step, described here.
 
-The test data, because it is big and not code, is separated from the main `data_api` repo. It is stored in a git submodule called `data_api_test_resources`. Please refer to the [Git submodule documentation](http://git-scm.com/docs/git-submodule) for details, but the basic commands that you should make sure you do to get the most recent version of the submodules are:
+The test data, because it is big and not code, is separated from the main `data_api` repo. 
+It is stored in a git submodule called `data_api_test_resources`. Please refer to the 
+[Git submodule documentation](http://git-scm.com/docs/git-submodule) for details, but the basic 
+commands that you should make sure you do to get the most recent version of the submodules are:
+
+**Note:** These steps assume that you are in the data_api git directory.
 
 1. In a repository that does not yet have any copy of the `data_api_test_resources` sub-repo, to initialize and clone the repo:
 
@@ -133,23 +161,41 @@ The sub-repository will be cloned in the directory `test_resources`.
    
    Installation of Redis:
    
+   - Linux
+       * Debian/Ubuntu:
+
         apt-get install redis
+
+       * Redhat/CentOS:
+
+        yum install redis
+
+   - OS X:
+      * Homebrew:
+
+        brew install redis
+
+      * Macports:
+
+        port install redis
+   
+   For other operating systems, see the Redis [homepage](http://redis.io)
    
    Starting the Redis instance:
         
-        redis-server redis.conf
+    redis-server redis.conf
 
 ## Starting the Data API services
 
    Services can be started using the data_api_start_service.py script, which is in your path from a virtualenv install.
 
-        data_api_start_service.py --config deployment.cfg --service taxon --port 9101
-        data_api_start_service.py --config deployment.cfg --service assembly --port 9102        
+    data_api_start_service.py --config deployment.cfg --service taxon --port 9101
+    data_api_start_service.py --config deployment.cfg --service assembly --port 9102        
 
    You can add a --kbase_url argument to indicate which service targets and configs from deployment.cfg to use.
    For instance, to set the services to use local files and assume a running Redis instance:
    
-        data_api_start_service.py --config deployment.cfg --service assembly --port 9102 --kbase_url=dir_cache        
+    data_api_start_service.py --config deployment.cfg --service assembly --port 9102 --kbase_url=dir_cache        
    
    The available targets are:
    
@@ -167,16 +213,16 @@ The sub-repository will be cloned in the directory `test_resources`.
 
    Change to the source directory:
 
-        cd data_api
+    cd data_api
    
    Install the [Test data](README.md#test-data)
 
    Start each of the API services:
    
-        nohup data_api_start_service.py --config deployment.cfg --service taxon --port 9101 & > taxonAPI.out
-        nohup data_api_start_service.py --config deployment.cfg --service assembly --port 9102 & > assemblyAPI.out        
+    nohup data_api_start_service.py --config deployment.cfg --service taxon --port 9101 & > taxonAPI.out
+    nohup data_api_start_service.py --config deployment.cfg --service assembly --port 9102 & > assemblyAPI.out        
 
    Run nosetests from the data_api source directory, which will use the test data:
 
-        nosetests -c nose.cfg -c nose-local.cfg -s doekbase.data_api
+    nosetests -c nose.cfg -c nose-local.cfg -s doekbase.data_api
 
