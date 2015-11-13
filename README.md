@@ -169,9 +169,7 @@ The sub-repository will be cloned in the directory `test_resources`.
 
         cd data_api
    
-   Install the test data:
-
-        See [Test data](README.md#test-data)
+   Install the [Test data](README.md#test-data)
 
    Start each of the API services:
    
