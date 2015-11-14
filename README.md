@@ -27,7 +27,7 @@ Develop branch status
 - [Information for developers modifying Data API](#for-developers)
 
 
-#quickstart instructions for installation
+#Quickstart instructions for installation
 
 1. Clone data_api repo:
 
@@ -40,23 +40,23 @@ Develop branch status
    - Linux
        * Debian/Ubuntu:
 
-        apt-get install python-dev python-virtualenv
+                apt-get install python-dev python-virtualenv
         
        * Redhat/CentOS: 
 
-        yum install python-devel
-        pip install virtualenv
+                yum install python-devel
+                pip install virtualenv
 
    - OS X:
       * Homebrew: 
 
-        brew install python python-config
-        pip install virtualenv
+                brew install python python-config
+                pip install virtualenv
 
       * Macports: 
 
-        port install python
-        pip install virtualenv
+                port install python
+                pip install virtualenv
 
 3. Create a virtualenv environment to install the source to:
         
@@ -76,16 +76,16 @@ Develop branch status
    If you are installing to a non-KBase environment, you will need to get your token elsewhere and set it manually.
        * From a Narrative code cell:
 
-        import os
-        token = os.environ.get("KB_AUTH_TOKEN")
+            import os
+            token = os.environ.get("KB_AUTH_TOKEN")
 
        * In an installed KBase shell environment:
 
-        kbase-login
-        #check your `.kbase_config` to make sure you obtained a token.
-        cat ~/.kbase_config
-        #now store your token in the shell environment
-        export KB_AUTH_TOKEN=$(kbase-whoami -t)
+            kbase-login
+            #check your `.kbase_config` to make sure you obtained a token.
+            cat ~/.kbase_config
+            #now store your token in the shell environment
+            export KB_AUTH_TOKEN=$(kbase-whoami -t)
 
 # Documentation
 
@@ -164,26 +164,26 @@ The sub-repository will be cloned in the directory `test_resources`.
    - Linux
        * Debian/Ubuntu:
 
-        apt-get install redis
+            apt-get install redis
 
        * Redhat/CentOS:
 
-        yum install redis
+            yum install redis
 
    - OS X:
       * Homebrew:
 
-        brew install redis
+            brew install redis
 
       * Macports:
 
-        port install redis
+            port install redis
    
    For other operating systems, see the Redis [homepage](http://redis.io)
    
    Starting the Redis instance:
         
-    redis-server redis.conf
+        redis-server redis.conf
 
 ## Starting the Data API services
 
@@ -199,12 +199,12 @@ The sub-repository will be cloned in the directory `test_resources`.
    
    The available targets are:
    
-   - prod        : KBase production environment, production Redis instance
-   - next        : KBase next environment, next Redis instance
-   - ci          : KBase continuous integration environment (Jenkins), CI Redis instance
-   - localhost   : A local instance of KBase (docker or vm), assume local Redis caching
-   - dir_cache   : Use local test files, assume local Redis caching
-   - dir_nocache : Use local test files, do not attempt to cache using Redis
+   - **prod**        : KBase production environment, production Redis instance
+   - **next**        : KBase next environment, next Redis instance
+   - **ci**          : KBase continuous integration environment (Jenkins), CI Redis instance
+   - **localhost**   : A local instance of KBase (docker or vm), assume local Redis caching
+   - **dir_cache**   : Use local test files, assume local Redis caching
+   - **dir_nocache** : Use local test files, do not attempt to cache using Redis
    
 
 ## Testing 
