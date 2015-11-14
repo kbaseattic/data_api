@@ -17,9 +17,7 @@ KBase Data API documentation
 ============================
 The Data API provides a unified entry point to retrieve and, eventually,
 store KBase data objects. This page covers concepts and installation instructions.
-For usage see the individual API pages for the :ref:`annotation_api`, :ref:`assembly_api` , and :ref:`taxon_api`.
-
-Developers should read the :ref:`developer_notes`.
+For usage, see the API pages for each data type: :ref:`annotation_api`, :ref:`assembly_api`, and :ref:`taxon_api`.
 
 .. Skip this for now: contents:: Contents
 
@@ -27,7 +25,7 @@ Developers should read the :ref:`developer_notes`.
 Concepts
 --------
 
-The Data API is multi-language, with the primary language implementation being Python. We are using Thrift to generate consistent language APIs in other languages. In all languages except Python, the implementation is a client/server, with a Python-based server and the other language as the client. The diagram below summarizes this design.
+The Data API is multi-language, with the library that implements all the behavior written in Python. We are using Thrift to generate consistent language APIs in other languages. For Python, you can import and use the library to connect directly to the data store. For other languages (and Python, too, if you choose), we use an RPC model, implemented as a thin layer of wrapper code around the Thrift-generated client to communicate with the Thrift-generated Data API `services`, which use the Python library to do its work. The diagram below summarizes this design.
 
 .. _overview_diagram:
 
@@ -70,10 +68,22 @@ Unpackage the download file, change into the top-level directory, then run the s
 
 Hello, World
 ------------
+Below is a simple example for each API.
+For detailed API documentation and more examples, see the object API pages for the :ref:`annotation_api`, :ref:`assembly_api` , and :ref:`taxon_api`.
 
-A simple hello, world example will be here "real soon now".
+Python
+^^^^^^
 
-For more examples, see the object API pages for the :ref:`annotation_api`, :ref:`assembly_api` , and :ref:`taxon_api`.
+.. literalinclude:: ../lib/doekbase/data_api/tests/examples/hello_world.py
+    :linenos:
+
+JavaScript
+^^^^^^^^^^
+Sorry, not ready yet.
+
+Perl
+^^^^
+Sorry, not ready yet.
 
 Indices and tables
 ==================
