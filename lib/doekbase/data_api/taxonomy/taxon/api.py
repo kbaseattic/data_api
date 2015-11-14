@@ -12,6 +12,8 @@ import abc
 # Local
 from doekbase.data_api.core import ObjectAPI
 from doekbase.data_api.util import get_logger, logged
+from doekbase.data_api import exceptions
+import doekbase.data_api.taxonomy.taxon.service.ttypes as ttypes
 
 _log = get_logger(__file__)
 
@@ -143,7 +145,14 @@ class _KBaseGenomes_Genome(ObjectAPI, TaxonInterface):
 
     def get_genome_annotations(self, ref_only=False):
         from doekbase.data_api.annotation.genome_annotation import GenomeAnnotationAPI
-        return [GenomeAnnotationAPI(self.services, self._token, self.ref)]
+
+        referrers = self.get_referrers()
+        annotations = list()
+
+        if ref_only:
+            return [self.ref]
+        else:
+            return [GenomeAnnotationAPI(self.services, self._token, self.ref)]
 
     def get_scientific_lineage(self):
         return [x.strip() for x in self.data["taxonomy"].split(";")]
@@ -327,6 +336,29 @@ _tc_log = get_logger('TaxonClientAPI')
 
 class TaxonClientAPI(TaxonInterface):
 
+    def client_method(func):
+        def wrapper(self, *args, **kwargs):
+            if not self.transport.isOpen():
+                self.transport.open()
+
+            try:
+                return func(self, *args, **kwargs)
+            except ttypes.AttributeException, e:
+                raise AttributeError(e.message)
+            except ttypes.AuthenticationException, e:
+                raise exceptions.AuthenticationError(e.message)
+            except ttypes.AuthorizationException, e:
+                raise exceptions.AuthorizationError(e.message)
+            except ttypes.TypeException, e:
+                raise exceptions.TypeError(e.message)
+            except ttypes.ServiceException, e:
+                raise exceptions.ServiceError(e.message)
+            except Exception, e:
+                raise
+            finally:
+                self.transport.close()
+        return wrapper
+
     @logged(_tc_log, log_name='init')
     def __init__(self, url=None, token=None, ref=None):
         from doekbase.data_api.taxonomy.taxon.service.interface import TaxonClientConnection
@@ -338,88 +370,39 @@ class TaxonClientAPI(TaxonInterface):
         self._token = token
 
     @logged(_tc_log)
+    @client_method
     def get_info(self):
-        if not self.transport.isOpen():
-            self.transport.open()
-
-        try:
-            return self.client.get_info(self._token, self.ref)
-        except Exception, e:
-            raise
-        finally:
-            self.transport.close()
+        return self.client.get_info(self._token, self.ref)
 
     @logged(_tc_log)
+    @client_method
     def get_history(self):
-        if not self.transport.isOpen():
-            self.transport.open()
-
-        try:
-            return self.client.get_history(self._token, self.ref)
-        except Exception, e:
-            raise
-        finally:
-            self.transport.close()
+        return self.client.get_history(self._token, self.ref)
 
     @logged(_tc_log)
+    @client_method
     def get_provenance(self):
-        if not self.transport.isOpen():
-            self.transport.open()
-
-        try:
-            return self.client.get_provenance(self._token, self.ref)
-        except Exception, e:
-            raise
-        finally:
-            self.transport.close()
+        return self.client.get_provenance(self._token, self.ref)
 
     @logged(_tc_log)
+    @client_method
     def get_id(self):
-        if not self.transport.isOpen():
-            self.transport.open()
-
-        try:
-            return self.client.get_id(self._token, self.ref)
-        except Exception, e:
-            raise
-        finally:
-            self.transport.close()
+        return self.client.get_id(self._token, self.ref)
 
     @logged(_tc_log)
+    @client_method
     def get_name(self):
-        if not self.transport.isOpen():
-            self.transport.open()
-
-        try:
-            return self.client.get_name(self._token, self.ref)
-        except Exception, e:
-            raise
-        finally:
-            self.transport.close()
+        return self.client.get_name(self._token, self.ref)
 
     @logged(_tc_log)
+    @client_method
     def get_version(self):
-        if not self.transport.isOpen():
-            self.transport.open()
-
-        try:
-            return self.client.get_version(self._token, self.ref)
-        except Exception, e:
-            raise
-        finally:
-            self.transport.close()
+        return self.client.get_version(self._token, self.ref)
 
     @logged(_tc_log)
+    @client_method
     def get_parent(self, ref_only=False):
-        if not self.transport.isOpen():
-            self.transport.open()
-
-        try:
-            parent_ref = self.client.get_parent(self._token, self.ref)
-        except Exception, e:
-            raise
-        finally:
-            self.transport.close()
+        parent_ref = self.client.get_parent(self._token, self.ref)
 
         if ref_only:
             return parent_ref
@@ -427,16 +410,9 @@ class TaxonClientAPI(TaxonInterface):
             return TaxonClientAPI(self.url, self._token, parent_ref)
 
     @logged(_tc_log)
+    @client_method
     def get_children(self, ref_only=False):
-        if not self.transport.isOpen():
-                self.transport.open()
-
-        try:
-            children_refs = self.client.get_children(self._token, self.ref)
-        except Exception, e:
-            raise
-        finally:
-            self.transport.close()
+        children_refs = self.client.get_children(self._token, self.ref)
 
         print("@@ children_refs (1) => {}".format(children_refs))
         children_refs = list(children_refs)
@@ -452,97 +428,41 @@ class TaxonClientAPI(TaxonInterface):
             return children
 
     @logged(_tc_log)
+    @client_method
     def get_genome_annotations(self, ref_only=False):
-        if not self.transport.isOpen():
-            self.transport.open()
-
-        try:
-            return self.client.get_genome_annotations(self._token, self.ref)
-        except Exception, e:
-            raise
-        finally:
-            self.transport.close()
+        return self.client.get_genome_annotations(self._token, self.ref)
 
     @logged(_tc_log)
+    @client_method
     def get_scientific_lineage(self):
-        if not self.transport.isOpen():
-            self.transport.open()
-
-        try:
-            return self.client.get_scientific_lineage(self._token, self.ref)
-        except Exception, e:
-            raise
-        finally:
-            self.transport.close()
+        return self.client.get_scientific_lineage(self._token, self.ref)
 
     @logged(_tc_log)
+    @client_method
     def get_scientific_name(self):
-        if not self.transport.isOpen():
-            self.transport.open()
-
-        try:
-            return self.client.get_scientific_name(self._token, self.ref)
-        except Exception, e:
-            raise
-        finally:
-            self.transport.close()
+        return self.client.get_scientific_name(self._token, self.ref)
 
     @logged(_tc_log)
+    @client_method
     def get_taxonomic_id(self):
-        if not self.transport.isOpen():
-            self.transport.open()
-
-        try:
-            return self.client.get_taxonomic_id(self._token, self.ref)
-        except Exception, e:
-            raise
-        finally:
-            self.transport.close()
+        return self.client.get_taxonomic_id(self._token, self.ref)
 
     @logged(_tc_log)
+    @client_method
     def get_kingdom(self):
-        if not self.transport.isOpen():
-            self.transport.open()
-
-        try:
-            return self.client.get_kingdom(self._token, self.ref)
-        except Exception, e:
-            raise
-        finally:
-            self.transport.close()
+        return self.client.get_kingdom(self._token, self.ref)
 
     @logged(_tc_log)
+    @client_method
     def get_domain(self):
-        if not self.transport.isOpen():
-            self.transport.open()
-
-        try:
-            return self.client.get_domain(self._token, self.ref)
-        except Exception, e:
-            raise
-        finally:
-            self.transport.close()
+        return self.client.get_domain(self._token, self.ref)
 
     @logged(_tc_log)
+    @client_method
     def get_aliases(self):
-        if not self.transport.isOpen():
-            self.transport.open()
-
-        try:
-            return self.client.get_aliases(self._token, self.ref)
-        except Exception, e:
-            raise
-        finally:
-            self.transport.close()
+        return self.client.get_aliases(self._token, self.ref)
 
     @logged(_tc_log)
+    @client_method
     def get_genetic_code(self):
-        if not self.transport.isOpen():
-            self.transport.open()
-
-        try:
-            return self.client.get_genetic_code(self._token, self.ref)
-        except Exception, e:
-            raise
-        finally:
-            self.transport.close()
+        return self.client.get_genetic_code(self._token, self.ref)

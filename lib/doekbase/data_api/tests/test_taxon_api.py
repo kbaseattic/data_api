@@ -9,7 +9,7 @@ from . import shared
 from doekbase.data_api.taxonomy.taxon.api import TaxonAPI
 from doekbase.data_api.taxonomy.taxon.api import _Prototype
 from doekbase.data_api.taxonomy.taxon.api import _KBaseGenomes_Genome
-
+from doekbase.data_api.taxonomy.taxon.api import TaxonClientAPI
 
 _log = logging.getLogger(__name__)
 
@@ -19,14 +19,18 @@ t_new = None
 t_new_e = None
 t_old = None
 t_old_e = None
+t_client_new = None
+t_client_old = None
 
 def setup():
     shared.setup()
-    global t_new, t_new_e, t_old, t_old_e
+    global t_new, t_new_e, t_old, t_old_e, t_client_new, t_client_old
     t_new = TaxonAPI(shared.services, shared.token, taxon_new)
     t_new_e = _Prototype(shared.services, shared.token, taxon_new)
     t_old = TaxonAPI(shared.services, shared.token, taxon_old)
     t_old_e = _KBaseGenomes_Genome(shared.services, shared.token, taxon_old)
+    t_client_new = TaxonClientAPI(shared.services["taxon_service_url"], shared.token, taxon_new)
+    t_client_old = TaxonClientAPI(shared.services["taxon_service_url"], shared.token, taxon_old)
 
 
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
@@ -43,7 +47,7 @@ def test_bogus_type():
             assert isinstance(e, TypeError)
 
 
-####### New Taxon Type tests
+####### New Taxon Type tests, library
 
 
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
@@ -55,6 +59,9 @@ def test_get_parent_new():
     parent_e = t_new_e.get_parent()
     assert isinstance(parent_e, TaxonAPI)
     assert parent.get_taxonomic_id() == parent_e.get_taxonomic_id()
+    parent_c = t_client_new.get_parent()
+    assert isinstance(parent_c, TaxonClientAPI)
+    assert parent.get_taxonomic_id() == parent_c.get_taxonomic_id()
 
 
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
@@ -65,11 +72,17 @@ def test_get_children_new():
     assert isinstance(children, list)
     #and len(children) > 0
     children_e = t_new_e.get_children()
-    assert isinstance(children, list)
+    assert isinstance(children_e, list)
     assert children == children_e, \
         "Children mismatch {} != {}".format(
             ','.join([str(x) for x in children]),
             ','.join([str(x) for x in children_e]))
+    children_c = t_client_new.get_children()
+    assert isinstance(children_c, list)
+    assert children == children_c, \
+        "Children mismatch {} != {}".format(
+            ','.join([str(x) for x in children]),
+            ','.join([str(x) for x in children_c]))
 
 
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
@@ -85,6 +98,13 @@ def test_get_genome_annotations_new():
         "Annotation mismatch {} != {}".format(
             ','.join(map(str, annotations)),
             ','.join(map(str, annotations_e)))
+    annotations_c = t_client_new.get_genome_annotations()
+    assert isinstance(annotations_c, list)
+    assert annotations == annotations_c, \
+        "Annotation mismatch {} != {}".format(
+            ','.join(map(str, annotations)),
+            ','.join(map(str, annotations_c)))
+
 
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
 def test_get_scientific_lineage_new():
@@ -95,6 +115,9 @@ def test_get_scientific_lineage_new():
     scientific_lineage_e = t_new_e.get_scientific_lineage()
     assert isinstance(scientific_lineage_e, list) and len(scientific_lineage_e) > 0
     assert scientific_lineage == scientific_lineage_e
+    scientific_lineage_c = t_client_new.get_scientific_lineage()
+    assert isinstance(scientific_lineage_c, list) and len(scientific_lineage_c) > 0
+    assert scientific_lineage == scientific_lineage_c
 
 
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
@@ -106,6 +129,9 @@ def test_get_scientific_name_new():
     scientific_name_e = t_new_e.get_scientific_name()
     assert isinstance(scientific_name_e, basestring) and len(scientific_name_e) > 0
     assert scientific_name == scientific_name_e
+    scientific_name_c = t_client_new.get_scientific_name()
+    assert isinstance(scientific_name_c, basestring) and len(scientific_name_c) > 0
+    assert scientific_name == scientific_name_c
 
 
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
@@ -117,6 +143,9 @@ def test_get_taxonomic_id_new():
     taxonomic_id_e = t_new_e.get_taxonomic_id()
     assert isinstance(taxonomic_id_e, int) and taxonomic_id_e != -1
     assert taxonomic_id == taxonomic_id_e
+    taxonomic_id_c = t_client_new.get_taxonomic_id()
+    assert isinstance(taxonomic_id_c, int) and taxonomic_id_c != -1
+    assert taxonomic_id == taxonomic_id_c
 
 
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
@@ -127,6 +156,8 @@ def test_get_kingdom_new():
     assert kingdom == "Viridiplantae"
     kingdom_e = t_new_e.get_kingdom()
     assert kingdom_e == "Viridiplantae"
+    kingdom_c = t_client_new.get_kingdom()
+    assert kingdom_c == "Viridiplantae"
 
 
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
@@ -138,6 +169,9 @@ def test_get_domain_new():
     domain_e = t_new_e.get_domain()
     assert isinstance(domain_e, basestring) and len(domain_e) > 0
     assert domain == domain_e
+    domain_c = t_client_new.get_domain()
+    assert isinstance(domain_c, basestring) and len(domain_c) > 0
+    assert domain == domain_c
 
 
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
@@ -149,6 +183,9 @@ def test_get_aliases_new():
     aliases_e = t_new_e.get_aliases()
     assert isinstance(aliases_e, list) and len(aliases_e) > 0
     assert aliases == aliases_e
+    aliases_c = t_client_new.get_aliases()
+    assert isinstance(aliases_c, list) and len(aliases_c) > 0
+    assert aliases == aliases_c
 
 
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
@@ -160,9 +197,12 @@ def test_get_genetic_code_new():
     genetic_code_e = t_new_e.get_genetic_code()
     assert isinstance(genetic_code_e, int) and genetic_code_e != -1
     assert genetic_code == genetic_code_e
+    genetic_code_c = t_client_new.get_genetic_code()
+    assert isinstance(genetic_code_c, int) and genetic_code_c != -1
+    assert genetic_code == genetic_code_c
 
 
-####### Old Taxon Type tests
+####### Old Taxon Type tests, library
 
 
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
@@ -183,6 +223,12 @@ def test_get_parent_old():
     else:
         assert False
 
+    try:
+        parent_c = t_client_old.get_parent()
+    except AttributeError:
+        assert True
+    else:
+        assert False
 
 
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
@@ -194,6 +240,9 @@ def test_get_children_old():
     children_e = t_old_e.get_children()
     assert isinstance(children_e, list) and len(children_e) == 0
     assert children == children_e
+    children_c = t_client_old.get_children()
+    assert isinstance(children_c, list) and len(children_c) == 0
+    assert children == children_c
 
 
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
@@ -205,6 +254,9 @@ def test_get_genome_annotations_old():
     annotations_e = t_old_e.get_genome_annotations()
     assert isinstance(annotations_e, list) and len(annotations_e) == 1
     assert annotations[0].get_feature_ids() == annotations_e[0].get_feature_ids()
+    annotations_c = t_client_old.get_genome_annotations()
+    assert isinstance(annotations_c, list) and len(annotations_c) == 1
+    # TODO check object reference string
 
 
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
@@ -216,6 +268,9 @@ def test_get_scientific_lineage_old():
     scientific_lineage_e = t_old_e.get_scientific_lineage()
     assert isinstance(scientific_lineage_e, list) and len(scientific_lineage_e) > 0
     assert scientific_lineage == scientific_lineage_e
+    scientific_lineage_c = t_client_old.get_scientific_lineage()
+    assert isinstance(scientific_lineage_c, list) and len(scientific_lineage_c) > 0
+    assert scientific_lineage == scientific_lineage_c
 
 
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
@@ -227,6 +282,9 @@ def test_get_scientific_name_old():
     scientific_name_e = t_old_e.get_scientific_name()
     assert isinstance(scientific_name_e, basestring) and len(scientific_name_e) > 0
     assert scientific_name == scientific_name_e
+    scientific_name_c = t_old_e.get_scientific_name()
+    assert isinstance(scientific_name_c, basestring) and len(scientific_name_c) > 0
+    assert scientific_name == scientific_name_c
 
 
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
@@ -242,6 +300,13 @@ def test_get_taxonomic_id_old():
 
     try:
         taxonomic_id_e = t_old_e.get_taxonomic_id()
+    except AttributeError:
+        assert True
+    else:
+        assert False
+
+    try:
+        taxonomic_id_c = t_client_old.get_taxonomic_id()
     except AttributeError:
         assert True
     else:
@@ -266,6 +331,13 @@ def test_get_kingdom_old():
     else:
         assert False
 
+    try:
+        kingdom_c = t_client_old.get_kingdom()
+    except AttributeError:
+        assert True
+    else:
+        assert False
+
 
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
 def test_get_domain_old():
@@ -276,6 +348,9 @@ def test_get_domain_old():
     domain_e = t_old_e.get_domain()
     assert isinstance(domain_e, basestring) and len(domain_e) > 0
     assert domain == domain_e
+    domain_c = t_client_old.get_domain()
+    assert isinstance(domain_c, basestring) and len(domain_c) > 0
+    assert domain == domain_c
 
 
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
@@ -287,6 +362,9 @@ def test_get_aliases_old():
     aliases_e = t_old_e.get_aliases()
     assert isinstance(aliases_e, list) and len(aliases_e) == 0
     assert aliases == aliases_e
+    aliases_c = t_client_old.get_aliases()
+    assert isinstance(aliases_c, list) and len(aliases_c) == 0
+    assert aliases == aliases_c
 
 
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
@@ -302,5 +380,12 @@ def test_get_genetic_code_old():
     try:
         genetic_code_e = t_old_e.get_genetic_code()
         assert isinstance(genetic_code_e, int) and genetic_code_e != -1
+    except AttributeError:
+        assert False
+
+    try:
+        genetic_code_c = t_client_old.get_genetic_code()
+        _log.info("Genetic code : {}".format(genetic_code_c))
+        assert isinstance(genetic_code_c, int) and genetic_code_c != -1
     except AttributeError:
         assert False

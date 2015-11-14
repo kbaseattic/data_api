@@ -150,6 +150,8 @@ class TaxonService:
         try:
             taxon_api = TaxonAPI(self.services, token, ref)
             return taxon_api.get_taxonomic_id()
+        except AttributeError, e:
+            raise ttypes.AttributeException(e.message, traceback.print_exc())
         except Exception, e:
             raise ttypes.ServiceException(e.message, traceback.print_exc(), {"ref": str(ref)})
 
@@ -157,6 +159,8 @@ class TaxonService:
         try:
             taxon_api = TaxonAPI(self.services, token, ref)
             return taxon_api.get_kingdom()
+        except AttributeError, e:
+            raise ttypes.AttributeException(e.message, traceback.print_exc())
         except Exception, e:
             raise ttypes.ServiceException(e.message, traceback.print_exc(), {"ref": str(ref)})
 
