@@ -676,6 +676,25 @@ assembly.AssemblyContig = function(args) {
   this.contig_id = null;
   this.sequence = null;
   this.length = null;
+  this.gc_content = null;
+  this.md5 = null;
+  this.name = null;
+  this.description = null;
+  this.is_complete = null;
+  this.is_circular = null;
+  if (args) {
+    if (args.contig_id !== undefined) {
+      this.contig_id = args.contig_id;
+    }
+    if (args.sequence !== undefined) {
+      this.sequence = args.sequence;
+    }
+    if (args.length !== undefined) {
+      this.length = args.length;
+    }
+    if (args.gc_content !== undefined) {
+      this.gc_content = args.gc_content;
+    }
     if (args.md5 !== undefined) {
       this.md5 = args.md5;
     }
@@ -729,8 +748,6 @@ assembly.AssemblyContig.prototype.read = function(input) {
       }
       break;
       case 4:
-<<<<<<< HEAD
-=======
       if (ftype == Thrift.Type.DOUBLE) {
         this.gc_content = input.readDouble().value;
       } else {
@@ -738,51 +755,34 @@ assembly.AssemblyContig.prototype.read = function(input) {
       }
       break;
       case 5:
->>>>>>> kbase/develop
       if (ftype == Thrift.Type.STRING) {
         this.md5 = input.readString().value;
       } else {
         input.skip(ftype);
       }
       break;
-<<<<<<< HEAD
-      case 5:
-=======
       case 6:
->>>>>>> kbase/develop
       if (ftype == Thrift.Type.STRING) {
         this.name = input.readString().value;
       } else {
         input.skip(ftype);
       }
       break;
-<<<<<<< HEAD
-      case 6:
-=======
       case 7:
->>>>>>> kbase/develop
       if (ftype == Thrift.Type.STRING) {
         this.description = input.readString().value;
       } else {
         input.skip(ftype);
       }
       break;
-<<<<<<< HEAD
-      case 7:
-=======
       case 8:
->>>>>>> kbase/develop
       if (ftype == Thrift.Type.BOOL) {
         this.is_complete = input.readBool().value;
       } else {
         input.skip(ftype);
       }
       break;
-<<<<<<< HEAD
-      case 8:
-=======
       case 9:
->>>>>>> kbase/develop
       if (ftype == Thrift.Type.BOOL) {
         this.is_circular = input.readBool().value;
       } else {
@@ -815,10 +815,6 @@ assembly.AssemblyContig.prototype.write = function(output) {
     output.writeI64(this.length);
     output.writeFieldEnd();
   }
-<<<<<<< HEAD
-  if (this.md5 !== null && this.md5 !== undefined) {
-    output.writeFieldBegin('md5', Thrift.Type.STRING, 4);
-=======
   if (this.gc_content !== null && this.gc_content !== undefined) {
     output.writeFieldBegin('gc_content', Thrift.Type.DOUBLE, 4);
     output.writeDouble(this.gc_content);
@@ -826,43 +822,26 @@ assembly.AssemblyContig.prototype.write = function(output) {
   }
   if (this.md5 !== null && this.md5 !== undefined) {
     output.writeFieldBegin('md5', Thrift.Type.STRING, 5);
->>>>>>> kbase/develop
     output.writeString(this.md5);
     output.writeFieldEnd();
   }
   if (this.name !== null && this.name !== undefined) {
-<<<<<<< HEAD
-    output.writeFieldBegin('name', Thrift.Type.STRING, 5);
-=======
     output.writeFieldBegin('name', Thrift.Type.STRING, 6);
->>>>>>> kbase/develop
     output.writeString(this.name);
     output.writeFieldEnd();
   }
   if (this.description !== null && this.description !== undefined) {
-<<<<<<< HEAD
-    output.writeFieldBegin('description', Thrift.Type.STRING, 6);
-=======
     output.writeFieldBegin('description', Thrift.Type.STRING, 7);
->>>>>>> kbase/develop
     output.writeString(this.description);
     output.writeFieldEnd();
   }
   if (this.is_complete !== null && this.is_complete !== undefined) {
-<<<<<<< HEAD
-    output.writeFieldBegin('is_complete', Thrift.Type.BOOL, 7);
-=======
     output.writeFieldBegin('is_complete', Thrift.Type.BOOL, 8);
->>>>>>> kbase/develop
     output.writeBool(this.is_complete);
     output.writeFieldEnd();
   }
   if (this.is_circular !== null && this.is_circular !== undefined) {
-<<<<<<< HEAD
-    output.writeFieldBegin('is_circular', Thrift.Type.BOOL, 8);
-=======
     output.writeFieldBegin('is_circular', Thrift.Type.BOOL, 9);
->>>>>>> kbase/develop
     output.writeBool(this.is_circular);
     output.writeFieldEnd();
   }
