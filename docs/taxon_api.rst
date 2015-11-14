@@ -12,7 +12,7 @@ The Taxon API can be used as a library or in client/server mode.
 .. py:currentmodule:: doekbase.data_api.taxonomy.taxon.api
 
 Creating a Taxonomic object
---------------------------
+---------------------------
 
 To create a new Taxon object, you will create an object that implements the interface defined in :class:`doekbase.data_api.taxonomy.taxon.api.TaxonInterface`. This class can implement a library or a Thrift client. In either case you will instantiate the class with an object reference. The interfaces used by both classes are shown below.
 

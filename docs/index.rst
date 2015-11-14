@@ -31,8 +31,8 @@ The Data API is multi-language, with the primary language implementation being P
 
 .. _overview_diagram:
 
-.. figure:: _static/img/api_overview.*
-    :height: 400px
+.. figure:: _static/img/DataAPIArchitecture.png
+    :height: 600px
     
     Overview of the Data API modules
     
@@ -73,7 +73,7 @@ Hello, World
 
 A simple hello, world example will be here "real soon now".
 
-For more examples, see the object API pages for the :ref:`annotation_api`, :ref:`genome_api` , and :ref:`taxon_api`.
+For more examples, see the object API pages for the :ref:`annotation_api`, :ref:`assembly_api` , and :ref:`taxon_api`.
 
 Indices and tables
 ==================
