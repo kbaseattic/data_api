@@ -18,7 +18,11 @@ except ImportError:
 
 # Local
 from doekbase.data_api.core import ObjectAPI
-from doekbase.data_api.util import PerfCollector, collect_performance
+from doekbase.data_api.util import get_logger, logged, PerfCollector, collect_performance
+from doekbase.data_api import exceptions
+from doekbase.data_api.taxonomy.taxon.service import ttypes
+
+_log = get_logger(__file__)
 
 CHUNK_SIZE = 2**30
 
@@ -160,7 +164,6 @@ class AssemblyInterface(object):
              actual contents of the sequence for this contig
         """
         pass
-
 
 
 class AssemblyAPI(ObjectAPI, AssemblyInterface):
@@ -358,41 +361,8 @@ class _KBaseGenomes_ContigSet(ObjectAPI, AssemblyInterface):
                    'name': c.get('name', None),
                    'description': c.get('description', None),
                    'is_complete': c.get('complete', 0),
-                   'is_circular': c.get('replicon_geometry','Unkown')
+                   'is_circular': c.get('replicon_geometry','Unknown')
                    }
-
-            # OLD code superseded by code above and below:
-            #contigs[c["id"]] = dict()
-            #contigs[c["id"]]["contig_id"] = c["id"]
-            #contigs[c["id"]]["sequence"] = c["sequence"]
-            # if "length" in c:
-            #     contigs[c["id"]]["length"] = c["length"]
-            # else:
-            #     contigs[c["id"]]["length"] = len(c["sequence"])
-            #
-            # if "md5" in c:
-            #     contigs[c["id"]]["md5"] = c["md5"]
-            # else:
-            #     contigs[c["id"]]["md5"] = hashlib.md5(c["sequence"].upper()).hexdigest()
-            # if "name" in c:
-            #     contigs[c["id"]]["name"] = c["name"]
-            # else:
-            #     contigs[c["id"]]["name"] = None
-            #
-            # if "description" in c:
-            #     contigs[c["id"]]["description"] = c["description"]
-            # else:
-            #     contigs[c["id"]]["description"] = None
-            #
-            # if "complete" in c:
-            #     contigs[c["id"]]["is_complete"] = c["complete"]
-            # else:
-            #     contigs[c["id"]]["is_complete"] = 0
-            #
-            # if "replicon_geometry" in c:
-            #     contigs[c["id"]]["is_circular"] = c["replicon_geometry"]
-            # else:
-            #     contigs[c["id"]]["is_circular"] = "Unknown"
 
             gc_count = self._sequence_gc(i, c['sequence'])
             cid['gc_content'] = gc_count / cid['length'] * 1.0
@@ -495,7 +465,7 @@ class _Prototype(ObjectAPI, AssemblyInterface):
         fasta_ref = data["fasta_handle_ref"]
         contigs = data["contigs"]
 
-        copy_keys = ["contig_id", "length", "md5", "name", "description", "is_complete", "is_circular"]
+        copy_keys = ["contig_id", "length", "gc_content", "md5", "name", "description", "is_complete", "is_circular"]
 
         header = dict()
         header["Authorization"] = "Oauth {0}".format(self._token)
@@ -564,7 +534,33 @@ class _Prototype(ObjectAPI, AssemblyInterface):
         return outContigs
 
 
+_as_log = get_logger('AssemblyClientAPI')
+
 class AssemblyClientAPI(AssemblyInterface):
+    def client_method(func):
+        def wrapper(self, *args, **kwargs):
+            if not self.transport.isOpen():
+                self.transport.open()
+
+            try:
+                return func(self, *args, **kwargs)
+            except ttypes.AttributeException, e:
+                raise AttributeError(e.message)
+            except ttypes.AuthenticationException, e:
+                raise exceptions.AuthenticationError(e.message)
+            except ttypes.AuthorizationException, e:
+                raise exceptions.AuthorizationError(e.message)
+            except ttypes.TypeException, e:
+                raise exceptions.TypeError(e.message)
+            except ttypes.ServiceException, e:
+                raise exceptions.ServiceError(e.message)
+            except Exception, e:
+                raise
+            finally:
+                self.transport.close()
+        return wrapper
+
+    @logged(_as_log, log_name='init')
     def __init__(self, url=None, token=None, ref=None):
         from doekbase.data_api.sequence.assembly.service.interface import AssemblyClientConnection
 
@@ -574,123 +570,83 @@ class AssemblyClientAPI(AssemblyInterface):
         self.ref = ref
         self._token = token
 
+    @logged(_as_log)
+    @client_method
     def get_assembly_id(self):
-        if not self.transport.isOpen():
-            self.transport.open()
+        return self.client.get_assembly_id(self._token, self.ref)
 
-        try:
-            return self.client.get_assembly_id(self._token, self.ref)
-        except Exception, e:
-            raise
-        finally:
-            self.transport.close()
-
+    @logged(_as_log)
+    @client_method
     def get_genome_annotations(self, ref_only=True):
-        if not self.transport.isOpen():
-            self.transport.open()
+        return self.client.get_genome_annotations(self._token, self.ref)
 
-        try:
-            return self.client.get_genome_annotations(self._token, self.ref)
-        except Exception, e:
-            raise
-        finally:
-            self.transport.close()
-
+    @logged(_as_log)
+    @client_method
     def get_external_source_info(self):
-        if not self.transport.isOpen():
-            self.transport.open()
+        info = self.client.get_external_source_info(self._token, self.ref)
+        return {
+            "external_source": info.external_source,
+            "external_source_id": info.external_source_id,
+            "external_source_origination_date": info.external_source_origination_date
+        }
 
-        try:
-            return self.client.get_external_source_info(self._token, self.ref)
-        except Exception, e:
-            raise
-        finally:
-            self.transport.close()
-
+    @logged(_as_log)
+    @client_method
     def get_stats(self):
-        if not self.transport.isOpen():
-            self.transport.open()
+        stats = self.client.get_stats(self._token, self.ref)
+        return {
+            "num_contigs": stats.num_contigs,
+            "dna_size": stats.dna_size,
+            "gc_content": stats.gc_content
+        }
 
-        try:
-            return self.client.get_stats(self._token, self.ref)
-        except Exception, e:
-            raise
-        finally:
-            self.transport.close()
-
+    @logged(_as_log)
+    @client_method
     def get_number_contigs(self):
-        if not self.transport.isOpen():
-            self.transport.open()
+        return self.client.get_number_contigs(self._token, self.ref)
 
-        try:
-            return self.client.get_number_contigs(self._token, self.ref)
-        except Exception, e:
-            raise
-        finally:
-            self.transport.close()
-
+    @logged(_as_log)
+    @client_method
     def get_gc_content(self):
-        if not self.transport.isOpen():
-            self.transport.open()
+        return self.client.get_gc_content(self._token, self.ref)
 
-        try:
-            return self.client.get_gc_content(self._token, self.ref)
-        except Exception, e:
-            raise
-        finally:
-            self.transport.close()
-
+    @logged(_as_log)
+    @client_method
     def get_dna_size(self):
-        if not self.transport.isOpen():
-            self.transport.open()
+        return self.client.get_dna_size(self._token, self.ref)
 
-        try:
-            return self.client.get_dna_size(self._token, self.ref)
-        except Exception, e:
-            raise
-        finally:
-            self.transport.close()
-
+    @logged(_as_log)
+    @client_method
     def get_contig_ids(self):
-        if not self.transport.isOpen():
-            self.transport.open()
+        return self.client.get_contig_ids(self._token, self.ref)
 
-        try:
-            return self.client.get_contig_ids(self._token, self.ref)
-        except Exception, e:
-            raise
-        finally:
-            self.transport.close()
-
+    @logged(_as_log)
+    @client_method
     def get_contig_lengths(self, contig_id_list=None):
-        if not self.transport.isOpen():
-            self.transport.open()
+        return self.client.get_contig_lengths(self._token, self.ref, contig_id_list)
 
-        try:
-            return self.client.get_contig_lengths(self._token, self.ref, contig_id_list)
-        except Exception, e:
-            raise
-        finally:
-            self.transport.close()
-
+    @logged(_as_log)
+    @client_method
     def get_contig_gc_content(self, contig_id_list=None):
-        if not self.transport.isOpen():
-            self.transport.open()
+        return self.client.get_contig_gc_content(self._token, self.ref, contig_id_list)
 
-        try:
-            return self.client.get_contig_gc_content(self._token, self.ref, contig_id_list)
-        except Exception, e:
-            raise
-        finally:
-            self.transport.close()
-
+    @logged(_as_log)
+    @client_method
     def get_contigs(self, contig_id_list=None):
-        if not self.transport.isOpen():
-            self.transport.open()
+        contigs = self.client.get_contigs(self._token, self.ref, contig_id_list)
 
-        try:
-            return self.client.get_contigs(self._token, self.ref, contig_id_list)
-        except Exception, e:
-            raise
-        finally:
-            self.transport.close()
+        out_contigs = dict()
+        for x in contigs:
+            out_contigs[x] = {
+                "contig_id": contigs[x].contig_id,
+                "sequence": contigs[x].sequence,
+                "length": contigs[x].length,
+                "gc_content": contigs[x].gc_content,
+                "md5": contigs[x].md5,
+                "name": contigs[x].name,
+                "description": contigs[x].description,
+                "is_complete": contigs[x].is_complete,
+                "is_circular": contigs[x].is_circular
+            }
+
+        return out_contigs

@@ -26,12 +26,9 @@ services = None
 
 # Globals
 
-g_redis_host = os.environ.get('KB_REDIS_HOST', None)
-if g_redis_host == "":
-    g_redis_host = None
-g_redis_port = int(os.environ.get('KB_REDIS_PORT', '6379'))
 g_redis_bin = os.environ.get('KB_REDIS_BIN', '/usr/local/bin/redis-server')
 g_redis_conf = os.environ.get('KB_REDIS_CONF', 'redis.conf')
+g_kbase_conf = os.environ.get('KB_DEPLOY_CFG', 'deployment.cfg')
 
 # Functions and classes
 
@@ -39,10 +36,30 @@ def in_travis():
     return os.environ.get('TRAVIS', 'false') == 'true'
 
 def get_services():
-    svc = {"workspace_service_url": g_ws_url,
-            "shock_service_url": g_shock_url}
-    #print("@@ service URLs = {}".format(svc))
-    return svc
+    if g_kbase_conf is not None:
+        import ConfigParser
+        deploy_config = ConfigParser.ConfigParser()
+        deploy_config.read(g_kbase_conf)
+    else:
+        raise Exception("Unable to read from {}".format(g_kbase_conf))
+
+    services = dict()
+
+    global_stanza_name = 'data_api' + ".kbase." + os.environ.get("KB_DEPLOY_URL", "dir_nocache")
+    services["shock_service_url"] = deploy_config.get(global_stanza_name, "shock_service_url")
+    services["workspace_service_url"] = deploy_config.get(global_stanza_name, "workspace_service_url")
+    services["taxon_service_url"] = deploy_config.get(global_stanza_name, "taxon_service_url")
+    services["assembly_service_url"] = deploy_config.get(global_stanza_name, "assembly_service_url")
+
+    try:
+        services["redis_host"] = deploy_config.get(global_stanza_name, "redis_host")
+        services["redis_port"] = deploy_config.get(global_stanza_name, "redis_port")
+    except ConfigParser.NoOptionError:
+        services["redis_host"] = None
+        services["redis_port"] = None
+
+    #print("@@ service URLs = {}".format(services))
+    return services
 
 def can_connect(ref=genome):
     """See if we can get a connection to the workspace and access the
@@ -88,11 +105,11 @@ def setup():
     global _log, services
     _log = get_logger('doekbase.data_api.tests.shared')
     services = get_services()
-    if g_redis_host is not None:
+    if services["redis_host"] is not None:
         cache.ObjectCache.cache_class = cache.RedisCache
         cache.ObjectCache.cache_params = {
-            'redis_host': g_redis_host,
-            'redis_port': g_redis_port}
+            'redis_host': services["redis_host"],
+            'redis_port': services["redis_port"]}
 
 def teardown():
     pass
