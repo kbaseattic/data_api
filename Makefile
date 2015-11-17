@@ -24,6 +24,8 @@ deploy-lib:
 
 deploy-service-scripts:
 	cp $(SCRIPTS_DIR)/start_service $(SCRIPTS_DIR)/stop_service $(SERVICE_DIR)/
+	mkdir $(SERVICE_DIR)/check_mk
+	cp $(SCRIPTS_DIR)/data_api_service $(SERVICE_DIR)/check_mk/
 
 clean:
 	echo not implemented
