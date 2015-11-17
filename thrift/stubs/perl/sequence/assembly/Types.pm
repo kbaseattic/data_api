@@ -754,7 +754,7 @@ sub write {
 
 package assembly::AssemblyContig;
 use base qw(Class::Accessor);
-assembly::AssemblyContig->mk_accessors( qw( contig_id sequence length md5 name description is_complete is_circular ) );
+assembly::AssemblyContig->mk_accessors( qw( contig_id sequence length gc_content md5 name description is_complete is_circular ) );
 
 sub new {
   my $classname = shift;
@@ -763,6 +763,7 @@ sub new {
   $self->{contig_id} = undef;
   $self->{sequence} = undef;
   $self->{length} = undef;
+  $self->{gc_content} = undef;
   $self->{md5} = undef;
   $self->{name} = undef;
   $self->{description} = undef;
@@ -777,6 +778,9 @@ sub new {
     }
     if (defined $vals->{length}) {
       $self->{length} = $vals->{length};
+    }
+    if (defined $vals->{gc_content}) {
+      $self->{gc_content} = $vals->{gc_content};
     }
     if (defined $vals->{md5}) {
       $self->{md5} = $vals->{md5};
@@ -834,31 +838,37 @@ sub read {
         $xfer += $input->skip($ftype);
       }
       last; };
-      /^4$/ && do{      if ($ftype == TType::STRING) {
-        $xfer += $input->readString(\$self->{md5});
+      /^4$/ && do{      if ($ftype == TType::DOUBLE) {
+        $xfer += $input->readDouble(\$self->{gc_content});
       } else {
         $xfer += $input->skip($ftype);
       }
       last; };
       /^5$/ && do{      if ($ftype == TType::STRING) {
-        $xfer += $input->readString(\$self->{name});
+        $xfer += $input->readString(\$self->{md5});
       } else {
         $xfer += $input->skip($ftype);
       }
       last; };
       /^6$/ && do{      if ($ftype == TType::STRING) {
+        $xfer += $input->readString(\$self->{name});
+      } else {
+        $xfer += $input->skip($ftype);
+      }
+      last; };
+      /^7$/ && do{      if ($ftype == TType::STRING) {
         $xfer += $input->readString(\$self->{description});
       } else {
         $xfer += $input->skip($ftype);
       }
       last; };
-      /^7$/ && do{      if ($ftype == TType::BOOL) {
+      /^8$/ && do{      if ($ftype == TType::BOOL) {
         $xfer += $input->readBool(\$self->{is_complete});
       } else {
         $xfer += $input->skip($ftype);
       }
       last; };
-      /^8$/ && do{      if ($ftype == TType::BOOL) {
+      /^9$/ && do{      if ($ftype == TType::BOOL) {
         $xfer += $input->readBool(\$self->{is_circular});
       } else {
         $xfer += $input->skip($ftype);
@@ -891,28 +901,33 @@ sub write {
     $xfer += $output->writeI64($self->{length});
     $xfer += $output->writeFieldEnd();
   }
+  if (defined $self->{gc_content}) {
+    $xfer += $output->writeFieldBegin('gc_content', TType::DOUBLE, 4);
+    $xfer += $output->writeDouble($self->{gc_content});
+    $xfer += $output->writeFieldEnd();
+  }
   if (defined $self->{md5}) {
-    $xfer += $output->writeFieldBegin('md5', TType::STRING, 4);
+    $xfer += $output->writeFieldBegin('md5', TType::STRING, 5);
     $xfer += $output->writeString($self->{md5});
     $xfer += $output->writeFieldEnd();
   }
   if (defined $self->{name}) {
-    $xfer += $output->writeFieldBegin('name', TType::STRING, 5);
+    $xfer += $output->writeFieldBegin('name', TType::STRING, 6);
     $xfer += $output->writeString($self->{name});
     $xfer += $output->writeFieldEnd();
   }
   if (defined $self->{description}) {
-    $xfer += $output->writeFieldBegin('description', TType::STRING, 6);
+    $xfer += $output->writeFieldBegin('description', TType::STRING, 7);
     $xfer += $output->writeString($self->{description});
     $xfer += $output->writeFieldEnd();
   }
   if (defined $self->{is_complete}) {
-    $xfer += $output->writeFieldBegin('is_complete', TType::BOOL, 7);
+    $xfer += $output->writeFieldBegin('is_complete', TType::BOOL, 8);
     $xfer += $output->writeBool($self->{is_complete});
     $xfer += $output->writeFieldEnd();
   }
   if (defined $self->{is_circular}) {
-    $xfer += $output->writeFieldBegin('is_circular', TType::BOOL, 8);
+    $xfer += $output->writeFieldBegin('is_circular', TType::BOOL, 9);
     $xfer += $output->writeBool($self->{is_circular});
     $xfer += $output->writeFieldEnd();
   }

@@ -7,3 +7,6 @@ exclude_lines =
 source = 
     doekbase.data_api
     doekbase.data_api.tests
+omit =
+    /*/tests/*
+    /*/service/*

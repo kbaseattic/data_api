@@ -31,7 +31,7 @@ def main():
                         help="service name to start, one of {}".format(SERVICE_NAMES),
                         required=True)
     parser.add_argument("--port", help="port to listen on", type=int)
-    parser.add_argument("--kbase_url", help="prod, next, ci, localhost, dir", default="dir")
+    parser.add_argument("--kbase_url", help="prod, next, ci, localhost, dir_cache, dir_nocache", default="dir_nocache")
     parser.add_argument("--pidfile", help="path to pidfile to use")
     parser.add_argument('--verbose', '-v', dest='vb', action="count", default=1,
                         help="Print more verbose messages to standard error. "
@@ -90,7 +90,7 @@ def main():
     if args.pidfile:
         pidfilename = args.pidfile
     if args.port:
-        service_port=args.port
+        service_port = args.port
 
     if service_port is None:
         logger.error("Service port not defined!")
@@ -129,7 +129,7 @@ def main():
         #TODO set up signal handling for HUP, KILL
         #signal.signal(signal.SIGHUP, driver.reload_config())
 
-        logger.info("Starting service: port={:d}, PID={:d}".format(service_port, pid))
+        logger.info("Starting service: port={}, PID={}".format(service_port, pid))
         try:
             if service_name == "taxon":
                 from doekbase.data_api.taxonomy.taxon.service import driver
