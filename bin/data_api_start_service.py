@@ -64,6 +64,7 @@ def main():
     redis_port = None
 
     # get config
+    logger.info("Attempting to read config from " + args.config)
     if config.has_section(global_stanza_name):
         logger.info("Reading global config:'{}', stanza:'{}'".format(args.config, global_stanza_name))
         ws = config.get(global_stanza_name,'workspace_service_url')
@@ -91,11 +92,14 @@ def main():
     if args.port:
         service_port = args.port
 
+    if service_port is None:
+        logger.error("Service port not defined!")
+        return 1
+
     if redis_host is not None and redis_port is not None:
         logger.info("Activating REDIS at host:{} port:{}".format(redis_host, redis_port))
         cache.ObjectCache.cache_class = cache.RedisCache
         cache.ObjectCache.cache_params = {'redis_host': redis_host, 'redis_port': redis_port}
-
 
     # test that the pidfile is not already locked with a running process
     pidfile = lockfile.pidlockfile.PIDLockFile(pidfilename, timeout=-1)
