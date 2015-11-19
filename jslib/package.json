@@ -32,10 +32,8 @@
     "karma-phantomjs-launcher": "0.2.1",
     "karma-requirejs": "0.2.2",
     "karma-safari-launcher": "0.1.1",
-    "phantomjs": "^1.9.18",
     "requirejs": "^2.1.20",
     "grunt-connect": "0.2.0",
-    "grunt-open": "0.2.3",
-    "zombie": "~4.2.1"
+    "grunt-open": "0.2.3"
   }
 }

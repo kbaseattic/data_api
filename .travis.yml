@@ -10,6 +10,8 @@ python:
 
 before_install:
   - redis-server redis.conf &
+  - npm install -g bower
+  - npm install -g grunt-cli
 
 install:
   - pip install -r requirements.txt
