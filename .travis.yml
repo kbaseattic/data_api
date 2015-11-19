@@ -36,6 +36,7 @@ before_script:
   - cd jslib
   - npm install
   - grunt build-travis
+  - mkdir -p logs/
   - /usr/sbin/nginx -p `pwd` -c nginx-testing.conf
 
 script:
