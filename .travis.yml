@@ -25,6 +25,7 @@ install:
   - python setup.py install -vv
 
 before_script:
+  - printf "PATH = $PATH \n"
   - nohup data_api_start_service.py --service taxon --config deployment.cfg > taxonAPI.out &
   - nohup data_api_start_service.py --service assembly --config deployment.cfg > assemblyAPI.out &
 #  - data_api_start_service.py --service genomeannotation --config deployment.cfg
@@ -35,7 +36,7 @@ before_script:
   - cd jslib
   - npm install
   - grunt build-travis
-  - nginx -p `pwd` -c nginx-testing.conf
+  - /usr/sbin/nginx -p `pwd` -c nginx-testing.conf
 
 script:
   - printf "PATH = $PATH \n"
