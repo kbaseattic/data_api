@@ -36,8 +36,8 @@ before_script:
   - cd jslib
   - npm install
   - grunt build-travis
-  - mkdir -p logs/
-  - /usr/sbin/nginx -p `pwd` -c nginx-testing.conf
+  - mkdir -p $HOME/logs
+  - /usr/sbin/nginx -c $HOME/jslib/nginx-testing.conf -p $HOME/jslib/
 
 script:
   - printf "PATH = $PATH \n"
