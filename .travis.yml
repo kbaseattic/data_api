@@ -36,7 +36,7 @@ before_script:
   - cd jslib
   - npm install
   - grunt build-travis
-  - mkdir -p logs nginx
+  - mkdir -p log logs nginx
   - /usr/sbin/nginx -c $TRAVIS_BUILD_DIR/jslib/nginx-testing.conf -p $TRAVIS_BUILD_DIR/jslib/
 
 script:
