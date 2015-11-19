@@ -1,6 +1,12 @@
 // Karma configuration
 // Generated on Thu Jul 30 2015 17:38:26 GMT-0700 (PDT)
 
+var chrome_browser = 'Chrome'
+var firefox_browser = 'Firefox'
+if (process.env.TRAVIS) {
+    chrome_browser = 'Chrome_TravisCI'
+}
+
 module.exports = function(config) {
   config.set({
 
@@ -100,11 +106,19 @@ module.exports = function(config) {
     // available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
     // browsers: ['PhantomJS', 'Chrome', 'Firefox', 'Safari'],
 
-    browsers: ['Chrome', 'Firefox'],
+    browsers: [chrome_browser, firefox_browser],
 
 
     // Continuous Integration mode
     // if true, Karma captures browsers, runs the tests and exits
-    singleRun: true
+    singleRun: true,
+
+    customLaunchers: {
+        Chrome_TravisCI: {
+            base: 'Chrome',
+            flags: ['--no-sandbox']
+        }
+    },
+
   })
 }
