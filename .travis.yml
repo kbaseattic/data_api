@@ -2,11 +2,13 @@ language: python
 python:
   - "2.7"
 
-# sudo: required
+sudo: false
 
-# cache:
-#  directories:
-#    - $HOME/.cache/pip
+cache:
+  directories:
+    - $HOME/.cache/pip
+    - jslib/bower_components
+    - jslib/node_modules
 
 before_install:
   - redis-server redis.conf &
@@ -28,7 +30,7 @@ before_script:
   - npm install
   - cd ..
   - bower update
-  - (cd jslib && grunt build)
+#  - (cd jslib && grunt build)
 
 script:
   - printf "PATH = $PATH \n"

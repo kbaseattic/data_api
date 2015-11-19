@@ -67,12 +67,16 @@ define([
 
         }
         authToken = config.token;
-        if (!authToken) {
+        if (authToken == '' || authToken == null) {
+        }
+        else if (!authToken.match(/un=.*\|tokenid=.*/)) {
             throw {
                 type: 'ArgumentError',
                 name: 'AuthTokenMissing',
-                message: 'No Authorization found; Authorization is required for the data api',
-                suggestion: 'The authorization is provided in the "token" argument" property'
+                message: 'Invalid Authorization found; Authorization token ' +
+                         'must match pattern "un=<name>|tokenid=<token>..."',
+                suggestion: 'Authorization is provided in the "token"' +
+                            'argument property'
             };
         }
         timeout = config.timeout;
