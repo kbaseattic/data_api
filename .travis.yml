@@ -25,7 +25,7 @@ install:
   - python setup.py install -vv
 
 before_script:
-  - printf "PATH = $PATH \n"
+  - printf "Build dir = $TRAVIS_BUILD_DIR\n"
   - nohup data_api_start_service.py --service taxon --config deployment.cfg > taxonAPI.out &
   - nohup data_api_start_service.py --service assembly --config deployment.cfg > assemblyAPI.out &
 #  - data_api_start_service.py --service genomeannotation --config deployment.cfg
@@ -37,7 +37,7 @@ before_script:
   - npm install
   - grunt build-travis
   - mkdir -p $HOME/logs
-  - /usr/sbin/nginx -c $HOME/jslib/nginx-testing.conf -p $HOME/jslib/
+  - /usr/sbin/nginx -c "$TRAVIS_BUILD_DIR/jslib/nginx-testing.conf" -p "$TRAVIS_BUILD_DIR/jslib/"
 
 script:
   - printf "PATH = $PATH \n"
