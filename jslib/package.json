@@ -33,6 +33,7 @@
     "phantomjs": "^1.9.18",
     "requirejs": "^2.1.20",
     "grunt-connect": "0.2.0",
-    "grunt-open": "0.2.3"
+    "grunt-open": "0.2.3",
+    "zombie": "~4.2.1"
   }
 }

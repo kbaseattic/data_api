@@ -43,55 +43,86 @@ The JavaScript Data API is, like the Python API, custom wrapper code on top of t
     
 ## Running
 
-1. For local testing, start a local copy of the Data API service. You can also use a well-known running instance of the service.
 
+1. Change to the build directory
 
-2. Configure the test authorization. Edit `jslib/runtime/config/test.yml` (initial template shown below). 
-    
-        ---
-        cookieName: taxonApiTest
-        username: YOURUSERNAME
-        password: YOURPASSWORD
-        loginUrl: https://ci.kbase.us/services/authorization/Sessions/Login
-        taxonUrl: http://euk.kbase.us/taxon
-        timeout: 1000
-        objectRef: 993/329/2
-    
-    a. Change `username` to your KBase login name
-    
-    b. Change `password` to your KBase password
-    
-    c. You can usually leave `loginUrl` alone
-    
-    d. Change `taxonUrl` to the address of the DataAPI service. For a local service, this will usually be something like: `taxonUrl: http://localhost:9090`
-    
-    e. For local testing, change the `taxonUrl` to something that is in the `test_resources/data` directory. For testing against a CI or production KBase installation, the default is probably fine. To get a list of available Taxon object IDs, you can use the utility program in the `bin` directory called `print_msgpack_ref`:
-    
-        ./bin/print_msgpack_ref test_resources/data/*taxon.msgpack
-    The identifier in the second column is what you should put inthe `objectRef` field in the `test.yml` file.
-    
-    **Important: Do NOT add the modified file to any git commits!** Doing so will make your username and password public information. In particular, do not use `git commit -a`, since this would automatically add it.
-    
-3. Install your changes. Run `grunt build` again to copy the new config file into the build. *Note:* You need to _re-run_ `grunt build` after any changes to the configuration file.
+        cd runtime/build
+        
+2. **IF** you want to run in a browser window, CORS is going to be an issue. Here is how to deal with it.
 
-4. Run a web server to serve the test pages. There are of course many ways to do this. The important thing to know is that the root of the documents served should be `jslib/runtime/build`. Here are some suggestions:
+    a) first install a proxy. I used `corsa`, which is a Python module available from PIP.
 
-    a. Run a simple Python HTTP server from that directory:
+        pip install corsa
 
-            cd jslib/runtime/build
-            python -m SimpleHTTPServer 
-
-    You can access the index page served by opening a web browser to "localhost:8000/htdocs/", e.g. from the shell:
+    b) Run the proxy from the current directory (in the background). It will run on port 8888
     
-        open -a Google\ Chrome 'http://localhost:8000/htdocs'
+        corsa --allow-origin ALL --allow-proxy ALL --app-dir . &
+
+    c) Run a "real" web server on port 8000, to serve static content
+    
+        python -m SimpleHTTPServer &
+
+    
+    
+    f) Open the test page in a browser
+
+        open "http://localhost:8888/proxy/http://localhost:8000/test1.html"
+
+    This should contact the CORS proxy, which in turn contacts the local web server to load the page. The page itself will then send an HTTP request (through the proxy) to the Taxon service to fetch some information, and it will display it in the <div id='result'> element on the page. This will look like plain-text.
+
+    g) You can replace the previous URL with test<N>.html to run all the other tests
     
 ## Testing
 
-Testing is configured for Karma and Jasmine. Code coverage not currently set up. All test artifacts are in the test directory.
-Tests operate against the built product in runtime/build.
+All the JavaScript tests and tools, unless otherwise stated, should be run from the same directory as this README, currently called `jslib`.
 
-To test from this directory:
+We use Karma and PhantomJS to run the JavaScript code. Tests run against the following browsers/platforms:
+    * chrome
+    * safari
+    * firefox
+
+The Karma configuration is under `test/karma.conf.js`. You shouldn't need to modify it, except perhaps for the "port:" setting if the default port conflicts with something else on your system.
+
+Tests themselves are in `test/spec` and are usually named `test_<type>_api.js`, where "<type>" is the API name, e.g., `test_taxon_api.js`.
+
+* Install Karma
+
+        npm install -g karma karma-cli
+    
+
+* Install nginx and nginx-extras. nginx needs to be installed with the ["more-headers" extension](https://github.com/openresty/headers-more-nginx-module), so you need to clone that git repo first, then to install nginx itself, grab the nginx source code from [nginx.org](http://nginx.org/), for example,
+   the version 1.7.10 (see [nginx compatibility](#compatibility)), and then build the source with this module:
+
+   ```bash
+
+    wget 'http://nginx.org/download/nginx-1.9.3.tar.gz'
+    tar -xzvf nginx-1.9.3.tar.gz
+    cd nginx-1.9.3/
+
+    # Here we assume you would install you nginx under /opt/nginx/.
+    ./configure --prefix=/opt/nginx \
+        --add-module=/path/to/headers-more-nginx-module
+
+    make
+    make install
+   ```
+      
+* Run nginx
+
+        mkdir -p logs
+        nginx  -p `pwd` -c nginx-testing.conf
+
+ 
+* Run the Data API service of choice -- here, Taxon -- using the configuration in `data_api-test.cfg`
+
+        data_api_start_service.py --config data_api-test.cfg --kbase_url test --service taxon &
+        
+    You can add `-v` for very verbose messages to stderr.
+
+* From the same directory, run the Karma tests
 
         karma start test/karam.conf.js
 
-Tests are set up to run against Chrome, Firefox, Safari, and PhantomJS. I can't confirm PhantomJS, because it is not currently working. There are JS compatability bugs in PhantomJS < 2.0, but 2.0 does not build on El Capitan at the moment (qt5 compatiblity issues...)
+* When you are done you can stop nginx using a `-s stop` option like this:
+
+        nginx  -p `pwd` -c nginx-testing.conf -s stop

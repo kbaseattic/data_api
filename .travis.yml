@@ -19,11 +19,16 @@ before_script:
   - nohup data_api_start_service.py --service taxon --config deployment.cfg > taxonAPI.out &
   - nohup data_api_start_service.py --service assembly --config deployment.cfg > assemblyAPI.out &
 #  - data_api_start_service.py --service genomeannotation --config deployment.cfg
+  - "export DISPLAY=:99.0"
+  - "sh -e /etc/init.d/xvfb start"
+  - sleep 3 # give xvfb some time to start
 
 script:
   - printf "PATH = $PATH \n"
   - coverage run `which nosetests` -c nose.cfg -c nose-local.cfg
   - coverage report --skip-covered
+  - cd jslib
+  - karma start test/karma.conf.js
 
 env:
   - KB_DEPLOY_URL="dir_cache"
