@@ -22,6 +22,11 @@ before_script:
   - "export DISPLAY=:99.0"
   - "sh -e /etc/init.d/xvfb start"
   - sleep 3 # give xvfb some time to start
+  - cd jslib
+  - npm install
+  - cd ..
+  - bower update
+  - (cd jslib && grunt build)
 
 script:
   - printf "PATH = $PATH \n"
