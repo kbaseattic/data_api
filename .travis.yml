@@ -10,6 +10,11 @@ cache:
     - jslib/bower_components
     - jslib/node_modules
 
+addons:
+  apt:
+    packages:
+      - nginx
+
 before_install:
   - redis-server redis.conf &
   - npm install -g bower
