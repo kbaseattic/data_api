@@ -29,14 +29,13 @@ before_script:
   - sleep 3 # give xvfb some time to start
   - cd jslib
   - npm install
-  - (cd .. && bower update)
   - grunt build-travis
+  - nginx -p `pwd` -c nginx-testing.conf
 
 script:
   - printf "PATH = $PATH \n"
   - coverage run `which nosetests` -c nose.cfg -c nose-local.cfg
   - coverage report --skip-covered
-  - cd jslib
   - karma start test/karma.conf.js
 
 env:
