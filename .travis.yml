@@ -29,9 +29,8 @@ before_script:
   - sleep 3 # give xvfb some time to start
   - cd jslib
   - npm install
-  - cd ..
-  - bower update
-#  - (cd jslib && grunt build)
+  - (cd .. && bower update)
+  - grunt build-travis
 
 script:
   - printf "PATH = $PATH \n"
