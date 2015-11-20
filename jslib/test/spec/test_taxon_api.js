@@ -51,6 +51,7 @@ define([
                 .catch(function (err) {
                     console.error(err)
                     done.fail('Error fetching scientific lineage')
+                    return null // not returning promise
                 })
         }, 10000)
         it('Gets the scientific name for a known taxon', function (done) {
@@ -63,6 +64,7 @@ define([
                 .catch(function (err) {
                     console.error(err)
                     done.fail('Error fetching scientific name')
+                    return null // not returning promise
                 })
          }, 10000)
     })
