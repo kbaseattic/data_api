@@ -32,6 +32,7 @@ before_script:
   - cd jslib
   - npm install
   - grunt build-travis
+  - cd ..
 # Use simple node corsproxy module to deal with CORS
   - CORSPROXY_PORT=8000 corsproxy &
 
@@ -39,7 +40,7 @@ script:
   - printf "PATH = $PATH \n"
   - coverage run `which nosetests` -c nose.cfg -c nose-local.cfg
   - coverage report --skip-covered
-  - karma start test/karma.conf.js
+  - cd jslib && karma start test/karma.conf.js
 
 env:
   - KB_DEPLOY_URL="dir_cache"
