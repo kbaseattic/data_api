@@ -10,11 +10,6 @@ cache:
     - jslib/bower_components
     - jslib/node_modules
 
-# Not needed because of Node corsproxy
-#addons:
-#  apt:
-#    packages:
-#      - nginx
 
 before_install:
   - redis-server redis.conf &
@@ -39,9 +34,6 @@ before_script:
   - grunt build-travis
 # Use simple node corsproxy module to deal with CORS
   - CORSPROXY_PORT=8000 corsproxy &
- # Don't use NGINX
- # - mkdir -p log logs nginx
- # - /usr/sbin/nginx -c $TRAVIS_BUILD_DIR/jslib/nginx-testing.conf
 
 script:
   - printf "PATH = $PATH \n"
