@@ -33,6 +33,7 @@
     "karma-safari-launcher": "0.1.1",
     "requirejs": "^2.1.20",
     "grunt-connect": "0.2.0",
-    "grunt-open": "0.2.3"
+    "grunt-open": "0.2.3",
+    "corsproxy": "1.4.0"
   }
 }

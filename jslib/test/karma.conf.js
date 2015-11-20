@@ -47,7 +47,7 @@ module.exports = function(config) {
       {pattern: 'runtime/build/js/**/*.js', included: false},
       {pattern: 'runtime/build/bower_components/**/*.js', included: false},
       {pattern: 'test/spec/**/*.js', included: false},
-      {pattern: 'runtime/build/config/config.yml', included: false},
+      //{pattern: 'runtime/build/config/config.yml', included: false},
 
       'test/main-test.js',
     ],
@@ -106,8 +106,8 @@ module.exports = function(config) {
     // available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
     // browsers: ['PhantomJS', 'Chrome', 'Firefox', 'Safari'],
 
-    browsers: [chrome_browser, firefox_browser],
-
+    //browsers: [chrome_browser, firefox_browser],
+    browsers: [firefox_browser],
 
     // Continuous Integration mode
     // if true, Karma captures browsers, runs the tests and exits

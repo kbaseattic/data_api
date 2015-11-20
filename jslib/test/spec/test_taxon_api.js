@@ -1,6 +1,4 @@
-/**
- *
- */
+// Run tests
 define([
     'kb_data_taxon' // Taxon API
     ],
@@ -8,13 +6,15 @@ define([
 
     'use strict';
 
-    var base_url = 'http://127.0.0.1:8000';
-    var service_suffix = {object: '/object', taxon: '/taxon'} // XXX: etc.
+    var base_url = 'http://localhost:8000/localhost'
+    var service_suffix = {
+        object: ':9100',
+        taxon: ':9101'}
 
     // Taxon API tests
     describe('Taxon API', function () {
         var url = base_url + service_suffix.taxon
-        console.log('Contacting Taxon API at:', url)
+        console.log('Contacting Taxon API at: "' + url + '"')
         it('Gets the scientific name for a known taxon', function (done) {
             var taxon = Taxon({ ref: "993/674615/1",
                     url: url,
