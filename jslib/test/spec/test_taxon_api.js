@@ -39,11 +39,9 @@ define([
             var taxon = Taxon({ ref: taxon_ref, url: url, token: '', timeout:
              6000})
         it('Gets the scientific lineage for a known taxon', function (done) {
-            //var taxon = Taxon({ ref: taxon_ref, url: url, token: '', timeout:
-            //6000})
             taxon.getScientificLineage()
                 .then(function(lineage) {
-                    console.log('Got lineage: ' + lineage)
+                    //console.log('Got lineage: ' + lineage)
                     for (var i=0; i < taxon_lineage.length; i++) {
                         expect(lineage[i]).toBe(taxon_lineage[i])
                     }
@@ -56,8 +54,6 @@ define([
                 })
         }, 10000)
         it('Gets the scientific name for a known taxon', function (done) {
-            //var taxon = Taxon({ ref: taxon_ref, url: url, token: '', timeout:
-            //6000})
             taxon.getScientificName()
                 .then(function(name) {
                     expect(name).toBe(taxon_data.scientific_name)
