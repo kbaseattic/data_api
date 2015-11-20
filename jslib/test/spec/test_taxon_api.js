@@ -38,19 +38,6 @@ define([
         console.log('Contacting Taxon API at: "' + url + '"')
             var taxon = Taxon({ ref: taxon_ref, url: url, token: '', timeout:
              6000})
-        it('Gets the scientific name for a known taxon', function (done) {
-            //var taxon = Taxon({ ref: taxon_ref, url: url, token: '', timeout:
-            //6000})
-            taxon.getScientificName()
-                .then(function(name) {
-                    expect(name).toBe(taxon_data.scientific_name)
-                    done()
-                 })
-                .catch(function (err) {
-                    console.error(err)
-                    done.fail('Error fetching scientific name')
-                })
-        }, 20000)
         it('Gets the scientific lineage for a known taxon', function (done) {
             //var taxon = Taxon({ ref: taxon_ref, url: url, token: '', timeout:
             //6000})
@@ -61,12 +48,27 @@ define([
                         expect(lineage[i]).toBe(taxon_lineage[i])
                     }
                     done()
+                    return null // not returning promise
                 })
                 .catch(function (err) {
                     console.error(err)
                     done.fail('Error fetching scientific lineage')
                 })
-        }, 20000)
+        }, 10000)
+        it('Gets the scientific name for a known taxon', function (done) {
+            //var taxon = Taxon({ ref: taxon_ref, url: url, token: '', timeout:
+            //6000})
+            taxon.getScientificName()
+                .then(function(name) {
+                    expect(name).toBe(taxon_data.scientific_name)
+                    done()
+                    return null // not returning promise
+                 })
+                .catch(function (err) {
+                    console.error(err)
+                    done.fail('Error fetching scientific name')
+                })
+         }, 10000)
     })
 })
 

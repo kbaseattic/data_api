@@ -167,10 +167,13 @@ define([
          *
          */
         function getScientificLineage() {
-            return Promise.resolve(client()
+           return Promise.resolve(client()
                 .get_scientific_lineage(authToken, objectReference, true))
               .then(function (data) {
-                  return data.split(';').map(function (x) {return x.trim(' ')})
+                  var str_data = data + ''
+                  var r = str_data.split(',')
+                    .map(function (x) { return x.trim(' ') })
+                  return r
               })
         }
 
