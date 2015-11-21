@@ -11,9 +11,12 @@ import hashlib
 
 # local imports
 from doekbase.data_api.core import ObjectAPI
+from doekbase.data_api.util import get_logger, logged
+from doekbase.data_api import exceptions
+import doekbase.data_api.annotation.genome_annotation.service.ttypes as ttypes
 
 _GENOME_TYPES = ['KBaseGenomes.Genome']
-_GENOME_ANNOTATION_TYPES = ['KBaseGenomesCondensedPrototypeV2.GenomeAnnotation']
+_GENOME_ANNOTATION_TYPES = ['KBaseGenomeAnnotations.GenomeAnnotation']
 TYPES = _GENOME_TYPES + _GENOME_ANNOTATION_TYPES
 
 #: Mapping of feature type codes to descriptions
@@ -45,11 +48,11 @@ FEATURE_DESCRIPTIONS = {
 }
 
 
-class GenomeInterface(object):
+class GenomeAnnotationInterface(object):
     __metaclass__ = abc.ABCMeta
 
     @abc.abstractmethod
-    def get_taxon(self):
+    def get_taxon(self, ref_only=False):
         """Retrieves the Taxon assigned to this Genome Annotation.
         
         Returns:
@@ -58,7 +61,7 @@ class GenomeInterface(object):
         pass
 
     @abc.abstractmethod
-    def get_assembly(self):
+    def get_assembly(self, ref_only=False):
         """Retrieves the Assembly used to create this Genome Annotation.
         
         Returns:
@@ -101,6 +104,21 @@ class GenomeInterface(object):
         return result
 
     @abc.abstractmethod
+    def get_feature_type_counts(self, type_list=None):
+        """Retrieve the number of Genome Features, grouped by
+        feature type identifier.
+
+        Args:
+          type_list (list<str>): List of feature types. Each should match a
+            value in :data:`FEATURE_DESCRIPTIONS`. If None,
+            or empty, will retrieve all type counts.
+
+        Returns:
+          dict: Map of string feature types to integer counts.
+        """
+        pass
+
+    @abc.abstractmethod
     def get_feature_ids(self, type_list=None, region_list=None,
                         function_list=None, alias_list=None):
         """Retrieves feature ids based on filters such as feature types,
@@ -124,20 +142,27 @@ class GenomeInterface(object):
         pass  # TODO: add examples in docs for function_list and alias_list
 
     @abc.abstractmethod
-    def get_feature_type_counts(self, type_list=None):
-        """Retrieve the number of Genome Features, grouped by
-        feature type identifier.
-        
+    def get_features(self, feature_id_list=None):
+        """Retrieves all the available data for Genome Features.
+
         Args:
-          type_list (list<str>): List of feature types. Each should match a
-            value in :data:`FEATURE_DESCRIPTIONS`. If None,
-            or empty, will retrieve all type counts.
+          feature_id_list (list<str>): List of features to retrieve.
+            If None, returns all feature functions.
 
         Returns:
-          dict: Map of string feature types to integer counts.
+          dict<str,dict<str,list>>: Mapping from feature IDs to dicts
+            of available data.
         """
         pass
-    
+
+    @abc.abstractmethod
+    def get_proteins(self):
+        """Retrieves all the available proteins for genome features.
+
+        Returns:
+          list<dict>"""
+        pass
+
     @abc.abstractmethod
     def get_feature_locations(self, feature_id_list=None):
         """Retrieves the location information for given genome features.
@@ -217,36 +242,14 @@ class GenomeInterface(object):
         pass
 
     @abc.abstractmethod
-    def get_features(self, feature_id_list=None):
-        """Retrieves all the available data for Genome Features.
-
-        Args:
-          feature_id_list (list<str>): List of features to retrieve.
-            If None, returns all feature functions.
-        
-        Returns:
-          dict<str,dict<str,list>>: Mapping from feature IDs to dicts
-            of available data.
-        """
-        pass
-
-    @abc.abstractmethod
-    def get_proteins(self):
-        """Retrieves all the available proteins for genome features.
-
-        Returns:
-          list<dict>"""
-        pass
-
-    @abc.abstractmethod
     def get_cds_by_mrna(self, mrna_feature_id_list=None):
         """Retrieves coding sequences (cds) for given mRNA feature IDs.
 
         Args:
-           mrna_feature_id_list (list<str>): List of features to retrieve.
-             If None, returns all values.
+           mrna_feature_id_list (list<str>): List of mrna feature ids to map to cds feature ids.
+             If None, returns all mappings between mrna feature ids and cds feature ids.
         Returns:
-          ????
+          dict<str>: str
         """
         pass
 
@@ -255,10 +258,10 @@ class GenomeInterface(object):
         """Retrieves mRNA for given coding sequences (cds) feature IDs.
 
         Args:
-           cds_feature_id_list (list<str>): List of features to retrieve.
-             If None, returns all values.
+           cds_feature_id_list (list<str>): List of cds feature ids to map to mrna feature ids.
+             If None, returns all mappings between cds feature ids and mrna feature ids
         Returns:
-          ????
+          dict<str>: str
         """
         pass
 
@@ -270,7 +273,7 @@ class GenomeInterface(object):
            cds_feature_id_list (list<str>): List of features to retrieve.
              If None, returns all values.
         Returns:
-          ????
+          dict<str>: str
         """
         pass
   
@@ -279,10 +282,10 @@ class GenomeInterface(object):
         """Retrieves Genes for given mRNA feature IDs.
 
         Args:
-           mrna_feature_id_list (list<str>): List of features to retrieve.
+           mrna_feature_id_list (list<str>): List of gene feature ids to map to mrna feature ids.
              If None, returns all values.
         Returns:
-          ????
+          dict<str>: str
         """
         pass
 
@@ -294,7 +297,7 @@ class GenomeInterface(object):
            gene_feature_id_list (list<str>): List of features to retrieve.
              If None, returns all values.
         Returns:
-          ????
+          dict<str>: list<str>
         """
         pass
     
@@ -303,16 +306,16 @@ class GenomeInterface(object):
         """Retrieves mRNA for given Gene feature IDs.
 
         Args:
-           gene_feature_id_list (list<str>): List of features to retrieve.
+           gene_feature_id_list (list<str>): List of mrna feature ids to map to gene feature ids.
              If None, returns all values.
         Returns:
-          ????
+          dict<str>: list<str>
         """
         pass
 
 
 
-class GenomeAnnotationAPI(ObjectAPI, GenomeInterface):
+class GenomeAnnotationAPI(ObjectAPI, GenomeAnnotationInterface):
     """
     Factory class for instantiating a GenomeAnnotationAPI object of the correct subtype.
     """
@@ -329,15 +332,15 @@ class GenomeAnnotationAPI(ObjectAPI, GenomeInterface):
             raise TypeError("Invalid type! Expected one of {0}, received {1}".format(TYPES, generic_object._typestring))
 
         if is_annotation_type:
-            self.proxy = _Prototype(services, token, ref)
+            self.proxy = _GenomeAnnotation(services, token, ref)
         else:
             self.proxy = _KBaseGenomes_Genome(services, token, ref)
 
-    def get_taxon(self):
-        return self.proxy.get_taxon()
+    def get_taxon(self, ref_only=False):
+        return self.proxy.get_taxon(ref_only)
 
-    def get_assembly(self):
-        return self.proxy.get_assembly()
+    def get_assembly(self, ref_only=False):
+        return self.proxy.get_assembly(ref_only)
     
     def get_feature_types(self):
         return self.proxy.get_feature_types()
@@ -392,17 +395,27 @@ class GenomeAnnotationAPI(ObjectAPI, GenomeInterface):
     
 
 
-class _KBaseGenomes_Genome(ObjectAPI, GenomeInterface):
+class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
     def __init__(self, services, token, ref):
         super(_KBaseGenomes_Genome, self).__init__(services, token, ref)
 
-    def get_taxon(self):
+    def get_taxon(self, ref_only=False):
         from doekbase.data_api.taxonomy.taxon.api import TaxonAPI
-        return TaxonAPI(self.services, token=self._token, ref=self.ref)
 
-    def get_assembly(self):
+        if ref_only:
+            return self.ref
+        else:
+            return TaxonAPI(self.services, token=self._token, ref=self.ref)
+
+    def get_assembly(self, ref_only=False):
         from doekbase.data_api.sequence.assembly.api import AssemblyAPI
-        return AssemblyAPI(self.services, self._token, ref=self.get_data_subset(path_list=["contigset_ref"])["contigset_ref"])
+
+        contigset_ref = self.get_data_subset(path_list=["contigset_ref"])["contigset_ref"]
+
+        if ref_only:
+            return contigset_ref
+        else:
+            return AssemblyAPI(self.services, self._token, ref=contigset_ref)
 
     def get_feature_types(self):
         feature_types = list()
@@ -925,9 +938,9 @@ class _KBaseGenomes_Genome(ObjectAPI, GenomeInterface):
 
 
 
-class _Prototype(ObjectAPI, GenomeInterface):
+class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
     def __init__(self, services, token, ref):
-        super(_Prototype, self).__init__(services, token, ref)
+        super(_GenomeAnnotation, self).__init__(services, token, ref)
 
     def _get_feature_containers(self, feature_id_list=None):
         if feature_id_list is None:
@@ -952,13 +965,25 @@ class _Prototype(ObjectAPI, GenomeInterface):
 
         return feature_containers
 
-    def get_taxon(self):
+    def get_taxon(self, ref_only=False):
         from doekbase.data_api.taxonomy.taxon.api import TaxonAPI
-        return TaxonAPI(self.services, token=self._token, ref=self.get_data_subset(path_list=["taxon_ref"])["taxon_ref"])
 
-    def get_assembly(self):
+        taxon_ref = self.get_data_subset(path_list=["taxon_ref"])["taxon_ref"]
+
+        if ref_only:
+            return taxon_ref
+        else:
+            return TaxonAPI(self.services, token=self._token, ref=taxon_ref)
+
+    def get_assembly(self, ref_only=False):
         from doekbase.data_api.sequence.assembly.api import AssemblyAPI
-        return AssemblyAPI(self.services, token=self._token, ref=self.get_data_subset(path_list=["assembly_ref"])["assembly_ref"])
+
+        assembly_ref = self.get_data_subset(path_list=["assembly_ref"])["assembly_ref"]
+
+        if ref_only:
+            return assembly_ref
+        else:
+            return AssemblyAPI(self.services, token=self._token, ref=assembly_ref)
 
     def get_feature_types(self):
         return self.get_data_subset(path_list=["feature_container_references"])["feature_container_references"].keys()
@@ -1434,3 +1459,148 @@ class _Prototype(ObjectAPI, GenomeInterface):
 
     def get_mrna_by_gene(self, gene_feature_id_list=None):
         return self._get_by_gene("mrna", gene_feature_id_list)
+
+
+_ga_log = get_logger('GenomeAnnotationClientAPI')
+
+class GenomeAnnotationClientAPI(GenomeAnnotationInterface):
+
+    def client_method(func):
+        def wrapper(self, *args, **kwargs):
+            if not self.transport.isOpen():
+                self.transport.open()
+
+            try:
+                return func(self, *args, **kwargs)
+            except ttypes.AttributeException, e:
+                raise AttributeError(e.message)
+            except ttypes.AuthenticationException, e:
+                raise exceptions.AuthenticationError(e.message)
+            except ttypes.AuthorizationException, e:
+                raise exceptions.AuthorizationError(e.message)
+            except ttypes.TypeException, e:
+                raise exceptions.TypeError(e.message)
+            except ttypes.ServiceException, e:
+                raise exceptions.ServiceError(e.message)
+            except Exception, e:
+                raise
+            finally:
+                self.transport.close()
+        return wrapper
+
+    @logged(_ga_log, log_name='init')
+    def __init__(self, url=None, token=None, ref=None):
+        from doekbase.data_api.annotation.genome_annotation.service.interface import GenomeAnnotationClientConnection
+
+        #TODO add exception handling and better error messages here
+        self.url = url
+        self.transport, self.client = GenomeAnnotationClientConnection(url).get_client()
+        self.ref = ref
+        self._token = token
+
+    @logged(_ga_log)
+    @client_method
+    def get_taxon(self, ref_only=False):
+        return self.client.get_taxon(self._token, self.ref)
+
+    @logged(_ga_log)
+    @client_method
+    def get_assembly(self, ref_only=False):
+        return self.client.get_assembly(self._token, self.ref)
+
+    @logged(_ga_log)
+    @client_method
+    def get_feature_types(self):
+        return self.client.get_feature_types(self._token, self.ref)
+    
+    @logged(_ga_log)
+    @client_method
+    def get_feature_type_descriptions(self, type_list=None):
+        return self.client.get_feature_type_descriptions(self._token, self.ref, type_list)
+
+    @logged(_ga_log)
+    @client_method
+    def get_feature_type_counts(self, type_list=None):
+        return self.client.get_feature_type_counts(self._token, self.ref, type_list)
+
+    @logged(_ga_log)
+    @client_method
+    def get_feature_ids(self, type_list=None, region_list=None, function_list=None, alias_list=None):
+        # TODO need to convertion region_list to thrift list of Region
+
+        return self.client.get_feature_ids(self._token, self.ref,
+                                           type_list, region_list,
+                                           function_list, alias_list)
+
+    @logged(_ga_log)
+    @client_method
+    def get_features(self, feature_id_list=None):
+        result = self.client.get_features(self._token, self.ref)
+
+        # TODO need to convert this back to dict
+
+        return result
+
+    @logged(_ga_log)
+    @client_method
+    def get_proteins(self):
+        return self.client.get_proteins(self._token, self.ref)
+
+    @logged(_ga_log)
+    @client_method
+    def get_feature_locations(self, feature_id_list=None):
+        result = self.client.get_feature_locations(self._token, self.ref)
+
+        # TODO need to convert regions back to tuples
+
+        return result
+
+    @logged(_ga_log)
+    @client_method
+    def get_feature_dna(self, feature_id_list=None):
+        return self.client.get_feature_dna(self._token, self.ref)
+
+    @logged(_ga_log)
+    @client_method
+    def get_feature_functions(self, feature_id_list=None):
+        return self.client.get_feature_functions(self._token, self.ref)
+
+    @logged(_ga_log)
+    @client_method
+    def get_feature_aliases(self, feature_id_list=None):
+        return self.client.get_feature_aliases(self._token, self.ref)
+
+    @logged(_ga_log)
+    @client_method
+    def get_feature_publications(self, feature_id_list=None):
+        return self.client.get_feature_publications(self._token, self.ref)
+
+    @logged(_ga_log)
+    @client_method
+    def get_cds_by_mrna(self, mrna_feature_id_list=None):
+        return self.client.get_cds_by_mrna(self._token, self.ref, mrna_feature_id_list)
+
+    @logged(_ga_log)
+    @client_method
+    def get_mrna_by_cds(self, cds_feature_id_list=None):
+        return self.client.get_mrna_by_cds(self._token, self.ref, cds_feature_id_list)
+
+    @logged(_ga_log)
+    @client_method
+    def get_gene_by_cds(self, cds_feature_id_list=None):
+        return self.client.get_gene_by_cds(self._token, self.ref, cds_feature_id_list)
+
+    @logged(_ga_log)
+    @client_method
+    def get_gene_by_mrna(self, mrna_feature_id_list=None):
+        return self.client.get_gene_by_mrna(self._token, self.ref, mrna_feature_id_list)
+
+    @logged(_ga_log)
+    @client_method
+    def get_cds_by_gene(self, gene_feature_id_list=None):
+        return self.client.get_cds_by_gene(self._token, self.ref, gene_feature_id_list)
+
+    @logged(_ga_log)
+    @client_method
+    def get_mrna_by_gene(self, gene_feature_id_list=None):
+        return self.client.get_mrna_by_gene(self._token, self.ref, gene_feature_id_list)

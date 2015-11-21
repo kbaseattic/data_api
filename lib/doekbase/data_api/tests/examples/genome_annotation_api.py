@@ -3,7 +3,7 @@ Examples for Genome Annotation API
 """
 import os
 
-from doekbase.data_api.annotation.genome_annotation import GenomeAnnotationAPI
+from doekbase.data_api.annotation.genome_annotation.api import GenomeAnnotationAPI
 
 # def get_proteins_for_gene(ref, gene, ws_url=None):
 #     """Fetch all Proteins for a gene.
@@ -49,8 +49,8 @@ def proteins_to_fasta(ws_url='https://ci.kbase.us/services/ws/'):
     Returns:
         Full path to output file
     """
-    ref = "PrototypeReferenceGenomes/kb|g.166819"
-    # ref = "PrototypeReferenceGenomes/kb|g.3899"
+    ref = "ReferenceGenomeAnnotations/kb|g.166819"
+    # ref = "ReferenceGenomeAnnotations/kb|g.3899"
     genome_annotation = GenomeAnnotationAPI(
         token=os.environ.get('KB_AUTH_TOKEN'), services={
             'workspace_service_url': ws_url}, ref=ref)

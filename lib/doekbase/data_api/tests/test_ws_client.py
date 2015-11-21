@@ -15,7 +15,7 @@ from doekbase.workspace import client as ws_client
 
 _log = logging.getLogger('doekbase.tests.test_ws_client')
 
-genome_new = "PrototypeReferenceGenomes/kb|g.166819"
+genome_new = "ReferenceGenomeAnnotations/kb|g.166819"
 genome_old = "OriginalReferenceGenomes/kb|g.166819"
 taxon_new = "ReferenceTaxons/242159_taxon"
 taxon_old = "OriginalReferenceGenomes/kb|g.166819"

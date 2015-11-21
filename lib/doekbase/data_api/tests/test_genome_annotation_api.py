@@ -5,13 +5,13 @@ import logging
 from unittest import skipUnless
 
 from . import shared
-from doekbase.data_api.annotation.genome_annotation import GenomeAnnotationAPI
+from doekbase.data_api.annotation.genome_annotation.api import GenomeAnnotationAPI
 from doekbase.data_api.sequence.assembly.api import AssemblyAPI
 from doekbase.data_api.taxonomy.taxon.api import TaxonAPI
 
 _log = logging.getLogger(__name__)
 
-genome_new = "PrototypeReferenceGenomes/kb|g.166819"
+genome_new = "ReferenceGenomeAnnotations/kb|g.166819"
 genome_old = "OriginalReferenceGenomes/kb|g.166819"
 t_new = None
 t_old = None

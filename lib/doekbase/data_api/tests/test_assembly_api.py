@@ -9,11 +9,11 @@ from doekbase.data_api import exceptions
 from doekbase.data_api.sequence.assembly.api import AssemblyAPI
 from doekbase.data_api.sequence.assembly.api import AssemblyClientAPI
 from doekbase.data_api.sequence.assembly.api import _KBaseGenomes_ContigSet
-from doekbase.data_api.sequence.assembly.api import _Prototype
+from doekbase.data_api.sequence.assembly.api import _Assembly
 
 _log = logging.getLogger(__name__)
 
-assembly_new = "PrototypeReferenceGenomes/kb|g.166819_assembly"
+assembly_new = "ReferenceGenomeAnnotations/kb|g.166819_assembly"
 assembly_old = "OriginalReferenceGenomes/kb|g.166819.contigset"
 t_new = None
 t_new_e = None
@@ -28,7 +28,7 @@ def setup():
     global t_new, t_old, t_new_e, t_old_e, t_client_new, t_client_old, g_skip_shock
     g_skip_shock = not shared.services["shock_service_url"].startswith("http")
     t_new = AssemblyAPI(shared.services, shared.token, assembly_new)
-    t_new_e = _Prototype(shared.services, shared.token, assembly_new)
+    t_new_e = _Assembly(shared.services, shared.token, assembly_new)
     t_old = AssemblyAPI(shared.services, shared.token, assembly_old)
     t_old_e = _KBaseGenomes_ContigSet(shared.services, shared.token, assembly_old)
     t_client_new = AssemblyClientAPI(shared.services["assembly_service_url"], shared.token, assembly_new)

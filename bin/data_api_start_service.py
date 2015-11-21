@@ -14,7 +14,7 @@ import lockfile.pidlockfile
 # local
 from doekbase.data_api import cache
 
-SERVICE_NAMES = ["object", "taxon", "assembly", "genomeannotation"]
+SERVICE_NAMES = ["object", "taxon", "assembly", "genome_annotation"]
 
 # Logging
 # TODO: add syslog support
@@ -131,6 +131,8 @@ def main():
                 from doekbase.data_api.taxonomy.taxon.service import driver
             elif service_name == "assembly":
                 from doekbase.data_api.sequence.assembly.service import driver
+            elif service_name == "genome_annotation":
+                from doekbase.data_api.annotation.genome_annotation.service import driver
             else:
                 raise Exception("Service not activated: {}".format(service_name))
 
