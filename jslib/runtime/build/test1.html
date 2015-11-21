@@ -1,0 +1,76 @@
+<html>
+ <head>
+        <title>Taxon API Test Page</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <!-- <script src="/bower_components/requirejs/require.js"></script> -->
+        <script src="require.js"></script>
+        <!-- <script src="require-config.js"></script> -->
+</head>
+<body>
+    <div id='result'></div>
+    <script>
+    'use strict';
+
+ // Configuration family fun time
+    require.config({
+        baseUrl: 'http://localhost:8888/proxy/http://localhost:8000/',
+        catchError: false,
+        onError: function (err) {
+            alert("RequireJS Error:" + err);
+        },
+        paths: {
+            // External Dependencies
+            // ----------------------
+            jquery: 'bower_components/jquery/jquery',
+            underscore: 'bower_components/underscore/underscore',
+            bluebird: 'bower_components/bluebird/bluebird',
+            bootstrap: 'bower_components/bootstrap/js/bootstrap',
+            bootstrap_css: 'bower_components/bootstrap/css/bootstrap',
+            'font-awesome': 'bower_components/font-awesome/css/font-awesome',
+            thrift: 'bower_components/thrift-binary-protocol/thrift-core',
+            thrift_transport_xhr: 'bower_components/thrift-binary-protocol/thrift-transport-xhr',
+            thrift_protocol_binary: 'bower_components/thrift-binary-protocol/thrift-protocol-binary',
+            text: 'bower_components/requirejs-text/text',
+            yaml: 'bower_components/require-yaml/yaml',
+            'js-yaml': 'bower_components/js-yaml/js-yaml',
+            css: 'bower_components/require-css/css',
+            // NB the taxon thrift libraries are generated, wrapped, and installed
+            // by grunt tasks.
+            taxon_types: 'js/thrift/taxon/taxon_types',
+            taxon_service: 'js/thrift/taxon/thrift_service',
+            // The main product
+            kb_data_taxon: 'js/Taxon',
+            kb_common_html: 'bower_components/kbase-common-js/html',
+            kb_common_cookie: 'bower_components/kbase-common-js/cookie',
+            kb_common_logger: 'bower_components/kbase-common-js/logger',
+            kb_common_session: 'bower_components/kbase-common-js/session'
+        },
+        shim: {
+            bootstrap: {
+                deps: ['jquery', 'css!bootstrap_css']
+            }
+        },
+        map: {
+            '*': {
+                 'css': 'css',
+                'promise': 'bluebird'
+            }
+        }
+    });
+
+// Do something stupid and ridiculous
+
+requirejs(['kb_data_taxon'], function(Taxon){
+    var taxon = Taxon({ ref: "993/674615/1",
+            url: "http://localhost:8888/proxy/http://localhost:9101",
+            token: "",
+            timeout: 6000})
+    taxon.getScientificName()
+        .then(function(name) {
+            console.log("Scientific name: ", name)
+            document.getElementById('result').innerHTML = name
+    })
+});
+</script>
+</body>
