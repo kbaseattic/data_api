@@ -2,28 +2,48 @@ language: python
 python:
   - "2.7"
 
-# sudo: required
+sudo: false
 
-# cache:
-#  directories:
-#    - $HOME/.cache/pip
+cache:
+  directories:
+    - $HOME/.cache/pip
+    - jslib/bower_components
+    - jslib/node_modules
+
 
 before_install:
   - redis-server redis.conf &
+  - npm install -g bower
+  - npm install -g grunt-cli
+  - npm install -g corsproxy
 
 install:
   - pip install -r requirements.txt
   - python setup.py install -vv
 
 before_script:
+  - printf "Build dir = $TRAVIS_BUILD_DIR\n"
   - nohup data_api_start_service.py --service taxon --config deployment.cfg > taxonAPI.out &
   - nohup data_api_start_service.py --service assembly --config deployment.cfg > assemblyAPI.out &
 #  - data_api_start_service.py --service genomeannotation --config deployment.cfg
+  - export DISPLAY=:99.0
+  - export CHROME_BIN=chromium-browser
+  - sh -e /etc/init.d/xvfb start
+  - sleep 3 # give xvfb some time to start
+  - cd jslib
+  - npm install
+  - grunt build-travis
+  - cd ..
+# Use simple node corsproxy module to deal with CORS
+  - CORSPROXY_PORT=8000 corsproxy &
 
 script:
-  - printf "PATH = $PATH \n"
+#  - printf "PATH = $PATH \n"
   - coverage run `which nosetests` -c nose.cfg -c nose-local.cfg
   - coverage report --skip-covered
+  - cd jslib
+  - karma start test/karma.conf.js
+  - cd ..
 
 env:
   - KB_DEPLOY_URL="dir_cache"

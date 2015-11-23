@@ -1,4 +1,4 @@
-/*global require, module */
+    /*global require, module */
 /*jslint white: true */
 var path = require('path');
 var fs = require('fs');
@@ -455,6 +455,17 @@ module.exports = function (grunt) {
         'copy:bower',
         'copy:build',
         'build-thrift-libs',
+        'copy:bower-package'
+    ]);
+
+    // Do a build w/o Thrift for TravisCI
+    grunt.registerTask('build-travis', [
+        'shell:bowerUpdate',
+        'jsdoc:build',
+        'markdown:build',
+        'copy:runtime',
+        'copy:bower',
+        'copy:build',
         'copy:bower-package'
     ]);
 

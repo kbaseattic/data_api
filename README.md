@@ -1,3 +1,5 @@
+**Version**: 0.1.0
+
 [![Join the chat at https://gitter.im/kbase/data_api](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/kbase/data_api?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 <img src="GolgiVolvox.png" alt="Volvox" style="width: 100px;"/>
@@ -6,9 +8,9 @@
 
 Towards a unified data api for KBase
 
-This repository is configured to use TravisCI
+This repository is configured to use TravisCI.
 
-Source code is under lib/ (Python)
+Source code is under lib/ (Python) and jslib/ (JavaScript)
 
 Master branch status
 [![Build Status](https://travis-ci.org/kbase/data_api.svg?branch=master)](https://travis-ci.org/kbase/data_api)
@@ -226,3 +228,6 @@ The sub-repository will be cloned in the directory `test_resources`.
 
     nosetests -c nose.cfg -c nose-local.cfg -s doekbase.data_api
 
+### JavaScript tests
+
+For the JavaScript API, all the code and tests live under `jslib`. See the README in that directory for more details.
