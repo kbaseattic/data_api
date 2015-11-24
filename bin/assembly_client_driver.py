@@ -20,7 +20,7 @@ def test_client():
     args = ap.parse_args()
 
     token='';
-    if os.has_key('KB_AUTH_TOKEN'):
+    if os.environ.has_key('KB_AUTH_TOKEN'):
         token = os.environ['KB_AUTH_TOKEN']
 
     api = AssemblyClientAPI(args.url, token, args.ref)
