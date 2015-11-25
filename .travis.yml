@@ -55,3 +55,8 @@ after_success:
   - kill $(cat taxonAPI.pid)
   - kill $(cat assemblyAPI.pid)
   - kill $(cat genome_annotationAPI.pid)
+
+after_failure:
+  - cat taxonAPI.out
+  - cat assemblyAPI.out
+  - cat genome_annotationAPI.out
