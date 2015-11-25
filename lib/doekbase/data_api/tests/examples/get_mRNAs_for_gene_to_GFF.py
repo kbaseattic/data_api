@@ -79,7 +79,5 @@ def run(ws_url='https://ci.kbase.us/services/ws/'):
     with open(outfile, 'w') as f:
         f.write(gffdata)
 
-
-
 if __name__ == '__main__':
     run()
