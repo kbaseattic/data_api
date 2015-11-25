@@ -1,17 +1,18 @@
-var tests = [];
-for (var file in window.__karma__.files) {
-  if (window.__karma__.files.hasOwnProperty(file)) {
-    if (/test_.*\.js$/.test(file)) {
-      tests.push(file);
-    }
-  }
-}
+'use strict';
 
+// Node version of require
+var requirejs = require('requirejs');
+
+// Configuration family fun time
 requirejs.config({
-    // Karma serves files from '/base'
-    baseUrl: '/base/runtime/build',
-
+    baseUrl: '.',
+    catchError: true,
+    onError: function (err) {
+        alert("RequireJS Error:" + err);
+    },
     paths: {
+        // External Dependencies
+        // ----------------------
         jquery: 'bower_components/jquery/jquery',
         underscore: 'bower_components/underscore/underscore',
         bluebird: 'bower_components/bluebird/bluebird',
@@ -36,22 +37,26 @@ requirejs.config({
         kb_common_logger: 'bower_components/kbase-common-js/logger',
         kb_common_session: 'bower_components/kbase-common-js/session'
     },
-
     shim: {
-        'underscore': {
-            exports: '_'
+        bootstrap: {
+            deps: ['jquery', 'css!bootstrap_css']
         }
     },
     map: {
         '*': {
-            'css': 'css',
+             'css': 'css',
             'promise': 'bluebird'
         }
-    },
-
-    // ask Require.js to load these files (all our tests)
-    deps: tests,
-
-    // start test run, once Require.js is done
-    callback: window.__karma__.start
+    }
 });
+
+// Do something stupid and ridiculous
+
+requirejs(['kb_data_taxon'], function(Taxon){
+    var txobj = Taxon({ ref: "993/674615/1",
+                   url: "localhost:9001",
+                   token: "",
+                   timeout: 6000})
+    console.log(txobj)
+    console.log("Scientific name: ",txobj.getScientificName())
+})
