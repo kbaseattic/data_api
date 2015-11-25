@@ -1,6 +1,4 @@
-namespace py taxon
-namespace js taxon
-namespace perl DOEKBase.DataAPI.taxonomy.taxon
+namespace * taxon
 
 /*
 TODO - Automatically populate version from setup.py.

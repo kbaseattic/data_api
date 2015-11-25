@@ -1,6 +1,12 @@
 // Karma configuration
 // Generated on Thu Jul 30 2015 17:38:26 GMT-0700 (PDT)
 
+var chrome_browser = 'Chrome'
+var firefox_browser = 'Firefox'
+if (process.env.TRAVIS) {
+    chrome_browser = 'Chrome_TravisCI'
+}
+
 module.exports = function(config) {
   config.set({
 
@@ -17,7 +23,7 @@ module.exports = function(config) {
     // but I like it to be explicit here.
     plugins: [
         'karma-jasmine',
-        'karma-phantomjs-launcher',
+//        'karma-phantomjs-launcher',
         'karma-coverage',
         'karma-requirejs',
         'karma-chrome-launcher',
@@ -41,7 +47,7 @@ module.exports = function(config) {
       {pattern: 'runtime/build/js/**/*.js', included: false},
       {pattern: 'runtime/build/bower_components/**/*.js', included: false},
       {pattern: 'test/spec/**/*.js', included: false},
-      {pattern: 'runtime/build/config/config.yml', included: false},
+      //{pattern: 'runtime/build/config/config.yml', included: false},
 
       'test/main-test.js',
     ],
@@ -71,9 +77,13 @@ module.exports = function(config) {
     // test results reporter to use
     // possible values: 'dots', 'progress'
     // available reporters: https://npmjs.org/browse/keyword/karma-reporter
-//    reporters: ['progress', 'coverage'],
+    //reporters: ['progress', 'coverage'],
     reporters: ['progress'],
 
+//    coverageReporter: {
+//      type : 'html',
+//      dir : 'coverage/'
+//    },
 
     // web server port
     port: 9876,
@@ -96,11 +106,18 @@ module.exports = function(config) {
     // available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
     // browsers: ['PhantomJS', 'Chrome', 'Firefox', 'Safari'],
 
-    browsers: ['Chrome', 'Firefox', 'Safari'],
-
+    browsers: [chrome_browser, firefox_browser],
 
     // Continuous Integration mode
     // if true, Karma captures browsers, runs the tests and exits
-    singleRun: true
+    singleRun: true,
+
+    customLaunchers: {
+        Chrome_TravisCI: {
+            base: 'Chrome',
+            flags: ['--no-sandbox']
+        }
+    },
+
   })
 }

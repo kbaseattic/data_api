@@ -67,12 +67,16 @@ define([
 
         }
         authToken = config.token;
-        if (!authToken) {
+        if (authToken == '' || authToken == null) {
+        }
+        else if (!authToken.match(/un=.*\|tokenid=.*/)) {
             throw {
                 type: 'ArgumentError',
                 name: 'AuthTokenMissing',
-                message: 'No Authorization found; Authorization is required for the data api',
-                suggestion: 'The authorization is provided in the "token" argument" property'
+                message: 'Invalid Authorization found; Authorization token ' +
+                         'must match pattern "un=<name>|tokenid=<token>..."',
+                suggestion: 'Authorization is provided in the "token"' +
+                            'argument property'
             };
         }
         timeout = config.timeout;
@@ -163,12 +167,14 @@ define([
          *
          */
         function getScientificLineage() {
-            return Promise.resolve(client().get_scientific_lineage(authToken, objectReference, true))
-                .then(function (data) {
-                    return data.split(';').map(function (x) {
-                        return x.trim(' ');
-                    });
-                });
+           return Promise.resolve(client()
+                .get_scientific_lineage(authToken, objectReference, true))
+              .then(function (data) {
+                  var str_data = data + ''
+                  var r = str_data.split(',')
+                    .map(function (x) { return x.trim(' ') })
+                  return r
+              })
         }
 
         /**
