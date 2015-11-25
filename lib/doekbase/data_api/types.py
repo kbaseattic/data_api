@@ -23,10 +23,10 @@ class DataStores(Enum):
 ## Mapping from a type name to a wrapper class, used in `get_class`
 _typemap = {
     r'KBaseGenomes\.ContigSet-2\.0': AssemblyAPI,    
-    r'KBaseGenomesCondensedPrototypeV2\.Assembly': AssemblyAPI,
-    r'KBaseGenomesCondensedPrototypeV2\.GenomeAnnotation': GenomeAnnotationAPI,
+    r'KBaseGenomeAnnotations\.Assembly': AssemblyAPI,
+    r'KBaseGenomeAnnotations\.GenomeAnnotation': GenomeAnnotationAPI,
     r'KBaseGenomes\.Genome-.*': GenomeAnnotationAPI,
-    r'KBaseGenomesCondensedPrototypeV2\.Taxon': TaxonAPI
+    r'KBaseGenomeAnnotations\.Taxon': TaxonAPI
 }
 
 def get_re(d, key, default_value):
