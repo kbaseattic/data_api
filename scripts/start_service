@@ -8,7 +8,7 @@ fi
 
 source $script_dir/venv/bin/activate
 
-for api in taxon assembly
+for api in taxon assembly genome_annotation
 do
     echo daemonize -c $script_dir -o $script_dir/$api.stdout -e $script_dir/$api.stderr -a -v $script_dir/venv/bin/python -u $script_dir/venv/bin/data_api_start_service.py --config $KB_DEPLOYMENT_CONFIG --service $api --kbase_url us
     daemonize -c $script_dir -o $script_dir/$api.stdout -e $script_dir/$api.stderr -a -v $script_dir/venv/bin/python -u $script_dir/venv/bin/data_api_start_service.py --config $KB_DEPLOYMENT_CONFIG --service $api --kbase_url us
