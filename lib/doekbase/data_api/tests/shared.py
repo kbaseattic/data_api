@@ -50,6 +50,7 @@ def get_services():
     services["workspace_service_url"] = deploy_config.get(global_stanza_name, "workspace_service_url")
     services["taxon_service_url"] = deploy_config.get(global_stanza_name, "taxon_service_url")
     services["assembly_service_url"] = deploy_config.get(global_stanza_name, "assembly_service_url")
+    services["genome_annotation_service_url"] = deploy_config.get(global_stanza_name, "genome_annotation_service_url")
 
     try:
         services["redis_host"] = deploy_config.get(global_stanza_name, "redis_host")

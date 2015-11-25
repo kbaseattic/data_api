@@ -78,9 +78,9 @@ def get_fasta(data):
         if i > 3:
             break
         geneinfo = data[keys]
-        aliases = get_aliases(geneinfo["aliases"])
-        function = geneinfo["function"]
-        sequence = geneinfo["amino_acid_sequence"]
+        aliases = get_aliases(geneinfo["protein_aliases"])
+        function = geneinfo["protein_function"]
+        sequence = geneinfo["protein_amino_acid_sequence"]
         yield '>{k} {f} {a}\n{s}\n'.format(k=keys, f=function, a=aliases,
                                            s=sequence)
 

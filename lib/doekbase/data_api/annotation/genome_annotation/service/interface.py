@@ -9,6 +9,7 @@ from thrift.transport import TTransport
 from thrift.protocol import TBinaryProtocol
 
 # Local
+from doekbase.data_api import exceptions
 from doekbase.data_api.annotation.genome_annotation.api import GenomeAnnotationAPI
 from doekbase.data_api.annotation.genome_annotation.service import thrift_service
 from doekbase.data_api.annotation.genome_annotation.service import thrift_client
@@ -104,29 +105,67 @@ class GenomeAnnotationService:
         return result
 
     @server_method
-    def get_feature_ids(self, token=None, ref=None,
-                        type_list=None, region_list=None, function_list=None, alias_list=None):
+    def get_feature_ids(self, token=None, ref=None, filters=None, group_by=None):
         ga_api = GenomeAnnotationAPI(self.services, token, ref)
-        result = ga_api.get_feature_ids(type_list=type_list, region_list=region_list,
-                                        function_list=function_list, alias_list=alias_list)
 
-        _log.info(result)
+        converted_filters = dict()
+        if filters is not None:
+            if len(filters.type_list) > 0:
+                converted_filters["type_list"] = filters.type_list
 
-        return result
+            if len(filters.region_list) > 0:
+                converted_filters["region_list"] = [{"contig_id": x.contig_id,
+                                                     "strand": x.strand,
+                                                     "start": x.start,
+                                                     "length": x.length}
+                                                    for x in filters.region_list]
+            if len(filters.function_list) > 0:
+                converted_filters["function_list"] = filters.function_list
+
+            if len(filters.alias_list) > 0:
+                converted_filters["alias_list"] = filters.alias_list
+
+        if group_by is None:
+            group_by = "type"
+
+        result = ga_api.get_feature_ids(filters=converted_filters, group_by=group_by)
+
+        if "by_type" in result:
+            output = ttypes.Feature_id_mapping(by_type=result["by_type"])
+        elif "by_region" in result:
+            output = ttypes.Feature_id_mapping(by_region=result["by_region"])
+        elif "by_function" in result:
+            output = ttypes.Feature_id_mapping(by_function=result["by_function"])
+        elif "by_alias" in result:
+            output = ttypes.Feature_id_mapping(by_alias=result["by_alias"])
+        else:
+            raise ttypes.TypeException("Unrecognized output {}".format(result.keys()))
+
+        return output
 
     @server_method
     def get_features(self, token=None, ref=None, feature_id_list=None):
         ga_api = GenomeAnnotationAPI(self.services, token, ref)
         result = ga_api.get_features(feature_id_list)
 
-        return result
+        output = dict()
+        for k,v in result.items():
+            output[k] = ttypes.Feature_data(**v)
+            output[k].feature_locations = [ttypes.Region(contig_id=r[0],
+                                                         strand=r[2],
+                                                         start=r[1],
+                                                         length=r[3])
+                                           for r in v["feature_locations"]]
+
+        return output
 
     @server_method
     def get_proteins(self, token=None, ref=None):
         ga_api = GenomeAnnotationAPI(self.services, token, ref)
         result = ga_api.get_proteins()
+        output = {x: ttypes.Protein_data(**result[x]) for x in result}
 
-        return result
+        return output
 
     @server_method
     def get_feature_aliases(self, token=None, ref=None, feature_id_list=None):
@@ -153,8 +192,9 @@ class GenomeAnnotationService:
     def get_feature_locations(self, token=None, ref=None, feature_id_list=None):
         ga_api = GenomeAnnotationAPI(self.services, token, ref)
         result = ga_api.get_feature_locations(feature_id_list)
+        output = {x: [ttypes.Region(**z) for z in result[x]] for x in result}
 
-        return result
+        return output
 
     @server_method
     def get_feature_publications(self, token=None, ref=None, feature_id_list=None):

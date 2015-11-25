@@ -663,43 +663,420 @@ class Region(object):
   def __ne__(self, other):
     return not (self == other)
 
-class AssemblyContig(object):
+class Feature_id_filters(object):
   """
   Attributes:
-   - contig_id
-   - sequence
-   - length
-   - gc_content
-   - md5
-   - name
-   - description
-   - is_complete
-   - is_circular
+   - type_list
+   - region_list
+   - function_list
+   - alias_list
   """
 
   thrift_spec = (
     None, # 0
-    (1, TType.STRING, 'contig_id', None, None, ), # 1
-    (2, TType.STRING, 'sequence', None, None, ), # 2
-    (3, TType.I64, 'length', None, None, ), # 3
-    (4, TType.DOUBLE, 'gc_content', None, None, ), # 4
-    (5, TType.STRING, 'md5', None, None, ), # 5
-    (6, TType.STRING, 'name', None, None, ), # 6
-    (7, TType.STRING, 'description', None, None, ), # 7
-    (8, TType.BOOL, 'is_complete', None, None, ), # 8
-    (9, TType.BOOL, 'is_circular', None, None, ), # 9
+    (1, TType.LIST, 'type_list', (TType.STRING,None), [
+    ], ), # 1
+    (2, TType.LIST, 'region_list', (TType.STRUCT,(Region, Region.thrift_spec)), [
+    ], ), # 2
+    (3, TType.LIST, 'function_list', (TType.STRING,None), [
+    ], ), # 3
+    (4, TType.LIST, 'alias_list', (TType.STRING,None), [
+    ], ), # 4
   )
 
-  def __init__(self, contig_id=None, sequence=None, length=None, gc_content=None, md5=None, name=None, description=None, is_complete=None, is_circular=None,):
-    self.contig_id = contig_id
-    self.sequence = sequence
-    self.length = length
-    self.gc_content = gc_content
-    self.md5 = md5
-    self.name = name
-    self.description = description
-    self.is_complete = is_complete
-    self.is_circular = is_circular
+  def __init__(self, type_list=thrift_spec[1][4], region_list=thrift_spec[2][4], function_list=thrift_spec[3][4], alias_list=thrift_spec[4][4],):
+    if type_list is self.thrift_spec[1][4]:
+      type_list = [
+    ]
+    self.type_list = type_list
+    if region_list is self.thrift_spec[2][4]:
+      region_list = [
+    ]
+    self.region_list = region_list
+    if function_list is self.thrift_spec[3][4]:
+      function_list = [
+    ]
+    self.function_list = function_list
+    if alias_list is self.thrift_spec[4][4]:
+      alias_list = [
+    ]
+    self.alias_list = alias_list
+
+  def read(self, iprot):
+    if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
+      fastbinary.decode_binary(self, iprot.trans, (self.__class__, self.thrift_spec))
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 1:
+        if ftype == TType.LIST:
+          self.type_list = []
+          (_etype19, _size16) = iprot.readListBegin()
+          for _i20 in xrange(_size16):
+            _elem21 = iprot.readString();
+            self.type_list.append(_elem21)
+          iprot.readListEnd()
+        else:
+          iprot.skip(ftype)
+      elif fid == 2:
+        if ftype == TType.LIST:
+          self.region_list = []
+          (_etype25, _size22) = iprot.readListBegin()
+          for _i26 in xrange(_size22):
+            _elem27 = Region()
+            _elem27.read(iprot)
+            self.region_list.append(_elem27)
+          iprot.readListEnd()
+        else:
+          iprot.skip(ftype)
+      elif fid == 3:
+        if ftype == TType.LIST:
+          self.function_list = []
+          (_etype31, _size28) = iprot.readListBegin()
+          for _i32 in xrange(_size28):
+            _elem33 = iprot.readString();
+            self.function_list.append(_elem33)
+          iprot.readListEnd()
+        else:
+          iprot.skip(ftype)
+      elif fid == 4:
+        if ftype == TType.LIST:
+          self.alias_list = []
+          (_etype37, _size34) = iprot.readListBegin()
+          for _i38 in xrange(_size34):
+            _elem39 = iprot.readString();
+            self.alias_list.append(_elem39)
+          iprot.readListEnd()
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
+      oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
+      return
+    oprot.writeStructBegin('Feature_id_filters')
+    if self.type_list is not None:
+      oprot.writeFieldBegin('type_list', TType.LIST, 1)
+      oprot.writeListBegin(TType.STRING, len(self.type_list))
+      for iter40 in self.type_list:
+        oprot.writeString(iter40)
+      oprot.writeListEnd()
+      oprot.writeFieldEnd()
+    if self.region_list is not None:
+      oprot.writeFieldBegin('region_list', TType.LIST, 2)
+      oprot.writeListBegin(TType.STRUCT, len(self.region_list))
+      for iter41 in self.region_list:
+        iter41.write(oprot)
+      oprot.writeListEnd()
+      oprot.writeFieldEnd()
+    if self.function_list is not None:
+      oprot.writeFieldBegin('function_list', TType.LIST, 3)
+      oprot.writeListBegin(TType.STRING, len(self.function_list))
+      for iter42 in self.function_list:
+        oprot.writeString(iter42)
+      oprot.writeListEnd()
+      oprot.writeFieldEnd()
+    if self.alias_list is not None:
+      oprot.writeFieldBegin('alias_list', TType.LIST, 4)
+      oprot.writeListBegin(TType.STRING, len(self.alias_list))
+      for iter43 in self.alias_list:
+        oprot.writeString(iter43)
+      oprot.writeListEnd()
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def validate(self):
+    return
+
+
+  def __hash__(self):
+    value = 17
+    value = (value * 31) ^ hash(self.type_list)
+    value = (value * 31) ^ hash(self.region_list)
+    value = (value * 31) ^ hash(self.function_list)
+    value = (value * 31) ^ hash(self.alias_list)
+    return value
+
+  def __repr__(self):
+    L = ['%s=%r' % (key, value)
+      for key, value in self.__dict__.iteritems()]
+    return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+  def __eq__(self, other):
+    return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+  def __ne__(self, other):
+    return not (self == other)
+
+class Feature_id_mapping(object):
+  """
+  Attributes:
+   - by_type
+   - by_region
+   - by_function
+   - by_alias
+  """
+
+  thrift_spec = (
+    None, # 0
+    (1, TType.MAP, 'by_type', (TType.STRING,None,TType.LIST,(TType.STRING,None)), {
+    }, ), # 1
+    (2, TType.MAP, 'by_region', (TType.STRING,None,TType.MAP,(TType.STRING,None,TType.MAP,(TType.STRING,None,TType.LIST,(TType.STRING,None)))), {
+    }, ), # 2
+    (3, TType.MAP, 'by_function', (TType.STRING,None,TType.LIST,(TType.STRING,None)), {
+    }, ), # 3
+    (4, TType.MAP, 'by_alias', (TType.STRING,None,TType.LIST,(TType.STRING,None)), {
+    }, ), # 4
+  )
+
+  def __init__(self, by_type=thrift_spec[1][4], by_region=thrift_spec[2][4], by_function=thrift_spec[3][4], by_alias=thrift_spec[4][4],):
+    if by_type is self.thrift_spec[1][4]:
+      by_type = {
+    }
+    self.by_type = by_type
+    if by_region is self.thrift_spec[2][4]:
+      by_region = {
+    }
+    self.by_region = by_region
+    if by_function is self.thrift_spec[3][4]:
+      by_function = {
+    }
+    self.by_function = by_function
+    if by_alias is self.thrift_spec[4][4]:
+      by_alias = {
+    }
+    self.by_alias = by_alias
+
+  def read(self, iprot):
+    if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
+      fastbinary.decode_binary(self, iprot.trans, (self.__class__, self.thrift_spec))
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 1:
+        if ftype == TType.MAP:
+          self.by_type = {}
+          (_ktype45, _vtype46, _size44 ) = iprot.readMapBegin()
+          for _i48 in xrange(_size44):
+            _key49 = iprot.readString();
+            _val50 = []
+            (_etype54, _size51) = iprot.readListBegin()
+            for _i55 in xrange(_size51):
+              _elem56 = iprot.readString();
+              _val50.append(_elem56)
+            iprot.readListEnd()
+            self.by_type[_key49] = _val50
+          iprot.readMapEnd()
+        else:
+          iprot.skip(ftype)
+      elif fid == 2:
+        if ftype == TType.MAP:
+          self.by_region = {}
+          (_ktype58, _vtype59, _size57 ) = iprot.readMapBegin()
+          for _i61 in xrange(_size57):
+            _key62 = iprot.readString();
+            _val63 = {}
+            (_ktype65, _vtype66, _size64 ) = iprot.readMapBegin()
+            for _i68 in xrange(_size64):
+              _key69 = iprot.readString();
+              _val70 = {}
+              (_ktype72, _vtype73, _size71 ) = iprot.readMapBegin()
+              for _i75 in xrange(_size71):
+                _key76 = iprot.readString();
+                _val77 = []
+                (_etype81, _size78) = iprot.readListBegin()
+                for _i82 in xrange(_size78):
+                  _elem83 = iprot.readString();
+                  _val77.append(_elem83)
+                iprot.readListEnd()
+                _val70[_key76] = _val77
+              iprot.readMapEnd()
+              _val63[_key69] = _val70
+            iprot.readMapEnd()
+            self.by_region[_key62] = _val63
+          iprot.readMapEnd()
+        else:
+          iprot.skip(ftype)
+      elif fid == 3:
+        if ftype == TType.MAP:
+          self.by_function = {}
+          (_ktype85, _vtype86, _size84 ) = iprot.readMapBegin()
+          for _i88 in xrange(_size84):
+            _key89 = iprot.readString();
+            _val90 = []
+            (_etype94, _size91) = iprot.readListBegin()
+            for _i95 in xrange(_size91):
+              _elem96 = iprot.readString();
+              _val90.append(_elem96)
+            iprot.readListEnd()
+            self.by_function[_key89] = _val90
+          iprot.readMapEnd()
+        else:
+          iprot.skip(ftype)
+      elif fid == 4:
+        if ftype == TType.MAP:
+          self.by_alias = {}
+          (_ktype98, _vtype99, _size97 ) = iprot.readMapBegin()
+          for _i101 in xrange(_size97):
+            _key102 = iprot.readString();
+            _val103 = []
+            (_etype107, _size104) = iprot.readListBegin()
+            for _i108 in xrange(_size104):
+              _elem109 = iprot.readString();
+              _val103.append(_elem109)
+            iprot.readListEnd()
+            self.by_alias[_key102] = _val103
+          iprot.readMapEnd()
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
+      oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
+      return
+    oprot.writeStructBegin('Feature_id_mapping')
+    if self.by_type is not None:
+      oprot.writeFieldBegin('by_type', TType.MAP, 1)
+      oprot.writeMapBegin(TType.STRING, TType.LIST, len(self.by_type))
+      for kiter110,viter111 in self.by_type.items():
+        oprot.writeString(kiter110)
+        oprot.writeListBegin(TType.STRING, len(viter111))
+        for iter112 in viter111:
+          oprot.writeString(iter112)
+        oprot.writeListEnd()
+      oprot.writeMapEnd()
+      oprot.writeFieldEnd()
+    if self.by_region is not None:
+      oprot.writeFieldBegin('by_region', TType.MAP, 2)
+      oprot.writeMapBegin(TType.STRING, TType.MAP, len(self.by_region))
+      for kiter113,viter114 in self.by_region.items():
+        oprot.writeString(kiter113)
+        oprot.writeMapBegin(TType.STRING, TType.MAP, len(viter114))
+        for kiter115,viter116 in viter114.items():
+          oprot.writeString(kiter115)
+          oprot.writeMapBegin(TType.STRING, TType.LIST, len(viter116))
+          for kiter117,viter118 in viter116.items():
+            oprot.writeString(kiter117)
+            oprot.writeListBegin(TType.STRING, len(viter118))
+            for iter119 in viter118:
+              oprot.writeString(iter119)
+            oprot.writeListEnd()
+          oprot.writeMapEnd()
+        oprot.writeMapEnd()
+      oprot.writeMapEnd()
+      oprot.writeFieldEnd()
+    if self.by_function is not None:
+      oprot.writeFieldBegin('by_function', TType.MAP, 3)
+      oprot.writeMapBegin(TType.STRING, TType.LIST, len(self.by_function))
+      for kiter120,viter121 in self.by_function.items():
+        oprot.writeString(kiter120)
+        oprot.writeListBegin(TType.STRING, len(viter121))
+        for iter122 in viter121:
+          oprot.writeString(iter122)
+        oprot.writeListEnd()
+      oprot.writeMapEnd()
+      oprot.writeFieldEnd()
+    if self.by_alias is not None:
+      oprot.writeFieldBegin('by_alias', TType.MAP, 4)
+      oprot.writeMapBegin(TType.STRING, TType.LIST, len(self.by_alias))
+      for kiter123,viter124 in self.by_alias.items():
+        oprot.writeString(kiter123)
+        oprot.writeListBegin(TType.STRING, len(viter124))
+        for iter125 in viter124:
+          oprot.writeString(iter125)
+        oprot.writeListEnd()
+      oprot.writeMapEnd()
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def validate(self):
+    return
+
+
+  def __hash__(self):
+    value = 17
+    value = (value * 31) ^ hash(self.by_type)
+    value = (value * 31) ^ hash(self.by_region)
+    value = (value * 31) ^ hash(self.by_function)
+    value = (value * 31) ^ hash(self.by_alias)
+    return value
+
+  def __repr__(self):
+    L = ['%s=%r' % (key, value)
+      for key, value in self.__dict__.iteritems()]
+    return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+  def __eq__(self, other):
+    return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+  def __ne__(self, other):
+    return not (self == other)
+
+class Feature_data(object):
+  """
+  Attributes:
+   - feature_id
+   - feature_type
+   - feature_function
+   - feature_aliases
+   - feature_dna_sequence_length
+   - feature_dna_sequence
+   - feature_md5
+   - feature_locations
+   - feature_publications
+   - feature_quality_warnings
+   - feature_quality_score
+   - feature_notes
+   - feature_inference
+  """
+
+  thrift_spec = (
+    None, # 0
+    (1, TType.STRING, 'feature_id', None, None, ), # 1
+    (2, TType.STRING, 'feature_type', None, None, ), # 2
+    (3, TType.STRING, 'feature_function', None, None, ), # 3
+    (4, TType.MAP, 'feature_aliases', (TType.STRING,None,TType.LIST,(TType.STRING,None)), None, ), # 4
+    (5, TType.I64, 'feature_dna_sequence_length', None, None, ), # 5
+    (6, TType.STRING, 'feature_dna_sequence', None, None, ), # 6
+    (7, TType.STRING, 'feature_md5', None, None, ), # 7
+    (8, TType.LIST, 'feature_locations', (TType.STRUCT,(Region, Region.thrift_spec)), None, ), # 8
+    (9, TType.LIST, 'feature_publications', (TType.STRING,None), None, ), # 9
+    (10, TType.LIST, 'feature_quality_warnings', (TType.STRING,None), None, ), # 10
+    (11, TType.LIST, 'feature_quality_score', (TType.STRING,None), None, ), # 11
+    (12, TType.LIST, 'feature_notes', (TType.STRING,None), None, ), # 12
+    (13, TType.STRING, 'feature_inference', None, None, ), # 13
+  )
+
+  def __init__(self, feature_id=None, feature_type=None, feature_function=None, feature_aliases=None, feature_dna_sequence_length=None, feature_dna_sequence=None, feature_md5=None, feature_locations=None, feature_publications=None, feature_quality_warnings=None, feature_quality_score=None, feature_notes=None, feature_inference=None,):
+    self.feature_id = feature_id
+    self.feature_type = feature_type
+    self.feature_function = feature_function
+    self.feature_aliases = feature_aliases
+    self.feature_dna_sequence_length = feature_dna_sequence_length
+    self.feature_dna_sequence = feature_dna_sequence
+    self.feature_md5 = feature_md5
+    self.feature_locations = feature_locations
+    self.feature_publications = feature_publications
+    self.feature_quality_warnings = feature_quality_warnings
+    self.feature_quality_score = feature_quality_score
+    self.feature_notes = feature_notes
+    self.feature_inference = feature_inference
 
   def read(self, iprot):
     if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
@@ -712,47 +1089,104 @@ class AssemblyContig(object):
         break
       if fid == 1:
         if ftype == TType.STRING:
-          self.contig_id = iprot.readString();
+          self.feature_id = iprot.readString();
         else:
           iprot.skip(ftype)
       elif fid == 2:
         if ftype == TType.STRING:
-          self.sequence = iprot.readString();
+          self.feature_type = iprot.readString();
         else:
           iprot.skip(ftype)
       elif fid == 3:
-        if ftype == TType.I64:
-          self.length = iprot.readI64();
+        if ftype == TType.STRING:
+          self.feature_function = iprot.readString();
         else:
           iprot.skip(ftype)
       elif fid == 4:
-        if ftype == TType.DOUBLE:
-          self.gc_content = iprot.readDouble();
+        if ftype == TType.MAP:
+          self.feature_aliases = {}
+          (_ktype127, _vtype128, _size126 ) = iprot.readMapBegin()
+          for _i130 in xrange(_size126):
+            _key131 = iprot.readString();
+            _val132 = []
+            (_etype136, _size133) = iprot.readListBegin()
+            for _i137 in xrange(_size133):
+              _elem138 = iprot.readString();
+              _val132.append(_elem138)
+            iprot.readListEnd()
+            self.feature_aliases[_key131] = _val132
+          iprot.readMapEnd()
         else:
           iprot.skip(ftype)
       elif fid == 5:
-        if ftype == TType.STRING:
-          self.md5 = iprot.readString();
+        if ftype == TType.I64:
+          self.feature_dna_sequence_length = iprot.readI64();
         else:
           iprot.skip(ftype)
       elif fid == 6:
         if ftype == TType.STRING:
-          self.name = iprot.readString();
+          self.feature_dna_sequence = iprot.readString();
         else:
           iprot.skip(ftype)
       elif fid == 7:
         if ftype == TType.STRING:
-          self.description = iprot.readString();
+          self.feature_md5 = iprot.readString();
         else:
           iprot.skip(ftype)
       elif fid == 8:
-        if ftype == TType.BOOL:
-          self.is_complete = iprot.readBool();
+        if ftype == TType.LIST:
+          self.feature_locations = []
+          (_etype142, _size139) = iprot.readListBegin()
+          for _i143 in xrange(_size139):
+            _elem144 = Region()
+            _elem144.read(iprot)
+            self.feature_locations.append(_elem144)
+          iprot.readListEnd()
         else:
           iprot.skip(ftype)
       elif fid == 9:
-        if ftype == TType.BOOL:
-          self.is_circular = iprot.readBool();
+        if ftype == TType.LIST:
+          self.feature_publications = []
+          (_etype148, _size145) = iprot.readListBegin()
+          for _i149 in xrange(_size145):
+            _elem150 = iprot.readString();
+            self.feature_publications.append(_elem150)
+          iprot.readListEnd()
+        else:
+          iprot.skip(ftype)
+      elif fid == 10:
+        if ftype == TType.LIST:
+          self.feature_quality_warnings = []
+          (_etype154, _size151) = iprot.readListBegin()
+          for _i155 in xrange(_size151):
+            _elem156 = iprot.readString();
+            self.feature_quality_warnings.append(_elem156)
+          iprot.readListEnd()
+        else:
+          iprot.skip(ftype)
+      elif fid == 11:
+        if ftype == TType.LIST:
+          self.feature_quality_score = []
+          (_etype160, _size157) = iprot.readListBegin()
+          for _i161 in xrange(_size157):
+            _elem162 = iprot.readString();
+            self.feature_quality_score.append(_elem162)
+          iprot.readListEnd()
+        else:
+          iprot.skip(ftype)
+      elif fid == 12:
+        if ftype == TType.LIST:
+          self.feature_notes = []
+          (_etype166, _size163) = iprot.readListBegin()
+          for _i167 in xrange(_size163):
+            _elem168 = iprot.readString();
+            self.feature_notes.append(_elem168)
+          iprot.readListEnd()
+        else:
+          iprot.skip(ftype)
+      elif fid == 13:
+        if ftype == TType.STRING:
+          self.feature_inference = iprot.readString();
         else:
           iprot.skip(ftype)
       else:
@@ -764,42 +1198,80 @@ class AssemblyContig(object):
     if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
       oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
       return
-    oprot.writeStructBegin('AssemblyContig')
-    if self.contig_id is not None:
-      oprot.writeFieldBegin('contig_id', TType.STRING, 1)
-      oprot.writeString(self.contig_id)
+    oprot.writeStructBegin('Feature_data')
+    if self.feature_id is not None:
+      oprot.writeFieldBegin('feature_id', TType.STRING, 1)
+      oprot.writeString(self.feature_id)
       oprot.writeFieldEnd()
-    if self.sequence is not None:
-      oprot.writeFieldBegin('sequence', TType.STRING, 2)
-      oprot.writeString(self.sequence)
+    if self.feature_type is not None:
+      oprot.writeFieldBegin('feature_type', TType.STRING, 2)
+      oprot.writeString(self.feature_type)
       oprot.writeFieldEnd()
-    if self.length is not None:
-      oprot.writeFieldBegin('length', TType.I64, 3)
-      oprot.writeI64(self.length)
+    if self.feature_function is not None:
+      oprot.writeFieldBegin('feature_function', TType.STRING, 3)
+      oprot.writeString(self.feature_function)
       oprot.writeFieldEnd()
-    if self.gc_content is not None:
-      oprot.writeFieldBegin('gc_content', TType.DOUBLE, 4)
-      oprot.writeDouble(self.gc_content)
+    if self.feature_aliases is not None:
+      oprot.writeFieldBegin('feature_aliases', TType.MAP, 4)
+      oprot.writeMapBegin(TType.STRING, TType.LIST, len(self.feature_aliases))
+      for kiter169,viter170 in self.feature_aliases.items():
+        oprot.writeString(kiter169)
+        oprot.writeListBegin(TType.STRING, len(viter170))
+        for iter171 in viter170:
+          oprot.writeString(iter171)
+        oprot.writeListEnd()
+      oprot.writeMapEnd()
       oprot.writeFieldEnd()
-    if self.md5 is not None:
-      oprot.writeFieldBegin('md5', TType.STRING, 5)
-      oprot.writeString(self.md5)
+    if self.feature_dna_sequence_length is not None:
+      oprot.writeFieldBegin('feature_dna_sequence_length', TType.I64, 5)
+      oprot.writeI64(self.feature_dna_sequence_length)
       oprot.writeFieldEnd()
-    if self.name is not None:
-      oprot.writeFieldBegin('name', TType.STRING, 6)
-      oprot.writeString(self.name)
+    if self.feature_dna_sequence is not None:
+      oprot.writeFieldBegin('feature_dna_sequence', TType.STRING, 6)
+      oprot.writeString(self.feature_dna_sequence)
       oprot.writeFieldEnd()
-    if self.description is not None:
-      oprot.writeFieldBegin('description', TType.STRING, 7)
-      oprot.writeString(self.description)
+    if self.feature_md5 is not None:
+      oprot.writeFieldBegin('feature_md5', TType.STRING, 7)
+      oprot.writeString(self.feature_md5)
       oprot.writeFieldEnd()
-    if self.is_complete is not None:
-      oprot.writeFieldBegin('is_complete', TType.BOOL, 8)
-      oprot.writeBool(self.is_complete)
+    if self.feature_locations is not None:
+      oprot.writeFieldBegin('feature_locations', TType.LIST, 8)
+      oprot.writeListBegin(TType.STRUCT, len(self.feature_locations))
+      for iter172 in self.feature_locations:
+        iter172.write(oprot)
+      oprot.writeListEnd()
       oprot.writeFieldEnd()
-    if self.is_circular is not None:
-      oprot.writeFieldBegin('is_circular', TType.BOOL, 9)
-      oprot.writeBool(self.is_circular)
+    if self.feature_publications is not None:
+      oprot.writeFieldBegin('feature_publications', TType.LIST, 9)
+      oprot.writeListBegin(TType.STRING, len(self.feature_publications))
+      for iter173 in self.feature_publications:
+        oprot.writeString(iter173)
+      oprot.writeListEnd()
+      oprot.writeFieldEnd()
+    if self.feature_quality_warnings is not None:
+      oprot.writeFieldBegin('feature_quality_warnings', TType.LIST, 10)
+      oprot.writeListBegin(TType.STRING, len(self.feature_quality_warnings))
+      for iter174 in self.feature_quality_warnings:
+        oprot.writeString(iter174)
+      oprot.writeListEnd()
+      oprot.writeFieldEnd()
+    if self.feature_quality_score is not None:
+      oprot.writeFieldBegin('feature_quality_score', TType.LIST, 11)
+      oprot.writeListBegin(TType.STRING, len(self.feature_quality_score))
+      for iter175 in self.feature_quality_score:
+        oprot.writeString(iter175)
+      oprot.writeListEnd()
+      oprot.writeFieldEnd()
+    if self.feature_notes is not None:
+      oprot.writeFieldBegin('feature_notes', TType.LIST, 12)
+      oprot.writeListBegin(TType.STRING, len(self.feature_notes))
+      for iter176 in self.feature_notes:
+        oprot.writeString(iter176)
+      oprot.writeListEnd()
+      oprot.writeFieldEnd()
+    if self.feature_inference is not None:
+      oprot.writeFieldBegin('feature_inference', TType.STRING, 13)
+      oprot.writeString(self.feature_inference)
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
     oprot.writeStructEnd()
@@ -810,15 +1282,165 @@ class AssemblyContig(object):
 
   def __hash__(self):
     value = 17
-    value = (value * 31) ^ hash(self.contig_id)
-    value = (value * 31) ^ hash(self.sequence)
-    value = (value * 31) ^ hash(self.length)
-    value = (value * 31) ^ hash(self.gc_content)
-    value = (value * 31) ^ hash(self.md5)
-    value = (value * 31) ^ hash(self.name)
-    value = (value * 31) ^ hash(self.description)
-    value = (value * 31) ^ hash(self.is_complete)
-    value = (value * 31) ^ hash(self.is_circular)
+    value = (value * 31) ^ hash(self.feature_id)
+    value = (value * 31) ^ hash(self.feature_type)
+    value = (value * 31) ^ hash(self.feature_function)
+    value = (value * 31) ^ hash(self.feature_aliases)
+    value = (value * 31) ^ hash(self.feature_dna_sequence_length)
+    value = (value * 31) ^ hash(self.feature_dna_sequence)
+    value = (value * 31) ^ hash(self.feature_md5)
+    value = (value * 31) ^ hash(self.feature_locations)
+    value = (value * 31) ^ hash(self.feature_publications)
+    value = (value * 31) ^ hash(self.feature_quality_warnings)
+    value = (value * 31) ^ hash(self.feature_quality_score)
+    value = (value * 31) ^ hash(self.feature_notes)
+    value = (value * 31) ^ hash(self.feature_inference)
+    return value
+
+  def __repr__(self):
+    L = ['%s=%r' % (key, value)
+      for key, value in self.__dict__.iteritems()]
+    return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+  def __eq__(self, other):
+    return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+  def __ne__(self, other):
+    return not (self == other)
+
+class Protein_data(object):
+  """
+  Attributes:
+   - protein_id
+   - protein_amino_acid_sequence
+   - protein_function
+   - protein_aliases
+   - protein_md5
+   - protein_domain_locations
+  """
+
+  thrift_spec = (
+    None, # 0
+    (1, TType.STRING, 'protein_id', None, None, ), # 1
+    (2, TType.STRING, 'protein_amino_acid_sequence', None, None, ), # 2
+    (3, TType.STRING, 'protein_function', None, None, ), # 3
+    (4, TType.LIST, 'protein_aliases', (TType.STRING,None), None, ), # 4
+    (5, TType.STRING, 'protein_md5', None, None, ), # 5
+    (6, TType.LIST, 'protein_domain_locations', (TType.STRING,None), None, ), # 6
+  )
+
+  def __init__(self, protein_id=None, protein_amino_acid_sequence=None, protein_function=None, protein_aliases=None, protein_md5=None, protein_domain_locations=None,):
+    self.protein_id = protein_id
+    self.protein_amino_acid_sequence = protein_amino_acid_sequence
+    self.protein_function = protein_function
+    self.protein_aliases = protein_aliases
+    self.protein_md5 = protein_md5
+    self.protein_domain_locations = protein_domain_locations
+
+  def read(self, iprot):
+    if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
+      fastbinary.decode_binary(self, iprot.trans, (self.__class__, self.thrift_spec))
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 1:
+        if ftype == TType.STRING:
+          self.protein_id = iprot.readString();
+        else:
+          iprot.skip(ftype)
+      elif fid == 2:
+        if ftype == TType.STRING:
+          self.protein_amino_acid_sequence = iprot.readString();
+        else:
+          iprot.skip(ftype)
+      elif fid == 3:
+        if ftype == TType.STRING:
+          self.protein_function = iprot.readString();
+        else:
+          iprot.skip(ftype)
+      elif fid == 4:
+        if ftype == TType.LIST:
+          self.protein_aliases = []
+          (_etype180, _size177) = iprot.readListBegin()
+          for _i181 in xrange(_size177):
+            _elem182 = iprot.readString();
+            self.protein_aliases.append(_elem182)
+          iprot.readListEnd()
+        else:
+          iprot.skip(ftype)
+      elif fid == 5:
+        if ftype == TType.STRING:
+          self.protein_md5 = iprot.readString();
+        else:
+          iprot.skip(ftype)
+      elif fid == 6:
+        if ftype == TType.LIST:
+          self.protein_domain_locations = []
+          (_etype186, _size183) = iprot.readListBegin()
+          for _i187 in xrange(_size183):
+            _elem188 = iprot.readString();
+            self.protein_domain_locations.append(_elem188)
+          iprot.readListEnd()
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
+      oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
+      return
+    oprot.writeStructBegin('Protein_data')
+    if self.protein_id is not None:
+      oprot.writeFieldBegin('protein_id', TType.STRING, 1)
+      oprot.writeString(self.protein_id)
+      oprot.writeFieldEnd()
+    if self.protein_amino_acid_sequence is not None:
+      oprot.writeFieldBegin('protein_amino_acid_sequence', TType.STRING, 2)
+      oprot.writeString(self.protein_amino_acid_sequence)
+      oprot.writeFieldEnd()
+    if self.protein_function is not None:
+      oprot.writeFieldBegin('protein_function', TType.STRING, 3)
+      oprot.writeString(self.protein_function)
+      oprot.writeFieldEnd()
+    if self.protein_aliases is not None:
+      oprot.writeFieldBegin('protein_aliases', TType.LIST, 4)
+      oprot.writeListBegin(TType.STRING, len(self.protein_aliases))
+      for iter189 in self.protein_aliases:
+        oprot.writeString(iter189)
+      oprot.writeListEnd()
+      oprot.writeFieldEnd()
+    if self.protein_md5 is not None:
+      oprot.writeFieldBegin('protein_md5', TType.STRING, 5)
+      oprot.writeString(self.protein_md5)
+      oprot.writeFieldEnd()
+    if self.protein_domain_locations is not None:
+      oprot.writeFieldBegin('protein_domain_locations', TType.LIST, 6)
+      oprot.writeListBegin(TType.STRING, len(self.protein_domain_locations))
+      for iter190 in self.protein_domain_locations:
+        oprot.writeString(iter190)
+      oprot.writeListEnd()
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def validate(self):
+    return
+
+
+  def __hash__(self):
+    value = 17
+    value = (value * 31) ^ hash(self.protein_id)
+    value = (value * 31) ^ hash(self.protein_amino_acid_sequence)
+    value = (value * 31) ^ hash(self.protein_function)
+    value = (value * 31) ^ hash(self.protein_aliases)
+    value = (value * 31) ^ hash(self.protein_md5)
+    value = (value * 31) ^ hash(self.protein_domain_locations)
     return value
 
   def __repr__(self):

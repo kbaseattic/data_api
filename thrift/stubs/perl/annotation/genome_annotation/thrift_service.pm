@@ -631,15 +631,15 @@ sub read {
     {
       /^0$/ && do{      if ($ftype == TType::LIST) {
         {
-          my $_size16 = 0;
+          my $_size191 = 0;
           $self->{success} = [];
-          my $_etype19 = 0;
-          $xfer += $input->readListBegin(\$_etype19, \$_size16);
-          for (my $_i20 = 0; $_i20 < $_size16; ++$_i20)
+          my $_etype194 = 0;
+          $xfer += $input->readListBegin(\$_etype194, \$_size191);
+          for (my $_i195 = 0; $_i195 < $_size191; ++$_i195)
           {
-            my $elem21 = undef;
-            $xfer += $input->readString(\$elem21);
-            push(@{$self->{success}},$elem21);
+            my $elem196 = undef;
+            $xfer += $input->readString(\$elem196);
+            push(@{$self->{success}},$elem196);
           }
           $xfer += $input->readListEnd();
         }
@@ -706,9 +706,9 @@ sub write {
     {
       $xfer += $output->writeListBegin(TType::STRING, scalar(@{$self->{success}}));
       {
-        foreach my $iter22 (@{$self->{success}}) 
+        foreach my $iter197 (@{$self->{success}}) 
         {
-          $xfer += $output->writeString($iter22);
+          $xfer += $output->writeString($iter197);
         }
       }
       $xfer += $output->writeListEnd();
@@ -808,15 +808,15 @@ sub read {
       last; };
       /^3$/ && do{      if ($ftype == TType::LIST) {
         {
-          my $_size23 = 0;
+          my $_size198 = 0;
           $self->{feature_type_list} = [];
-          my $_etype26 = 0;
-          $xfer += $input->readListBegin(\$_etype26, \$_size23);
-          for (my $_i27 = 0; $_i27 < $_size23; ++$_i27)
+          my $_etype201 = 0;
+          $xfer += $input->readListBegin(\$_etype201, \$_size198);
+          for (my $_i202 = 0; $_i202 < $_size198; ++$_i202)
           {
-            my $elem28 = undef;
-            $xfer += $input->readString(\$elem28);
-            push(@{$self->{feature_type_list}},$elem28);
+            my $elem203 = undef;
+            $xfer += $input->readString(\$elem203);
+            push(@{$self->{feature_type_list}},$elem203);
           }
           $xfer += $input->readListEnd();
         }
@@ -851,9 +851,9 @@ sub write {
     {
       $xfer += $output->writeListBegin(TType::STRING, scalar(@{$self->{feature_type_list}}));
       {
-        foreach my $iter29 (@{$self->{feature_type_list}}) 
+        foreach my $iter204 (@{$self->{feature_type_list}}) 
         {
-          $xfer += $output->writeString($iter29);
+          $xfer += $output->writeString($iter204);
         }
       }
       $xfer += $output->writeListEnd();
@@ -927,18 +927,18 @@ sub read {
     {
       /^0$/ && do{      if ($ftype == TType::MAP) {
         {
-          my $_size30 = 0;
+          my $_size205 = 0;
           $self->{success} = {};
-          my $_ktype31 = 0;
-          my $_vtype32 = 0;
-          $xfer += $input->readMapBegin(\$_ktype31, \$_vtype32, \$_size30);
-          for (my $_i34 = 0; $_i34 < $_size30; ++$_i34)
+          my $_ktype206 = 0;
+          my $_vtype207 = 0;
+          $xfer += $input->readMapBegin(\$_ktype206, \$_vtype207, \$_size205);
+          for (my $_i209 = 0; $_i209 < $_size205; ++$_i209)
           {
-            my $key35 = '';
-            my $val36 = '';
-            $xfer += $input->readString(\$key35);
-            $xfer += $input->readString(\$val36);
-            $self->{success}->{$key35} = $val36;
+            my $key210 = '';
+            my $val211 = '';
+            $xfer += $input->readString(\$key210);
+            $xfer += $input->readString(\$val211);
+            $self->{success}->{$key210} = $val211;
           }
           $xfer += $input->readMapEnd();
         }
@@ -1005,10 +1005,10 @@ sub write {
     {
       $xfer += $output->writeMapBegin(TType::STRING, TType::STRING, scalar(keys %{$self->{success}}));
       {
-        while( my ($kiter37,$viter38) = each %{$self->{success}}) 
+        while( my ($kiter212,$viter213) = each %{$self->{success}}) 
         {
-          $xfer += $output->writeString($kiter37);
-          $xfer += $output->writeString($viter38);
+          $xfer += $output->writeString($kiter212);
+          $xfer += $output->writeString($viter213);
         }
       }
       $xfer += $output->writeMapEnd();
@@ -1108,15 +1108,15 @@ sub read {
       last; };
       /^3$/ && do{      if ($ftype == TType::LIST) {
         {
-          my $_size39 = 0;
+          my $_size214 = 0;
           $self->{feature_type_list} = [];
-          my $_etype42 = 0;
-          $xfer += $input->readListBegin(\$_etype42, \$_size39);
-          for (my $_i43 = 0; $_i43 < $_size39; ++$_i43)
+          my $_etype217 = 0;
+          $xfer += $input->readListBegin(\$_etype217, \$_size214);
+          for (my $_i218 = 0; $_i218 < $_size214; ++$_i218)
           {
-            my $elem44 = undef;
-            $xfer += $input->readString(\$elem44);
-            push(@{$self->{feature_type_list}},$elem44);
+            my $elem219 = undef;
+            $xfer += $input->readString(\$elem219);
+            push(@{$self->{feature_type_list}},$elem219);
           }
           $xfer += $input->readListEnd();
         }
@@ -1151,9 +1151,9 @@ sub write {
     {
       $xfer += $output->writeListBegin(TType::STRING, scalar(@{$self->{feature_type_list}}));
       {
-        foreach my $iter45 (@{$self->{feature_type_list}}) 
+        foreach my $iter220 (@{$self->{feature_type_list}}) 
         {
-          $xfer += $output->writeString($iter45);
+          $xfer += $output->writeString($iter220);
         }
       }
       $xfer += $output->writeListEnd();
@@ -1227,18 +1227,18 @@ sub read {
     {
       /^0$/ && do{      if ($ftype == TType::MAP) {
         {
-          my $_size46 = 0;
+          my $_size221 = 0;
           $self->{success} = {};
-          my $_ktype47 = 0;
-          my $_vtype48 = 0;
-          $xfer += $input->readMapBegin(\$_ktype47, \$_vtype48, \$_size46);
-          for (my $_i50 = 0; $_i50 < $_size46; ++$_i50)
+          my $_ktype222 = 0;
+          my $_vtype223 = 0;
+          $xfer += $input->readMapBegin(\$_ktype222, \$_vtype223, \$_size221);
+          for (my $_i225 = 0; $_i225 < $_size221; ++$_i225)
           {
-            my $key51 = '';
-            my $val52 = 0;
-            $xfer += $input->readString(\$key51);
-            $xfer += $input->readI64(\$val52);
-            $self->{success}->{$key51} = $val52;
+            my $key226 = '';
+            my $val227 = 0;
+            $xfer += $input->readString(\$key226);
+            $xfer += $input->readI64(\$val227);
+            $self->{success}->{$key226} = $val227;
           }
           $xfer += $input->readMapEnd();
         }
@@ -1305,10 +1305,10 @@ sub write {
     {
       $xfer += $output->writeMapBegin(TType::STRING, TType::I64, scalar(keys %{$self->{success}}));
       {
-        while( my ($kiter53,$viter54) = each %{$self->{success}}) 
+        while( my ($kiter228,$viter229) = each %{$self->{success}}) 
         {
-          $xfer += $output->writeString($kiter53);
-          $xfer += $output->writeI64($viter54);
+          $xfer += $output->writeString($kiter228);
+          $xfer += $output->writeI64($viter229);
         }
       }
       $xfer += $output->writeMapEnd();
@@ -1352,7 +1352,7 @@ sub write {
 
 package genome_annotation::thrift_service_get_feature_ids_args;
 use base qw(Class::Accessor);
-genome_annotation::thrift_service_get_feature_ids_args->mk_accessors( qw( token ref feature_type_list region_list function_list alias_list ) );
+genome_annotation::thrift_service_get_feature_ids_args->mk_accessors( qw( token ref filters group_type ) );
 
 sub new {
   my $classname = shift;
@@ -1360,10 +1360,8 @@ sub new {
   my $vals      = shift || {};
   $self->{token} = undef;
   $self->{ref} = undef;
-  $self->{feature_type_list} = undef;
-  $self->{region_list} = undef;
-  $self->{function_list} = undef;
-  $self->{alias_list} = undef;
+  $self->{filters} = undef;
+  $self->{group_type} = undef;
   if (UNIVERSAL::isa($vals,'HASH')) {
     if (defined $vals->{token}) {
       $self->{token} = $vals->{token};
@@ -1371,17 +1369,11 @@ sub new {
     if (defined $vals->{ref}) {
       $self->{ref} = $vals->{ref};
     }
-    if (defined $vals->{feature_type_list}) {
-      $self->{feature_type_list} = $vals->{feature_type_list};
+    if (defined $vals->{filters}) {
+      $self->{filters} = $vals->{filters};
     }
-    if (defined $vals->{region_list}) {
-      $self->{region_list} = $vals->{region_list};
-    }
-    if (defined $vals->{function_list}) {
-      $self->{function_list} = $vals->{function_list};
-    }
-    if (defined $vals->{alias_list}) {
-      $self->{alias_list} = $vals->{alias_list};
+    if (defined $vals->{group_type}) {
+      $self->{group_type} = $vals->{group_type};
     }
   }
   return bless ($self, $classname);
@@ -1418,75 +1410,15 @@ sub read {
         $xfer += $input->skip($ftype);
       }
       last; };
-      /^3$/ && do{      if ($ftype == TType::LIST) {
-        {
-          my $_size55 = 0;
-          $self->{feature_type_list} = [];
-          my $_etype58 = 0;
-          $xfer += $input->readListBegin(\$_etype58, \$_size55);
-          for (my $_i59 = 0; $_i59 < $_size55; ++$_i59)
-          {
-            my $elem60 = undef;
-            $xfer += $input->readString(\$elem60);
-            push(@{$self->{feature_type_list}},$elem60);
-          }
-          $xfer += $input->readListEnd();
-        }
+      /^3$/ && do{      if ($ftype == TType::STRUCT) {
+        $self->{filters} = new genome_annotation::Feature_id_filters();
+        $xfer += $self->{filters}->read($input);
       } else {
         $xfer += $input->skip($ftype);
       }
       last; };
-      /^4$/ && do{      if ($ftype == TType::LIST) {
-        {
-          my $_size61 = 0;
-          $self->{region_list} = [];
-          my $_etype64 = 0;
-          $xfer += $input->readListBegin(\$_etype64, \$_size61);
-          for (my $_i65 = 0; $_i65 < $_size61; ++$_i65)
-          {
-            my $elem66 = undef;
-            $elem66 = new genome_annotation::Region();
-            $xfer += $elem66->read($input);
-            push(@{$self->{region_list}},$elem66);
-          }
-          $xfer += $input->readListEnd();
-        }
-      } else {
-        $xfer += $input->skip($ftype);
-      }
-      last; };
-      /^5$/ && do{      if ($ftype == TType::LIST) {
-        {
-          my $_size67 = 0;
-          $self->{function_list} = [];
-          my $_etype70 = 0;
-          $xfer += $input->readListBegin(\$_etype70, \$_size67);
-          for (my $_i71 = 0; $_i71 < $_size67; ++$_i71)
-          {
-            my $elem72 = undef;
-            $xfer += $input->readString(\$elem72);
-            push(@{$self->{function_list}},$elem72);
-          }
-          $xfer += $input->readListEnd();
-        }
-      } else {
-        $xfer += $input->skip($ftype);
-      }
-      last; };
-      /^6$/ && do{      if ($ftype == TType::LIST) {
-        {
-          my $_size73 = 0;
-          $self->{alias_list} = [];
-          my $_etype76 = 0;
-          $xfer += $input->readListBegin(\$_etype76, \$_size73);
-          for (my $_i77 = 0; $_i77 < $_size73; ++$_i77)
-          {
-            my $elem78 = undef;
-            $xfer += $input->readString(\$elem78);
-            push(@{$self->{alias_list}},$elem78);
-          }
-          $xfer += $input->readListEnd();
-        }
+      /^4$/ && do{      if ($ftype == TType::STRING) {
+        $xfer += $input->readString(\$self->{group_type});
       } else {
         $xfer += $input->skip($ftype);
       }
@@ -1513,60 +1445,14 @@ sub write {
     $xfer += $output->writeString($self->{ref});
     $xfer += $output->writeFieldEnd();
   }
-  if (defined $self->{feature_type_list}) {
-    $xfer += $output->writeFieldBegin('feature_type_list', TType::LIST, 3);
-    {
-      $xfer += $output->writeListBegin(TType::STRING, scalar(@{$self->{feature_type_list}}));
-      {
-        foreach my $iter79 (@{$self->{feature_type_list}}) 
-        {
-          $xfer += $output->writeString($iter79);
-        }
-      }
-      $xfer += $output->writeListEnd();
-    }
+  if (defined $self->{filters}) {
+    $xfer += $output->writeFieldBegin('filters', TType::STRUCT, 3);
+    $xfer += $self->{filters}->write($output);
     $xfer += $output->writeFieldEnd();
   }
-  if (defined $self->{region_list}) {
-    $xfer += $output->writeFieldBegin('region_list', TType::LIST, 4);
-    {
-      $xfer += $output->writeListBegin(TType::STRUCT, scalar(@{$self->{region_list}}));
-      {
-        foreach my $iter80 (@{$self->{region_list}}) 
-        {
-          $xfer += ${iter80}->write($output);
-        }
-      }
-      $xfer += $output->writeListEnd();
-    }
-    $xfer += $output->writeFieldEnd();
-  }
-  if (defined $self->{function_list}) {
-    $xfer += $output->writeFieldBegin('function_list', TType::LIST, 5);
-    {
-      $xfer += $output->writeListBegin(TType::STRING, scalar(@{$self->{function_list}}));
-      {
-        foreach my $iter81 (@{$self->{function_list}}) 
-        {
-          $xfer += $output->writeString($iter81);
-        }
-      }
-      $xfer += $output->writeListEnd();
-    }
-    $xfer += $output->writeFieldEnd();
-  }
-  if (defined $self->{alias_list}) {
-    $xfer += $output->writeFieldBegin('alias_list', TType::LIST, 6);
-    {
-      $xfer += $output->writeListBegin(TType::STRING, scalar(@{$self->{alias_list}}));
-      {
-        foreach my $iter82 (@{$self->{alias_list}}) 
-        {
-          $xfer += $output->writeString($iter82);
-        }
-      }
-      $xfer += $output->writeListEnd();
-    }
+  if (defined $self->{group_type}) {
+    $xfer += $output->writeFieldBegin('group_type', TType::STRING, 4);
+    $xfer += $output->writeString($self->{group_type});
     $xfer += $output->writeFieldEnd();
   }
   $xfer += $output->writeFieldStop();
@@ -1634,38 +1520,9 @@ sub read {
     }
     SWITCH: for($fid)
     {
-      /^0$/ && do{      if ($ftype == TType::MAP) {
-        {
-          my $_size83 = 0;
-          $self->{success} = {};
-          my $_ktype84 = 0;
-          my $_vtype85 = 0;
-          $xfer += $input->readMapBegin(\$_ktype84, \$_vtype85, \$_size83);
-          for (my $_i87 = 0; $_i87 < $_size83; ++$_i87)
-          {
-            my $key88 = '';
-            my $val89 = [];
-            $xfer += $input->readString(\$key88);
-            {
-              my $_size90 = 0;
-              $val89 = {};
-              my $_ktype91 = 0;
-              my $_vtype92 = 0;
-              $xfer += $input->readMapBegin(\$_ktype91, \$_vtype92, \$_size90);
-              for (my $_i94 = 0; $_i94 < $_size90; ++$_i94)
-              {
-                my $key95 = '';
-                my $val96 = '';
-                $xfer += $input->readString(\$key95);
-                $xfer += $input->readString(\$val96);
-                $val89->{$key95} = $val96;
-              }
-              $xfer += $input->readMapEnd();
-            }
-            $self->{success}->{$key88} = $val89;
-          }
-          $xfer += $input->readMapEnd();
-        }
+      /^0$/ && do{      if ($ftype == TType::STRUCT) {
+        $self->{success} = new genome_annotation::Feature_id_mapping();
+        $xfer += $self->{success}->read($input);
       } else {
         $xfer += $input->skip($ftype);
       }
@@ -1725,28 +1582,8 @@ sub write {
   my $xfer   = 0;
   $xfer += $output->writeStructBegin('thrift_service_get_feature_ids_result');
   if (defined $self->{success}) {
-    $xfer += $output->writeFieldBegin('success', TType::MAP, 0);
-    {
-      $xfer += $output->writeMapBegin(TType::STRING, TType::MAP, scalar(keys %{$self->{success}}));
-      {
-        while( my ($kiter97,$viter98) = each %{$self->{success}}) 
-        {
-          $xfer += $output->writeString($kiter97);
-          {
-            $xfer += $output->writeMapBegin(TType::STRING, TType::STRING, scalar(keys %{${viter98}}));
-            {
-              while( my ($kiter99,$viter100) = each %{${viter98}}) 
-              {
-                $xfer += $output->writeString($kiter99);
-                $xfer += $output->writeString($viter100);
-              }
-            }
-            $xfer += $output->writeMapEnd();
-          }
-        }
-      }
-      $xfer += $output->writeMapEnd();
-    }
+    $xfer += $output->writeFieldBegin('success', TType::STRUCT, 0);
+    $xfer += $self->{success}->write($output);
     $xfer += $output->writeFieldEnd();
   }
   if (defined $self->{generic_exception}) {
@@ -1842,15 +1679,15 @@ sub read {
       last; };
       /^3$/ && do{      if ($ftype == TType::LIST) {
         {
-          my $_size101 = 0;
+          my $_size230 = 0;
           $self->{feature_id_list} = [];
-          my $_etype104 = 0;
-          $xfer += $input->readListBegin(\$_etype104, \$_size101);
-          for (my $_i105 = 0; $_i105 < $_size101; ++$_i105)
+          my $_etype233 = 0;
+          $xfer += $input->readListBegin(\$_etype233, \$_size230);
+          for (my $_i234 = 0; $_i234 < $_size230; ++$_i234)
           {
-            my $elem106 = undef;
-            $xfer += $input->readString(\$elem106);
-            push(@{$self->{feature_id_list}},$elem106);
+            my $elem235 = undef;
+            $xfer += $input->readString(\$elem235);
+            push(@{$self->{feature_id_list}},$elem235);
           }
           $xfer += $input->readListEnd();
         }
@@ -1885,9 +1722,9 @@ sub write {
     {
       $xfer += $output->writeListBegin(TType::STRING, scalar(@{$self->{feature_id_list}}));
       {
-        foreach my $iter107 (@{$self->{feature_id_list}}) 
+        foreach my $iter236 (@{$self->{feature_id_list}}) 
         {
-          $xfer += $output->writeString($iter107);
+          $xfer += $output->writeString($iter236);
         }
       }
       $xfer += $output->writeListEnd();
@@ -1961,18 +1798,19 @@ sub read {
     {
       /^0$/ && do{      if ($ftype == TType::MAP) {
         {
-          my $_size108 = 0;
+          my $_size237 = 0;
           $self->{success} = {};
-          my $_ktype109 = 0;
-          my $_vtype110 = 0;
-          $xfer += $input->readMapBegin(\$_ktype109, \$_vtype110, \$_size108);
-          for (my $_i112 = 0; $_i112 < $_size108; ++$_i112)
+          my $_ktype238 = 0;
+          my $_vtype239 = 0;
+          $xfer += $input->readMapBegin(\$_ktype238, \$_vtype239, \$_size237);
+          for (my $_i241 = 0; $_i241 < $_size237; ++$_i241)
           {
-            my $key113 = '';
-            my $val114 = '';
-            $xfer += $input->readString(\$key113);
-            $xfer += $input->readString(\$val114);
-            $self->{success}->{$key113} = $val114;
+            my $key242 = '';
+            my $val243 = new genome_annotation::Feature_data();
+            $xfer += $input->readString(\$key242);
+            $val243 = new genome_annotation::Feature_data();
+            $xfer += $val243->read($input);
+            $self->{success}->{$key242} = $val243;
           }
           $xfer += $input->readMapEnd();
         }
@@ -2037,12 +1875,12 @@ sub write {
   if (defined $self->{success}) {
     $xfer += $output->writeFieldBegin('success', TType::MAP, 0);
     {
-      $xfer += $output->writeMapBegin(TType::STRING, TType::STRING, scalar(keys %{$self->{success}}));
+      $xfer += $output->writeMapBegin(TType::STRING, TType::STRUCT, scalar(keys %{$self->{success}}));
       {
-        while( my ($kiter115,$viter116) = each %{$self->{success}}) 
+        while( my ($kiter244,$viter245) = each %{$self->{success}}) 
         {
-          $xfer += $output->writeString($kiter115);
-          $xfer += $output->writeString($viter116);
+          $xfer += $output->writeString($kiter244);
+          $xfer += ${viter245}->write($output);
         }
       }
       $xfer += $output->writeMapEnd();
@@ -2086,7 +1924,7 @@ sub write {
 
 package genome_annotation::thrift_service_get_proteins_args;
 use base qw(Class::Accessor);
-genome_annotation::thrift_service_get_proteins_args->mk_accessors( qw( token ref feature_id_list ) );
+genome_annotation::thrift_service_get_proteins_args->mk_accessors( qw( token ref ) );
 
 sub new {
   my $classname = shift;
@@ -2094,16 +1932,12 @@ sub new {
   my $vals      = shift || {};
   $self->{token} = undef;
   $self->{ref} = undef;
-  $self->{feature_id_list} = undef;
   if (UNIVERSAL::isa($vals,'HASH')) {
     if (defined $vals->{token}) {
       $self->{token} = $vals->{token};
     }
     if (defined $vals->{ref}) {
       $self->{ref} = $vals->{ref};
-    }
-    if (defined $vals->{feature_id_list}) {
-      $self->{feature_id_list} = $vals->{feature_id_list};
     }
   }
   return bless ($self, $classname);
@@ -2140,24 +1974,6 @@ sub read {
         $xfer += $input->skip($ftype);
       }
       last; };
-      /^3$/ && do{      if ($ftype == TType::LIST) {
-        {
-          my $_size117 = 0;
-          $self->{feature_id_list} = [];
-          my $_etype120 = 0;
-          $xfer += $input->readListBegin(\$_etype120, \$_size117);
-          for (my $_i121 = 0; $_i121 < $_size117; ++$_i121)
-          {
-            my $elem122 = undef;
-            $xfer += $input->readString(\$elem122);
-            push(@{$self->{feature_id_list}},$elem122);
-          }
-          $xfer += $input->readListEnd();
-        }
-      } else {
-        $xfer += $input->skip($ftype);
-      }
-      last; };
         $xfer += $input->skip($ftype);
     }
     $xfer += $input->readFieldEnd();
@@ -2178,20 +1994,6 @@ sub write {
   if (defined $self->{ref}) {
     $xfer += $output->writeFieldBegin('ref', TType::STRING, 2);
     $xfer += $output->writeString($self->{ref});
-    $xfer += $output->writeFieldEnd();
-  }
-  if (defined $self->{feature_id_list}) {
-    $xfer += $output->writeFieldBegin('feature_id_list', TType::LIST, 3);
-    {
-      $xfer += $output->writeListBegin(TType::STRING, scalar(@{$self->{feature_id_list}}));
-      {
-        foreach my $iter123 (@{$self->{feature_id_list}}) 
-        {
-          $xfer += $output->writeString($iter123);
-        }
-      }
-      $xfer += $output->writeListEnd();
-    }
     $xfer += $output->writeFieldEnd();
   }
   $xfer += $output->writeFieldStop();
@@ -2261,18 +2063,19 @@ sub read {
     {
       /^0$/ && do{      if ($ftype == TType::MAP) {
         {
-          my $_size124 = 0;
+          my $_size246 = 0;
           $self->{success} = {};
-          my $_ktype125 = 0;
-          my $_vtype126 = 0;
-          $xfer += $input->readMapBegin(\$_ktype125, \$_vtype126, \$_size124);
-          for (my $_i128 = 0; $_i128 < $_size124; ++$_i128)
+          my $_ktype247 = 0;
+          my $_vtype248 = 0;
+          $xfer += $input->readMapBegin(\$_ktype247, \$_vtype248, \$_size246);
+          for (my $_i250 = 0; $_i250 < $_size246; ++$_i250)
           {
-            my $key129 = '';
-            my $val130 = '';
-            $xfer += $input->readString(\$key129);
-            $xfer += $input->readString(\$val130);
-            $self->{success}->{$key129} = $val130;
+            my $key251 = '';
+            my $val252 = new genome_annotation::Protein_data();
+            $xfer += $input->readString(\$key251);
+            $val252 = new genome_annotation::Protein_data();
+            $xfer += $val252->read($input);
+            $self->{success}->{$key251} = $val252;
           }
           $xfer += $input->readMapEnd();
         }
@@ -2337,12 +2140,12 @@ sub write {
   if (defined $self->{success}) {
     $xfer += $output->writeFieldBegin('success', TType::MAP, 0);
     {
-      $xfer += $output->writeMapBegin(TType::STRING, TType::STRING, scalar(keys %{$self->{success}}));
+      $xfer += $output->writeMapBegin(TType::STRING, TType::STRUCT, scalar(keys %{$self->{success}}));
       {
-        while( my ($kiter131,$viter132) = each %{$self->{success}}) 
+        while( my ($kiter253,$viter254) = each %{$self->{success}}) 
         {
-          $xfer += $output->writeString($kiter131);
-          $xfer += $output->writeString($viter132);
+          $xfer += $output->writeString($kiter253);
+          $xfer += ${viter254}->write($output);
         }
       }
       $xfer += $output->writeMapEnd();
@@ -2442,15 +2245,15 @@ sub read {
       last; };
       /^3$/ && do{      if ($ftype == TType::LIST) {
         {
-          my $_size133 = 0;
+          my $_size255 = 0;
           $self->{feature_id_list} = [];
-          my $_etype136 = 0;
-          $xfer += $input->readListBegin(\$_etype136, \$_size133);
-          for (my $_i137 = 0; $_i137 < $_size133; ++$_i137)
+          my $_etype258 = 0;
+          $xfer += $input->readListBegin(\$_etype258, \$_size255);
+          for (my $_i259 = 0; $_i259 < $_size255; ++$_i259)
           {
-            my $elem138 = undef;
-            $xfer += $input->readString(\$elem138);
-            push(@{$self->{feature_id_list}},$elem138);
+            my $elem260 = undef;
+            $xfer += $input->readString(\$elem260);
+            push(@{$self->{feature_id_list}},$elem260);
           }
           $xfer += $input->readListEnd();
         }
@@ -2485,9 +2288,9 @@ sub write {
     {
       $xfer += $output->writeListBegin(TType::STRING, scalar(@{$self->{feature_id_list}}));
       {
-        foreach my $iter139 (@{$self->{feature_id_list}}) 
+        foreach my $iter261 (@{$self->{feature_id_list}}) 
         {
-          $xfer += $output->writeString($iter139);
+          $xfer += $output->writeString($iter261);
         }
       }
       $xfer += $output->writeListEnd();
@@ -2561,31 +2364,31 @@ sub read {
     {
       /^0$/ && do{      if ($ftype == TType::MAP) {
         {
-          my $_size140 = 0;
+          my $_size262 = 0;
           $self->{success} = {};
-          my $_ktype141 = 0;
-          my $_vtype142 = 0;
-          $xfer += $input->readMapBegin(\$_ktype141, \$_vtype142, \$_size140);
-          for (my $_i144 = 0; $_i144 < $_size140; ++$_i144)
+          my $_ktype263 = 0;
+          my $_vtype264 = 0;
+          $xfer += $input->readMapBegin(\$_ktype263, \$_vtype264, \$_size262);
+          for (my $_i266 = 0; $_i266 < $_size262; ++$_i266)
           {
-            my $key145 = '';
-            my $val146 = [];
-            $xfer += $input->readString(\$key145);
+            my $key267 = '';
+            my $val268 = [];
+            $xfer += $input->readString(\$key267);
             {
-              my $_size147 = 0;
-              $val146 = [];
-              my $_etype150 = 0;
-              $xfer += $input->readListBegin(\$_etype150, \$_size147);
-              for (my $_i151 = 0; $_i151 < $_size147; ++$_i151)
+              my $_size269 = 0;
+              $val268 = [];
+              my $_etype272 = 0;
+              $xfer += $input->readListBegin(\$_etype272, \$_size269);
+              for (my $_i273 = 0; $_i273 < $_size269; ++$_i273)
               {
-                my $elem152 = undef;
-                $elem152 = new genome_annotation::Region();
-                $xfer += $elem152->read($input);
-                push(@{$val146},$elem152);
+                my $elem274 = undef;
+                $elem274 = new genome_annotation::Region();
+                $xfer += $elem274->read($input);
+                push(@{$val268},$elem274);
               }
               $xfer += $input->readListEnd();
             }
-            $self->{success}->{$key145} = $val146;
+            $self->{success}->{$key267} = $val268;
           }
           $xfer += $input->readMapEnd();
         }
@@ -2652,15 +2455,15 @@ sub write {
     {
       $xfer += $output->writeMapBegin(TType::STRING, TType::LIST, scalar(keys %{$self->{success}}));
       {
-        while( my ($kiter153,$viter154) = each %{$self->{success}}) 
+        while( my ($kiter275,$viter276) = each %{$self->{success}}) 
         {
-          $xfer += $output->writeString($kiter153);
+          $xfer += $output->writeString($kiter275);
           {
-            $xfer += $output->writeListBegin(TType::STRUCT, scalar(@{${viter154}}));
+            $xfer += $output->writeListBegin(TType::STRUCT, scalar(@{${viter276}}));
             {
-              foreach my $iter155 (@{${viter154}}) 
+              foreach my $iter277 (@{${viter276}}) 
               {
-                $xfer += ${iter155}->write($output);
+                $xfer += ${iter277}->write($output);
               }
             }
             $xfer += $output->writeListEnd();
@@ -2764,15 +2567,15 @@ sub read {
       last; };
       /^3$/ && do{      if ($ftype == TType::LIST) {
         {
-          my $_size156 = 0;
+          my $_size278 = 0;
           $self->{feature_id_list} = [];
-          my $_etype159 = 0;
-          $xfer += $input->readListBegin(\$_etype159, \$_size156);
-          for (my $_i160 = 0; $_i160 < $_size156; ++$_i160)
+          my $_etype281 = 0;
+          $xfer += $input->readListBegin(\$_etype281, \$_size278);
+          for (my $_i282 = 0; $_i282 < $_size278; ++$_i282)
           {
-            my $elem161 = undef;
-            $xfer += $input->readString(\$elem161);
-            push(@{$self->{feature_id_list}},$elem161);
+            my $elem283 = undef;
+            $xfer += $input->readString(\$elem283);
+            push(@{$self->{feature_id_list}},$elem283);
           }
           $xfer += $input->readListEnd();
         }
@@ -2807,9 +2610,9 @@ sub write {
     {
       $xfer += $output->writeListBegin(TType::STRING, scalar(@{$self->{feature_id_list}}));
       {
-        foreach my $iter162 (@{$self->{feature_id_list}}) 
+        foreach my $iter284 (@{$self->{feature_id_list}}) 
         {
-          $xfer += $output->writeString($iter162);
+          $xfer += $output->writeString($iter284);
         }
       }
       $xfer += $output->writeListEnd();
@@ -2883,18 +2686,30 @@ sub read {
     {
       /^0$/ && do{      if ($ftype == TType::MAP) {
         {
-          my $_size163 = 0;
+          my $_size285 = 0;
           $self->{success} = {};
-          my $_ktype164 = 0;
-          my $_vtype165 = 0;
-          $xfer += $input->readMapBegin(\$_ktype164, \$_vtype165, \$_size163);
-          for (my $_i167 = 0; $_i167 < $_size163; ++$_i167)
+          my $_ktype286 = 0;
+          my $_vtype287 = 0;
+          $xfer += $input->readMapBegin(\$_ktype286, \$_vtype287, \$_size285);
+          for (my $_i289 = 0; $_i289 < $_size285; ++$_i289)
           {
-            my $key168 = '';
-            my $val169 = '';
-            $xfer += $input->readString(\$key168);
-            $xfer += $input->readString(\$val169);
-            $self->{success}->{$key168} = $val169;
+            my $key290 = '';
+            my $val291 = [];
+            $xfer += $input->readString(\$key290);
+            {
+              my $_size292 = 0;
+              $val291 = [];
+              my $_etype295 = 0;
+              $xfer += $input->readListBegin(\$_etype295, \$_size292);
+              for (my $_i296 = 0; $_i296 < $_size292; ++$_i296)
+              {
+                my $elem297 = undef;
+                $xfer += $input->readString(\$elem297);
+                push(@{$val291},$elem297);
+              }
+              $xfer += $input->readListEnd();
+            }
+            $self->{success}->{$key290} = $val291;
           }
           $xfer += $input->readMapEnd();
         }
@@ -2959,12 +2774,21 @@ sub write {
   if (defined $self->{success}) {
     $xfer += $output->writeFieldBegin('success', TType::MAP, 0);
     {
-      $xfer += $output->writeMapBegin(TType::STRING, TType::STRING, scalar(keys %{$self->{success}}));
+      $xfer += $output->writeMapBegin(TType::STRING, TType::LIST, scalar(keys %{$self->{success}}));
       {
-        while( my ($kiter170,$viter171) = each %{$self->{success}}) 
+        while( my ($kiter298,$viter299) = each %{$self->{success}}) 
         {
-          $xfer += $output->writeString($kiter170);
-          $xfer += $output->writeString($viter171);
+          $xfer += $output->writeString($kiter298);
+          {
+            $xfer += $output->writeListBegin(TType::STRING, scalar(@{${viter299}}));
+            {
+              foreach my $iter300 (@{${viter299}}) 
+              {
+                $xfer += $output->writeString($iter300);
+              }
+            }
+            $xfer += $output->writeListEnd();
+          }
         }
       }
       $xfer += $output->writeMapEnd();
@@ -3064,15 +2888,15 @@ sub read {
       last; };
       /^3$/ && do{      if ($ftype == TType::LIST) {
         {
-          my $_size172 = 0;
+          my $_size301 = 0;
           $self->{feature_id_list} = [];
-          my $_etype175 = 0;
-          $xfer += $input->readListBegin(\$_etype175, \$_size172);
-          for (my $_i176 = 0; $_i176 < $_size172; ++$_i176)
+          my $_etype304 = 0;
+          $xfer += $input->readListBegin(\$_etype304, \$_size301);
+          for (my $_i305 = 0; $_i305 < $_size301; ++$_i305)
           {
-            my $elem177 = undef;
-            $xfer += $input->readString(\$elem177);
-            push(@{$self->{feature_id_list}},$elem177);
+            my $elem306 = undef;
+            $xfer += $input->readString(\$elem306);
+            push(@{$self->{feature_id_list}},$elem306);
           }
           $xfer += $input->readListEnd();
         }
@@ -3107,9 +2931,9 @@ sub write {
     {
       $xfer += $output->writeListBegin(TType::STRING, scalar(@{$self->{feature_id_list}}));
       {
-        foreach my $iter178 (@{$self->{feature_id_list}}) 
+        foreach my $iter307 (@{$self->{feature_id_list}}) 
         {
-          $xfer += $output->writeString($iter178);
+          $xfer += $output->writeString($iter307);
         }
       }
       $xfer += $output->writeListEnd();
@@ -3183,18 +3007,18 @@ sub read {
     {
       /^0$/ && do{      if ($ftype == TType::MAP) {
         {
-          my $_size179 = 0;
+          my $_size308 = 0;
           $self->{success} = {};
-          my $_ktype180 = 0;
-          my $_vtype181 = 0;
-          $xfer += $input->readMapBegin(\$_ktype180, \$_vtype181, \$_size179);
-          for (my $_i183 = 0; $_i183 < $_size179; ++$_i183)
+          my $_ktype309 = 0;
+          my $_vtype310 = 0;
+          $xfer += $input->readMapBegin(\$_ktype309, \$_vtype310, \$_size308);
+          for (my $_i312 = 0; $_i312 < $_size308; ++$_i312)
           {
-            my $key184 = '';
-            my $val185 = '';
-            $xfer += $input->readString(\$key184);
-            $xfer += $input->readString(\$val185);
-            $self->{success}->{$key184} = $val185;
+            my $key313 = '';
+            my $val314 = '';
+            $xfer += $input->readString(\$key313);
+            $xfer += $input->readString(\$val314);
+            $self->{success}->{$key313} = $val314;
           }
           $xfer += $input->readMapEnd();
         }
@@ -3261,10 +3085,10 @@ sub write {
     {
       $xfer += $output->writeMapBegin(TType::STRING, TType::STRING, scalar(keys %{$self->{success}}));
       {
-        while( my ($kiter186,$viter187) = each %{$self->{success}}) 
+        while( my ($kiter315,$viter316) = each %{$self->{success}}) 
         {
-          $xfer += $output->writeString($kiter186);
-          $xfer += $output->writeString($viter187);
+          $xfer += $output->writeString($kiter315);
+          $xfer += $output->writeString($viter316);
         }
       }
       $xfer += $output->writeMapEnd();
@@ -3364,15 +3188,15 @@ sub read {
       last; };
       /^3$/ && do{      if ($ftype == TType::LIST) {
         {
-          my $_size188 = 0;
+          my $_size317 = 0;
           $self->{feature_id_list} = [];
-          my $_etype191 = 0;
-          $xfer += $input->readListBegin(\$_etype191, \$_size188);
-          for (my $_i192 = 0; $_i192 < $_size188; ++$_i192)
+          my $_etype320 = 0;
+          $xfer += $input->readListBegin(\$_etype320, \$_size317);
+          for (my $_i321 = 0; $_i321 < $_size317; ++$_i321)
           {
-            my $elem193 = undef;
-            $xfer += $input->readString(\$elem193);
-            push(@{$self->{feature_id_list}},$elem193);
+            my $elem322 = undef;
+            $xfer += $input->readString(\$elem322);
+            push(@{$self->{feature_id_list}},$elem322);
           }
           $xfer += $input->readListEnd();
         }
@@ -3407,9 +3231,9 @@ sub write {
     {
       $xfer += $output->writeListBegin(TType::STRING, scalar(@{$self->{feature_id_list}}));
       {
-        foreach my $iter194 (@{$self->{feature_id_list}}) 
+        foreach my $iter323 (@{$self->{feature_id_list}}) 
         {
-          $xfer += $output->writeString($iter194);
+          $xfer += $output->writeString($iter323);
         }
       }
       $xfer += $output->writeListEnd();
@@ -3483,18 +3307,18 @@ sub read {
     {
       /^0$/ && do{      if ($ftype == TType::MAP) {
         {
-          my $_size195 = 0;
+          my $_size324 = 0;
           $self->{success} = {};
-          my $_ktype196 = 0;
-          my $_vtype197 = 0;
-          $xfer += $input->readMapBegin(\$_ktype196, \$_vtype197, \$_size195);
-          for (my $_i199 = 0; $_i199 < $_size195; ++$_i199)
+          my $_ktype325 = 0;
+          my $_vtype326 = 0;
+          $xfer += $input->readMapBegin(\$_ktype325, \$_vtype326, \$_size324);
+          for (my $_i328 = 0; $_i328 < $_size324; ++$_i328)
           {
-            my $key200 = '';
-            my $val201 = '';
-            $xfer += $input->readString(\$key200);
-            $xfer += $input->readString(\$val201);
-            $self->{success}->{$key200} = $val201;
+            my $key329 = '';
+            my $val330 = '';
+            $xfer += $input->readString(\$key329);
+            $xfer += $input->readString(\$val330);
+            $self->{success}->{$key329} = $val330;
           }
           $xfer += $input->readMapEnd();
         }
@@ -3561,10 +3385,10 @@ sub write {
     {
       $xfer += $output->writeMapBegin(TType::STRING, TType::STRING, scalar(keys %{$self->{success}}));
       {
-        while( my ($kiter202,$viter203) = each %{$self->{success}}) 
+        while( my ($kiter331,$viter332) = each %{$self->{success}}) 
         {
-          $xfer += $output->writeString($kiter202);
-          $xfer += $output->writeString($viter203);
+          $xfer += $output->writeString($kiter331);
+          $xfer += $output->writeString($viter332);
         }
       }
       $xfer += $output->writeMapEnd();
@@ -3664,15 +3488,15 @@ sub read {
       last; };
       /^3$/ && do{      if ($ftype == TType::LIST) {
         {
-          my $_size204 = 0;
+          my $_size333 = 0;
           $self->{feature_id_list} = [];
-          my $_etype207 = 0;
-          $xfer += $input->readListBegin(\$_etype207, \$_size204);
-          for (my $_i208 = 0; $_i208 < $_size204; ++$_i208)
+          my $_etype336 = 0;
+          $xfer += $input->readListBegin(\$_etype336, \$_size333);
+          for (my $_i337 = 0; $_i337 < $_size333; ++$_i337)
           {
-            my $elem209 = undef;
-            $xfer += $input->readString(\$elem209);
-            push(@{$self->{feature_id_list}},$elem209);
+            my $elem338 = undef;
+            $xfer += $input->readString(\$elem338);
+            push(@{$self->{feature_id_list}},$elem338);
           }
           $xfer += $input->readListEnd();
         }
@@ -3707,9 +3531,9 @@ sub write {
     {
       $xfer += $output->writeListBegin(TType::STRING, scalar(@{$self->{feature_id_list}}));
       {
-        foreach my $iter210 (@{$self->{feature_id_list}}) 
+        foreach my $iter339 (@{$self->{feature_id_list}}) 
         {
-          $xfer += $output->writeString($iter210);
+          $xfer += $output->writeString($iter339);
         }
       }
       $xfer += $output->writeListEnd();
@@ -3783,30 +3607,30 @@ sub read {
     {
       /^0$/ && do{      if ($ftype == TType::MAP) {
         {
-          my $_size211 = 0;
+          my $_size340 = 0;
           $self->{success} = {};
-          my $_ktype212 = 0;
-          my $_vtype213 = 0;
-          $xfer += $input->readMapBegin(\$_ktype212, \$_vtype213, \$_size211);
-          for (my $_i215 = 0; $_i215 < $_size211; ++$_i215)
+          my $_ktype341 = 0;
+          my $_vtype342 = 0;
+          $xfer += $input->readMapBegin(\$_ktype341, \$_vtype342, \$_size340);
+          for (my $_i344 = 0; $_i344 < $_size340; ++$_i344)
           {
-            my $key216 = '';
-            my $val217 = [];
-            $xfer += $input->readString(\$key216);
+            my $key345 = '';
+            my $val346 = [];
+            $xfer += $input->readString(\$key345);
             {
-              my $_size218 = 0;
-              $val217 = [];
-              my $_etype221 = 0;
-              $xfer += $input->readListBegin(\$_etype221, \$_size218);
-              for (my $_i222 = 0; $_i222 < $_size218; ++$_i222)
+              my $_size347 = 0;
+              $val346 = [];
+              my $_etype350 = 0;
+              $xfer += $input->readListBegin(\$_etype350, \$_size347);
+              for (my $_i351 = 0; $_i351 < $_size347; ++$_i351)
               {
-                my $elem223 = undef;
-                $xfer += $input->readString(\$elem223);
-                push(@{$val217},$elem223);
+                my $elem352 = undef;
+                $xfer += $input->readString(\$elem352);
+                push(@{$val346},$elem352);
               }
               $xfer += $input->readListEnd();
             }
-            $self->{success}->{$key216} = $val217;
+            $self->{success}->{$key345} = $val346;
           }
           $xfer += $input->readMapEnd();
         }
@@ -3873,15 +3697,15 @@ sub write {
     {
       $xfer += $output->writeMapBegin(TType::STRING, TType::LIST, scalar(keys %{$self->{success}}));
       {
-        while( my ($kiter224,$viter225) = each %{$self->{success}}) 
+        while( my ($kiter353,$viter354) = each %{$self->{success}}) 
         {
-          $xfer += $output->writeString($kiter224);
+          $xfer += $output->writeString($kiter353);
           {
-            $xfer += $output->writeListBegin(TType::STRING, scalar(@{${viter225}}));
+            $xfer += $output->writeListBegin(TType::STRING, scalar(@{${viter354}}));
             {
-              foreach my $iter226 (@{${viter225}}) 
+              foreach my $iter355 (@{${viter354}}) 
               {
-                $xfer += $output->writeString($iter226);
+                $xfer += $output->writeString($iter355);
               }
             }
             $xfer += $output->writeListEnd();
@@ -3985,15 +3809,15 @@ sub read {
       last; };
       /^3$/ && do{      if ($ftype == TType::LIST) {
         {
-          my $_size227 = 0;
+          my $_size356 = 0;
           $self->{gene_id_list} = [];
-          my $_etype230 = 0;
-          $xfer += $input->readListBegin(\$_etype230, \$_size227);
-          for (my $_i231 = 0; $_i231 < $_size227; ++$_i231)
+          my $_etype359 = 0;
+          $xfer += $input->readListBegin(\$_etype359, \$_size356);
+          for (my $_i360 = 0; $_i360 < $_size356; ++$_i360)
           {
-            my $elem232 = undef;
-            $xfer += $input->readString(\$elem232);
-            push(@{$self->{gene_id_list}},$elem232);
+            my $elem361 = undef;
+            $xfer += $input->readString(\$elem361);
+            push(@{$self->{gene_id_list}},$elem361);
           }
           $xfer += $input->readListEnd();
         }
@@ -4028,9 +3852,9 @@ sub write {
     {
       $xfer += $output->writeListBegin(TType::STRING, scalar(@{$self->{gene_id_list}}));
       {
-        foreach my $iter233 (@{$self->{gene_id_list}}) 
+        foreach my $iter362 (@{$self->{gene_id_list}}) 
         {
-          $xfer += $output->writeString($iter233);
+          $xfer += $output->writeString($iter362);
         }
       }
       $xfer += $output->writeListEnd();
@@ -4104,18 +3928,30 @@ sub read {
     {
       /^0$/ && do{      if ($ftype == TType::MAP) {
         {
-          my $_size234 = 0;
+          my $_size363 = 0;
           $self->{success} = {};
-          my $_ktype235 = 0;
-          my $_vtype236 = 0;
-          $xfer += $input->readMapBegin(\$_ktype235, \$_vtype236, \$_size234);
-          for (my $_i238 = 0; $_i238 < $_size234; ++$_i238)
+          my $_ktype364 = 0;
+          my $_vtype365 = 0;
+          $xfer += $input->readMapBegin(\$_ktype364, \$_vtype365, \$_size363);
+          for (my $_i367 = 0; $_i367 < $_size363; ++$_i367)
           {
-            my $key239 = '';
-            my $val240 = '';
-            $xfer += $input->readString(\$key239);
-            $xfer += $input->readString(\$val240);
-            $self->{success}->{$key239} = $val240;
+            my $key368 = '';
+            my $val369 = [];
+            $xfer += $input->readString(\$key368);
+            {
+              my $_size370 = 0;
+              $val369 = [];
+              my $_etype373 = 0;
+              $xfer += $input->readListBegin(\$_etype373, \$_size370);
+              for (my $_i374 = 0; $_i374 < $_size370; ++$_i374)
+              {
+                my $elem375 = undef;
+                $xfer += $input->readString(\$elem375);
+                push(@{$val369},$elem375);
+              }
+              $xfer += $input->readListEnd();
+            }
+            $self->{success}->{$key368} = $val369;
           }
           $xfer += $input->readMapEnd();
         }
@@ -4180,12 +4016,21 @@ sub write {
   if (defined $self->{success}) {
     $xfer += $output->writeFieldBegin('success', TType::MAP, 0);
     {
-      $xfer += $output->writeMapBegin(TType::STRING, TType::STRING, scalar(keys %{$self->{success}}));
+      $xfer += $output->writeMapBegin(TType::STRING, TType::LIST, scalar(keys %{$self->{success}}));
       {
-        while( my ($kiter241,$viter242) = each %{$self->{success}}) 
+        while( my ($kiter376,$viter377) = each %{$self->{success}}) 
         {
-          $xfer += $output->writeString($kiter241);
-          $xfer += $output->writeString($viter242);
+          $xfer += $output->writeString($kiter376);
+          {
+            $xfer += $output->writeListBegin(TType::STRING, scalar(@{${viter377}}));
+            {
+              foreach my $iter378 (@{${viter377}}) 
+              {
+                $xfer += $output->writeString($iter378);
+              }
+            }
+            $xfer += $output->writeListEnd();
+          }
         }
       }
       $xfer += $output->writeMapEnd();
@@ -4285,15 +4130,15 @@ sub read {
       last; };
       /^3$/ && do{      if ($ftype == TType::LIST) {
         {
-          my $_size243 = 0;
+          my $_size379 = 0;
           $self->{mrna_id_list} = [];
-          my $_etype246 = 0;
-          $xfer += $input->readListBegin(\$_etype246, \$_size243);
-          for (my $_i247 = 0; $_i247 < $_size243; ++$_i247)
+          my $_etype382 = 0;
+          $xfer += $input->readListBegin(\$_etype382, \$_size379);
+          for (my $_i383 = 0; $_i383 < $_size379; ++$_i383)
           {
-            my $elem248 = undef;
-            $xfer += $input->readString(\$elem248);
-            push(@{$self->{mrna_id_list}},$elem248);
+            my $elem384 = undef;
+            $xfer += $input->readString(\$elem384);
+            push(@{$self->{mrna_id_list}},$elem384);
           }
           $xfer += $input->readListEnd();
         }
@@ -4328,9 +4173,9 @@ sub write {
     {
       $xfer += $output->writeListBegin(TType::STRING, scalar(@{$self->{mrna_id_list}}));
       {
-        foreach my $iter249 (@{$self->{mrna_id_list}}) 
+        foreach my $iter385 (@{$self->{mrna_id_list}}) 
         {
-          $xfer += $output->writeString($iter249);
+          $xfer += $output->writeString($iter385);
         }
       }
       $xfer += $output->writeListEnd();
@@ -4404,18 +4249,18 @@ sub read {
     {
       /^0$/ && do{      if ($ftype == TType::MAP) {
         {
-          my $_size250 = 0;
+          my $_size386 = 0;
           $self->{success} = {};
-          my $_ktype251 = 0;
-          my $_vtype252 = 0;
-          $xfer += $input->readMapBegin(\$_ktype251, \$_vtype252, \$_size250);
-          for (my $_i254 = 0; $_i254 < $_size250; ++$_i254)
+          my $_ktype387 = 0;
+          my $_vtype388 = 0;
+          $xfer += $input->readMapBegin(\$_ktype387, \$_vtype388, \$_size386);
+          for (my $_i390 = 0; $_i390 < $_size386; ++$_i390)
           {
-            my $key255 = '';
-            my $val256 = '';
-            $xfer += $input->readString(\$key255);
-            $xfer += $input->readString(\$val256);
-            $self->{success}->{$key255} = $val256;
+            my $key391 = '';
+            my $val392 = '';
+            $xfer += $input->readString(\$key391);
+            $xfer += $input->readString(\$val392);
+            $self->{success}->{$key391} = $val392;
           }
           $xfer += $input->readMapEnd();
         }
@@ -4482,10 +4327,10 @@ sub write {
     {
       $xfer += $output->writeMapBegin(TType::STRING, TType::STRING, scalar(keys %{$self->{success}}));
       {
-        while( my ($kiter257,$viter258) = each %{$self->{success}}) 
+        while( my ($kiter393,$viter394) = each %{$self->{success}}) 
         {
-          $xfer += $output->writeString($kiter257);
-          $xfer += $output->writeString($viter258);
+          $xfer += $output->writeString($kiter393);
+          $xfer += $output->writeString($viter394);
         }
       }
       $xfer += $output->writeMapEnd();
@@ -4585,15 +4430,15 @@ sub read {
       last; };
       /^3$/ && do{      if ($ftype == TType::LIST) {
         {
-          my $_size259 = 0;
+          my $_size395 = 0;
           $self->{cds_id_list} = [];
-          my $_etype262 = 0;
-          $xfer += $input->readListBegin(\$_etype262, \$_size259);
-          for (my $_i263 = 0; $_i263 < $_size259; ++$_i263)
+          my $_etype398 = 0;
+          $xfer += $input->readListBegin(\$_etype398, \$_size395);
+          for (my $_i399 = 0; $_i399 < $_size395; ++$_i399)
           {
-            my $elem264 = undef;
-            $xfer += $input->readString(\$elem264);
-            push(@{$self->{cds_id_list}},$elem264);
+            my $elem400 = undef;
+            $xfer += $input->readString(\$elem400);
+            push(@{$self->{cds_id_list}},$elem400);
           }
           $xfer += $input->readListEnd();
         }
@@ -4628,9 +4473,9 @@ sub write {
     {
       $xfer += $output->writeListBegin(TType::STRING, scalar(@{$self->{cds_id_list}}));
       {
-        foreach my $iter265 (@{$self->{cds_id_list}}) 
+        foreach my $iter401 (@{$self->{cds_id_list}}) 
         {
-          $xfer += $output->writeString($iter265);
+          $xfer += $output->writeString($iter401);
         }
       }
       $xfer += $output->writeListEnd();
@@ -4704,18 +4549,18 @@ sub read {
     {
       /^0$/ && do{      if ($ftype == TType::MAP) {
         {
-          my $_size266 = 0;
+          my $_size402 = 0;
           $self->{success} = {};
-          my $_ktype267 = 0;
-          my $_vtype268 = 0;
-          $xfer += $input->readMapBegin(\$_ktype267, \$_vtype268, \$_size266);
-          for (my $_i270 = 0; $_i270 < $_size266; ++$_i270)
+          my $_ktype403 = 0;
+          my $_vtype404 = 0;
+          $xfer += $input->readMapBegin(\$_ktype403, \$_vtype404, \$_size402);
+          for (my $_i406 = 0; $_i406 < $_size402; ++$_i406)
           {
-            my $key271 = '';
-            my $val272 = '';
-            $xfer += $input->readString(\$key271);
-            $xfer += $input->readString(\$val272);
-            $self->{success}->{$key271} = $val272;
+            my $key407 = '';
+            my $val408 = '';
+            $xfer += $input->readString(\$key407);
+            $xfer += $input->readString(\$val408);
+            $self->{success}->{$key407} = $val408;
           }
           $xfer += $input->readMapEnd();
         }
@@ -4782,10 +4627,10 @@ sub write {
     {
       $xfer += $output->writeMapBegin(TType::STRING, TType::STRING, scalar(keys %{$self->{success}}));
       {
-        while( my ($kiter273,$viter274) = each %{$self->{success}}) 
+        while( my ($kiter409,$viter410) = each %{$self->{success}}) 
         {
-          $xfer += $output->writeString($kiter273);
-          $xfer += $output->writeString($viter274);
+          $xfer += $output->writeString($kiter409);
+          $xfer += $output->writeString($viter410);
         }
       }
       $xfer += $output->writeMapEnd();
@@ -4885,15 +4730,15 @@ sub read {
       last; };
       /^3$/ && do{      if ($ftype == TType::LIST) {
         {
-          my $_size275 = 0;
+          my $_size411 = 0;
           $self->{mrna_id_list} = [];
-          my $_etype278 = 0;
-          $xfer += $input->readListBegin(\$_etype278, \$_size275);
-          for (my $_i279 = 0; $_i279 < $_size275; ++$_i279)
+          my $_etype414 = 0;
+          $xfer += $input->readListBegin(\$_etype414, \$_size411);
+          for (my $_i415 = 0; $_i415 < $_size411; ++$_i415)
           {
-            my $elem280 = undef;
-            $xfer += $input->readString(\$elem280);
-            push(@{$self->{mrna_id_list}},$elem280);
+            my $elem416 = undef;
+            $xfer += $input->readString(\$elem416);
+            push(@{$self->{mrna_id_list}},$elem416);
           }
           $xfer += $input->readListEnd();
         }
@@ -4928,9 +4773,9 @@ sub write {
     {
       $xfer += $output->writeListBegin(TType::STRING, scalar(@{$self->{mrna_id_list}}));
       {
-        foreach my $iter281 (@{$self->{mrna_id_list}}) 
+        foreach my $iter417 (@{$self->{mrna_id_list}}) 
         {
-          $xfer += $output->writeString($iter281);
+          $xfer += $output->writeString($iter417);
         }
       }
       $xfer += $output->writeListEnd();
@@ -5004,18 +4849,18 @@ sub read {
     {
       /^0$/ && do{      if ($ftype == TType::MAP) {
         {
-          my $_size282 = 0;
+          my $_size418 = 0;
           $self->{success} = {};
-          my $_ktype283 = 0;
-          my $_vtype284 = 0;
-          $xfer += $input->readMapBegin(\$_ktype283, \$_vtype284, \$_size282);
-          for (my $_i286 = 0; $_i286 < $_size282; ++$_i286)
+          my $_ktype419 = 0;
+          my $_vtype420 = 0;
+          $xfer += $input->readMapBegin(\$_ktype419, \$_vtype420, \$_size418);
+          for (my $_i422 = 0; $_i422 < $_size418; ++$_i422)
           {
-            my $key287 = '';
-            my $val288 = '';
-            $xfer += $input->readString(\$key287);
-            $xfer += $input->readString(\$val288);
-            $self->{success}->{$key287} = $val288;
+            my $key423 = '';
+            my $val424 = '';
+            $xfer += $input->readString(\$key423);
+            $xfer += $input->readString(\$val424);
+            $self->{success}->{$key423} = $val424;
           }
           $xfer += $input->readMapEnd();
         }
@@ -5082,10 +4927,10 @@ sub write {
     {
       $xfer += $output->writeMapBegin(TType::STRING, TType::STRING, scalar(keys %{$self->{success}}));
       {
-        while( my ($kiter289,$viter290) = each %{$self->{success}}) 
+        while( my ($kiter425,$viter426) = each %{$self->{success}}) 
         {
-          $xfer += $output->writeString($kiter289);
-          $xfer += $output->writeString($viter290);
+          $xfer += $output->writeString($kiter425);
+          $xfer += $output->writeString($viter426);
         }
       }
       $xfer += $output->writeMapEnd();
@@ -5185,15 +5030,15 @@ sub read {
       last; };
       /^3$/ && do{      if ($ftype == TType::LIST) {
         {
-          my $_size291 = 0;
+          my $_size427 = 0;
           $self->{gene_id_list} = [];
-          my $_etype294 = 0;
-          $xfer += $input->readListBegin(\$_etype294, \$_size291);
-          for (my $_i295 = 0; $_i295 < $_size291; ++$_i295)
+          my $_etype430 = 0;
+          $xfer += $input->readListBegin(\$_etype430, \$_size427);
+          for (my $_i431 = 0; $_i431 < $_size427; ++$_i431)
           {
-            my $elem296 = undef;
-            $xfer += $input->readString(\$elem296);
-            push(@{$self->{gene_id_list}},$elem296);
+            my $elem432 = undef;
+            $xfer += $input->readString(\$elem432);
+            push(@{$self->{gene_id_list}},$elem432);
           }
           $xfer += $input->readListEnd();
         }
@@ -5228,9 +5073,9 @@ sub write {
     {
       $xfer += $output->writeListBegin(TType::STRING, scalar(@{$self->{gene_id_list}}));
       {
-        foreach my $iter297 (@{$self->{gene_id_list}}) 
+        foreach my $iter433 (@{$self->{gene_id_list}}) 
         {
-          $xfer += $output->writeString($iter297);
+          $xfer += $output->writeString($iter433);
         }
       }
       $xfer += $output->writeListEnd();
@@ -5304,18 +5149,18 @@ sub read {
     {
       /^0$/ && do{      if ($ftype == TType::MAP) {
         {
-          my $_size298 = 0;
+          my $_size434 = 0;
           $self->{success} = {};
-          my $_ktype299 = 0;
-          my $_vtype300 = 0;
-          $xfer += $input->readMapBegin(\$_ktype299, \$_vtype300, \$_size298);
-          for (my $_i302 = 0; $_i302 < $_size298; ++$_i302)
+          my $_ktype435 = 0;
+          my $_vtype436 = 0;
+          $xfer += $input->readMapBegin(\$_ktype435, \$_vtype436, \$_size434);
+          for (my $_i438 = 0; $_i438 < $_size434; ++$_i438)
           {
-            my $key303 = '';
-            my $val304 = '';
-            $xfer += $input->readString(\$key303);
-            $xfer += $input->readString(\$val304);
-            $self->{success}->{$key303} = $val304;
+            my $key439 = '';
+            my $val440 = '';
+            $xfer += $input->readString(\$key439);
+            $xfer += $input->readString(\$val440);
+            $self->{success}->{$key439} = $val440;
           }
           $xfer += $input->readMapEnd();
         }
@@ -5382,10 +5227,10 @@ sub write {
     {
       $xfer += $output->writeMapBegin(TType::STRING, TType::STRING, scalar(keys %{$self->{success}}));
       {
-        while( my ($kiter305,$viter306) = each %{$self->{success}}) 
+        while( my ($kiter441,$viter442) = each %{$self->{success}}) 
         {
-          $xfer += $output->writeString($kiter305);
-          $xfer += $output->writeString($viter306);
+          $xfer += $output->writeString($kiter441);
+          $xfer += $output->writeString($viter442);
         }
       }
       $xfer += $output->writeMapEnd();
@@ -5485,15 +5330,15 @@ sub read {
       last; };
       /^3$/ && do{      if ($ftype == TType::LIST) {
         {
-          my $_size307 = 0;
+          my $_size443 = 0;
           $self->{gene_id_list} = [];
-          my $_etype310 = 0;
-          $xfer += $input->readListBegin(\$_etype310, \$_size307);
-          for (my $_i311 = 0; $_i311 < $_size307; ++$_i311)
+          my $_etype446 = 0;
+          $xfer += $input->readListBegin(\$_etype446, \$_size443);
+          for (my $_i447 = 0; $_i447 < $_size443; ++$_i447)
           {
-            my $elem312 = undef;
-            $xfer += $input->readString(\$elem312);
-            push(@{$self->{gene_id_list}},$elem312);
+            my $elem448 = undef;
+            $xfer += $input->readString(\$elem448);
+            push(@{$self->{gene_id_list}},$elem448);
           }
           $xfer += $input->readListEnd();
         }
@@ -5528,9 +5373,9 @@ sub write {
     {
       $xfer += $output->writeListBegin(TType::STRING, scalar(@{$self->{gene_id_list}}));
       {
-        foreach my $iter313 (@{$self->{gene_id_list}}) 
+        foreach my $iter449 (@{$self->{gene_id_list}}) 
         {
-          $xfer += $output->writeString($iter313);
+          $xfer += $output->writeString($iter449);
         }
       }
       $xfer += $output->writeListEnd();
@@ -5604,18 +5449,30 @@ sub read {
     {
       /^0$/ && do{      if ($ftype == TType::MAP) {
         {
-          my $_size314 = 0;
+          my $_size450 = 0;
           $self->{success} = {};
-          my $_ktype315 = 0;
-          my $_vtype316 = 0;
-          $xfer += $input->readMapBegin(\$_ktype315, \$_vtype316, \$_size314);
-          for (my $_i318 = 0; $_i318 < $_size314; ++$_i318)
+          my $_ktype451 = 0;
+          my $_vtype452 = 0;
+          $xfer += $input->readMapBegin(\$_ktype451, \$_vtype452, \$_size450);
+          for (my $_i454 = 0; $_i454 < $_size450; ++$_i454)
           {
-            my $key319 = '';
-            my $val320 = '';
-            $xfer += $input->readString(\$key319);
-            $xfer += $input->readString(\$val320);
-            $self->{success}->{$key319} = $val320;
+            my $key455 = '';
+            my $val456 = [];
+            $xfer += $input->readString(\$key455);
+            {
+              my $_size457 = 0;
+              $val456 = [];
+              my $_etype460 = 0;
+              $xfer += $input->readListBegin(\$_etype460, \$_size457);
+              for (my $_i461 = 0; $_i461 < $_size457; ++$_i461)
+              {
+                my $elem462 = undef;
+                $xfer += $input->readString(\$elem462);
+                push(@{$val456},$elem462);
+              }
+              $xfer += $input->readListEnd();
+            }
+            $self->{success}->{$key455} = $val456;
           }
           $xfer += $input->readMapEnd();
         }
@@ -5680,12 +5537,21 @@ sub write {
   if (defined $self->{success}) {
     $xfer += $output->writeFieldBegin('success', TType::MAP, 0);
     {
-      $xfer += $output->writeMapBegin(TType::STRING, TType::STRING, scalar(keys %{$self->{success}}));
+      $xfer += $output->writeMapBegin(TType::STRING, TType::LIST, scalar(keys %{$self->{success}}));
       {
-        while( my ($kiter321,$viter322) = each %{$self->{success}}) 
+        while( my ($kiter463,$viter464) = each %{$self->{success}}) 
         {
-          $xfer += $output->writeString($kiter321);
-          $xfer += $output->writeString($viter322);
+          $xfer += $output->writeString($kiter463);
+          {
+            $xfer += $output->writeListBegin(TType::STRING, scalar(@{${viter464}}));
+            {
+              foreach my $iter465 (@{${viter464}}) 
+              {
+                $xfer += $output->writeString($iter465);
+              }
+            }
+            $xfer += $output->writeListEnd();
+          }
         }
       }
       $xfer += $output->writeMapEnd();
@@ -5778,10 +5644,8 @@ sub get_feature_ids{
   my $self = shift;
   my $token = shift;
   my $ref = shift;
-  my $feature_type_list = shift;
-  my $region_list = shift;
-  my $function_list = shift;
-  my $alias_list = shift;
+  my $filters = shift;
+  my $group_type = shift;
 
   die 'implement interface';
 }
@@ -5799,7 +5663,6 @@ sub get_proteins{
   my $self = shift;
   my $token = shift;
   my $ref = shift;
-  my $feature_id_list = shift;
 
   die 'implement interface';
 }
@@ -5962,11 +5825,9 @@ sub get_feature_ids{
 
   my $token = ($request->{'token'}) ? $request->{'token'} : undef;
   my $ref = ($request->{'ref'}) ? $request->{'ref'} : undef;
-  my $feature_type_list = ($request->{'feature_type_list'}) ? $request->{'feature_type_list'} : undef;
-  my $region_list = ($request->{'region_list'}) ? $request->{'region_list'} : undef;
-  my $function_list = ($request->{'function_list'}) ? $request->{'function_list'} : undef;
-  my $alias_list = ($request->{'alias_list'}) ? $request->{'alias_list'} : undef;
-  return $self->{impl}->get_feature_ids($token, $ref, $feature_type_list, $region_list, $function_list, $alias_list);
+  my $filters = ($request->{'filters'}) ? $request->{'filters'} : undef;
+  my $group_type = ($request->{'group_type'}) ? $request->{'group_type'} : undef;
+  return $self->{impl}->get_feature_ids($token, $ref, $filters, $group_type);
 }
 
 sub get_features{
@@ -5983,8 +5844,7 @@ sub get_proteins{
 
   my $token = ($request->{'token'}) ? $request->{'token'} : undef;
   my $ref = ($request->{'ref'}) ? $request->{'ref'} : undef;
-  my $feature_id_list = ($request->{'feature_id_list'}) ? $request->{'feature_id_list'} : undef;
-  return $self->{impl}->get_proteins($token, $ref, $feature_id_list);
+  return $self->{impl}->get_proteins($token, $ref);
 }
 
 sub get_feature_locations{
@@ -6429,12 +6289,10 @@ sub get_feature_ids{
   my $self = shift;
   my $token = shift;
   my $ref = shift;
-  my $feature_type_list = shift;
-  my $region_list = shift;
-  my $function_list = shift;
-  my $alias_list = shift;
+  my $filters = shift;
+  my $group_type = shift;
 
-    $self->send_get_feature_ids($token, $ref, $feature_type_list, $region_list, $function_list, $alias_list);
+    $self->send_get_feature_ids($token, $ref, $filters, $group_type);
   return $self->recv_get_feature_ids();
 }
 
@@ -6442,19 +6300,15 @@ sub send_get_feature_ids{
   my $self = shift;
   my $token = shift;
   my $ref = shift;
-  my $feature_type_list = shift;
-  my $region_list = shift;
-  my $function_list = shift;
-  my $alias_list = shift;
+  my $filters = shift;
+  my $group_type = shift;
 
   $self->{output}->writeMessageBegin('get_feature_ids', TMessageType::CALL, $self->{seqid});
   my $args = new genome_annotation::thrift_service_get_feature_ids_args();
   $args->{token} = $token;
   $args->{ref} = $ref;
-  $args->{feature_type_list} = $feature_type_list;
-  $args->{region_list} = $region_list;
-  $args->{function_list} = $function_list;
-  $args->{alias_list} = $alias_list;
+  $args->{filters} = $filters;
+  $args->{group_type} = $group_type;
   $args->write($self->{output});
   $self->{output}->writeMessageEnd();
   $self->{output}->getTransport()->flush();
@@ -6572,9 +6426,8 @@ sub get_proteins{
   my $self = shift;
   my $token = shift;
   my $ref = shift;
-  my $feature_id_list = shift;
 
-    $self->send_get_proteins($token, $ref, $feature_id_list);
+    $self->send_get_proteins($token, $ref);
   return $self->recv_get_proteins();
 }
 
@@ -6582,13 +6435,11 @@ sub send_get_proteins{
   my $self = shift;
   my $token = shift;
   my $ref = shift;
-  my $feature_id_list = shift;
 
   $self->{output}->writeMessageBegin('get_proteins', TMessageType::CALL, $self->{seqid});
   my $args = new genome_annotation::thrift_service_get_proteins_args();
   $args->{token} = $token;
   $args->{ref} = $ref;
-  $args->{feature_id_list} = $feature_id_list;
   $args->write($self->{output});
   $self->{output}->writeMessageEnd();
   $self->{output}->getTransport()->flush();
@@ -7548,7 +7399,7 @@ sub process_get_feature_ids {
     $input->readMessageEnd();
     my $result = new genome_annotation::thrift_service_get_feature_ids_result();
     eval {
-      $result->{success} = $self->{handler}->get_feature_ids($args->token, $args->ref, $args->feature_type_list, $args->region_list, $args->function_list, $args->alias_list);
+      $result->{success} = $self->{handler}->get_feature_ids($args->token, $args->ref, $args->filters, $args->group_type);
     }; if( UNIVERSAL::isa($@,'genome_annotation::ServiceException') ){ 
       $result->{generic_exception} = $@;
         }; if( UNIVERSAL::isa($@,'genome_annotation::AuthorizationException') ){ 
@@ -7602,7 +7453,7 @@ sub process_get_proteins {
     $input->readMessageEnd();
     my $result = new genome_annotation::thrift_service_get_proteins_result();
     eval {
-      $result->{success} = $self->{handler}->get_proteins($args->token, $args->ref, $args->feature_id_list);
+      $result->{success} = $self->{handler}->get_proteins($args->token, $args->ref);
     }; if( UNIVERSAL::isa($@,'genome_annotation::ServiceException') ){ 
       $result->{generic_exception} = $@;
         }; if( UNIVERSAL::isa($@,'genome_annotation::AuthorizationException') ){ 

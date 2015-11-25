@@ -47,18 +47,44 @@ struct Region {
     4: i64 length;
 }
 
-struct AssemblyContig {
-    1: string contig_id;
-    2: string sequence;
-    3: i64 length;
-    4: double gc_content;
-    5: string md5;
-    6: string name;
-    7: string description;
-    8: bool is_complete;
-    9: bool is_circular;
+struct Feature_id_filters {
+    1: list<string> type_list = [];
+    2: list<Region> region_list = [];
+    3: list<string> function_list = [];
+    4: list<string> alias_list = [];
 }
 
+struct Feature_id_mapping {
+    1: map<string, list<string>> by_type = empty;
+    2: map<string, map<string, map<string, list<string>>>> by_region = empty;
+    3: map<string, list<string>> by_function = empty;
+    4: map<string, list<string>> by_alias = empty;
+}
+
+struct Feature_data {
+    1: string feature_id;
+    2: string feature_type;
+    3: string feature_function;
+    4: map<string, list<string>> feature_aliases;
+    5: i64 feature_dna_sequence_length;
+    6: string feature_dna_sequence;
+    7: string feature_md5;
+    8: list<Region> feature_locations;
+    9: list<string> feature_publications;
+    10: list<string> feature_quality_warnings;
+    11: list<string> feature_quality_score;
+    12: list<string> feature_notes;
+    13: string feature_inference;
+}
+
+struct Protein_data {
+    1: string protein_id;
+    2: string protein_amino_acid_sequence;
+    3: string protein_function;
+    4: list<string> protein_aliases;
+    5: string protein_md5;
+    6: list<string> protein_domain_locations;
+}
 
 service thrift_service {
     /**
@@ -132,12 +158,10 @@ service thrift_service {
      * Retrieve Feature ids in this GenomeAnnotation, optionally filtered by type, region, function, alias.
      *
      */
-    map<string,map<string,string>> get_feature_ids(1:required string token,
-                                                   2:required ObjectReference ref,
-                                                   3:list<string> feature_type_list,
-                                                   4:list<Region> region_list,
-                                                   5:list<string> function_list,
-                                                   6:list<string> alias_list) throws (
+    Feature_id_mapping get_feature_ids(1:required string token,
+                                       2:required ObjectReference ref,
+                                       3:Feature_id_filters filters,
+                                       4:string group_type) throws (
         1:ServiceException generic_exception,
         2:AuthorizationException authorization_exception,
         3:AuthenticationException authentication_exception,
@@ -149,9 +173,9 @@ service thrift_service {
      * Retrieve Feature data available in this GenomeAnnotation.
      *
      */
-    map<string,string> get_features(1:required string token,
-                                    2:required ObjectReference ref,
-                                    3:list<string> feature_id_list) throws (
+    map<string, Feature_data> get_features(1:required string token,
+                                           2:required ObjectReference ref,
+                                           3:list<string> feature_id_list) throws (
         1:ServiceException generic_exception,
         2:AuthorizationException authorization_exception,
         3:AuthenticationException authentication_exception,
@@ -163,9 +187,8 @@ service thrift_service {
      * Retrieve Protein data available in this GenomeAnnotation.
      *
      */
-    map<string,string> get_proteins(1:required string token,
-                                    2:required ObjectReference ref,
-                                    3:list<string> feature_id_list) throws (
+    map<string, Protein_data> get_proteins(1:required string token,
+                                           2:required ObjectReference ref) throws (
         1:ServiceException generic_exception,
         2:AuthorizationException authorization_exception,
         3:AuthenticationException authentication_exception,
@@ -177,9 +200,9 @@ service thrift_service {
      * Retrieve Feature locations in this GenomeAnnotation.
      *
      */
-    map<string,list<Region>> get_feature_locations(1:required string token,
-                                             2:required ObjectReference ref,
-                                             3:list<string> feature_id_list) throws (
+    map<string, list<Region>> get_feature_locations(1:required string token,
+                                                    2:required ObjectReference ref,
+                                                    3:list<string> feature_id_list) throws (
         1:ServiceException generic_exception,
         2:AuthorizationException authorization_exception,
         3:AuthenticationException authentication_exception,
@@ -191,9 +214,9 @@ service thrift_service {
      * Retrieve Feature publications in this GenomeAnnotation.
      *
      */
-    map<string,string> get_feature_publications(1:required string token,
-                                                2:required ObjectReference ref,
-                                                3:list<string> feature_id_list) throws (
+    map<string,list<string>> get_feature_publications(1:required string token,
+                                                      2:required ObjectReference ref,
+                                                      3:list<string> feature_id_list) throws (
         1:ServiceException generic_exception,
         2:AuthorizationException authorization_exception,
         3:AuthenticationException authentication_exception,
@@ -247,9 +270,9 @@ service thrift_service {
      * Retrieve the CDS id for each Gene id in this GenomeAnnotation.
      *
      */
-    map<string,string> get_cds_by_gene(1:required string token,
-                                       2:required ObjectReference ref,
-                                       3:list<string> gene_id_list) throws (
+    map<string,list<string>> get_cds_by_gene(1:required string token,
+                                             2:required ObjectReference ref,
+                                             3:list<string> gene_id_list) throws (
         1:ServiceException generic_exception,
         2:AuthorizationException authorization_exception,
         3:AuthenticationException authentication_exception,
@@ -317,9 +340,9 @@ service thrift_service {
      * Retrieve the mRNA id for each Gene id in this GenomeAnnotation.
      *
      */
-    map<string,string> get_mrna_by_gene(1:required string token,
-                                        2:required ObjectReference ref,
-                                        3:list<string> gene_id_list) throws (
+    map<string, list<string>> get_mrna_by_gene(1:required string token,
+                                               2:required ObjectReference ref,
+                                               3:list<string> gene_id_list) throws (
         1:ServiceException generic_exception,
         2:AuthorizationException authorization_exception,
         3:AuthenticationException authentication_exception,
