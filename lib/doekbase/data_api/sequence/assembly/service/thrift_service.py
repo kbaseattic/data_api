@@ -3543,7 +3543,7 @@ class get_contig_gc_content_result:
   """
 
   thrift_spec = (
-    (0, TType.MAP, 'success', (TType.STRING,None,TType.I64,None), None, ), # 0
+    (0, TType.MAP, 'success', (TType.STRING,None,TType.DOUBLE,None), None, ), # 0
     (1, TType.STRUCT, 'generic_exception', (ServiceException, ServiceException.thrift_spec), None, ), # 1
     (2, TType.STRUCT, 'authorization_exception', (AuthorizationException, AuthorizationException.thrift_spec), None, ), # 2
     (3, TType.STRUCT, 'authentication_exception', (AuthenticationException, AuthenticationException.thrift_spec), None, ), # 3
@@ -3576,7 +3576,7 @@ class get_contig_gc_content_result:
           (_ktype54, _vtype55, _size53 ) = iprot.readMapBegin()
           for _i57 in xrange(_size53):
             _key58 = iprot.readString();
-            _val59 = iprot.readI64();
+            _val59 = iprot.readDouble();
             self.success[_key58] = _val59
           iprot.readMapEnd()
         else:
@@ -3629,10 +3629,10 @@ class get_contig_gc_content_result:
     oprot.writeStructBegin('get_contig_gc_content_result')
     if self.success is not None:
       oprot.writeFieldBegin('success', TType.MAP, 0)
-      oprot.writeMapBegin(TType.STRING, TType.I64, len(self.success))
+      oprot.writeMapBegin(TType.STRING, TType.DOUBLE, len(self.success))
       for kiter60,viter61 in self.success.items():
         oprot.writeString(kiter60)
-        oprot.writeI64(viter61)
+        oprot.writeDouble(viter61)
       oprot.writeMapEnd()
       oprot.writeFieldEnd()
     if self.generic_exception is not None:
