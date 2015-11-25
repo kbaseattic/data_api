@@ -15,6 +15,7 @@ import lockfile.pidlockfile
 from doekbase.data_api import cache
 
 SERVICE_NAMES = ["object", "taxon", "assembly", "genome_annotation"]
+KBASE_TARGETS = ["prod", "next", "ci", "localhost", "dir_cache", "dir_nocache"]
 
 # Logging
 # TODO: add syslog support
@@ -47,6 +48,10 @@ def main():
     config = ConfigParser.ConfigParser()
     if args.config:
         config.read(args.config)
+
+    if args.kbase_url not in KBASE_TARGETS:
+        logger.info("Unrecognized KBase url {}".format(args.kbase_url))
+        return 1
 
     if args.service not in SERVICE_NAMES:
         logger.info("Unrecognized service name {}".format(args.service))
