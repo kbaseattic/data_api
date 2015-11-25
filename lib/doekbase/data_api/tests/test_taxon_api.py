@@ -7,7 +7,7 @@ from unittest import skipUnless
 from . import shared
 
 from doekbase.data_api.taxonomy.taxon.api import TaxonAPI
-from doekbase.data_api.taxonomy.taxon.api import _Prototype
+from doekbase.data_api.taxonomy.taxon.api import _Taxon
 from doekbase.data_api.taxonomy.taxon.api import _KBaseGenomes_Genome
 from doekbase.data_api.taxonomy.taxon.api import TaxonClientAPI
 
@@ -26,7 +26,7 @@ def setup():
     shared.setup()
     global t_new, t_new_e, t_old, t_old_e, t_client_new, t_client_old
     t_new = TaxonAPI(shared.services, shared.token, taxon_new)
-    t_new_e = _Prototype(shared.services, shared.token, taxon_new)
+    t_new_e = _Taxon(shared.services, shared.token, taxon_new)
     t_old = TaxonAPI(shared.services, shared.token, taxon_old)
     t_old_e = _KBaseGenomes_Genome(shared.services, shared.token, taxon_old)
     t_client_new = TaxonClientAPI(shared.services["taxon_service_url"], shared.token, taxon_new)
@@ -36,8 +36,8 @@ def setup():
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
 def test_bogus_type():
     inputs = ["Bogus",
-              "PrototypeReferenceGenomes/kb|g.166819",
-              "PrototypeReferenceGenomes/kb|g.166819_assembly",
+              "ReferenceGenomeAnnotations/kb|g.166819",
+              "ReferenceGenomeAnnotations/kb|g.166819_assembly",
               "OriginalReferenceGenomes/kb|g.166819.contigset"]
     _log.info("Input {}".format(inputs))
     for x in inputs:

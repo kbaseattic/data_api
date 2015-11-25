@@ -71,7 +71,7 @@ def get_gff(gene):
     return string       
 
 
-genomeref = "PrototypeReferenceGenomes/kb|g.166828"
+genomeref = "ReferenceGenomeAnnotations/kb|g.166828"
 genome = ObjectAPI(services, token=token, ref=genomeref)
 genome_annotation = GenomeAnnotationAPI(services, token, ref=genomeref)
 gene='kb|g.166828.locus.15345'    

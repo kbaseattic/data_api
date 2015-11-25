@@ -90,7 +90,7 @@ class TestBenchmarkAssemblyObjects(unittest.TestCase):
                                             "kb|g.140106.c.400000","kb|g.140106.c.500000",
                                             "kb|g.140106.c.600000","kb|g.140106.c.700000"]}
 
-        print "Prototype Condensed Version Objects"
+        print "Updated Object Types"
 
         for x in assemblies:
             print "\tBasic stats about {0}".format(x)

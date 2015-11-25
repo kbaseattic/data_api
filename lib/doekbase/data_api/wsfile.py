@@ -96,7 +96,7 @@ class WorkspaceFile(object):
 
     * ref - object reference like "123/4"
     * type - Name of the type of this object, e.g. "FooType"
-    * name - Name of this object, e.g. "PrototypeReferenceGenomes/kb|g.3157"
+    * name - Name of this object, e.g. "ReferenceGenomeAnnotations/kb|g.3157"
     * links - List of references, each in the same form as the 'ref' field.
     * data - JSON object with the data (whatever you want)
     """
@@ -420,26 +420,28 @@ MD5_TYPES = {
     u'KBaseGenomes.Genome-7.0': u'KBaseGenomes.Genome-93da9d2c8fb7836fb473dd9c1e4ca89e',
     u'KBaseGenomes.Genome-8.0': u'KBaseGenomes.Genome-51b05a5c27084ae56106e60df5b66df5',
     u'KBaseGenomes.ContigSet-3.0': u'KBaseGenomes.ContigSet-db7f518c9469d166a783d813c15d64e9',
-    u'KBaseGenomesCondensedPrototypeV2.GenomeAnnotation-0.1': u'KBaseGenomesCondensedPrototypeV2.GenomeAnnotation-d4301f53dab71e72d70ea5be6919696e',
-    u'KBaseGenomesCondensedPrototypeV2.GenomeAnnotation-1.0': u'KBaseGenomesCondensedPrototypeV2.GenomeAnnotation-d4301f53dab71e72d70ea5be6919696e',
-    u'KBaseGenomesCondensedPrototypeV2.GenomeAnnotation-1.1': u'KBaseGenomesCondensedPrototypeV2.GenomeAnnotation-97253a4ad440116a6421ede1fca50cad',
-    u'KBaseGenomesCondensedPrototypeV2.GenomeAnnotation-2.0': u'KBaseGenomesCondensedPrototypeV2.GenomeAnnotation-e3de51478246422db519fd4cbc9eb4cd',
-    u'KBaseGenomesCondensedPrototypeV2.GenomeAnnotation-2.1': u'KBaseGenomesCondensedPrototypeV2.GenomeAnnotation-6935b73c720523e4541dd516bc13ef56',
-    u'KBaseGenomesCondensedPrototypeV2.GenomeAnnotation-3.0': u'KBaseGenomesCondensedPrototypeV2.GenomeAnnotation-841a82daab5165ff77a4fd9aba899d93',
-    u'KBaseGenomesCondensedPrototypeV2.GenomeAnnotation-3.1': u'KBaseGenomesCondensedPrototypeV2.GenomeAnnotation-2d8e562a12357b92ce84c723e2663c10',
-    u'KBaseGenomesCondensedPrototypeV2.Taxon-0.1': u'KBaseGenomesCondensedPrototypeV2.Taxon-ba7d1e3c906dba5b760e22f5d3bba2a2',
-    u'KBaseGenomesCondensedPrototypeV2.Taxon-1.0': u'KBaseGenomesCondensedPrototypeV2.Taxon-ba7d1e3c906dba5b760e22f5d3bba2a2',
-    u'KBaseGenomesCondensedPrototypeV2.Taxon-2.0': u'KBaseGenomesCondensedPrototypeV2.Taxon-f569f539547dd1eea6a59eb9aa0b2eda',
-    u'KBaseGenomesCondensedPrototypeV2.FeatureContainer-0.1': u'KBaseGenomesCondensedPrototypeV2.FeatureContainer-3e6afdc52a0574ae18a8c66f6a4e10a3',
-    u'KBaseGenomesCondensedPrototypeV2.FeatureContainer-1.0': u'KBaseGenomesCondensedPrototypeV2.FeatureContainer-3e6afdc52a0574ae18a8c66f6a4e10a3',
-    u'KBaseGenomesCondensedPrototypeV2.FeatureContainer-2.0': u'KBaseGenomesCondensedPrototypeV2.FeatureContainer-c0f1fd6639ab3663d1a8373253981fdf',
-    u'KBaseGenomesCondensedPrototypeV2.FeatureContainer-3.0': u'KBaseGenomesCondensedPrototypeV2.FeatureContainer-3cf973a339b0e6e18e8cade7b77272fe',
-    u'KBaseGenomesCondensedPrototypeV2.FeatureContainer-4.0': u'KBaseGenomesCondensedPrototypeV2.FeatureContainer-9f300ab15a34a764eb32acc265983ef3',
-    u'KBaseGenomesCondensedPrototypeV2.FeatureContainer-5.0': u'KBaseGenomesCondensedPrototypeV2.FeatureContainer-02ba9ba1340d07c0eb7401dcb9e51647',
-    u'KBaseGenomesCondensedPrototypeV2.FeatureContainer-6.0': u'KBaseGenomesCondensedPrototypeV2.FeatureContainer-3cf973a339b0e6e18e8cade7b77272fe',
-    u'KBaseGenomesCondensedPrototypeV2.ProteinContainer-4.0': u'KBaseGenomesCondensedPrototypeV2.ProteinContainer-24986e79a34d6c0800b2008c974015b4',
-    u'KBaseGenomesCondensedPrototypeV2.Assembly-0.1': u'KBaseGenomesCondensedPrototypeV2.Assembly-ffd679cc5c9ce4a3b1bb1a5c3960b42e',
-    u'KBaseGenomesCondensedPrototypeV2.Assembly-1.0': u'KBaseGenomesCondensedPrototypeV2.Assembly-ffd679cc5c9ce4a3b1bb1a5c3960b42e',
-    u'KBaseGenomesCondensedPrototypeV2.Assembly-1.1': u'KBaseGenomesCondensedPrototypeV2.Assembly-1ab165a65ef2bf6d7279107ac185fa99',
-    u'KBaseGenomesCondensedPrototypeV2.Assembly-2.0': u'KBaseGenomesCondensedPrototypeV2.Assembly-d4a52a103bd75fb99714c2a330d80d20'
+    u'KBaseGenomeAnnotations.AnnotationQuality-0.1': u'KBaseGenomeAnnotations.AnnotationQuality-477a5cc8e4eef9a07eddea445d5b3e03',
+    u'KBaseGenomeAnnotations.AnnotationQuality-1.0': u'KBaseGenomeAnnotations.AnnotationQuality-477a5cc8e4eef9a07eddea445d5b3e03',
+    u'KBaseGenomeAnnotations.Assembly-0.1': u'KBaseGenomeAnnotations.Assembly-5702392af48de51769471473571ffb1a',
+    u'KBaseGenomeAnnotations.Assembly-1.0': u'KBaseGenomeAnnotations.Assembly-5702392af48de51769471473571ffb1a',
+    u'KBaseGenomeAnnotations.EvidenceContainer-0.1': u'KBaseGenomeAnnotations.EvidenceContainer-ffd466ca300b0c9479a2eee1aa4d53be',
+    u'KBaseGenomeAnnotations.EvidenceContainer-1.0': u'KBaseGenomeAnnotations.EvidenceContainer-ffd466ca300b0c9479a2eee1aa4d53be',
+    u'KBaseGenomeAnnotations.FeatureContainer-0.1': u'KBaseGenomeAnnotations.FeatureContainer-77ee3036a791592496e3852b3c9e87b4',
+    u'KBaseGenomeAnnotations.FeatureContainer-1.0': u'KBaseGenomeAnnotations.FeatureContainer-77ee3036a791592496e3852b3c9e87b4',
+    u'KBaseGenomeAnnotations.GenomeAnnotation-0.1': u'KBaseGenomeAnnotations.GenomeAnnotation-994bc5d281b14ae29d2759bce9d59703',
+    u'KBaseGenomeAnnotations.GenomeAnnotation-0.2': u'KBaseGenomeAnnotations.GenomeAnnotation-34168943eac1c2fd0746655790a63afe',
+    u'KBaseGenomeAnnotations.GenomeAnnotation-1.0': u'KBaseGenomeAnnotations.GenomeAnnotation-34168943eac1c2fd0746655790a63afe',
+    u'KBaseGenomeAnnotations.GenomeAnnotationSet-0.1': u'KBaseGenomeAnnotations.GenomeAnnotationSet-a1c6a7e69da3d38e403b8bac4e312a23',
+    u'KBaseGenomeAnnotations.GenomeAnnotationSet-1.0': u'KBaseGenomeAnnotations.GenomeAnnotationSet-a1c6a7e69da3d38e403b8bac4e312a23',
+    u'KBaseGenomeAnnotations.ProteinContainer-0.1': u'KBaseGenomeAnnotations.ProteinContainer-24986e79a34d6c0800b2008c974015b4',
+    u'KBaseGenomeAnnotations.ProteinContainer-1.0': u'KBaseGenomeAnnotations.ProteinContainer-24986e79a34d6c0800b2008c974015b4',
+    u'KBaseGenomeAnnotations.SeedRoles-0.1': u'KBaseGenomeAnnotations.SeedRoles-4633e4a9703e27c7b6e6760c8ec5f893',
+    u'KBaseGenomeAnnotations.SeedRoles-1.0': u'KBaseGenomeAnnotations.SeedRoles-4633e4a9703e27c7b6e6760c8ec5f893',
+    u'KBaseGenomeAnnotations.Taxon-0.1': u'KBaseGenomeAnnotations.Taxon-6367e669a33764f466bb0c71628e3b22',
+    u'KBaseGenomeAnnotations.Taxon-1.0': u'KBaseGenomeAnnotations.Taxon-6367e669a33764f466bb0c71628e3b22',
+    u'KBaseGenomeAnnotations.TaxonLookup-0.1': u'KBaseGenomeAnnotations.TaxonLookup-c5ce71324217b089cb8a17eda359a8f6',
+    u'KBaseGenomeAnnotations.TaxonLookup-1.0': u'KBaseGenomeAnnotations.TaxonLookup-c5ce71324217b089cb8a17eda359a8f6',
+    u'KBaseGenomeAnnotations.TaxonLookup-2.0': u'KBaseGenomeAnnotations.TaxonLookup-75222de8c337d6d4f53943cd1e5a59aa',
+    u'KBaseGenomeAnnotations.TaxonSet-0.1': u'KBaseGenomeAnnotations.TaxonSet-e4b647bbc4d7965a8def8909b10c6b9e',
+    u'KBaseGenomeAnnotations.TaxonSet-1.0': u'KBaseGenomeAnnotations.TaxonSet-e4b647bbc4d7965a8def8909b10c6b9e'
 }
