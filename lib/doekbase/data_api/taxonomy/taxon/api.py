@@ -212,21 +212,21 @@ class _Taxon(ObjectAPI, TaxonInterface):
         return children
 
     def get_genome_annotations(self, ref_only=False):
-        import doekbase.data_api.annotation.genome_annotation
+        from doekbase.data_api.annotation.genome_annotation.api import GenomeAnnotationAPI
+        from doekbase.data_api.annotation.genome_annotation.api import TYPES as GA_TYPES
 
         referrers = self.get_referrers()
         annotations = list()
 
         if ref_only:
             for object_type in referrers:
-                if object_type.split('-')[0] in doekbase.data_api.annotation.genome_annotation.TYPES:
+                if object_type.split('-')[0] in GA_TYPES:
                     annotations.extend(referrers[object_type])
         else:
             for object_type in referrers:
-                if object_type.split('-')[0] in doekbase.data_api.annotation.genome_annotation.TYPES:
+                if object_type.split('-')[0] in GA_TYPES:
                     for x in referrers[object_type]:
-                        annotations.append(doekbase.data_api.annotation.genome_annotation.GenomeAnnotationAPI(
-                            self.services, self._token, ref=x))
+                        annotations.append(GenomeAnnotationAPI(self.services, self._token, ref=x))
 
         return annotations
 
