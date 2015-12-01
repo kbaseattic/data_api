@@ -188,9 +188,9 @@ service thrift_service {
      * Retrieve the gc content for contigs in this Assembly.
      *
      */
-    map<string, i64> get_contig_gc_content(1:required string token,
-                                           2:required ObjectReference ref,
-                                           3:list<string> contig_id_list) throws (
+    map<string, double> get_contig_gc_content(1:required string token,
+                                              2:required ObjectReference ref,
+                                              3:list<string> contig_id_list) throws (
         1:ServiceException generic_exception,
         2:AuthorizationException authorization_exception,
         3:AuthenticationException authentication_exception,

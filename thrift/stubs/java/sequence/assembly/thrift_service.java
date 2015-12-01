@@ -131,7 +131,7 @@ public class thrift_service {
      * @param ref
      * @param contig_id_list
      */
-    public Map<String,Long> get_contig_gc_content(String token, String ref, List<String> contig_id_list) throws ServiceException, AuthorizationException, AuthenticationException, ObjectReferenceException, AttributeException, TypeException, org.apache.thrift.TException;
+    public Map<String,Double> get_contig_gc_content(String token, String ref, List<String> contig_id_list) throws ServiceException, AuthorizationException, AuthenticationException, ObjectReferenceException, AttributeException, TypeException, org.apache.thrift.TException;
 
     /**
      * Retrieve all the data for the contigs in this Assembly.
@@ -570,7 +570,7 @@ public class thrift_service {
       throw new org.apache.thrift.TApplicationException(org.apache.thrift.TApplicationException.MISSING_RESULT, "get_contig_lengths failed: unknown result");
     }
 
-    public Map<String,Long> get_contig_gc_content(String token, String ref, List<String> contig_id_list) throws ServiceException, AuthorizationException, AuthenticationException, ObjectReferenceException, AttributeException, TypeException, org.apache.thrift.TException
+    public Map<String,Double> get_contig_gc_content(String token, String ref, List<String> contig_id_list) throws ServiceException, AuthorizationException, AuthenticationException, ObjectReferenceException, AttributeException, TypeException, org.apache.thrift.TException
     {
       send_get_contig_gc_content(token, ref, contig_id_list);
       return recv_get_contig_gc_content();
@@ -585,7 +585,7 @@ public class thrift_service {
       sendBase("get_contig_gc_content", args);
     }
 
-    public Map<String,Long> recv_get_contig_gc_content() throws ServiceException, AuthorizationException, AuthenticationException, ObjectReferenceException, AttributeException, TypeException, org.apache.thrift.TException
+    public Map<String,Double> recv_get_contig_gc_content() throws ServiceException, AuthorizationException, AuthenticationException, ObjectReferenceException, AttributeException, TypeException, org.apache.thrift.TException
     {
       get_contig_gc_content_result result = new get_contig_gc_content_result();
       receiveBase(result, "get_contig_gc_content");
@@ -1020,7 +1020,7 @@ public class thrift_service {
         prot.writeMessageEnd();
       }
 
-      public Map<String,Long> getResult() throws ServiceException, AuthorizationException, AuthenticationException, ObjectReferenceException, AttributeException, TypeException, org.apache.thrift.TException {
+      public Map<String,Double> getResult() throws ServiceException, AuthorizationException, AuthenticationException, ObjectReferenceException, AttributeException, TypeException, org.apache.thrift.TException {
         if (getState() != org.apache.thrift.async.TAsyncMethodCall.State.RESPONSE_READ) {
           throw new IllegalStateException("Method call not finished!");
         }
@@ -2240,7 +2240,7 @@ public class thrift_service {
       }
     }
 
-    public static class get_contig_gc_content<I extends AsyncIface> extends org.apache.thrift.AsyncProcessFunction<I, get_contig_gc_content_args, Map<String,Long>> {
+    public static class get_contig_gc_content<I extends AsyncIface> extends org.apache.thrift.AsyncProcessFunction<I, get_contig_gc_content_args, Map<String,Double>> {
       public get_contig_gc_content() {
         super("get_contig_gc_content");
       }
@@ -2249,10 +2249,10 @@ public class thrift_service {
         return new get_contig_gc_content_args();
       }
 
-      public AsyncMethodCallback<Map<String,Long>> getResultHandler(final AsyncFrameBuffer fb, final int seqid) {
+      public AsyncMethodCallback<Map<String,Double>> getResultHandler(final AsyncFrameBuffer fb, final int seqid) {
         final org.apache.thrift.AsyncProcessFunction fcall = this;
-        return new AsyncMethodCallback<Map<String,Long>>() { 
-          public void onComplete(Map<String,Long> o) {
+        return new AsyncMethodCallback<Map<String,Double>>() { 
+          public void onComplete(Map<String,Double> o) {
             get_contig_gc_content_result result = new get_contig_gc_content_result();
             result.success = o;
             try {
@@ -2317,7 +2317,7 @@ public class thrift_service {
         return false;
       }
 
-      public void start(I iface, get_contig_gc_content_args args, org.apache.thrift.async.AsyncMethodCallback<Map<String,Long>> resultHandler) throws TException {
+      public void start(I iface, get_contig_gc_content_args args, org.apache.thrift.async.AsyncMethodCallback<Map<String,Double>> resultHandler) throws TException {
         iface.get_contig_gc_content(args.token, args.ref, args.contig_id_list,resultHandler);
       }
     }
@@ -16477,7 +16477,7 @@ public class thrift_service {
       schemes.put(TupleScheme.class, new get_contig_gc_content_resultTupleSchemeFactory());
     }
 
-    public Map<String,Long> success; // required
+    public Map<String,Double> success; // required
     public ServiceException generic_exception; // required
     public AuthorizationException authorization_exception; // required
     public AuthenticationException authentication_exception; // required
@@ -16568,7 +16568,7 @@ public class thrift_service {
       tmpMap.put(_Fields.SUCCESS, new org.apache.thrift.meta_data.FieldMetaData("success", org.apache.thrift.TFieldRequirementType.DEFAULT, 
           new org.apache.thrift.meta_data.MapMetaData(org.apache.thrift.protocol.TType.MAP, 
               new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING), 
-              new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.I64))));
+              new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.DOUBLE))));
       tmpMap.put(_Fields.GENERIC_EXCEPTION, new org.apache.thrift.meta_data.FieldMetaData("generic_exception", org.apache.thrift.TFieldRequirementType.DEFAULT, 
           new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRUCT)));
       tmpMap.put(_Fields.AUTHORIZATION_EXCEPTION, new org.apache.thrift.meta_data.FieldMetaData("authorization_exception", org.apache.thrift.TFieldRequirementType.DEFAULT, 
@@ -16589,7 +16589,7 @@ public class thrift_service {
     }
 
     public get_contig_gc_content_result(
-      Map<String,Long> success,
+      Map<String,Double> success,
       ServiceException generic_exception,
       AuthorizationException authorization_exception,
       AuthenticationException authentication_exception,
@@ -16612,7 +16612,7 @@ public class thrift_service {
      */
     public get_contig_gc_content_result(get_contig_gc_content_result other) {
       if (other.isSetSuccess()) {
-        Map<String,Long> __this__success = new TreeMap<String,Long>(other.success);
+        Map<String,Double> __this__success = new TreeMap<String,Double>(other.success);
         this.success = __this__success;
       }
       if (other.isSetGeneric_exception()) {
@@ -16654,18 +16654,18 @@ public class thrift_service {
       return (this.success == null) ? 0 : this.success.size();
     }
 
-    public void putToSuccess(String key, long val) {
+    public void putToSuccess(String key, double val) {
       if (this.success == null) {
-        this.success = new TreeMap<String,Long>();
+        this.success = new TreeMap<String,Double>();
       }
       this.success.put(key, val);
     }
 
-    public Map<String,Long> getSuccess() {
+    public Map<String,Double> getSuccess() {
       return this.success;
     }
 
-    public get_contig_gc_content_result setSuccess(Map<String,Long> success) {
+    public get_contig_gc_content_result setSuccess(Map<String,Double> success) {
       this.success = success;
       return this;
     }
@@ -16835,7 +16835,7 @@ public class thrift_service {
         if (value == null) {
           unsetSuccess();
         } else {
-          setSuccess((Map<String,Long>)value);
+          setSuccess((Map<String,Double>)value);
         }
         break;
 
@@ -17263,13 +17263,13 @@ public class thrift_service {
               if (schemeField.type == org.apache.thrift.protocol.TType.MAP) {
                 {
                   org.apache.thrift.protocol.TMap _map60 = iprot.readMapBegin();
-                  struct.success = new TreeMap<String,Long>();
+                  struct.success = new TreeMap<String,Double>();
                   String _key61;
-                  long _val62;
+                  double _val62;
                   for (int _i63 = 0; _i63 < _map60.size; ++_i63)
                   {
                     _key61 = iprot.readString();
-                    _val62 = iprot.readI64();
+                    _val62 = iprot.readDouble();
                     struct.success.put(_key61, _val62);
                   }
                   iprot.readMapEnd();
@@ -17351,11 +17351,11 @@ public class thrift_service {
         if (struct.success != null) {
           oprot.writeFieldBegin(SUCCESS_FIELD_DESC);
           {
-            oprot.writeMapBegin(new org.apache.thrift.protocol.TMap(org.apache.thrift.protocol.TType.STRING, org.apache.thrift.protocol.TType.I64, struct.success.size()));
-            for (Map.Entry<String, Long> _iter64 : struct.success.entrySet())
+            oprot.writeMapBegin(new org.apache.thrift.protocol.TMap(org.apache.thrift.protocol.TType.STRING, org.apache.thrift.protocol.TType.DOUBLE, struct.success.size()));
+            for (Map.Entry<String, Double> _iter64 : struct.success.entrySet())
             {
               oprot.writeString(_iter64.getKey());
-              oprot.writeI64(_iter64.getValue());
+              oprot.writeDouble(_iter64.getValue());
             }
             oprot.writeMapEnd();
           }
@@ -17434,10 +17434,10 @@ public class thrift_service {
         if (struct.isSetSuccess()) {
           {
             oprot.writeI32(struct.success.size());
-            for (Map.Entry<String, Long> _iter65 : struct.success.entrySet())
+            for (Map.Entry<String, Double> _iter65 : struct.success.entrySet())
             {
               oprot.writeString(_iter65.getKey());
-              oprot.writeI64(_iter65.getValue());
+              oprot.writeDouble(_iter65.getValue());
             }
           }
         }
@@ -17467,14 +17467,14 @@ public class thrift_service {
         BitSet incoming = iprot.readBitSet(7);
         if (incoming.get(0)) {
           {
-            org.apache.thrift.protocol.TMap _map66 = new org.apache.thrift.protocol.TMap(org.apache.thrift.protocol.TType.STRING, org.apache.thrift.protocol.TType.I64, iprot.readI32());
-            struct.success = new TreeMap<String,Long>();
+            org.apache.thrift.protocol.TMap _map66 = new org.apache.thrift.protocol.TMap(org.apache.thrift.protocol.TType.STRING, org.apache.thrift.protocol.TType.DOUBLE, iprot.readI32());
+            struct.success = new TreeMap<String,Double>();
             String _key67;
-            long _val68;
+            double _val68;
             for (int _i69 = 0; _i69 < _map66.size; ++_i69)
             {
               _key67 = iprot.readString();
-              _val68 = iprot.readI64();
+              _val68 = iprot.readDouble();
               struct.success.put(_key67, _val68);
             }
           }
