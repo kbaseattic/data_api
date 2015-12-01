@@ -19,7 +19,11 @@ def test_client():
                                          '(default=%(default)s)')
     args = ap.parse_args()
 
-    api = AssemblyClientAPI(args.url, os.environ["KB_AUTH_TOKEN"], args.ref)
+    token='';
+    if os.environ.has_key('KB_AUTH_TOKEN'):
+        token = os.environ['KB_AUTH_TOKEN']
+
+    api = AssemblyClientAPI(args.url, token, args.ref)
 
     print("Getting data..")
 

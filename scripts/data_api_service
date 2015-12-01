@@ -1,0 +1,15 @@
+#!/bin/bash
+
+script_dir=$(dirname "$(readlink -f "$0")")
+
+if [ -z $KB_DEPLOYMENT_CONFIG ]
+then
+    export KB_DEPLOYMENT_CONFIG=$KB_TOP/deployment.cfg
+fi
+
+source $script_dir/venv/bin/activate
+
+for api in assembly
+do
+    test_api_service.py assembly https://ci.kbase.us/services/data/assembly
+done
