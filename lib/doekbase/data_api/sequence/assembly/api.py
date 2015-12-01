@@ -396,23 +396,24 @@ class _Assembly(ObjectAPI, AssemblyInterface):
         return self.get_data_subset(path_list=["assembly_id"])["assembly_id"]        
 
     def get_genome_annotations(self, ref_only=False):
-        import doekbase.data_api.annotation.genome_annotation
-        
+        from doekbase.data_api.annotation.genome_annotation.api import GenomeAnnotationAPI
+        from doekbase.data_api.annotation.genome_annotation.api import TYPES as GA_TYPES
+
         referrers = self.get_referrers()
 
         if ref_only:
             annotation_refs = list()
             for object_type in referrers:
-                if object_type.split('-')[0] in doekbase.data_api.annotation.genome_annotation.TYPES:
+                if object_type.split('-')[0] in GA_TYPES:
                     for x in referrers[object_type]:
                         annotation_refs.append(x)
             return annotation_refs
         else:
             annotations = list()
             for object_type in referrers:
-                if object_type.split('-')[0] in doekbase.data_api.annotation.genome_annotation.TYPES:
+                if object_type.split('-')[0] in GA_TYPES:
                     for x in referrers[object_type]:
-                        annotations.append(doekbase.data_api.annotation.genome_annotation.GenomeAnnotationAPI(
+                        annotations.append(GenomeAnnotationAPI(
                             self.services, self._token, ref=x))
             return annotations
 
