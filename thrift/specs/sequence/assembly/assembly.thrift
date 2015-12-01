@@ -1,4 +1,6 @@
-namespace * assembly
+namespace py assembly
+namespace js assembly
+namespace perl DOEKBase.DataAPI.sequence.assembly
 
 /*
 TODO - Automatically populate version from setup.py.

@@ -327,6 +327,7 @@ config = {
                 "bin/dump_wsfile",
                 "bin/data_api_start_service.py",
                 "bin/assembly_client_driver.py",
+                "bin/genome_annotation_client_driver.py",
                 "bin/taxon_client_driver.py",
                 "bin/test_api_service.py",
                 "bin/extract_thrift_docs"],
