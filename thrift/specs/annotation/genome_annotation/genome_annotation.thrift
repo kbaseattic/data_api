@@ -1,4 +1,6 @@
-namespace * genome_annotation
+namespace py genome_annotation
+namespace js genome_annotation
+namespace perl DOEKBase.DataAPI.annotation.genome_annotation
 
 /*
 TODO - Automatically populate version from setup.py.
