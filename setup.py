@@ -329,6 +329,7 @@ config = {
                 "bin/assembly_client_driver.py",
                 "bin/genome_annotation_client_driver.py",
                 "bin/taxon_client_driver.py",
+                "bin/test_api_service.py",
                 "bin/extract_thrift_docs"],
     "name": "doekbase_data_api",
     "entry_points": {
