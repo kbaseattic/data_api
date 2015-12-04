@@ -35,17 +35,17 @@ Genome annotation object interface
 
 The interface used by both the client/server and local Python library APIs is shown below.
 
-Feature description codes
-+++++++++++++++++++++++++
-
-.. autodata:: FEATURE_DESCRIPTIONS
-    :annotation:
-
 Interface
 +++++++++
 
 .. autoclass:: GenomeAnnotationInterface
     :members:
+
+Feature description codes
++++++++++++++++++++++++++
+
+.. autodata:: FEATURE_DESCRIPTIONS
+
 
 Examples
 --------
