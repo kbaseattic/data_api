@@ -13,6 +13,7 @@ from doekbase.data_api.taxonomy.taxon.api import TaxonAPI
 
 def fetch_and_print_taxon(ws_url='https://ci.kbase.us/services/ws/'):
     """Fetch Taxon from Workspace Service.
+    Print the scientific name and taxonomic ID of the given Taxon.
 
     Args:
       ws_url (str): a service address or a local directory

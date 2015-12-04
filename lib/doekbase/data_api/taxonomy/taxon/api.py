@@ -414,6 +414,10 @@ class TaxonClientAPI(TaxonInterface):
     def get_children(self, ref_only=False):
         children_refs = self.client.get_children(self._token, self.ref)
 
+        print("@@ children_refs (1) => {}".format(children_refs))
+        children_refs = list(children_refs)
+        print("@@ children_refs (2) => {}".format(children_refs))
+
         if ref_only:
             return children_refs
         else:

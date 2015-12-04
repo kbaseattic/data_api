@@ -126,27 +126,38 @@ class GenomeAnnotationInterface(object):
         If no filters are applied, all feature ids will be returned.
         Only the group_by selected will be included in the results.
         
-        Retrieves feature ids based on filters such as feature types, regions, functional descriptions, aliases.
+        Retrieves feature ids based on filters such as feature types, regions,
+        functional descriptions, aliases.
 
         Args:
-          filters: Optional dictionary of filters that can be applied to object contents.
-                   Recognized filter keys:
-                       "type_list" - List of feature type strings.
-                                     Should be findable in :data:`FEATURE_DESCRIPTIONS`.
-                       "region_list" - List of region specs.
-                                       e.g.,[{"contig_id": str, "strand": "+"|"-"|"?", "start": int, "stop": int},...]
-                       "function_list" - List of function strings to match.
-                       "alias_ist" - List of alias strings to match.
+          filters (dict): Optional dictionary of filters that can be applied to
+            object contents. Recognized filter keys:
+
+            type_list : list<str>
+                List of feature type strings. Should be findable 
+                in :data:`FEATURE_DESCRIPTIONS`.
+            region_list : list<dict>
+                List of region specs. e.g.,[{"contig_id": str, "strand": "+"|"-"|"?", "start": int, "stop": int},...]
+            function_list : list<str>
+                 List of function strings to match.
+            alias_list : list<str>
+                List of alias strings to match.
 
           group_by: Specify the grouping of feature ids returned.
                     Recognized values are one of ["type","region","function","alias"]
                     Defaults to "type".
 
-        Returns:
-          {"by_type": dict<str feature_type, list<str feature_id>>,
-           "by_region": dict<str contig_id, dict<str strand, dict<string range, list<string feature_id>>>>,
-           "by_function": dict<str function, list<str feature_id>>,
-           "by_alias": dict<str alias, list<str feature_id>>}"""
+        Returns: dict with the following keys and values:
+        
+        by_type : dict
+            dict<str feature_type, list<str feature_id>>
+        by_region : dict
+            dict<str contig_id, dict<str strand, dict<string range, list<string feature_id>>>>
+        by_function : dict
+            dict<str function, list<str feature_id>>
+        by_alias : dict
+            dict<str alias, list<str feature_id>>
+        """
 
         pass  # TODO: add examples in docs for function_list and alias_list
 
