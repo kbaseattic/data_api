@@ -160,12 +160,12 @@ class WorkspaceFile(object):
           ValueError: parsing failed.
         """
         # log start
-        t0 = log_start(_log, 'WorkspaceFile.load', level=logging.INFO,
+        t0 = log_start(_log, 'WorkspaceFile.load', level=logging.DEBUG,
                        kvp=dict(ref=ref))
         # stop if already loaded in the past
         if ref in self._loaded:
             # log done and return
-            log_end(_log, t0, 'WorkspaceFile.load', level=logging.INFO,
+            log_end(_log, t0, 'WorkspaceFile.load', level=logging.DEBUG,
                     kvp=dict(ref=ref, cached='yes'))
             return
         # create the full path from the reference
@@ -191,7 +191,7 @@ class WorkspaceFile(object):
         # insert the parsed data into mongomock
         self.collection.insert(record)
         # log done
-        log_end(_log, t0, 'WorkspaceFile.load', level=logging.INFO,
+        log_end(_log, t0, 'WorkspaceFile.load', level=logging.DEBUG,
                 kvp=dict(ref=ref, cached='no'))
 
     def unload(self, ref):
