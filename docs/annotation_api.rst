@@ -9,14 +9,14 @@ The Annotation API can be used as a library or in client/server mode.
 
 .. contents::
 
-.. py:currentmodule:: doekbase.data_api.annotation.genome_annotation
+.. py:currentmodule:: doekbase.data_api.annotation.genome_annotation.api
 
 Creating an Annotation
 ----------------------
 
 To create a new taxon, you will create an object that implements the interface defined in :class:`doekbase.data_api.annnotation.genome_annotation.api.GenomeInterface`.
 
-* From the KBase Narrative (or within any Python program), instantiate the :class:`doekbase.data_api.annotation.genome_annotation.GenomeAnnotationAPI` class. This will communicate with the back-end database directly::
+* From the KBase Narrative (or within any Python program), instantiate the :class:`doekbase.data_api.annotation.genome_annotation.api.GenomeAnnotationAPI` class. This will communicate with the back-end database directly::
 
     my_ann = GenomeAnnotationAPI(
         token=os.environ.get('KB_AUTH_TOKEN'),      # Authorization token
@@ -44,7 +44,7 @@ Feature description codes
 Interface
 +++++++++
 
-.. autoclass:: GenomeInterface
+.. autoclass:: GenomeAnnotationInterface
     :members:
 
 Examples
