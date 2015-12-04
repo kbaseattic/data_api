@@ -2453,9 +2453,9 @@ sub read {
           for (my $_i57 = 0; $_i57 < $_size53; ++$_i57)
           {
             my $key58 = '';
-            my $val59 = 0;
+            my $val59 = 0.0;
             $xfer += $input->readString(\$key58);
-            $xfer += $input->readI64(\$val59);
+            $xfer += $input->readDouble(\$val59);
             $self->{success}->{$key58} = $val59;
           }
           $xfer += $input->readMapEnd();
@@ -2521,12 +2521,12 @@ sub write {
   if (defined $self->{success}) {
     $xfer += $output->writeFieldBegin('success', TType::MAP, 0);
     {
-      $xfer += $output->writeMapBegin(TType::STRING, TType::I64, scalar(keys %{$self->{success}}));
+      $xfer += $output->writeMapBegin(TType::STRING, TType::DOUBLE, scalar(keys %{$self->{success}}));
       {
         while( my ($kiter60,$viter61) = each %{$self->{success}}) 
         {
           $xfer += $output->writeString($kiter60);
-          $xfer += $output->writeI64($viter61);
+          $xfer += $output->writeDouble($viter61);
         }
       }
       $xfer += $output->writeMapEnd();

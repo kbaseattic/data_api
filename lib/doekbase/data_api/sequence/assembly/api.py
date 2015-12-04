@@ -27,7 +27,7 @@ _log = get_logger(__file__)
 CHUNK_SIZE = 2**30
 
 _CONTIGSET_TYPES = ['KBaseGenomes.ContigSet']
-_ASSEMBLY_TYPES = ['KBaseGenomesCondensedPrototypeV2.Assembly']
+_ASSEMBLY_TYPES = ['KBaseGenomeAnnotations.Assembly']
 TYPES = _CONTIGSET_TYPES + _ASSEMBLY_TYPES
 
 g_stats = PerfCollector('AssemblyAPI')
@@ -179,7 +179,7 @@ class AssemblyAPI(ObjectAPI, AssemblyInterface):
             raise TypeError("Invalid type! Expected one of {0}, received {1}".format(TYPES, self._typestring))
 
         if is_assembly_type:
-            self.proxy = _Prototype(services, token, ref)
+            self.proxy = _Assembly(services, token, ref)
         else:
             self.proxy = _KBaseGenomes_ContigSet(services, token, ref)
     
@@ -226,8 +226,8 @@ class _KBaseGenomes_ContigSet(ObjectAPI, AssemblyInterface):
         return self.get_data_subset(path_list=["id"])["id"]
     
     def get_genome_annotations(self, ref_only=False):
-        from doekbase.data_api.annotation.genome_annotation import TYPES as genome_annotation_types
-        from doekbase.data_api.annotation.genome_annotation import GenomeAnnotationAPI
+        from doekbase.data_api.annotation.genome_annotation.api import TYPES as genome_annotation_types
+        from doekbase.data_api.annotation.genome_annotation.api import GenomeAnnotationAPI
         referrers = self.get_referrers()
 
         if ref_only:
@@ -388,31 +388,32 @@ class _KBaseGenomes_ContigSet(ObjectAPI, AssemblyInterface):
         matches = re.finditer(self._gc_pattern, self._current_sequence)
         return sum(itertools.imap(lambda x: 1, matches))
 
-class _Prototype(ObjectAPI, AssemblyInterface):
+class _Assembly(ObjectAPI, AssemblyInterface):
     def __init__(self, services, token, ref):
-        super(_Prototype, self).__init__(services, token, ref)
+        super(_Assembly, self).__init__(services, token, ref)
 
     def get_assembly_id(self):
         return self.get_data_subset(path_list=["assembly_id"])["assembly_id"]        
 
     def get_genome_annotations(self, ref_only=False):
-        import doekbase.data_api.annotation.genome_annotation
-        
+        from doekbase.data_api.annotation.genome_annotation.api import GenomeAnnotationAPI
+        from doekbase.data_api.annotation.genome_annotation.api import TYPES as GA_TYPES
+
         referrers = self.get_referrers()
 
         if ref_only:
             annotation_refs = list()
             for object_type in referrers:
-                if object_type.split('-')[0] in doekbase.data_api.annotation.genome_annotation.TYPES:
+                if object_type.split('-')[0] in GA_TYPES:
                     for x in referrers[object_type]:
                         annotation_refs.append(x)
             return annotation_refs
         else:
             annotations = list()
             for object_type in referrers:
-                if object_type.split('-')[0] in doekbase.data_api.annotation.genome_annotation.TYPES:
+                if object_type.split('-')[0] in GA_TYPES:
                     for x in referrers[object_type]:
-                        annotations.append(doekbase.data_api.annotation.genome_annotation.GenomeAnnotationAPI(
+                        annotations.append(GenomeAnnotationAPI(
                             self.services, self._token, ref=x))
             return annotations
 

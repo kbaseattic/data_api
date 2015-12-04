@@ -2536,7 +2536,7 @@ assembly.thrift_service_get_contig_gc_content_result.prototype.read = function(i
           var key66 = null;
           var val67 = null;
           key66 = input.readString().value;
-          val67 = input.readI64().value;
+          val67 = input.readDouble().value;
           this.success[key66] = val67;
         }
         input.readMapEnd();
@@ -2605,14 +2605,14 @@ assembly.thrift_service_get_contig_gc_content_result.prototype.write = function(
   output.writeStructBegin('thrift_service_get_contig_gc_content_result');
   if (this.success !== null && this.success !== undefined) {
     output.writeFieldBegin('success', Thrift.Type.MAP, 0);
-    output.writeMapBegin(Thrift.Type.STRING, Thrift.Type.I64, Thrift.objectLength(this.success));
+    output.writeMapBegin(Thrift.Type.STRING, Thrift.Type.DOUBLE, Thrift.objectLength(this.success));
     for (var kiter68 in this.success)
     {
       if (this.success.hasOwnProperty(kiter68))
       {
         var viter69 = this.success[kiter68];
         output.writeString(kiter68);
-        output.writeI64(viter69);
+        output.writeDouble(viter69);
       }
     }
     output.writeMapEnd();

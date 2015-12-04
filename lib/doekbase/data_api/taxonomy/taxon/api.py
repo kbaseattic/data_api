@@ -18,14 +18,14 @@ import doekbase.data_api.taxonomy.taxon.service.ttypes as ttypes
 _log = get_logger(__file__)
 
 _GENOME_TYPES = ['KBaseGenomes.Genome']
-_TAXON_TYPES = ['KBaseGenomesCondensedPrototypeV2.Taxon']
+_TAXON_TYPES = ['KBaseGenomeAnnotations.Taxon']
 TYPES = _GENOME_TYPES + _TAXON_TYPES
 
 
 class TaxonInterface(object):
     """Represents a Taxonomic Unit, e.g., species.
 
-    Built to support KBaseGenomesCondensedPrototypeV2.Taxon and
+    Built to support KBaseGenomeAnnotations.Taxon and
     KBaseGenomes.Genome.
     """
     __metaclass__ = abc.ABCMeta
@@ -144,7 +144,7 @@ class _KBaseGenomes_Genome(ObjectAPI, TaxonInterface):
         return list()
 
     def get_genome_annotations(self, ref_only=False):
-        from doekbase.data_api.annotation.genome_annotation import GenomeAnnotationAPI
+        from doekbase.data_api.annotation.genome_annotation.api import GenomeAnnotationAPI
 
         referrers = self.get_referrers()
         annotations = list()
@@ -179,9 +179,9 @@ class _KBaseGenomes_Genome(ObjectAPI, TaxonInterface):
         return self.data["genetic_code"]
 
 
-class _Prototype(ObjectAPI, TaxonInterface):
+class _Taxon(ObjectAPI, TaxonInterface):
     def __init__(self, services, token, ref):
-        super(_Prototype, self).__init__(services, token, ref)
+        super(_Taxon, self).__init__(services, token, ref)
 
         self.data = self.get_data()
 
@@ -212,21 +212,21 @@ class _Prototype(ObjectAPI, TaxonInterface):
         return children
 
     def get_genome_annotations(self, ref_only=False):
-        import doekbase.data_api.annotation.genome_annotation
+        from doekbase.data_api.annotation.genome_annotation.api import GenomeAnnotationAPI
+        from doekbase.data_api.annotation.genome_annotation.api import TYPES as GA_TYPES
 
         referrers = self.get_referrers()
         annotations = list()
 
         if ref_only:
             for object_type in referrers:
-                if object_type.split('-')[0] in doekbase.data_api.annotation.genome_annotation.TYPES:
+                if object_type.split('-')[0] in GA_TYPES:
                     annotations.extend(referrers[object_type])
         else:
             for object_type in referrers:
-                if object_type.split('-')[0] in doekbase.data_api.annotation.genome_annotation.TYPES:
+                if object_type.split('-')[0] in GA_TYPES:
                     for x in referrers[object_type]:
-                        annotations.append(doekbase.data_api.annotation.genome_annotation.GenomeAnnotationAPI(
-                            self.services, self._token, ref=x))
+                        annotations.append(GenomeAnnotationAPI(self.services, self._token, ref=x))
 
         return annotations
 
@@ -282,7 +282,7 @@ class TaxonAPI(ObjectAPI, TaxonInterface):
             raise TypeError("Invalid type! Expected one of {0}, received {1}".format(TYPES, self._typestring))
 
         if is_taxon_type:
-            self.proxy = _Prototype(services, token, ref)
+            self.proxy = _Taxon(services, token, ref)
         else:
             self.proxy = _KBaseGenomes_Genome(services, token, ref)
 
@@ -430,6 +430,8 @@ class TaxonClientAPI(TaxonInterface):
     @logged(_tc_log)
     @client_method
     def get_genome_annotations(self, ref_only=False):
+        # TODO need to return GenomeAnnotationClientAPI if ref_only == False
+        # which means here we need to know where to find GenomeAnnotation service
         return self.client.get_genome_annotations(self._token, self.ref)
 
     @logged(_tc_log)

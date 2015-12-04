@@ -9,6 +9,7 @@ from thrift.transport import TTransport
 from thrift.protocol import TBinaryProtocol
 
 # Local
+from doekbase.data_api import exceptions
 from doekbase.data_api.taxonomy.taxon.api import TaxonAPI
 from doekbase.data_api.taxonomy.taxon.service import thrift_service
 from doekbase.data_api.taxonomy.taxon.service import thrift_client
@@ -34,9 +35,8 @@ class TaxonClientConnection(object):
             self.client = thrift_client.Client(self.transport,
                                                TBinaryProtocol.TBinaryProtocolFactory())
         except TTransport.TTransportException as err:
-            print('{}'.format(err.message))
-            raise RuntimeError('Cannot connect to remote Thrift service at {}:{:d}'
-                               .format(host, port))
+            raise RuntimeError('Cannot connect to remote Thrift service at {}: {}'
+                               .format(url, err.message))
 
     def get_client(self):
         return self.transport, self.client
@@ -44,6 +44,22 @@ class TaxonClientConnection(object):
 
 class TaxonService:
     zope.interface.implements(thrift_service.Iface)
+
+    def server_method(func):
+        def wrapper(self, token, ref, *args, **kwargs):
+            try:
+                return func(self, token, ref, *args, **kwargs)
+            except AttributeError, e:
+                raise ttypes.AttributeException(e.message, traceback.print_exc())
+            except exceptions.AuthenticationError, e:
+                raise ttypes.AuthenticationException(e.message, traceback.print_exc())
+            except exceptions.AuthorizationError, e:
+                raise ttypes.AuthorizationException(e.message, traceback.print_exc())
+            except exceptions.TypeError, e:
+                raise ttypes.TypeException(e.message, traceback.print_exc())
+            except Exception, e:
+                raise ttypes.ServiceException(e.message, traceback.print_exc(), {"ref": str(ref)})
+        return wrapper
 
     def __init__(self, services=None):
         if services is None or not isinstance(services, dict):
@@ -55,133 +71,93 @@ class TaxonService:
         self.services = services
         self.logger = doekbase.data_api.util.get_logger("TaxonService")
 
+    @server_method
     def get_info(self, token=None, ref=None):
-        try:
-            taxon_api = TaxonAPI(self.services, token, ref)
-            result = taxon_api.get_info()
-            #if result["object_metadata"] is None:
-            #    result["object_metadata"] = dict()
+        taxon_api = TaxonAPI(self.services, token, ref)
+        result = taxon_api.get_info()
 
-            return ttypes.ObjectInfo(**result)
-        except Exception, e:
-            raise ttypes.ServiceException(e.message, traceback.print_exc(), {"ref": str(ref)})
+        return ttypes.ObjectInfo(**result)
 
+    @server_method
     def get_history(self, token=None, ref=None):
-        try:
-            taxon_api = TaxonAPI(self.services, token, ref)
-            result = taxon_api.get_history()
+        taxon_api = TaxonAPI(self.services, token, ref)
+        result = taxon_api.get_history()
 
-            self.logger.info(result)
+        self.logger.info(result)
 
-            return [ttypes.ObjectInfo(**x) for x in result]
-        except Exception, e:
-            raise ttypes.ServiceException(e.message, traceback.print_exc(), {"ref": str(ref)})
+        return [ttypes.ObjectInfo(**x) for x in result]
 
+    @server_method
     def get_provenance(self, token=None, ref=None):
-        try:
-            taxon_api = TaxonAPI(self.services, token, ref)
-            result =  taxon_api.get_provenance()
+        taxon_api = TaxonAPI(self.services, token, ref)
+        result =  taxon_api.get_provenance()
 
-            self.logger.info(result)
+        self.logger.info(result)
 
-            return [ttypes.ObjectProvenanceAction(**x) for x in result]
-        except Exception, e:
-            raise ttypes.ServiceException(e.message, traceback.print_exc(), {"ref": str(ref)})
+        return [ttypes.ObjectProvenanceAction(**x) for x in result]
 
+    @server_method
     def get_id(self, token=None, ref=None):
-        try:
-            taxon_api = TaxonAPI(self.services, token, ref)
-            return taxon_api.get_id()
-        except Exception, e:
-            raise ttypes.ServiceException(e.message, traceback.print_exc(), {"ref": str(ref)})
+        taxon_api = TaxonAPI(self.services, token, ref)
+        return taxon_api.get_id()
 
+    @server_method
     def get_name(self, token=None, ref=None):
-        try:
-            taxon_api = TaxonAPI(self.services, token, ref)
-            return taxon_api.get_name()
-        except Exception, e:
-            raise ttypes.ServiceException(e.message, traceback.print_exc(), {"ref": str(ref)})
+        taxon_api = TaxonAPI(self.services, token, ref)
+        return taxon_api.get_name()
 
+    @server_method
     def get_version(self, token=None, ref=None):
-        try:
-            taxon_api = TaxonAPI(self.services, token, ref)
-            return taxon_api.get_version()
-        except Exception, e:
-            raise ttypes.ServiceException(e.message, traceback.print_exc(), {"ref": str(ref)})
+        taxon_api = TaxonAPI(self.services, token, ref)
+        return taxon_api.get_version()
 
+    @server_method
     def get_parent(self, token=None, ref=None):
-        try:
-            taxon_api = TaxonAPI(self.services, token, ref)
-            return taxon_api.get_parent(ref_only=True)
-        except AttributeError, e:
-            raise ttypes.AttributeException(e.message)
-        except Exception, e:
-            raise ttypes.ServiceException(e.message, traceback.print_exc(), {"ref": str(ref)})
+        taxon_api = TaxonAPI(self.services, token, ref)
+        return taxon_api.get_parent(ref_only=True)
 
+    @server_method
     def get_children(self, token=None, ref=None):
-        try:
-            taxon_api = TaxonAPI(self.services, token, ref)
-            return taxon_api.get_children(ref_only=True)
-        except Exception, e:
-            raise ttypes.ServiceException(e.message, traceback.print_exc(), {"ref": str(ref)})
+        taxon_api = TaxonAPI(self.services, token, ref)
+        return taxon_api.get_children(ref_only=True)
 
+    @server_method
     def get_genome_annotations(self, token=None, ref=None):
-        try:
-            taxon_api = TaxonAPI(self.services, token, ref)
-            return taxon_api.get_genome_annotations(ref_only=True)
-        except Exception, e:
-            raise ttypes.ServiceException(e.message, traceback.print_exc(), {"ref": str(ref)})
+        taxon_api = TaxonAPI(self.services, token, ref)
+        return taxon_api.get_genome_annotations(ref_only=True)
 
+    @server_method
     def get_scientific_lineage(self, token=None, ref=None):
-        try:
-            taxon_api = TaxonAPI(self.services, token, ref)
-            return taxon_api.get_scientific_lineage()
-        except Exception, e:
-            raise ttypes.ServiceException(e.message, traceback.print_exc(), {"ref": str(ref)})
+        taxon_api = TaxonAPI(self.services, token, ref)
+        return taxon_api.get_scientific_lineage()
 
+    @server_method
     def get_scientific_name(self, token=None, ref=None):
-        try:
-            taxon_api = TaxonAPI(self.services, token, ref)
-            return taxon_api.get_scientific_name()
-        except Exception, e:
-            raise ttypes.ServiceException(e.message, traceback.print_exc(), {"ref": str(ref)})
+        taxon_api = TaxonAPI(self.services, token, ref)
+        return taxon_api.get_scientific_name()
 
+    @server_method
     def get_taxonomic_id(self, token=None, ref=None):
-        try:
-            taxon_api = TaxonAPI(self.services, token, ref)
-            return taxon_api.get_taxonomic_id()
-        except AttributeError, e:
-            raise ttypes.AttributeException(e.message, traceback.print_exc())
-        except Exception, e:
-            raise ttypes.ServiceException(e.message, traceback.print_exc(), {"ref": str(ref)})
+        taxon_api = TaxonAPI(self.services, token, ref)
+        return taxon_api.get_taxonomic_id()
 
+    @server_method
     def get_kingdom(self, token=None, ref=None):
-        try:
-            taxon_api = TaxonAPI(self.services, token, ref)
-            return taxon_api.get_kingdom()
-        except AttributeError, e:
-            raise ttypes.AttributeException(e.message, traceback.print_exc())
-        except Exception, e:
-            raise ttypes.ServiceException(e.message, traceback.print_exc(), {"ref": str(ref)})
+        taxon_api = TaxonAPI(self.services, token, ref)
+        return taxon_api.get_kingdom()
 
+    @server_method
     def get_domain(self, token=None, ref=None):
-        try:
-            taxon_api = TaxonAPI(self.services, token, ref)
-            return taxon_api.get_domain()
-        except Exception, e:
-            raise ttypes.ServiceException(e.message, traceback.print_exc(), {"ref": str(ref)})
+        taxon_api = TaxonAPI(self.services, token, ref)
+        return taxon_api.get_domain()
 
+    @server_method
     def get_aliases(self, token=None, ref=None):
-        try:
-            taxon_api = TaxonAPI(self.services, token, ref)
-            return taxon_api.get_aliases()
-        except Exception, e:
-            raise ttypes.ServiceException(e.message, traceback.print_exc(), {"ref": str(ref)})
+        taxon_api = TaxonAPI(self.services, token, ref)
+        return taxon_api.get_aliases()
 
+    @server_method
     def get_genetic_code(self, token=None, ref=None):
-        try:
-            taxon_api = TaxonAPI(self.services, token, ref)
-            return taxon_api.get_genetic_code()
-        except Exception, e:
-            raise ttypes.ServiceException(e.message, traceback.print_exc(), {"ref": str(ref)})
+        taxon_api = TaxonAPI(self.services, token, ref)
+        return taxon_api.get_genetic_code()
 

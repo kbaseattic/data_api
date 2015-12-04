@@ -170,7 +170,7 @@ class TestCache(unittest.TestCase):
 
 class TestCachedObjectAPI(unittest.TestCase):
 
-    genome_new = "PrototypeReferenceGenomes/kb|g.166819"
+    genome_new = "ReferenceGenomeAnnotations/kb|g.166819"
     genome_old = "OriginalReferenceGenomes/kb|g.166819"
 
     def setUp(self):
