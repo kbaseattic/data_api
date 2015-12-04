@@ -130,7 +130,7 @@ class ObjectCache(object):
         cp = cache_params or self.cache_params
         self._cache = cc(**cp)  # workers of the world unite!
         self._stats.end_event('cache.init', self._key)
-        _log.info('ObjectCache.init.end cache_class={}'.format(
+        _log.debug('ObjectCache.init.end cache_class={}'.format(
             cc.__name__))
 
     def get_derived_data(self, parent_method, name):

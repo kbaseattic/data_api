@@ -55,9 +55,38 @@ def test_client():
     print("Got and parsed data from get_feature_type_counts() in {:g} seconds".format(dt))
 
     t0 = time.time()
-    feature_ids = api.get_feature_ids()
+    feature_ids = api.get_feature_ids(filters={"type_list": ["CDS"]})
     dt = time.time() - t0
-    print feature_ids
+    print feature_ids["by_type"]["CDS"][0:2]
+    print("Got and parsed data from get_feature_ids() in {:g} seconds".format(dt))
+
+    locations = api.get_feature_locations(feature_ids["by_type"]["CDS"][0:2])
+    regions = list()
+    for x in locations:
+        regions.extend(locations[x])
+
+    t0 = time.time()
+    feature_ids = api.get_feature_ids(filters={"region_list": regions}, group_by="region")
+    dt = time.time() - t0
+    print feature_ids["by_region"].items()[0]
+    print("Got and parsed data from get_feature_ids() in {:g} seconds".format(dt))
+
+    t0 = time.time()
+    feature_ids = api.get_feature_ids(filters={"function_list": ["protein"]}, group_by="function")
+    dt = time.time() - t0
+    print feature_ids["by_function"].items()[0]
+    print("Got and parsed data from get_feature_ids() in {:g} seconds".format(dt))
+
+    t0 = time.time()
+    feature_ids = api.get_feature_ids(filters={"alias_list": ["29216","93082"]}, group_by="alias")
+    dt = time.time() - t0
+    print feature_ids["by_alias"]
+    print("Got and parsed data from get_feature_ids() in {:g} seconds".format(dt))
+
+    t0 = time.time()
+    feature_ids = api.get_feature_ids(group_by="type")
+    dt = time.time() - t0
+    print feature_ids.keys()
     print("Got and parsed data from get_feature_ids() in {:g} seconds".format(dt))
 
     t0 = time.time()
@@ -69,7 +98,7 @@ def test_client():
     t0 = time.time()
     proteins = api.get_proteins()
     dt = time.time() - t0
-    print proteins
+    print proteins.items()[0]
     print("Got and parsed data from get_proteins() in {:g} seconds".format(dt))
 
     t0 = time.time()

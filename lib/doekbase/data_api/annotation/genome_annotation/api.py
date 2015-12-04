@@ -47,6 +47,7 @@ FEATURE_DESCRIPTIONS = {
     "trnspn": "Transposon"    
 }
 
+_log = get_logger("GenomeAnnotationAPI")
 
 class GenomeAnnotationInterface(object):
     __metaclass__ = abc.ABCMeta
@@ -100,7 +101,7 @@ class GenomeAnnotationInterface(object):
                 if not isinstance(key, basestring):
                     raise TypeError("key '{}' is type '{}', but type 'str' "
                                     "expected".format(key, type(key)))
-            result[key] = FEATURE_DESCRIPTIONS[key]
+                result[key] = FEATURE_DESCRIPTIONS[key]
         return result
 
     @abc.abstractmethod
@@ -134,7 +135,7 @@ class GenomeAnnotationInterface(object):
                        "type_list" - List of feature type strings.
                                      Should be findable in :data:`FEATURE_DESCRIPTIONS`.
                        "region_list" - List of region specs.
-                                       e.g.,[{"contig_id": str, "strand": "+"|"-"|"?", "start": int, "stop": int},...]
+                                       e.g.,[{"contig_id": str, "strand": "+"|"-"|"?", "start": int, "length": int},...]
                        "function_list" - List of function strings to match.
                        "alias_ist" - List of alias strings to match.
 
@@ -403,7 +404,6 @@ class GenomeAnnotationAPI(ObjectAPI, GenomeAnnotationInterface):
         return self.proxy.get_mrna_by_gene(gene_feature_id_list)
     
 
-
 class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
     def __init__(self, services, token, ref):
         super(_KBaseGenomes_Genome, self).__init__(services, token, ref)
@@ -428,18 +428,17 @@ class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
 
     def get_feature_types(self):
         feature_types = list()
-        data = self.get_data()
-        features = data["features"]
+        features = self.get_data()["features"]
 
         for x in features:
-            if x["type"] not in feature_types:
+            if "type" in x and x["type"] not in feature_types:
                 feature_types.append(x["type"])
 
         return feature_types
 
     def get_feature_ids(self, filters=None, group_by="type"):
         # no choice but to pull all features
-        features = self.get_data_subset(path_list=["features"])["features"]
+        features = self.get_data()["features"]
 
         # now process all filters and reduce the data
         if filters is None:
@@ -456,7 +455,8 @@ class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
                 if features[i]["type"] not in filters["type_list"]:
                     remove_features.append(i)
             if len(remove_features) > 0:
-                del features[remove_features]
+                for i in reversed(remove_features):
+                    del features[i]
 
         if "region_list" in filters and filters["region_list"] is not None:
             if not isinstance(filters["region_list"], list):
@@ -465,19 +465,20 @@ class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
                 raise TypeError("A list of region dictionaries is required, received an empty list.")
 
             def is_feature_in_regions(f, regions):
-                location_key = None                
-                
-                if "location" in f:
-                    location_key = "location"
-                elif "locations" in f:
-                    location_key = "locations"
-                    
-                for loc in f[location_key]:
+                if "location" not in f:
+                    return False
+
+                for loc in f["location"]:
                     for r in regions:
-                        if (r["contig_id"] == loc[0]) and \
-                           (loc[2] == r["strand"] or r["strand"] == "?") and \
-                           (loc[1] <= r["stop"] and r["start"] <= loc[1] + loc[3]):
-                            return True
+                        if r["contig_id"] == loc[0] and \
+                           (loc[2] == r["strand"] or r["strand"] == "?"):
+
+                            if loc[2] == "+" and \
+                               max(loc[1], r["start"]) <= min(loc[1]+loc[3], r["start"] + r["length"]):
+                                return True
+                            elif loc[2] == "-" and \
+                               max(loc[1]+loc[3], r["start"]) <= min(loc[1], r["start"]):
+                                return True
                 return False
 
             remove_features = list()
@@ -485,14 +486,15 @@ class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
                 if not is_feature_in_regions(features[i], filters["region_list"]):
                     remove_features.append(i)
             if len(remove_features) > 0:
-                del features[remove_features]
+                for i in reversed(remove_features):
+                    del features[i]
 
         if "function_list" in filters and filters["function_list"] is not None:
             if not isinstance(filters["function_list"], list):
                 raise TypeError("A list of feature function strings is required.")
             elif len(filters["function_list"]) == 0:
                 raise TypeError("A list of feature function strings is required, received an empty list.")
-            
+
             remove_features = list()
             for i in xrange(len(features)):
                 if "function" not in features[i]:
@@ -500,13 +502,14 @@ class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
                 else:
                     found = False
                     for f in filters["function_list"]:
-                        if feature["function"].find(f) >= 0:
+                        if features[i]["function"].find(f) >= 0:
                             found = True
 
                     if not found:
                         remove_features.append(i)
             if len(remove_features) > 0:
-                del features[remove_features]
+                for i in reversed(remove_features):
+                    del features[i]
 
         if "alias_list" in filters and filters["alias_list"] is not None:
             if not isinstance(filters["alias_list"], list):
@@ -527,7 +530,8 @@ class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
                     if not found:
                         remove_features.append(i)
             if len(remove_features) > 0:
-                del features[remove_features]
+                for i in reversed(remove_features):
+                    del features[i]
 
         # now that filtering has been completed, attempt to group the data as requested
         results = dict()
@@ -542,22 +546,23 @@ class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
         elif group_by == "region":
             results["by_region"] = dict()
             for x in features:
-                contig_id = x["location"][0]
-                strand = x["location"][2]
-                start = x["location"][1]
-                length = x["location"][3]
-                range = "{}-{}".format(start,start+length)
+                for r in x["location"]:
+                    contig_id = r[0]
+                    strand = r[2]
+                    start = r[1]
+                    length = r[3]
+                    range = "{}-{}".format(start,start+length)
 
-                if contig_id not in results["by_region"]:
-                    results["by_region"][contig_id] = dict()
+                    if contig_id not in results["by_region"]:
+                        results["by_region"][contig_id] = dict()
 
-                if strand not in results["by_region"][contig_id]:
-                    results["by_region"][contig_id][strand] = dict()
+                    if strand not in results["by_region"][contig_id]:
+                        results["by_region"][contig_id][strand] = dict()
 
-                if range not in results["by_region"][contig_id][strand]:
-                    results["by_region"][contig_id][strand][range] = list()
+                    if range not in results["by_region"][contig_id][strand]:
+                        results["by_region"][contig_id][strand][range] = list()
 
-                results["by_region"][contig_id][strand][range].append(x["id"])
+                    results["by_region"][contig_id][strand][range].append(x["id"])
         elif group_by == "function":
             results["by_function"] = dict()
             for x in features:
@@ -584,8 +589,7 @@ class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
         Returns:
           dict<str>:int"""
         counts = dict()
-        data = self.get_data()
-        features = data["features"]
+        features = self.get_data()["features"]
 
         if type_list is None:
             for x in features:
@@ -612,8 +616,7 @@ class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
 
     def get_feature_locations(self, feature_id_list=None):
         locations = dict()
-        data = self.get_data()
-        features = data["features"]
+        features = self.get_data()["features"]
 
         if feature_id_list is None:
             for x in features:
@@ -652,8 +655,7 @@ class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
 
     def get_feature_dna(self, feature_id_list=None):
         sequences = dict()
-        data = self.get_data()
-        features = data["features"]
+        features = self.get_data()["features"]
 
         if feature_id_list is None:
             for x in features:
@@ -681,8 +683,7 @@ class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
 
     def get_feature_functions(self, feature_id_list=None):
         functions = dict()
-        data = self.get_data()
-        features = data["features"]
+        features = self.get_data()["features"]
 
         if feature_id_list is None:
             for x in features:
@@ -710,8 +711,7 @@ class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
 
     def get_feature_aliases(self, feature_id_list=None):
         aliases = dict()
-        data = self.get_data()
-        features = data["features"]
+        features = self.get_data()["features"]
 
         if feature_id_list is None:
             for x in features:
@@ -739,8 +739,7 @@ class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
     
     def get_feature_publications(self, feature_id_list=None):
         publications = dict()
-        data = self.get_data()
-        features = data["features"]
+        features = self.get_data()["features"]
 
         if feature_id_list is None:
             for x in features:
@@ -768,8 +767,7 @@ class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
 
     def get_features(self, feature_id_list=None):
         out_features = dict()
-        data = self.get_data()
-        features = data["features"]
+        features = self.get_data()["features"]
 
         def fill_out_feature(x):
             f = dict()
@@ -837,8 +835,7 @@ class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
 
     def get_proteins(self):
         proteins = dict()
-        data = self.get_data()
-        features = data["features"]
+        features = self.get_data()["features"]
         
         for f in features:
             if "protein_translation" in f and len(f["protein_translation"]) > 0:
@@ -1007,24 +1004,27 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
                 raise TypeError("A list of region dictionaries is required, received an empty list.")
 
             def is_feature_in_regions(f, regions):
-                location_key = None
-
-                if "location" in f:
-                    location_key = "location"
-                elif "locations" in f:
-                    location_key = "locations"
-
-                for loc in f[location_key]:
+                for loc in f["locations"]:
                     for r in regions:
-                        if (r["contig_id"] == loc[0]) and \
-                           (loc[2] == r["strand"] or r["strand"] == "?") and \
-                           (loc[1] <= r["stop"] and r["start"] <= loc[1] + loc[3]):
-                            return True
+                        if r["contig_id"] == loc[0] and \
+                           (loc[2] == r["strand"] or r["strand"] == "?"):
+
+                            if loc[2] == "+" and \
+                               max(loc[1], r["start"]) <= min(loc[1]+loc[3], r["start"] + r["length"]):
+                                return True
+                            elif loc[2] == "-" and \
+                               max(loc[1]+loc[3], r["start"]) <= min(loc[1], r["start"]):
+                                return True
                 return False
 
+            remove_features = list()
+
             for f in features:
-                if not is_feature_in_regions(f, filters["region_list"]):
-                    del features[f]
+                if not is_feature_in_regions(features[f], filters["region_list"]):
+                    remove_features.append(f)
+
+            for f in remove_features:
+                del features[f]
 
         if "function_list" in filters and filters["function_list"] is not None:
             if not isinstance(filters["function_list"], list):
@@ -1032,17 +1032,22 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
             elif len(filters["function_list"]) == 0:
                 raise TypeError("A list of feature function strings is required, received an empty list.")
 
+            remove_features = list()
+
             for f in features:
-                if "function" not in f:
-                    del features[f]
+                if "function" not in features[f]:
+                    remove_features.append(f)
                 else:
                     found = False
                     for func in filters["function_list"]:
-                        if f["function"].find(func) >= 0:
+                        if features[f]["function"].find(func) >= 0:
                             found = True
 
                     if not found:
-                        del features[f]
+                        remove_features.append(f)
+
+            for f in remove_features:
+                del features[f]
 
         if "alias_list" in filters and filters["alias_list"] is not None:
             if not isinstance(filters["alias_list"], list):
@@ -1050,17 +1055,22 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
             elif len(filters["alias_list"]) == 0:
                 raise TypeError("A list of feature alias strings is required, received an empty list.")
 
+            remove_features = list()
+
             for f in features:
-                if "aliases" not in f:
-                    del features[f]
+                if "aliases" not in features[f]:
+                    remove_features.append(f)
                 else:
                     found = False
                     for alias in filters["alias_list"]:
-                        if alias in f["aliases"]:
+                        if alias in features[f]["aliases"]:
                             found = True
 
                     if not found:
-                        del features[f]
+                        remove_features.append(f)
+
+            for f in remove_features:
+                del features[f]
 
         # now that filtering has been completed, attempt to group the data as requested
         results = dict()
@@ -1075,37 +1085,39 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
         elif group_by == "region":
             results["by_region"] = dict()
             for x in features:
-                contig_id = features[x]["location"][0]
-                strand = features[x]["location"][2]
-                start = features[x]["location"][1]
-                length = features[x]["location"][3]
-                range = "{}-{}".format(start,start+length)
+                for r in features[x]["locations"]:
+                    contig_id = r[0]
+                    strand = r[2]
+                    start = r[1]
+                    length = r[3]
+                    range = "{}-{}".format(start,start+length)
 
-                if contig_id not in results["by_region"]:
-                    results["by_region"][contig_id] = dict()
+                    if contig_id not in results["by_region"]:
+                        results["by_region"][contig_id] = dict()
 
-                if strand not in results["by_region"][contig_id]:
-                    results["by_region"][contig_id][strand] = dict()
+                    if strand not in results["by_region"][contig_id]:
+                        results["by_region"][contig_id][strand] = dict()
 
-                if range not in results["by_region"][contig_id][strand]:
-                    results["by_region"][contig_id][strand][range] = list()
+                    if range not in results["by_region"][contig_id][strand]:
+                        results["by_region"][contig_id][strand][range] = list()
 
-                results["by_region"][contig_id][strand][range].append(features[x]["feature_id"])
+                    results["by_region"][contig_id][strand][range].append(features[x]["feature_id"])
         elif group_by == "function":
             results["by_function"] = dict()
             for x in features:
                 if features[x]["function"] not in results["by_function"]:
                     results["by_function"][features[x]["function"]] = list()
 
-                results["by_function"][features[x]["function"]].append(features[x]["id"])
+                results["by_function"][features[x]["function"]].append(features[x]["feature_id"])
         elif group_by == "alias":
             results["by_alias"] = dict()
             for x in features:
-                for alias in features[x]["aliases"]:
-                    if alias not in results["by_alias"]:
-                        results["by_alias"][alias] = list()
+                if "aliases" in features[x]:
+                    for alias in features[x]["aliases"]:
+                        if alias not in results["by_alias"]:
+                            results["by_alias"][alias] = list()
 
-                    results["by_alias"][alias].append(features[x]["id"])
+                        results["by_alias"][alias].append(features[x]["feature_id"])
 
         return results
 
@@ -1191,6 +1203,53 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
         out_features = dict()
         feature_containers = self._get_feature_containers(feature_id_list)
 
+        def fill_out_feature(x):
+            f = dict()
+            f["feature_id"] = x['feature_id']
+            f["feature_type"] = x['type']
+            f["feature_md5"] = x['md5']
+            f["feature_dna_sequence"] = x['dna_sequence']
+            f["feature_dna_sequence_length"] = x['dna_sequence_length']
+            f["feature_locations"] = x['locations']
+
+            if 'function' in x:
+                f["feature_function"] = x['function']
+            else:
+                f["feature_function"] = "Unknown"
+
+            if 'publications' in x:
+                f["feature_publications"] = x['publications']
+            else:
+                f["feature_publications"] = []
+
+            if 'aliases' in x:
+                f["feature_aliases"] = x['aliases']
+            else:
+                f["feature_aliases"] = {}
+
+            if 'notes' in x:
+                f["feature_notes"] = x['notes']
+            else:
+                f["feature_notes"] = []
+
+            if 'inference' in x:
+                f["feature_inference"] = x['inference']
+            else:
+                f["feature_inference"] = "Unknown"
+
+            if 'quality' in x:
+                f["feature_quality_score"] = x['quality']
+            else:
+                f["feature_quality_score"] = []
+
+            if 'quality_warnings' in x:
+                f["feature_quality_warnings"] = x['quality_warnings']
+            else:
+                f["feature_quality_warnings"] = []
+
+            return f
+
+
         for ref in feature_containers:
             container = ObjectAPI(self.services, self._token, ref)
             if feature_id_list is None:
@@ -1202,49 +1261,8 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
                 working_list = feature_containers[ref]
             
             for x in working_list:
-                out_features[features[x]['feature_id']] = dict()
-                out_features[x]["feature_id"] = features[x]['feature_id']
-                out_features[x]["feature_type"] = features[x]['type']
-                out_features[x]["feature_md5"] = features[x]['md5']
-                out_features[x]["feature_dna_sequence"] = features[x]['dna_sequence']
-                out_features[x]["feature_dna_sequence_length"] = features[x]['dna_sequence_length']
-                out_features[x]["feature_locations"] = features[x]['locations']
-                
-                if 'function' in features[x]:
-                    out_features[x]["feature_function"] = features[x]['function']
-                else:
-                    out_features[x]["feature_function"] = "Unknown"
+                out_features[x] = fill_out_feature(features[x])
 
-                if 'publications' in features[x]:
-                    out_features[x]["feature_publications"] = features[x]['publications']
-                else:
-                    out_features[x]["feature_publications"] = []
-
-                if 'aliases' in features[x]:
-                    out_features[x]["feature_aliases"] = features[x]['aliases']
-                else:
-                    out_features[x]["feature_aliases"] = {}
-                    
-                if 'notes' in features[x]:
-                    out_features[x]["feature_notes"] = features[x]['notes']
-                else:
-                    out_features[x]["feature_notes"] = []
-
-                if 'inference' in features[x]:
-                    out_features[x]["feature_inference"] = features[x]['inference']
-                else:
-                    out_features[x]["feature_inference"] = "Unknown"
-
-                if 'quality' in features[x]:
-                    out_features[x]["feature_quality_score"] = features[x]['quality']
-                else:
-                    out_features[x]["feature_quality_score"] = []
-
-                if 'quality_warnings' in features[x]:
-                    out_features[x]["feature_quality_warnings"] = features[x]['quality_warnings']
-                else:
-                    out_features[x]["feature_quality_warnings"] = []
-        
         return out_features
 
     def get_proteins(self):
@@ -1461,10 +1479,26 @@ class GenomeAnnotationClientAPI(GenomeAnnotationInterface):
     def get_feature_ids(self, filters=None, group_by="type"):
         converted_filters = ttypes.Feature_id_filters()
         if filters is not None:
-            type_list = filters["type_list"] or []
-            region_list = [ttypes.Region(**x) for x in filters["region_list"]] or []
-            function_list = filters["function_list"] or []
-            alias_list = filters["alias_list"] or []
+            if "type_list" in filters:
+                type_list = filters["type_list"]
+            else:
+                type_list = list()
+
+            if "region_list" in filters:
+                region_list = [ttypes.Region(**x) for x in filters["region_list"]]
+            else:
+                region_list = list()
+
+            if "function_list" in filters:
+                function_list = filters["function_list"]
+            else:
+                function_list = list()
+
+            if "alias_list" in filters:
+                alias_list = filters["alias_list"]
+            else:
+                alias_list = list()
+
             converted_filters = ttypes.Feature_id_filters(type_list=type_list,
                                                           region_list=region_list,
                                                           function_list=function_list,
@@ -1494,6 +1528,7 @@ class GenomeAnnotationClientAPI(GenomeAnnotationInterface):
     @client_method
     def get_proteins(self):
         result = self.client.get_proteins(self._token, self.ref)
+
         output = dict()
         for x in result:
             output[x] = dict()
@@ -1508,9 +1543,14 @@ class GenomeAnnotationClientAPI(GenomeAnnotationInterface):
     def get_feature_locations(self, feature_id_list=None):
         result = self.client.get_feature_locations(self._token, self.ref, feature_id_list)
 
-        # TODO need to convert regions back to tuples
+        output = dict()
+        for x in result:
+            output[x] = list()
 
-        return result
+            for region in result[x]:
+                output[x].append({k: region.__dict__[k] for k in region.__dict__})
+
+        return output
 
     @logged(_ga_log)
     @client_method
