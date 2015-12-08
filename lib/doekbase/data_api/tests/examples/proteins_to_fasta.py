@@ -3,7 +3,7 @@ __author__ = 'Marcin Joachimiak <mjoachimiak@lbl.gov>'
 __date__ = '11/06/15'
 
 import doekbase.data_api
-from doekbase.data_api.annotation.genome_annotation import GenomeAnnotationAPI
+from doekbase.data_api.annotation.genome_annotation.api import GenomeAnnotationAPI
 import os
 
 def get_aliases (data):
@@ -28,7 +28,7 @@ def get_protein_fasta(data):
 
 def run(ws_url='https://ci.kbase.us/services/ws/'):
 
-    genomeref = "PrototypeReferenceGenomes/kb|g.166828"
+    genomeref = "ReferenceGenomeAnnotations/kb|g.166828"
     genome_annotation = GenomeAnnotationAPI(services = {"workspace_service_url": ws_url}, token=os.environ.get('KB_AUTH_TOKEN'), ref=genomeref)
         
     proteins= genome_annotation.get_proteins()
