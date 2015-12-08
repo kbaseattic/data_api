@@ -29,6 +29,7 @@ def setup():
     t_new_e = _Taxon(shared.services, shared.token, taxon_new)
     t_old = TaxonAPI(shared.services, shared.token, taxon_old)
     t_old_e = _KBaseGenomes_Genome(shared.services, shared.token, taxon_old)
+    _log.info("Connecting to Taxon Thrift Service at {}".format(shared.services["taxon_service_url"]))
     t_client_new = TaxonClientAPI(shared.services["taxon_service_url"], shared.token, taxon_new)
     t_client_old = TaxonClientAPI(shared.services["taxon_service_url"], shared.token, taxon_old)
 
