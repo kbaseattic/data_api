@@ -8,16 +8,17 @@ import time
 import os
 
 
-def get_gff(gene, genome_annotation):
+def get_core_exons(gene, genome_annotation):
     t0 = time.time()
     listmrna=genome_annotation.get_mrna_by_gene([gene])[gene]    
     t1 = time.time()
     print "get_mrna_by_gene " , (t1-t0), "s"
+    print listmrna
 
     t0 = time.time()
     listcds=genome_annotation.get_cds_by_gene([gene])[gene] 
     t1 = time.time()
-    print "get_cds_by_gene " , (t1-t0) , "s" 
+    print "get_cds_by_gene " , (t1-t0), "s"   
 
     t0 = time.time()
     mrna_cds=genome_annotation.get_cds_by_mrna(listmrna)
@@ -43,13 +44,10 @@ def get_gff(gene, genome_annotation):
     cds_mrna=genome_annotation.get_mrna_by_cds(listcds)
     t1 = time.time()
     print "get_mrna_by_cds " , (t1-t0), "s"
-    
-    string=""
-    for x in gene_location:
-        info=gene_location[x][0]
-        stop=info['start'] + info['length']
-        string+=info['contig_id']  + "\tblah" + "\tgene\t"  + str(info['start']) + "\t" + str(stop) + "\t.\t" +  info['strand']+ "\t.\t" + "ID=" + x + ";" + "Name="+ x +"\n"
-        
+
+    mRNA_count=len(listmrna)
+
+    exons_dict = {}
     for mrna in listmrna:
         cds=mrna_cds[mrna]
         infomrna=mrna_location[mrna]
@@ -57,27 +55,38 @@ def get_gff(gene, genome_annotation):
         i=0
         for exon in infomrna:
             i=i+1
-            stop=exon['start'] + exon['length']
-            string+=exon['contig_id']  + "\tblah" + "\texon\t"  + str(exon['start'])+ "\t" + str(stop) + "\t.\t" +  exon['strand']+ "\t.\t" + "ID=" + mrna +".exon." + str(i)  + ";" + "Parent="+ gene+"\n"
-        j=0
-        for cds in infocds:
-            j=j+1
-            stop=cds['start'] + cds['length']
-            string+=cds['contig_id']  + "\tblah" + "\tCDS\t"  + str(cds['start']) + "\t" + str(stop) + "\t.\t" +  cds['strand']+ "\t.\t" + "ID="  + mrna_cds[mrna]  +".CDS." + str(j) + ";" + "Parent="+  mrna+"\n"
-    return string       
+            start=exon['start']
+            stop=start + exon['length']
+            key = "" + str(start)+"_"+str(stop)
+            if(bool(exons_dict.get(key))):
+                exons_dict[key]  = exons_dict[key] + 1                
+            else:
+                exons_dict[key] = 1
+            #string+=exon['contig_id']  + "\tphytozome9_0" + "\texon\t"  + str(exon['start'])+ "\t" + str(stop) + "\t.\t" +  exon['strand']+ "\t.\t" + "ID=" + mrna +".exon." + str(i)  + ";" + "Parent="+ gene+"\n"
+       
+    dellist = []
+    for key in exons_dict:
+        print key
+        if(exons_dict[key] < mRNA_count):
+            print "removing non-core exon " + key
+            dellist.append(key)
+           
+    for key in dellist:
+         del exons_dict[key]
 
+    return exons_dict       
 
 def run(ws_url='https://ci.kbase.us/services/ws/'):
 
     genomeref = "PrototypeReferenceGenomes/kb|g.166828"
     genome_annotation = GenomeAnnotationAPI(services = {"workspace_service_url": ws_url}, token=os.environ.get('KB_AUTH_TOKEN'), ref=genomeref)
     gene='kb|g.166828.locus.15345'    
-    gffdata=get_gff(gene, genome_annotation)
+    exons=get_core_exons(gene, genome_annotation)
 
-    outfile = 'g.166828.locus.15345.gff'
-    print outfile
-    with open(outfile, 'w') as f:
-        f.write(gffdata)
+    print "Core exon(s) found in all mRNAs for gene "+gene
+    print exons
+
+
 
 if __name__ == '__main__':
     run()
