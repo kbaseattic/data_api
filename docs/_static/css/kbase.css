@@ -93,7 +93,8 @@ dl.method, dl.class, dl.function {
 /* Class and method declarations */
 /* add a border for classes */
 dl.class dt {
-    border-top: 2px solid #4BB856;
+    /* NO! This breaks up the flow too much */
+    /* border-top: 2px solid #4BB856; */
 }
 tt.descclassname {
 }
