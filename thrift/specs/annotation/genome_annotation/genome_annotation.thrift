@@ -175,9 +175,10 @@ service thrift_service {
      * Retrieve Feature data available in this GenomeAnnotation.
      *
      */
-    map<string, Feature_data> get_features(1:required string token,
+    map<string, list<Feature_data>> get_features(1:required string token,
                                            2:required ObjectReference ref,
-                                           3:list<string> feature_id_list) throws (
+                                           3:list<string> feature_type_list),
+                                           4:list<string> feature_id_list) throws (
         1:ServiceException generic_exception,
         2:AuthorizationException authorization_exception,
         3:AuthenticationException authentication_exception,
