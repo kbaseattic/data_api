@@ -49,6 +49,11 @@ struct Region {
     4: i64 length;
 }
 
+struct Feature_tuple {
+    1: string feature_type;
+    2: string feature_id;
+}
+
 struct Feature_id_filters {
     1: list<string> type_list = [];
     2: list<Region> region_list = [];
@@ -57,10 +62,10 @@ struct Feature_id_filters {
 }
 
 struct Feature_id_mapping {
-    1: map<string, list<string>> by_type = empty;
-    2: map<string, map<string, map<string, list<string>>>> by_region = empty;
-    3: map<string, list<string>> by_function = empty;
-    4: map<string, list<string>> by_alias = empty;
+    1: map<string, list<Feature_tuple>> by_type = empty;
+    2: map<string, map<string, map<string, list<Feature_tuple>>>> by_region = empty;
+    3: map<string, list<Feature_tuple>> by_function = empty;
+    4: map<string, list<Feature_tuple>> by_alias = empty;
 }
 
 struct Feature_data {
@@ -175,10 +180,9 @@ service thrift_service {
      * Retrieve Feature data available in this GenomeAnnotation.
      *
      */
-    map<string, list<Feature_data>> get_features(1:required string token,
+    map<string, map<string, list<Feature_data>>> get_features(1:required string token,
                                            2:required ObjectReference ref,
-                                           3:list<string> feature_type_list),
-                                           4:list<string> feature_id_list) throws (
+                                           3:list<Feature_tuple> feature_tuple_list) throws (
         1:ServiceException generic_exception,
         2:AuthorizationException authorization_exception,
         3:AuthenticationException authentication_exception,
