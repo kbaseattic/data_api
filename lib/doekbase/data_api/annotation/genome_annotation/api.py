@@ -1032,7 +1032,7 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
                                max(loc[1], r["start"]) <= min(loc[1]+loc[3], r["start"] + r["length"]):
                                 return True
                             elif loc[2] == "-" and \
-                               max(loc[1]+loc[3], r["start"]) <= min(loc[1], r["start"]):
+                               max(loc[1]-loc[3], r["start"]) <= min(loc[1], r["start"] + r["length"]):
                                 return True
                 return False
 
