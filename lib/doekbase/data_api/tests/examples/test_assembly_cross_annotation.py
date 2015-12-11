@@ -1,5 +1,5 @@
 """
-Verify that all examples in ``taxon_api`` are runnable.
+Verify that all examples in ``assembly_api`` are runnable.
 
 When you add a new example, add a call to it, here.
 """

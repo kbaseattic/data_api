@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 
 __author__ = 'Marcin Joachimiak <mjoachimiak@lbl.gov>'
 __date__ = '11/06/15'
@@ -8,7 +9,7 @@ import time
 import os
 
 
-def get_gff(gene, genome_annotation):
+def get_gff(gene,genome_annotation):
     t0 = time.time()
     listmrna=genome_annotation.get_mrna_by_gene([gene])[gene]    
     t1 = time.time()
@@ -17,7 +18,7 @@ def get_gff(gene, genome_annotation):
     t0 = time.time()
     listcds=genome_annotation.get_cds_by_gene([gene])[gene] 
     t1 = time.time()
-    print "get_cds_by_gene " , (t1-t0) , "s" 
+    print "get_cds_by_gene " , (t1-t0), "s"   
 
     t0 = time.time()
     mrna_cds=genome_annotation.get_cds_by_mrna(listmrna)
@@ -71,13 +72,18 @@ def run(ws_url='https://ci.kbase.us/services/ws/'):
 
     genomeref = "ReferenceGenomeAnnotations/kb|g.3157"
     genome_annotation = GenomeAnnotationAPI(services = {"workspace_service_url": ws_url}, token=os.environ.get('KB_AUTH_TOKEN'), ref=genomeref)
-    gene='kb|g.3157.locus.1'    
-    gffdata=get_gff(gene, genome_annotation)
+    genes=['kb|g.3157.locus.1','kb|g.3157.locus.2','kb|g.3157.locus.3']
 
-    outfile = 'g.3157.locus.1.gff'
+    gffdata=""
+    for s in genes:
+        gffdata+=get_gff(s,genome_annotation)
+
+    outfile = 'g.3157.locus.1_2_3.gff'
     print outfile
     with open(outfile, 'w') as f:
         f.write(gffdata)
+
+
 
 if __name__ == '__main__':
     run()
