@@ -231,3 +231,8 @@ The sub-repository will be cloned in the directory `test_resources`.
 ### JavaScript tests
 
 For the JavaScript API, all the code and tests live under `jslib`. See the README in that directory for more details.
+
+
+### Example narratives
+
+	Retrieving and counting features for a genome [feature count example](https://narrative-ci.kbase.us/narrative/ws.3292.obj.1)
