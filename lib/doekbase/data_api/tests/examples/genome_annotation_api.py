@@ -49,7 +49,7 @@ def proteins_to_fasta(ws_url='https://ci.kbase.us/services/ws/'):
     Returns:
         Full path to output file
     """
-    ref = "ReferenceGenomeAnnotations/kb|g.166819"
+    ref = "ReferenceGenomeAnnotations/kb|g.3157"
     # ref = "ReferenceGenomeAnnotations/kb|g.3899"
     genome_annotation = GenomeAnnotationAPI(
         token=os.environ.get('KB_AUTH_TOKEN'), services={

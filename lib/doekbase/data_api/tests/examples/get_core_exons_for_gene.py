@@ -3,7 +3,7 @@ __author__ = 'Marcin Joachimiak <mjoachimiak@lbl.gov>'
 __date__ = '11/06/15'
 
 import doekbase.data_api
-from doekbase.data_api.annotation.genome_annotation import GenomeAnnotationAPI
+from doekbase.data_api.annotation.genome_annotation.api import GenomeAnnotationAPI
 import time
 import os
 
@@ -78,9 +78,9 @@ def get_core_exons(gene, genome_annotation):
 
 def run(ws_url='https://ci.kbase.us/services/ws/'):
 
-    genomeref = "PrototypeReferenceGenomes/kb|g.166828"
+    genomeref = "ReferenceGenomeAnnotations/kb|g.3157"
     genome_annotation = GenomeAnnotationAPI(services = {"workspace_service_url": ws_url}, token=os.environ.get('KB_AUTH_TOKEN'), ref=genomeref)
-    gene='kb|g.166828.locus.15345'    
+    gene='kb|g.3157.locus.1'    
     exons=get_core_exons(gene, genome_annotation)
 
     print "Core exon(s) found in all mRNAs for gene "+gene

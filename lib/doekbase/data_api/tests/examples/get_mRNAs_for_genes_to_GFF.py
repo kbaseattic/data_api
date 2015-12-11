@@ -4,7 +4,7 @@ __author__ = 'Marcin Joachimiak <mjoachimiak@lbl.gov>'
 __date__ = '11/06/15'
 
 import doekbase.data_api
-from doekbase.data_api.annotation.genome_annotation import GenomeAnnotationAPI
+from doekbase.data_api.annotation.genome_annotation.api import GenomeAnnotationAPI
 import time
 import os
 
@@ -70,15 +70,15 @@ def get_gff(gene,genome_annotation):
 
 def run(ws_url='https://ci.kbase.us/services/ws/'):
 
-    genomeref = "PrototypeReferenceGenomes/kb|g.166828"
+    genomeref = "ReferenceGenomeAnnotations/kb|g.3157"
     genome_annotation = GenomeAnnotationAPI(services = {"workspace_service_url": ws_url}, token=os.environ.get('KB_AUTH_TOKEN'), ref=genomeref)
-    genes=['kb|g.166828.locus.15345','kb|g.166828.locus.15346','kb|g.166828.locus.15347']
+    genes=['kb|g.3157.locus.1','kb|g.3157.locus.2','kb|g.3157.locus.3']
 
     gffdata=""
     for s in genes:
         gffdata+=get_gff(s,genome_annotation)
 
-    outfile = 'g.166828.locus.15345_15346_15347.gff'
+    outfile = 'g.3157.locus.1_2_3.gff'
     print outfile
     with open(outfile, 'w') as f:
         f.write(gffdata)
