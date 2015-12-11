@@ -3847,7 +3847,7 @@ class get_features_result:
   """
 
   thrift_spec = (
-    (0, TType.MAP, 'success', (TType.STRING,None,TType.MAP,(TType.STRING,None,TType.LIST,(TType.STRUCT,(Feature_data, Feature_data.thrift_spec)))), None, ), # 0
+    (0, TType.MAP, 'success', (TType.STRING,None,TType.LIST,(TType.STRUCT,(Feature_data, Feature_data.thrift_spec))), None, ), # 0
     (1, TType.STRUCT, 'generic_exception', (ServiceException, ServiceException.thrift_spec), None, ), # 1
     (2, TType.STRUCT, 'authorization_exception', (AuthorizationException, AuthorizationException.thrift_spec), None, ), # 2
     (3, TType.STRUCT, 'authentication_exception', (AuthenticationException, AuthenticationException.thrift_spec), None, ), # 3
@@ -3880,19 +3880,13 @@ class get_features_result:
           (_ktype238, _vtype239, _size237 ) = iprot.readMapBegin()
           for _i241 in xrange(_size237):
             _key242 = iprot.readString()
-            _val243 = {}
-            (_ktype245, _vtype246, _size244 ) = iprot.readMapBegin()
+            _val243 = []
+            (_etype247, _size244) = iprot.readListBegin()
             for _i248 in xrange(_size244):
-              _key249 = iprot.readString()
-              _val250 = []
-              (_etype254, _size251) = iprot.readListBegin()
-              for _i255 in xrange(_size251):
-                _elem256 = Feature_data()
-                _elem256.read(iprot)
-                _val250.append(_elem256)
-              iprot.readListEnd()
-              _val243[_key249] = _val250
-            iprot.readMapEnd()
+              _elem249 = Feature_data()
+              _elem249.read(iprot)
+              _val243.append(_elem249)
+            iprot.readListEnd()
             self.success[_key242] = _val243
           iprot.readMapEnd()
         else:
@@ -3945,17 +3939,13 @@ class get_features_result:
     oprot.writeStructBegin('get_features_result')
     if self.success is not None:
       oprot.writeFieldBegin('success', TType.MAP, 0)
-      oprot.writeMapBegin(TType.STRING, TType.MAP, len(self.success))
-      for kiter257,viter258 in self.success.items():
-        oprot.writeString(kiter257)
-        oprot.writeMapBegin(TType.STRING, TType.LIST, len(viter258))
-        for kiter259,viter260 in viter258.items():
-          oprot.writeString(kiter259)
-          oprot.writeListBegin(TType.STRUCT, len(viter260))
-          for iter261 in viter260:
-            iter261.write(oprot)
-          oprot.writeListEnd()
-        oprot.writeMapEnd()
+      oprot.writeMapBegin(TType.STRING, TType.LIST, len(self.success))
+      for kiter250,viter251 in self.success.items():
+        oprot.writeString(kiter250)
+        oprot.writeListBegin(TType.STRUCT, len(viter251))
+        for iter252 in viter251:
+          iter252.write(oprot)
+        oprot.writeListEnd()
       oprot.writeMapEnd()
       oprot.writeFieldEnd()
     if self.generic_exception is not None:
@@ -4136,12 +4126,12 @@ class get_proteins_result:
       if fid == 0:
         if ftype == TType.MAP:
           self.success = {}
-          (_ktype263, _vtype264, _size262 ) = iprot.readMapBegin()
-          for _i266 in xrange(_size262):
-            _key267 = iprot.readString()
-            _val268 = Protein_data()
-            _val268.read(iprot)
-            self.success[_key267] = _val268
+          (_ktype254, _vtype255, _size253 ) = iprot.readMapBegin()
+          for _i257 in xrange(_size253):
+            _key258 = iprot.readString()
+            _val259 = Protein_data()
+            _val259.read(iprot)
+            self.success[_key258] = _val259
           iprot.readMapEnd()
         else:
           iprot.skip(ftype)
@@ -4194,9 +4184,9 @@ class get_proteins_result:
     if self.success is not None:
       oprot.writeFieldBegin('success', TType.MAP, 0)
       oprot.writeMapBegin(TType.STRING, TType.STRUCT, len(self.success))
-      for kiter269,viter270 in self.success.items():
-        oprot.writeString(kiter269)
-        viter270.write(oprot)
+      for kiter260,viter261 in self.success.items():
+        oprot.writeString(kiter260)
+        viter261.write(oprot)
       oprot.writeMapEnd()
       oprot.writeFieldEnd()
     if self.generic_exception is not None:
@@ -4294,10 +4284,10 @@ class get_feature_locations_args:
       elif fid == 3:
         if ftype == TType.LIST:
           self.feature_id_list = []
-          (_etype274, _size271) = iprot.readListBegin()
-          for _i275 in xrange(_size271):
-            _elem276 = iprot.readString()
-            self.feature_id_list.append(_elem276)
+          (_etype265, _size262) = iprot.readListBegin()
+          for _i266 in xrange(_size262):
+            _elem267 = iprot.readString()
+            self.feature_id_list.append(_elem267)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
@@ -4322,8 +4312,8 @@ class get_feature_locations_args:
     if self.feature_id_list is not None:
       oprot.writeFieldBegin('feature_id_list', TType.LIST, 3)
       oprot.writeListBegin(TType.STRING, len(self.feature_id_list))
-      for iter277 in self.feature_id_list:
-        oprot.writeString(iter277)
+      for iter268 in self.feature_id_list:
+        oprot.writeString(iter268)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
@@ -4398,17 +4388,17 @@ class get_feature_locations_result:
       if fid == 0:
         if ftype == TType.MAP:
           self.success = {}
-          (_ktype279, _vtype280, _size278 ) = iprot.readMapBegin()
-          for _i282 in xrange(_size278):
-            _key283 = iprot.readString()
-            _val284 = []
-            (_etype288, _size285) = iprot.readListBegin()
-            for _i289 in xrange(_size285):
-              _elem290 = Region()
-              _elem290.read(iprot)
-              _val284.append(_elem290)
+          (_ktype270, _vtype271, _size269 ) = iprot.readMapBegin()
+          for _i273 in xrange(_size269):
+            _key274 = iprot.readString()
+            _val275 = []
+            (_etype279, _size276) = iprot.readListBegin()
+            for _i280 in xrange(_size276):
+              _elem281 = Region()
+              _elem281.read(iprot)
+              _val275.append(_elem281)
             iprot.readListEnd()
-            self.success[_key283] = _val284
+            self.success[_key274] = _val275
           iprot.readMapEnd()
         else:
           iprot.skip(ftype)
@@ -4461,11 +4451,11 @@ class get_feature_locations_result:
     if self.success is not None:
       oprot.writeFieldBegin('success', TType.MAP, 0)
       oprot.writeMapBegin(TType.STRING, TType.LIST, len(self.success))
-      for kiter291,viter292 in self.success.items():
-        oprot.writeString(kiter291)
-        oprot.writeListBegin(TType.STRUCT, len(viter292))
-        for iter293 in viter292:
-          iter293.write(oprot)
+      for kiter282,viter283 in self.success.items():
+        oprot.writeString(kiter282)
+        oprot.writeListBegin(TType.STRUCT, len(viter283))
+        for iter284 in viter283:
+          iter284.write(oprot)
         oprot.writeListEnd()
       oprot.writeMapEnd()
       oprot.writeFieldEnd()
@@ -4564,10 +4554,10 @@ class get_feature_publications_args:
       elif fid == 3:
         if ftype == TType.LIST:
           self.feature_id_list = []
-          (_etype297, _size294) = iprot.readListBegin()
-          for _i298 in xrange(_size294):
-            _elem299 = iprot.readString()
-            self.feature_id_list.append(_elem299)
+          (_etype288, _size285) = iprot.readListBegin()
+          for _i289 in xrange(_size285):
+            _elem290 = iprot.readString()
+            self.feature_id_list.append(_elem290)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
@@ -4592,8 +4582,8 @@ class get_feature_publications_args:
     if self.feature_id_list is not None:
       oprot.writeFieldBegin('feature_id_list', TType.LIST, 3)
       oprot.writeListBegin(TType.STRING, len(self.feature_id_list))
-      for iter300 in self.feature_id_list:
-        oprot.writeString(iter300)
+      for iter291 in self.feature_id_list:
+        oprot.writeString(iter291)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
@@ -4668,16 +4658,16 @@ class get_feature_publications_result:
       if fid == 0:
         if ftype == TType.MAP:
           self.success = {}
-          (_ktype302, _vtype303, _size301 ) = iprot.readMapBegin()
-          for _i305 in xrange(_size301):
-            _key306 = iprot.readString()
-            _val307 = []
-            (_etype311, _size308) = iprot.readListBegin()
-            for _i312 in xrange(_size308):
-              _elem313 = iprot.readString()
-              _val307.append(_elem313)
+          (_ktype293, _vtype294, _size292 ) = iprot.readMapBegin()
+          for _i296 in xrange(_size292):
+            _key297 = iprot.readString()
+            _val298 = []
+            (_etype302, _size299) = iprot.readListBegin()
+            for _i303 in xrange(_size299):
+              _elem304 = iprot.readString()
+              _val298.append(_elem304)
             iprot.readListEnd()
-            self.success[_key306] = _val307
+            self.success[_key297] = _val298
           iprot.readMapEnd()
         else:
           iprot.skip(ftype)
@@ -4730,11 +4720,11 @@ class get_feature_publications_result:
     if self.success is not None:
       oprot.writeFieldBegin('success', TType.MAP, 0)
       oprot.writeMapBegin(TType.STRING, TType.LIST, len(self.success))
-      for kiter314,viter315 in self.success.items():
-        oprot.writeString(kiter314)
-        oprot.writeListBegin(TType.STRING, len(viter315))
-        for iter316 in viter315:
-          oprot.writeString(iter316)
+      for kiter305,viter306 in self.success.items():
+        oprot.writeString(kiter305)
+        oprot.writeListBegin(TType.STRING, len(viter306))
+        for iter307 in viter306:
+          oprot.writeString(iter307)
         oprot.writeListEnd()
       oprot.writeMapEnd()
       oprot.writeFieldEnd()
@@ -4833,10 +4823,10 @@ class get_feature_dna_args:
       elif fid == 3:
         if ftype == TType.LIST:
           self.feature_id_list = []
-          (_etype320, _size317) = iprot.readListBegin()
-          for _i321 in xrange(_size317):
-            _elem322 = iprot.readString()
-            self.feature_id_list.append(_elem322)
+          (_etype311, _size308) = iprot.readListBegin()
+          for _i312 in xrange(_size308):
+            _elem313 = iprot.readString()
+            self.feature_id_list.append(_elem313)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
@@ -4861,8 +4851,8 @@ class get_feature_dna_args:
     if self.feature_id_list is not None:
       oprot.writeFieldBegin('feature_id_list', TType.LIST, 3)
       oprot.writeListBegin(TType.STRING, len(self.feature_id_list))
-      for iter323 in self.feature_id_list:
-        oprot.writeString(iter323)
+      for iter314 in self.feature_id_list:
+        oprot.writeString(iter314)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
@@ -4937,11 +4927,11 @@ class get_feature_dna_result:
       if fid == 0:
         if ftype == TType.MAP:
           self.success = {}
-          (_ktype325, _vtype326, _size324 ) = iprot.readMapBegin()
-          for _i328 in xrange(_size324):
-            _key329 = iprot.readString()
-            _val330 = iprot.readString()
-            self.success[_key329] = _val330
+          (_ktype316, _vtype317, _size315 ) = iprot.readMapBegin()
+          for _i319 in xrange(_size315):
+            _key320 = iprot.readString()
+            _val321 = iprot.readString()
+            self.success[_key320] = _val321
           iprot.readMapEnd()
         else:
           iprot.skip(ftype)
@@ -4994,9 +4984,9 @@ class get_feature_dna_result:
     if self.success is not None:
       oprot.writeFieldBegin('success', TType.MAP, 0)
       oprot.writeMapBegin(TType.STRING, TType.STRING, len(self.success))
-      for kiter331,viter332 in self.success.items():
-        oprot.writeString(kiter331)
-        oprot.writeString(viter332)
+      for kiter322,viter323 in self.success.items():
+        oprot.writeString(kiter322)
+        oprot.writeString(viter323)
       oprot.writeMapEnd()
       oprot.writeFieldEnd()
     if self.generic_exception is not None:
@@ -5094,10 +5084,10 @@ class get_feature_functions_args:
       elif fid == 3:
         if ftype == TType.LIST:
           self.feature_id_list = []
-          (_etype336, _size333) = iprot.readListBegin()
-          for _i337 in xrange(_size333):
-            _elem338 = iprot.readString()
-            self.feature_id_list.append(_elem338)
+          (_etype327, _size324) = iprot.readListBegin()
+          for _i328 in xrange(_size324):
+            _elem329 = iprot.readString()
+            self.feature_id_list.append(_elem329)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
@@ -5122,8 +5112,8 @@ class get_feature_functions_args:
     if self.feature_id_list is not None:
       oprot.writeFieldBegin('feature_id_list', TType.LIST, 3)
       oprot.writeListBegin(TType.STRING, len(self.feature_id_list))
-      for iter339 in self.feature_id_list:
-        oprot.writeString(iter339)
+      for iter330 in self.feature_id_list:
+        oprot.writeString(iter330)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
@@ -5198,11 +5188,11 @@ class get_feature_functions_result:
       if fid == 0:
         if ftype == TType.MAP:
           self.success = {}
-          (_ktype341, _vtype342, _size340 ) = iprot.readMapBegin()
-          for _i344 in xrange(_size340):
-            _key345 = iprot.readString()
-            _val346 = iprot.readString()
-            self.success[_key345] = _val346
+          (_ktype332, _vtype333, _size331 ) = iprot.readMapBegin()
+          for _i335 in xrange(_size331):
+            _key336 = iprot.readString()
+            _val337 = iprot.readString()
+            self.success[_key336] = _val337
           iprot.readMapEnd()
         else:
           iprot.skip(ftype)
@@ -5255,9 +5245,9 @@ class get_feature_functions_result:
     if self.success is not None:
       oprot.writeFieldBegin('success', TType.MAP, 0)
       oprot.writeMapBegin(TType.STRING, TType.STRING, len(self.success))
-      for kiter347,viter348 in self.success.items():
-        oprot.writeString(kiter347)
-        oprot.writeString(viter348)
+      for kiter338,viter339 in self.success.items():
+        oprot.writeString(kiter338)
+        oprot.writeString(viter339)
       oprot.writeMapEnd()
       oprot.writeFieldEnd()
     if self.generic_exception is not None:
@@ -5355,10 +5345,10 @@ class get_feature_aliases_args:
       elif fid == 3:
         if ftype == TType.LIST:
           self.feature_id_list = []
-          (_etype352, _size349) = iprot.readListBegin()
-          for _i353 in xrange(_size349):
-            _elem354 = iprot.readString()
-            self.feature_id_list.append(_elem354)
+          (_etype343, _size340) = iprot.readListBegin()
+          for _i344 in xrange(_size340):
+            _elem345 = iprot.readString()
+            self.feature_id_list.append(_elem345)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
@@ -5383,8 +5373,8 @@ class get_feature_aliases_args:
     if self.feature_id_list is not None:
       oprot.writeFieldBegin('feature_id_list', TType.LIST, 3)
       oprot.writeListBegin(TType.STRING, len(self.feature_id_list))
-      for iter355 in self.feature_id_list:
-        oprot.writeString(iter355)
+      for iter346 in self.feature_id_list:
+        oprot.writeString(iter346)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
@@ -5459,16 +5449,16 @@ class get_feature_aliases_result:
       if fid == 0:
         if ftype == TType.MAP:
           self.success = {}
-          (_ktype357, _vtype358, _size356 ) = iprot.readMapBegin()
-          for _i360 in xrange(_size356):
-            _key361 = iprot.readString()
-            _val362 = []
-            (_etype366, _size363) = iprot.readListBegin()
-            for _i367 in xrange(_size363):
-              _elem368 = iprot.readString()
-              _val362.append(_elem368)
+          (_ktype348, _vtype349, _size347 ) = iprot.readMapBegin()
+          for _i351 in xrange(_size347):
+            _key352 = iprot.readString()
+            _val353 = []
+            (_etype357, _size354) = iprot.readListBegin()
+            for _i358 in xrange(_size354):
+              _elem359 = iprot.readString()
+              _val353.append(_elem359)
             iprot.readListEnd()
-            self.success[_key361] = _val362
+            self.success[_key352] = _val353
           iprot.readMapEnd()
         else:
           iprot.skip(ftype)
@@ -5521,11 +5511,11 @@ class get_feature_aliases_result:
     if self.success is not None:
       oprot.writeFieldBegin('success', TType.MAP, 0)
       oprot.writeMapBegin(TType.STRING, TType.LIST, len(self.success))
-      for kiter369,viter370 in self.success.items():
-        oprot.writeString(kiter369)
-        oprot.writeListBegin(TType.STRING, len(viter370))
-        for iter371 in viter370:
-          oprot.writeString(iter371)
+      for kiter360,viter361 in self.success.items():
+        oprot.writeString(kiter360)
+        oprot.writeListBegin(TType.STRING, len(viter361))
+        for iter362 in viter361:
+          oprot.writeString(iter362)
         oprot.writeListEnd()
       oprot.writeMapEnd()
       oprot.writeFieldEnd()
@@ -5624,10 +5614,10 @@ class get_cds_by_gene_args:
       elif fid == 3:
         if ftype == TType.LIST:
           self.gene_id_list = []
-          (_etype375, _size372) = iprot.readListBegin()
-          for _i376 in xrange(_size372):
-            _elem377 = iprot.readString()
-            self.gene_id_list.append(_elem377)
+          (_etype366, _size363) = iprot.readListBegin()
+          for _i367 in xrange(_size363):
+            _elem368 = iprot.readString()
+            self.gene_id_list.append(_elem368)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
@@ -5652,8 +5642,8 @@ class get_cds_by_gene_args:
     if self.gene_id_list is not None:
       oprot.writeFieldBegin('gene_id_list', TType.LIST, 3)
       oprot.writeListBegin(TType.STRING, len(self.gene_id_list))
-      for iter378 in self.gene_id_list:
-        oprot.writeString(iter378)
+      for iter369 in self.gene_id_list:
+        oprot.writeString(iter369)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
@@ -5728,16 +5718,16 @@ class get_cds_by_gene_result:
       if fid == 0:
         if ftype == TType.MAP:
           self.success = {}
-          (_ktype380, _vtype381, _size379 ) = iprot.readMapBegin()
-          for _i383 in xrange(_size379):
-            _key384 = iprot.readString()
-            _val385 = []
-            (_etype389, _size386) = iprot.readListBegin()
-            for _i390 in xrange(_size386):
-              _elem391 = iprot.readString()
-              _val385.append(_elem391)
+          (_ktype371, _vtype372, _size370 ) = iprot.readMapBegin()
+          for _i374 in xrange(_size370):
+            _key375 = iprot.readString()
+            _val376 = []
+            (_etype380, _size377) = iprot.readListBegin()
+            for _i381 in xrange(_size377):
+              _elem382 = iprot.readString()
+              _val376.append(_elem382)
             iprot.readListEnd()
-            self.success[_key384] = _val385
+            self.success[_key375] = _val376
           iprot.readMapEnd()
         else:
           iprot.skip(ftype)
@@ -5790,11 +5780,11 @@ class get_cds_by_gene_result:
     if self.success is not None:
       oprot.writeFieldBegin('success', TType.MAP, 0)
       oprot.writeMapBegin(TType.STRING, TType.LIST, len(self.success))
-      for kiter392,viter393 in self.success.items():
-        oprot.writeString(kiter392)
-        oprot.writeListBegin(TType.STRING, len(viter393))
-        for iter394 in viter393:
-          oprot.writeString(iter394)
+      for kiter383,viter384 in self.success.items():
+        oprot.writeString(kiter383)
+        oprot.writeListBegin(TType.STRING, len(viter384))
+        for iter385 in viter384:
+          oprot.writeString(iter385)
         oprot.writeListEnd()
       oprot.writeMapEnd()
       oprot.writeFieldEnd()
@@ -5893,10 +5883,10 @@ class get_cds_by_mrna_args:
       elif fid == 3:
         if ftype == TType.LIST:
           self.mrna_id_list = []
-          (_etype398, _size395) = iprot.readListBegin()
-          for _i399 in xrange(_size395):
-            _elem400 = iprot.readString()
-            self.mrna_id_list.append(_elem400)
+          (_etype389, _size386) = iprot.readListBegin()
+          for _i390 in xrange(_size386):
+            _elem391 = iprot.readString()
+            self.mrna_id_list.append(_elem391)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
@@ -5921,8 +5911,8 @@ class get_cds_by_mrna_args:
     if self.mrna_id_list is not None:
       oprot.writeFieldBegin('mrna_id_list', TType.LIST, 3)
       oprot.writeListBegin(TType.STRING, len(self.mrna_id_list))
-      for iter401 in self.mrna_id_list:
-        oprot.writeString(iter401)
+      for iter392 in self.mrna_id_list:
+        oprot.writeString(iter392)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
@@ -5997,11 +5987,11 @@ class get_cds_by_mrna_result:
       if fid == 0:
         if ftype == TType.MAP:
           self.success = {}
-          (_ktype403, _vtype404, _size402 ) = iprot.readMapBegin()
-          for _i406 in xrange(_size402):
-            _key407 = iprot.readString()
-            _val408 = iprot.readString()
-            self.success[_key407] = _val408
+          (_ktype394, _vtype395, _size393 ) = iprot.readMapBegin()
+          for _i397 in xrange(_size393):
+            _key398 = iprot.readString()
+            _val399 = iprot.readString()
+            self.success[_key398] = _val399
           iprot.readMapEnd()
         else:
           iprot.skip(ftype)
@@ -6054,9 +6044,9 @@ class get_cds_by_mrna_result:
     if self.success is not None:
       oprot.writeFieldBegin('success', TType.MAP, 0)
       oprot.writeMapBegin(TType.STRING, TType.STRING, len(self.success))
-      for kiter409,viter410 in self.success.items():
-        oprot.writeString(kiter409)
-        oprot.writeString(viter410)
+      for kiter400,viter401 in self.success.items():
+        oprot.writeString(kiter400)
+        oprot.writeString(viter401)
       oprot.writeMapEnd()
       oprot.writeFieldEnd()
     if self.generic_exception is not None:
@@ -6154,10 +6144,10 @@ class get_gene_by_cds_args:
       elif fid == 3:
         if ftype == TType.LIST:
           self.cds_id_list = []
-          (_etype414, _size411) = iprot.readListBegin()
-          for _i415 in xrange(_size411):
-            _elem416 = iprot.readString()
-            self.cds_id_list.append(_elem416)
+          (_etype405, _size402) = iprot.readListBegin()
+          for _i406 in xrange(_size402):
+            _elem407 = iprot.readString()
+            self.cds_id_list.append(_elem407)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
@@ -6182,8 +6172,8 @@ class get_gene_by_cds_args:
     if self.cds_id_list is not None:
       oprot.writeFieldBegin('cds_id_list', TType.LIST, 3)
       oprot.writeListBegin(TType.STRING, len(self.cds_id_list))
-      for iter417 in self.cds_id_list:
-        oprot.writeString(iter417)
+      for iter408 in self.cds_id_list:
+        oprot.writeString(iter408)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
@@ -6258,11 +6248,11 @@ class get_gene_by_cds_result:
       if fid == 0:
         if ftype == TType.MAP:
           self.success = {}
-          (_ktype419, _vtype420, _size418 ) = iprot.readMapBegin()
-          for _i422 in xrange(_size418):
-            _key423 = iprot.readString()
-            _val424 = iprot.readString()
-            self.success[_key423] = _val424
+          (_ktype410, _vtype411, _size409 ) = iprot.readMapBegin()
+          for _i413 in xrange(_size409):
+            _key414 = iprot.readString()
+            _val415 = iprot.readString()
+            self.success[_key414] = _val415
           iprot.readMapEnd()
         else:
           iprot.skip(ftype)
@@ -6315,9 +6305,9 @@ class get_gene_by_cds_result:
     if self.success is not None:
       oprot.writeFieldBegin('success', TType.MAP, 0)
       oprot.writeMapBegin(TType.STRING, TType.STRING, len(self.success))
-      for kiter425,viter426 in self.success.items():
-        oprot.writeString(kiter425)
-        oprot.writeString(viter426)
+      for kiter416,viter417 in self.success.items():
+        oprot.writeString(kiter416)
+        oprot.writeString(viter417)
       oprot.writeMapEnd()
       oprot.writeFieldEnd()
     if self.generic_exception is not None:
@@ -6415,10 +6405,10 @@ class get_gene_by_mrna_args:
       elif fid == 3:
         if ftype == TType.LIST:
           self.mrna_id_list = []
-          (_etype430, _size427) = iprot.readListBegin()
-          for _i431 in xrange(_size427):
-            _elem432 = iprot.readString()
-            self.mrna_id_list.append(_elem432)
+          (_etype421, _size418) = iprot.readListBegin()
+          for _i422 in xrange(_size418):
+            _elem423 = iprot.readString()
+            self.mrna_id_list.append(_elem423)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
@@ -6443,8 +6433,8 @@ class get_gene_by_mrna_args:
     if self.mrna_id_list is not None:
       oprot.writeFieldBegin('mrna_id_list', TType.LIST, 3)
       oprot.writeListBegin(TType.STRING, len(self.mrna_id_list))
-      for iter433 in self.mrna_id_list:
-        oprot.writeString(iter433)
+      for iter424 in self.mrna_id_list:
+        oprot.writeString(iter424)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
@@ -6519,11 +6509,11 @@ class get_gene_by_mrna_result:
       if fid == 0:
         if ftype == TType.MAP:
           self.success = {}
-          (_ktype435, _vtype436, _size434 ) = iprot.readMapBegin()
-          for _i438 in xrange(_size434):
-            _key439 = iprot.readString()
-            _val440 = iprot.readString()
-            self.success[_key439] = _val440
+          (_ktype426, _vtype427, _size425 ) = iprot.readMapBegin()
+          for _i429 in xrange(_size425):
+            _key430 = iprot.readString()
+            _val431 = iprot.readString()
+            self.success[_key430] = _val431
           iprot.readMapEnd()
         else:
           iprot.skip(ftype)
@@ -6576,9 +6566,9 @@ class get_gene_by_mrna_result:
     if self.success is not None:
       oprot.writeFieldBegin('success', TType.MAP, 0)
       oprot.writeMapBegin(TType.STRING, TType.STRING, len(self.success))
-      for kiter441,viter442 in self.success.items():
-        oprot.writeString(kiter441)
-        oprot.writeString(viter442)
+      for kiter432,viter433 in self.success.items():
+        oprot.writeString(kiter432)
+        oprot.writeString(viter433)
       oprot.writeMapEnd()
       oprot.writeFieldEnd()
     if self.generic_exception is not None:
@@ -6676,10 +6666,10 @@ class get_mrna_by_cds_args:
       elif fid == 3:
         if ftype == TType.LIST:
           self.gene_id_list = []
-          (_etype446, _size443) = iprot.readListBegin()
-          for _i447 in xrange(_size443):
-            _elem448 = iprot.readString()
-            self.gene_id_list.append(_elem448)
+          (_etype437, _size434) = iprot.readListBegin()
+          for _i438 in xrange(_size434):
+            _elem439 = iprot.readString()
+            self.gene_id_list.append(_elem439)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
@@ -6704,8 +6694,8 @@ class get_mrna_by_cds_args:
     if self.gene_id_list is not None:
       oprot.writeFieldBegin('gene_id_list', TType.LIST, 3)
       oprot.writeListBegin(TType.STRING, len(self.gene_id_list))
-      for iter449 in self.gene_id_list:
-        oprot.writeString(iter449)
+      for iter440 in self.gene_id_list:
+        oprot.writeString(iter440)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
@@ -6780,11 +6770,11 @@ class get_mrna_by_cds_result:
       if fid == 0:
         if ftype == TType.MAP:
           self.success = {}
-          (_ktype451, _vtype452, _size450 ) = iprot.readMapBegin()
-          for _i454 in xrange(_size450):
-            _key455 = iprot.readString()
-            _val456 = iprot.readString()
-            self.success[_key455] = _val456
+          (_ktype442, _vtype443, _size441 ) = iprot.readMapBegin()
+          for _i445 in xrange(_size441):
+            _key446 = iprot.readString()
+            _val447 = iprot.readString()
+            self.success[_key446] = _val447
           iprot.readMapEnd()
         else:
           iprot.skip(ftype)
@@ -6837,9 +6827,9 @@ class get_mrna_by_cds_result:
     if self.success is not None:
       oprot.writeFieldBegin('success', TType.MAP, 0)
       oprot.writeMapBegin(TType.STRING, TType.STRING, len(self.success))
-      for kiter457,viter458 in self.success.items():
-        oprot.writeString(kiter457)
-        oprot.writeString(viter458)
+      for kiter448,viter449 in self.success.items():
+        oprot.writeString(kiter448)
+        oprot.writeString(viter449)
       oprot.writeMapEnd()
       oprot.writeFieldEnd()
     if self.generic_exception is not None:
@@ -6937,10 +6927,10 @@ class get_mrna_by_gene_args:
       elif fid == 3:
         if ftype == TType.LIST:
           self.gene_id_list = []
-          (_etype462, _size459) = iprot.readListBegin()
-          for _i463 in xrange(_size459):
-            _elem464 = iprot.readString()
-            self.gene_id_list.append(_elem464)
+          (_etype453, _size450) = iprot.readListBegin()
+          for _i454 in xrange(_size450):
+            _elem455 = iprot.readString()
+            self.gene_id_list.append(_elem455)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
@@ -6965,8 +6955,8 @@ class get_mrna_by_gene_args:
     if self.gene_id_list is not None:
       oprot.writeFieldBegin('gene_id_list', TType.LIST, 3)
       oprot.writeListBegin(TType.STRING, len(self.gene_id_list))
-      for iter465 in self.gene_id_list:
-        oprot.writeString(iter465)
+      for iter456 in self.gene_id_list:
+        oprot.writeString(iter456)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
@@ -7041,16 +7031,16 @@ class get_mrna_by_gene_result:
       if fid == 0:
         if ftype == TType.MAP:
           self.success = {}
-          (_ktype467, _vtype468, _size466 ) = iprot.readMapBegin()
-          for _i470 in xrange(_size466):
-            _key471 = iprot.readString()
-            _val472 = []
-            (_etype476, _size473) = iprot.readListBegin()
-            for _i477 in xrange(_size473):
-              _elem478 = iprot.readString()
-              _val472.append(_elem478)
+          (_ktype458, _vtype459, _size457 ) = iprot.readMapBegin()
+          for _i461 in xrange(_size457):
+            _key462 = iprot.readString()
+            _val463 = []
+            (_etype467, _size464) = iprot.readListBegin()
+            for _i468 in xrange(_size464):
+              _elem469 = iprot.readString()
+              _val463.append(_elem469)
             iprot.readListEnd()
-            self.success[_key471] = _val472
+            self.success[_key462] = _val463
           iprot.readMapEnd()
         else:
           iprot.skip(ftype)
@@ -7103,11 +7093,11 @@ class get_mrna_by_gene_result:
     if self.success is not None:
       oprot.writeFieldBegin('success', TType.MAP, 0)
       oprot.writeMapBegin(TType.STRING, TType.LIST, len(self.success))
-      for kiter479,viter480 in self.success.items():
-        oprot.writeString(kiter479)
-        oprot.writeListBegin(TType.STRING, len(viter480))
-        for iter481 in viter480:
-          oprot.writeString(iter481)
+      for kiter470,viter471 in self.success.items():
+        oprot.writeString(kiter470)
+        oprot.writeListBegin(TType.STRING, len(viter471))
+        for iter472 in viter471:
+          oprot.writeString(iter472)
         oprot.writeListEnd()
       oprot.writeMapEnd()
       oprot.writeFieldEnd()

@@ -180,7 +180,7 @@ service thrift_service {
      * Retrieve Feature data available in this GenomeAnnotation.
      *
      */
-    map<string, map<string, list<Feature_data>>> get_features(1:required string token,
+    map<string, list<Feature_data>> get_features(1:required string token,
                                            2:required ObjectReference ref,
                                            3:list<Feature_tuple> feature_tuple_list) throws (
         1:ServiceException generic_exception,

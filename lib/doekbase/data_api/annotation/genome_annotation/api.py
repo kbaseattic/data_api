@@ -146,10 +146,10 @@ class GenomeAnnotationInterface(object):
                     Defaults to "type".
 
         Returns:
-          {"by_type": dict<str feature_type, list<str feature_id>>,
-           "by_region": dict<str contig_id, dict<str strand, dict<string range, list<string feature_id>>>>,
-           "by_function": dict<str function, list<str feature_id>>,
-           "by_alias": dict<str alias, list<str feature_id>>}"""
+          {"by_type": dict<str feature_type, list<tuple<feature_type, feature_id>>>,
+           "by_region": dict<str contig_id, dict<str strand, dict<string range, list<tuple<feature_type, feature_id>>>>>,
+           "by_function": dict<str function, list<tuple<feature_type, feature_id>>>,
+           "by_alias": dict<str alias, list<tuple<feature_type, feature_id>>>}"""
 
         pass  # TODO: add examples in docs for function_list and alias_list
 
@@ -158,7 +158,7 @@ class GenomeAnnotationInterface(object):
         """Retrieves all the available data for Genome Features.
 
         Args:
-          feature_id_list (list<str>): List of features to retrieve.
+          feature_id_list (list<tuple<feature_type, feature_id>>): List of features to retrieve.
             If None, returns all feature functions.
 
         Returns:
