@@ -27,7 +27,7 @@ TYPES = _GENOME_TYPES + _GENOME_ANNOTATION_TYPES
 FEATURE_DESCRIPTIONS = {
     "CDS": "Coding Sequence",
     "PEG": "Protein Encoding Genes",
-    "rna": "Ribonucliec Acid (RNA)",
+    "rna": "Ribonucleic Acid (RNA)",
     "crispr": "Clustered Regularly Interspaced Short Palindromic Repeats",
     "crs": "Clustered Regularly Interspaced Short Palindromic Repeats",
     "mRNA": "Messenger RNA",
@@ -1100,7 +1100,7 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
                 if features[x]["type"] not in results["by_type"]:
                     results["by_type"][features[x]["type"]] = list()
 
-                results["by_type"][features[x]["type"]].append(features[x]["feature_id"])
+                results["by_type"][features[x]["type"]].append( ttypes.Feature_tuple( feature_type=features[x]["type"], feature_id=features[x]["feature_id"] )  )
         elif group_by == "region":
             results["by_region"] = dict()
             for x in features:
@@ -1120,14 +1120,16 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
                     if range not in results["by_region"][contig_id][strand]:
                         results["by_region"][contig_id][strand][range] = list()
 
-                    results["by_region"][contig_id][strand][range].append(features[x]["feature_id"])
+#                    results["by_region"][contig_id][strand][range].append( { 'feature_type': features[x]["type"], 'feature_id': features[x]["feature_id"] }  )
+                    results["by_region"][contig_id][strand][range].append( ttypes.Feature_tuple( feature_type=features[x]["type"], feature_id=features[x]["feature_id"] )  )
         elif group_by == "function":
             results["by_function"] = dict()
             for x in features:
                 if features[x]["function"] not in results["by_function"]:
                     results["by_function"][features[x]["function"]] = list()
 
-                results["by_function"][features[x]["function"]].append(features[x]["feature_id"])
+#                results["by_function"][features[x]["function"]].append( { 'feature_type': features[x]["type"], 'feature_id': features[x]["feature_id"] }  )
+                results["by_function"][features[x]["function"]].append( ttypes.Feature_tuple( feature_type=features[x]["type"], feature_id=features[x]["feature_id"] )  )
         elif group_by == "alias":
             results["by_alias"] = dict()
             for x in features:
@@ -1136,7 +1138,8 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
                         if alias not in results["by_alias"]:
                             results["by_alias"][alias] = list()
 
-                        results["by_alias"][alias].append(features[x]["feature_id"])
+#                        results["by_alias"][alias].append( { 'feature_type': features[x]["type"], 'feature_id': features[x]["feature_id"] }  )
+                        results["by_alias"][alias].append( ttypes.Feature_tuple( feature_type=features[x]["type"], feature_id=features[x]["feature_id"] )  )
 
         return results
 
@@ -1525,9 +1528,36 @@ class GenomeAnnotationClientAPI(GenomeAnnotationInterface):
 
         result = self.client.get_feature_ids(self._token, self.ref, converted_filters, group_by)
 
+        output = dict()
+        for group_by_option in ['by_type','by_function','by_alias','by_region']:
+            output[group_by_option] = dict()
+
+        for type in result.by_type.keys():
+            output['by_type'][type] = list()
+            for featuretuple in result.by_type[type]:
+                output['by_type'][type].append( (featuretuple.feature_type,featuretuple.feature_id) )
+        for function in result.by_function.keys():
+            output['by_function'][function] = list()
+            for featuretuple in result.by_function[function]:
+                output['by_function'][function].append( (featuretuple.feature_type,featuretuple.feature_id) )
+        for alias in result.by_alias.keys():
+            output['by_alias'][alias] = list()
+            for featuretuple in result.by_alias[alias]:
+                output['by_alias'][alias].append( (featuretuple.feature_type,featuretuple.feature_id) )
+# by_region won't work yet, its structure is different from the others
+# there must be a nicer way to do this
+        for contig in result.by_region.keys():
+            output['by_region'][contig] = dict()
+            for strand in result.by_region[contig]:
+                output['by_region'][contig][strand] = dict()
+                for region in result.by_region[contig][strand]:
+                    output['by_region'][contig][strand][region] = list()
+                    for featuretuple in result.by_region[contig][strand][region]:
+                        output['by_region'][contig][strand][region].append( (featuretuple.feature_type,featuretuple.feature_id) )
+
         group_key = "by_{}".format(group_by)
 
-        return {group_key: result.__dict__[group_key]}
+        return {group_key: output[group_key]}
 
     @logged(_ga_log)
     @client_method
