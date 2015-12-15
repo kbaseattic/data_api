@@ -15,9 +15,9 @@ import os.path
 import simplejson
 
 # KBase imports
-import biokbase.Transform.script_utils as script_utils
+import doekbase.Transform.script_utils as script_utils
 import TextFileDecoder
-import biokbase.workspace.client 
+import doekbase.workspace.client
 
 # transformation method that can be called if this module is imported
 # Note the logger has different levels it could be run.  
@@ -53,11 +53,11 @@ def transform(shock_service_url=None,
         logger = script_utils.stderrlogger(__file__)
 
 
-    assembly_ws_client = biokbase.workspace.client.Workspace(wsurl)
+    assembly_ws_client = doekbase.workspace.client.Workspace(wsurl)
  
     assembly_workspace_object = assembly_ws_client.get_workspace_info({'workspace':wsname}) 
  
-#    taxon_ws_client = biokbase.workspace.client.Workspace(wsurl)
+#    taxon_ws_client = doekbase.workspace.client.Workspace(wsurl)
  
 #    taxon_workspace_object = ws_client.get_workspace_info({'workspace':taxon_wsname}) 
  
@@ -291,7 +291,7 @@ def transform(shock_service_url=None,
                              "name": "%s_assembly" % (genome_id), 
                              "provenance":assembly_provenance}]}) 
                 assembly_not_saved = False 
-            except biokbase.workspace.client.ServerError as err: 
+            except doekbase.workspace.client.ServerError as err:
                 print "SAVE FAILED ON genome " + str(genome_id) + " ERROR: " + err 
                 raise 
             except: 

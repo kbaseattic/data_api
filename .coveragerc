@@ -1,0 +1,9 @@
+[report]
+exclude_lines = 
+    pragma: no cover
+    pass
+
+[run]
+source = 
+    doekbase.data_api
+    doekbase.data_api.tests

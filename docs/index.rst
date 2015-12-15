@@ -3,76 +3,76 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
+.. toctree::
+    :maxdepth: 4
+
+    annotation_api
+    assembly_api
+    taxon_api
+    developer
+    API Reference <_source/modules>
+
 KBase Data API documentation
 ============================
 The Data API provides a unified entry point to retrieve and, eventually,
-store KBase data objects.
+store KBase data objects. This page covers concepts and installation instructions.
+For usage see the individual API pages for the :ref:`annotation_api`, :ref:`assembly_api` , and :ref:`taxon_api`.
+
+Developers should read the :ref:`developer_notes`.
+
+.. Skip this for now: contents:: Contents
 
 
-On this page
+Concepts
+--------
+
+The Data API is multi-language, with the primary language implementation being Python. We are using Thrift to generate consistent language APIs in other languages. In all languages except Python, the implementation is a client/server, with a Python-based server and the other language as the client. The diagram below summarizes this design.
+
+.. _overview_diagram:
+
+.. figure:: _static/img/api_overview.*
+    :height: 400px
+    
+    Overview of the Data API modules
+    
+Install
+-------
+
+You can download the latest release of the Data API from the `release page on github https://github.com/kbase/data_api/releases`_. It is generally recommended that you install packages in a virtual environment.
+
+1. Install virtualenv using your local installer e.g., apt-get install virtualenv
+
+2. Create a virtualenv environment to install the source to e.g.::
+
+    virtualenv venv
+
+3. Activate the virtualenv::
+
+    source venv/bin/activate
+
+You can get out of the virtualenv environment with "deactivate".
+    
+4. Set your ``KB_AUTH_TOKEN`` to your token string.
+
+.. include:: kbauth.txt
+
+Unpackage the download file, change into the top-level directory, then run the standard Python setup command::
+
+    python setup.py install
+
+5. Run the tests, which are designed to use ``nosetests``::
+
+    nosetests
+
+.. note:: You can re-run ``python setup.py install`` if you have edited files locally and want to test them out without having to reset the virtualenv.
+
+
+Hello, World
 ------------
 
-.. contents::
+A simple hello, world example will be here "real soon now".
 
-    :depth: 1
-
-API Reference
--------------
-.. toctree::
-    :maxdepth: 2
-
-    biokbase.data_api
-
-Using the Data API
-==================
-
-There are two primary modes of using the Data API: interactively and programmatically.
-Interactively, the API can be imported into in the IPython/Jupyter notebook or
-Narrative and used to explore and examine data objects.
-Results will be automatically displayed as HTML and inline plots. Programmatically,
-the same API can be imported into any Python code and used like a standard
-library.
-
-.. note::
-
-    The integration of the Data API into the KBase Narrative is not quite
-    done yet. For now, you need to try it out in a recent (August 2015+)
-    version of the Jupyter notebook.
-
-In both cases, the :ref:`core-api` functions are used to access the objects.
-For interactive use, and some programmatic use-cases, the :ref:`highlevel-api`
-will be more convenient.
-
-.. _highlevel-api:
-
-High-level API
---------------
-This section covers how to :ref:`initialize the high-level API <highlevel-api-conf>`
-to access the KBase data as an authenticated user,
-then how to :ref:`use the provided functions <highlevel-api-func>`.
-
-.. _highlevel-api-conf:
-
-Configuration and Authorization
-+++++++++++++++++++++++++++++++
-
-.. _highlevel-api-func:
-
-Functions
-+++++++++
-
-.. _core-api:
-
-Core API
---------
-This section covers how to initialize the high-level API to access the KBase
-data as an authenticated user, then how to use the provided functions.
-
-Configuration and Authorization
-+++++++++++++++++++++++++++++++
-
-Functions
-+++++++++
+For more examples, see the object API pages for the :ref:`annotation_api`, :ref:`genome_api` , and :ref:`taxon_api`.
 
 Indices and tables
 ==================

@@ -1,7 +1,7 @@
 import simplejson
 import time
 import sys
-import biokbase.workspace.client
+import doekbase.workspace.client
 import re
 import hashlib
 import traceback
@@ -11,8 +11,8 @@ import os.path
 def convert_original_genome_object_to_prototype(source_wsname=None,destination_wsname=None,taxon_wsname=None,source_wsurl=None, 
                                                 destination_wsurl = None, lineage_files_dir = None, taxon_names_file=None, genomes = []): 
 
-    source_ws_client = biokbase.workspace.client.Workspace(source_wsurl)
-    destination_ws_client = biokbase.workspace.client.Workspace(destination_wsurl)
+    source_ws_client = doekbase.workspace.client.Workspace(source_wsurl)
+    destination_ws_client = doekbase.workspace.client.Workspace(destination_wsurl)
 
     source_workspace_object = source_ws_client.get_workspace_info({'workspace':source_wsname})
     source_workspace_id = source_workspace_object[0]
@@ -397,7 +397,7 @@ def convert_original_genome_object_to_prototype(source_wsname=None,destination_w
                         try:
                             protein_container_info =  destination_ws_client.save_objects({"workspace": destination_workspace_name,"objects":[ { "type":"KBaseGenomeAnnotations.ProteinContainer","data":protein_container,"name": protein_container_object_name,"provenance":protein_container_provenance}]})
                             protein_container_not_saved = False
-                        except biokbase.workspace.client.ServerError as err:
+                        except doekbase.workspace.client.ServerError as err:
                             raise
 
                 #def save_feature_container()
@@ -425,7 +425,7 @@ def convert_original_genome_object_to_prototype(source_wsname=None,destination_w
                             feature_container_info =  destination_ws_client.save_objects({"workspace":destination_workspace_name,"objects":[ { "type":"KBaseGenomeAnnotations.FeatureContainer","data":feature_container,"name": feature_container_object_name,"provenance":feature_container_provenance}]}) 
                             feature_container_not_saved = False 
                             print "Feature Container saved for %s" % (feature_container_object_name)
-                        except biokbase.workspace.client.ServerError as err: 
+                        except doekbase.workspace.client.ServerError as err:
                             raise
 
                 #print "Feature lookup %s" % (feature_lookup)
@@ -450,7 +450,7 @@ def convert_original_genome_object_to_prototype(source_wsname=None,destination_w
                         genome_annotation_info =  destination_ws_client.save_objects({"workspace":destination_workspace_name,"objects":[ { "type":"KBaseGenomeAnnotations.GenomeAnnotation","data":genome_annotation,"name": genome_annotation_object_name,"provenance":genome_annotation_provenance}]}) 
                         genome_annotation_not_saved = False
                         print "Genome Annotation saved for %s" % (core_object_name) 
-                    except biokbase.workspace.client.ServerError as err: 
+                    except doekbase.workspace.client.ServerError as err:
                         raise
                 object_counter = object_counter + 1
 

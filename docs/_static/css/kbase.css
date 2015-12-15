@@ -1,0 +1,267 @@
+/* KBase documentation CSS */
+a {
+    text-decoration: none;
+}
+/* make text a little less humongous */
+div.body h1  {
+    font-size: 180%;
+}
+
+div.body h2 {
+    font-size: 160%;
+}
+
+div.body h3 {
+    font-size: 140%;
+}
+
+div.body h4 {
+    font-size: 120%;
+}
+/* Headings should be green */
+h1,h2,h3,h4,h5 {
+    color: #6B844B;
+}
+/* sidebar heading color */
+div.sphinxsidebar h3, div.sphinxsidebar h4 {
+    color: #6B844B;
+}
+/* Heading color, even if they're links, should also be green */
+div.section h1 a, div.section h2 a, div.section h3 a {
+    color: #6B844B;
+}
+
+/*----------------------
+ * Sidebar
+ *----------------------
+ */
+div.sphinxsidebar {
+    margin: 0;
+    position: fixed;
+    top: 0;
+    left: 0;
+    padding: 10px;
+    height: 100%;
+    background-color: #EEEEEE;
+    width: 240px;
+}
+
+div.sphinxsidebar ul, div.sphinxsidebar li, div.sphinxsidebar ul>ul {
+    width: auto;
+    font-size: 90%;
+}
+
+div.sphinxsidebar #searchbox input[type="text"] {
+    width: 150px;
+}
+
+/*----------------------
+ * Body content
+ *----------------------
+ */
+
+/* this avoids the footer coming up and overlapping the
+   'fixed' position sidebar in weird ways. */
+div.document {
+    min-height: 550px;
+    width: auto;
+}
+
+/* hide the toctree right after a body */
+div.body > div.toctree-wrapper {
+    display: none;
+}
+
+div.bodywrapper {
+    margin-left: 230px;
+}
+
+/* emphasize top-level headings */
+div.section h1 {
+    /*border-bottom: 2px solid;*/
+    font-weight: 800;
+}
+
+/*----------------------
+ * Code documentation
+ *----------------------
+ */
+
+dl.method, dl.class, dl.function {
+    color: #256B12; /* muted green */
+}
+/* Class and method declarations */
+/* add a border for classes */
+dl.class dt {
+    border-top: 2px solid #4BB856;
+}
+tt.descclassname {
+}
+/* don't have a border for each method */
+dl.method dt {
+    border: none;
+}
+/* methods declarations */
+dl.method dt tt {
+    padding-left: 5px;
+    /*border-left: 2px solid #4BB856;*/
+}
+
+/* fine-tune colors in parameter list */
+tt.descname + big, tt.descname + big + em + big, tt.descname + big + big {
+    color: grey;
+    font-weight: 400;
+}
+tt.descname + big + em {
+    color: black;
+    font-weight: 500;
+}
+
+/* Class and method names */
+dl.class tt {
+    color: #0066B9;
+}
+dl.method tt {
+    /*color: #43877C;*/
+    color: #0066B9;
+}
+/*
+ * We use definition lists to spell out the contents of returned
+ *  dicts from API methods, so it is helpful to make them clean and compact.
+ */
+dl.docutils {
+    padding: 0.5em;
+}
+dl.docutils dt {
+    float: left;
+    clear: left;
+    width: 120px;
+    text-align: left;
+    font-weight: 500;
+    line-height: 1;
+}
+dl.docutils dd {
+   margin: 0 0 0 130px;
+   padding: 0 0 0.5em 0;
+   line-height: 1;
+}
+/* replace 'a : b' with 'a (b)', where '(b)' is smaller */
+dl.docutils span.classifier-delimiter {
+    display: none;
+}
+dl.docutils span.classifier {
+    font-size: 90%;
+    color: grey;
+}
+dl.docutils span.classifier::before {
+  content: "(";
+}
+dl.docutils span.classifier::after {
+  content: ")";
+}
+
+/*----------------------
+ * Note blocks
+ *----------------------
+ */
+div.note {
+    background-color: #F5F5F5;
+    border: none;
+    padding: 10px;
+    margin: 5px 10px;
+}
+div.note:before {
+    font-size: 120%;
+    content: "\261e";
+    color: #6B844B; /* like the text */
+}
+div.note p.first {
+    font-size: 120%;
+    color: #6B844B; /* like a heading */
+}
+div.note p.first + p {
+    display: inline;
+}
+
+/*----------------------
+ * Footer
+ * Copied from kbase.us
+ * ---------------------
+ */
+.sticky-footer, .sticky-push {
+    height: 80px;
+}
+
+.sticky-push {
+    margin-top: 1em;
+}
+
+.sticky-footer {
+    /*    position: relative; */
+}
+
+.kbase-footer {
+    background-color: #e6e6e6;
+    border-top: 2px #999 solid;
+    background-color: #e6e6e6;
+    border-top: 2px solid #999;
+    padding: 20px 0;
+    width: 100%;
+    position: relative;
+    bottom: 0;
+}
+
+.kbase-footer-menu .menu-item {
+    vertical-align: middle;
+    line-height: 42px;
+    margin: 0;
+}
+
+.footer-bar {
+    text-align: center;
+    vertical-align: middle;
+    line-height: 42px;
+}
+
+.footer-sep {
+    position: relative;
+    top: -2px;
+
+}
+
+.footer-sep::before {
+    content: "▰";
+    color: silver;
+
+    font-size: 80%;
+}
+
+.kbase-footer > .row {
+    margin-top: 12px;
+}
+
+.kbase-footer ul {
+    line-height: 1.3em;
+    padding-left: 1.3em;
+    margin: 0 0 0.5em 0;
+}
+
+.kbase-footer ul li {
+    margin-bottom: 0.4em;
+    list-style-type: none;
+}
+
+.kbase-footer-menu {
+    display: inline-block;
+}
+
+.kbase-footer-menu ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: inline-block;
+}
+
+.kbase-footer-menu ul li {
+    display: inline-block;
+}

@@ -1,7 +1,7 @@
 import simplejson
 import time
 import sys
-import biokbase.workspace.client
+import doekbase.workspace.client
 import re
 import hashlib
 import traceback
@@ -47,7 +47,7 @@ def make_taxons(wsname=None,wsurl=None, taxon_files_dir = None):
     start  = time.time()
     print "Start time " + str(start)
 
-    ws_client = biokbase.workspace.client.Workspace(wsurl)
+    ws_client = doekbase.workspace.client.Workspace(wsurl)
 
     workspace_object = ws_client.get_workspace_info({'workspace':wsname})
     
@@ -347,7 +347,7 @@ def make_taxons(wsname=None,wsurl=None, taxon_files_dir = None):
                                                                                                    "name": taxon_object_name, 
                                                                                                    "provenance":taxon_provenance}] }) 
                     taxons_not_saved = False 
-                except biokbase.workspace.client.ServerError as err:
+                except doekbase.workspace.client.ServerError as err:
                     print "SAVE FAILED ON SAVE COUNTER " + str(save_counter) + " Taxon ID: " + str(taxon_id) + " ERROR: " + str(err)
                     #                        raise
                 except KeyboardInterrupt:

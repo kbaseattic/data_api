@@ -14,12 +14,12 @@
 
 import sys
 import os
-import shlex
+#import shlex
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-#sys.path.insert(0, os.path.abspath('.'))
+sys.path.insert(0, os.path.abspath('../lib'))
 
 # -- General configuration ------------------------------------------------
 
@@ -37,6 +37,7 @@ extensions = [
     'sphinx.ext.coverage',
     'sphinx.ext.mathjax',
     'sphinx.ext.viewcode',
+    'alabaster'
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -55,7 +56,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'KBase Data API'
-copyright = u'2015, Dan Gunter, Matt Henderson'
+copyright = u'2015 The KBase Project'
 author = u'Dan Gunter, Matt Henderson'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -121,10 +122,10 @@ html_theme = 'alabaster'
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
-#html_theme_options = {}
+html_theme_options = { }
 
 # Add any paths that contain custom themes here, relative to this directory.
-#html_theme_path = []
+#html_theme_path = ['.']
 
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".
@@ -140,7 +141,7 @@ html_theme = 'alabaster'
 # The name of an image file (within the static path) to use as favicon of the
 # docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
 # pixels large.
-#html_favicon = None
+html_favicon = 'kbase-logo.ico'
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
@@ -154,7 +155,7 @@ html_static_path = ['_static']
 
 # If not '', a 'Last updated on:' timestamp is inserted at every page bottom,
 # using the given strftime format.
-#html_last_updated_fmt = '%b %d, %Y'
+html_last_updated_fmt = '%b %d, %Y'
 
 # If true, SmartyPants will be used to convert quotes and dashes to
 # typographically correct entities.
@@ -208,7 +209,7 @@ html_static_path = ['_static']
 #html_search_scorer = 'scorer.js'
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'KBaseDataAPIdoc'
+htmlhelp_basename = 'KBaseDataAPI'
 
 # -- Options for LaTeX output ---------------------------------------------
 
@@ -361,24 +362,65 @@ epub_exclude_files = ['search.html']
 # If false, no index is generated.
 #epub_use_index = True
 
-# =================================
-# Guzzle
-# =================================
+# ====================
+# Alabaster
+# ====================
+import alabaster
 
-guzzle = True
-if guzzle:
-    import guzzle_sphinx_theme
-
-    # Adds an HTML table visitor to apply Bootstrap table classes
-    html_translator_class = 'guzzle_sphinx_theme.HTMLTranslator'
-    html_theme_path = guzzle_sphinx_theme.html_theme_path()
-    html_theme = 'guzzle_sphinx_theme'
-
-    # Register the theme as an extension to generate a sitemap.xml
-    extensions.append("guzzle_sphinx_theme")
-
-    # Guzzle theme options (see theme.conf for more information)
-    html_theme_options = {
-        # Set the name of the project to appear in the sidebar
-        "project_nav_name": "KBase Data API",
-    }
+html_theme_path = [alabaster.get_path()]
+html_theme = 'alabaster'
+html_sidebars = {
+    '**': [
+        'about.html',
+        'navigation.html',
+        'relations.html',
+        'searchbox.html',
+        'donate.html',
+    ]
+}
+html_theme_options.update({
+    'logo': 'img/kbase-logo.png',
+    'github_banner': True,
+    'github_user': 'kbase',
+    'github_repo': 'data_api',
+    'font_family': 'Helvetica Neue, Helvetica, Arial, sans-serif',
+    'head_font_family': 'Helvetica Neue, Helvetica, Arial, sans-serif',
+    'body_text': '#000',
+    'link': '#337AB7'
+# 'gray_1': '#f33',
+# gray_2: Light gray.
+# gray_3: Medium gray.
+# pink_1: Light pink.
+# pink_2: Medium pink.
+# body_text: Main content text.
+# footer_text: Footer text (includes links.)
+# link: Non-hovered body links.
+# link_hover: Body links, hovered.
+# sidebar_header: Sidebar headers. Defaults to gray_1.
+# sidebar_text: Sidebar paragraph text.
+# sidebar_link: Sidebar links (there is no hover variant.) Applies to both header & text links. Defaults to gray_1.
+# sidebar_link_underscore: Sidebar links’ underline (technically a bottom-border).
+# sidebar_search_button: Background color of the search field’s ‘Go’ button.
+# sidebar_list: Foreground color of sidebar list bullets & unlinked text.
+# sidebar_hr: Color of sidebar horizontal rule dividers. Defaults to gray_3.
+# anchor: Foreground color of section anchor links (the ‘paragraph’ symbol that shows up when you mouseover page section headers.)
+# anchor_hover_fg: Foreground color of section anchor links (as above) when moused over. Defaults to gray_1.
+# anchor_hover_bg: Background color of above.
+# note_bg: Background of .. note:: blocks. Defaults to gray_2.
+# note_border: Border of same.
+# seealso_bg: Background of .. seealso:: blocks. Defaults to gray_2.
+# seealso_border: Border of same.
+# warn_bg: Background of .. warn:: blocks. Defaults to pink_1.
+# warn_border: Border of same. Defaults to pink_2.
+# footnote_bg: Background of footnote blocks.
+# footnote_border: Border of same. Defaults to gray_2.
+# pre_bg: Background of preformatted text blocks (including code snippets.) Defaults to gray_2.
+# narrow_sidebar_bg: Background of ‘sidebar’ when narrow window forces it to the bottom of the page.
+# narrow_sidebar_fg: Text color of same.
+# narrow_sidebar_link: Link color of same. Defaults to gray_3.
+# code_highlight: Color of highlight when using :emphasize-lines: in a code block.
+#     font_family: Font family of body text. Defaults to 'goudy old style', 'minion pro', 'bell mt', Georgia, 'Hiragino Mincho Pro', serif.
+# head_font_family: Font family of headings. Defaults to 'Garamond', 'Georgia', serif.
+# code_font_size: Font size of code block text. Defaults to 0.9em.
+# code_font_family: Font family of code block text. Defaults to 'Consolas', 'Menlo', 'Deja Vu Sans Mono', 'Bitstream Vera Sans Mono', monospace.
+})

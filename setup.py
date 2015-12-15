@@ -1,4 +1,5 @@
 import setuptools
+import os
 
 def parse_requirements():
     packages = list()
@@ -13,33 +14,41 @@ def parse_requirements():
                 packages.append(line)
     return packages
 
+version = open('VERSION').read().strip()
+
 config = {
     "description": "KBase Data API",
     "author": "Matt Henderson",
     "url": "https://github.com/kbase/data_api/",
     "download_url": "https://github.com/kbase/data_api/stuff?download",
     "author_email": "mhenderson@lbl.gov",
-    "version": "0.1",
+    "version": version,
     "setup_requires": ["six"],
-    "tests_require": ["nose"],
+    "tests_require": ["nose", "nose-timer", "codecov"],
     "install_requires": parse_requirements(),
-    "packages": ["biokbase",
-                 "biokbase.data_api",
-                 "biokbase.data_api.annotation",
-                 "biokbase.data_api.sequence",
-                 "biokbase.data_api.taxonomy",
-                 "biokbase.data_api.genome",
-                 "biokbase.data_api.baseobj",
-                 "biokbase.data_api.tests",
-                 "biokbase.data_api.tests.performance",
-                 "biokbase.workspace"],
-    "scripts": ["bin/data_api_test_basic.py", 
-                "bin/data_api_demo.py", 
-                "bin/data_api_benchmark.py" , 
-                "bin/data_api_test_genome_annotation_api.py"],
-    "name": "genome_api"
+    "packages": ["doekbase",
+                 "doekbase.data_api",
+                 "doekbase.data_api.annotation",
+                 "doekbase.data_api.sequence",
+                 "doekbase.data_api.taxonomy",
+                 "doekbase.data_api.taxonomy.taxon",
+                 "doekbase.data_api.taxonomy.taxon.service",
+                 "doekbase.data_api.baseobj",
+                 "doekbase.data_api.tests",
+                 "doekbase.data_api.tests.performance",
+                 "doekbase.data_api.tests.examples",
+                 "doekbase.workspace"],
+    "scripts": ["bin/data_api_demo.py",
+                "bin/data_api_benchmark.py",
+                "bin/dump_wsfile"],
+    "name": "doekbase_data_api",
+    "entry_points": {
+        'nose.plugins.0.10': [
+            'wsurl = doekbase.data_api.tests.nose_plugin_wsurl:WorkspaceURL'
+        ]
+    },
+    "zip_safe": True
 }
 
 setuptools.setup(package_dir = {'': 'lib'},
-                 test_suite = "biokbase.data_api.tests.basic_suite",
                  **config)

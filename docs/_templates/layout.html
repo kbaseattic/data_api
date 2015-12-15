@@ -1,0 +1,53 @@
+{% extends "!layout.html" %}
+{% block linktags %}
+<link rel="stylesheet" href="_static/css/bootstrap.min.css" type="text/css">
+<link rel="stylesheet" href="_static/css/kbase.css" type="text/css">
+{{ super }}
+{% endblock %}
+{% block footer %}
+<div class="container-fluid kbase-footer">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="footer-bar">
+                <div class="kbase-footer-menu">
+                    <ul id="menu-footer-menu" class="menu">
+                        <li id="menu-item-664"
+                            class="menu-item menu-item-type-post_type menu-item-object-page menu-item-664">
+                            <a href="http://kbase.us/what-is-kbase/">About
+                                KBase</a> <span class="footer-sep"></span></li>
+                        <li id="menu-item-666"
+                            class="menu-item menu-item-type-post_type menu-item-object-page menu-item-666">
+                            <a href="http://kbase.us/terms-and-conditions/">Terms
+                                and Conditions</a> <span
+                                class="footer-sep"></span></li>
+                        <li id="menu-item-667"
+                            class="menu-item menu-item-type-post_type menu-item-object-page menu-item-667">
+                            <a href="http://kbase.us/contact-us/">Contact Us</a>
+                            <span class="footer-sep"></span></li>
+                    </ul>
+                </div>
+                <!-- hard code the social icons for now -->
+                <a href="https://www.facebook.com/pages/DOE-Systems-Biology-Knowledgebase/148332628600806"
+                   target="_blank" style="height: 24px; display: inline-block;"
+                   class="menu-item"><img
+                        src="http://kbase.us/wp-content/themes/kbase-wordpress-theme/images/facebook-icon.png"></a>
+
+                <span class="footer-sep"></span>
+
+                <a href="https://twitter.com/DOEKbase" target="_blank"><img
+                        src="http://kbase.us/wp-content/themes/kbase-wordpress-theme/images/twitter-icon.png"></a>
+
+                <span class="footer-sep"></span>
+
+                <a href="http://science.energy.gov/ber/">
+                    <img src="_static/img/doe_office_of_science_250.png"
+                         alt="doe_office_of_science_250.png" width="250"
+                         height="42" target="_blank">
+                </a>
+
+            </div>
+        </div>
+    </div>
+</div>
+{{ super }}
+{% endblock %}

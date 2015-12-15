@@ -1,0 +1,16 @@
+# Change Log
+All notable changes to this project will be documented in this file.
+This project adheres to [Semantic Versioning](http://semver.org/).
+
+## [Unreleased][unreleased]
+### Changed
+- version.py added for version manipulation
+- renamed parent package to doekbase (from biokbase) to make installation in Narrative easier
+- used Thrift for client/server interface
+- many tests, much documentation
+- complete re-org of directory structure for
+
+## [0.1.0] - 2015-08-01
+### First version of the API
+- It sort of works
+
