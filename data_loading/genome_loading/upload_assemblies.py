@@ -25,7 +25,7 @@ import doekbase.workspace.client
 #
 # The default level is set to INFO which includes everything except DEBUG
 def transform(shock_service_url=None, 
-              #handle_service_url=None, 
+              handle_service_url=None, 
               #output_file_name=None, 
               input_fasta_directory=None, 
               #working_directory=None, shock_id=None, handle_id=None, 
@@ -272,11 +272,14 @@ def transform(shock_service_url=None,
         contig_set_dict["notes"] = "Unknown"
 
         shock_id = None
+        handle_id = None 
         if shock_id is None:
             shock_info = script_utils.upload_file_to_shock(logger, shock_service_url, input_file_name, token=token)
             shock_id = shock_info["id"]
-    
-        contig_set_dict["fasta_handle_ref"] = shock_id
+            handles = script_utils.getHandles(logger, shock_service_url, handle_service_url, [shock_id], [handle_id], token)
+            handle_id = handles[0]     
+
+        contig_set_dict["fasta_handle_ref"] = handle_id
 
         # For future development if the type is updated to the handle_reference instead of a shock_reference
 
@@ -314,9 +317,9 @@ if __name__ == "__main__":
     parser.add_argument('--shock_service_url', 
                         help=script_details["Args"]["shock_service_url"],
                         action='store', type=str, nargs='?', required=True)
-#    parser.add_argument('--handle_service_url', 
-#                        help=script_details["Args"]["handle_service_url"], 
-#                        action='store', type=str, nargs='?', default=None, required=False)
+    parser.add_argument('--handle_service_url', 
+                        help=script_details["Args"]["handle_service_url"], 
+                        action='store', type=str, nargs='?', default=None, required=True)
     parser.add_argument('--input_fasta_directory', 
                         help=script_details["Args"]["input_fasta_directory"], 
                         action='store', type=str, nargs='?', required=True)
@@ -351,7 +354,7 @@ if __name__ == "__main__":
     try:
     
         transform(shock_service_url = args.shock_service_url, 
-#                  handle_service_url = args.handle_service_url, 
+                  handle_service_url = args.handle_service_url, 
 #                  output_file_name = args.output_file_name, 
                   input_fasta_directory = args.input_fasta_directory, 
 #                  working_directory = args.working_directory, 
