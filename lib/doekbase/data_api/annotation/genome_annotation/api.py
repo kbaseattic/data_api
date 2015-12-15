@@ -1221,8 +1221,11 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
     def get_feature_publications(self, feature_id_list=None):
         return self._get_feature_data("publications", feature_id_list)
 
-    def get_features(self, feature_id_list=None):
+    def get_features(self, feature_tuple_list=None):
         out_features = dict()
+        feature_id_list = None
+        if feature_tuple_list != None:
+            feature_id_list = [ x.feature_id for x in feature_tuple_list ]
         feature_containers = self._get_feature_containers(feature_id_list)
 
         def fill_out_feature(x):
@@ -1283,7 +1286,10 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
                 working_list = feature_containers[ref]
             
             for x in working_list:
-                out_features[x] = fill_out_feature(features[x])
+# need to check if list before making empty one
+                if x not in out_features:
+                    out_features[x] = list()
+                out_features[x].append( fill_out_feature(features[x]) )
 
         return out_features
 
@@ -1561,16 +1567,25 @@ class GenomeAnnotationClientAPI(GenomeAnnotationInterface):
 
     @logged(_ga_log)
     @client_method
-    def get_features(self, feature_id_list=None):
-        result = self.client.get_features(self._token, self.ref, feature_id_list)
+    def get_features(self, feature_tuple_list=None):
+        # need to convert list of tuples to list of ttypes.Feature_tuples
+        tuple_list=None
+        if feature_tuple_list != None:
+            tuple_list = [ttypes.Feature_tuple(feature_type=x[0],feature_id=x[1]) for x in feature_tuple_list]
+        result = self.client.get_features(self._token, self.ref, tuple_list)
 
         output = dict()
-        for x in result:
-            output[x] = dict()
+        # need to adjust since return is a list<Feature_data> instead of Feature_data
+        for fid in result:
+            output[fid] = list()
 
-            for k in result[x].__dict__:
-                output[x][k] = result[x].__dict__[k]
+            for feature_data in result[fid]:
+                feat = dict()
+                for k in feature_data.__dict__:
+                    feat[k]=feature_data.__dict__[k]
+                output[fid].append(feat)
 
+        print output
         return output
 
     @logged(_ga_log)
