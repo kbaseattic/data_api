@@ -15,9 +15,20 @@ import os.path
 import simplejson
 
 # KBase imports
-import doekbase.Transform.script_utils as script_utils
+#import doekbase.Transform.script_utils as script_utils
+import biokbase.Transform.script_utils as script_utils
 import TextFileDecoder
-import doekbase.workspace.client
+#import doekbase.workspace.client
+import biokbase.workspace.client
+
+
+
+#########################################
+#
+# note this needs to be put into and from /mnt/search/transform/jason/transform/plugins/scripts/upload/
+#
+#
+########################################
 
 # transformation method that can be called if this module is imported
 # Note the logger has different levels it could be run.  
@@ -52,8 +63,8 @@ def transform(shock_service_url=None,
     if logger is None:
         logger = script_utils.stderrlogger(__file__)
 
-
-    assembly_ws_client = doekbase.workspace.client.Workspace(wsurl)
+    assembly_ws_client = biokbase.workspace.client.Workspace(wsurl)
+#    assembly_ws_client = doekbase.workspace.client.Workspace(wsurl)
  
     assembly_workspace_object = assembly_ws_client.get_workspace_info({'workspace':wsname}) 
  
@@ -294,7 +305,8 @@ def transform(shock_service_url=None,
                              "name": "%s_assembly" % (genome_id), 
                              "provenance":assembly_provenance}]}) 
                 assembly_not_saved = False 
-            except doekbase.workspace.client.ServerError as err:
+            except biokbase.workspace.client.ServerError as err:
+#            except doekbase.workspace.client.ServerError as err:
                 print "SAVE FAILED ON genome " + str(genome_id) + " ERROR: " + err 
                 raise 
             except: 
@@ -318,7 +330,6 @@ if __name__ == "__main__":
                         help=script_details["Args"]["shock_service_url"],
                         action='store', type=str, nargs='?', required=True)
     parser.add_argument('--handle_service_url', 
-                        help=script_details["Args"]["handle_service_url"], 
                         action='store', type=str, nargs='?', default=None, required=True)
     parser.add_argument('--input_fasta_directory', 
                         help=script_details["Args"]["input_fasta_directory"], 
