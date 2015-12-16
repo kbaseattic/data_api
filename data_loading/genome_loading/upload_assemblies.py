@@ -26,6 +26,9 @@ import biokbase.workspace.client
 #########################################
 #
 # note this needs to be put into and from /mnt/search/transform/jason/transform/plugins/scripts/upload/
+# 
+# EXAMPLE CALL :  
+# python /mnt/search/transform/jason/transform/plugins/scripts/upload/upload_condensed_assembly_new.py  --wsname PrototypeReferenceGenomes --wsurl https://ci.kbase.us/services/ws --shock_service_url https://ci.kbase.us/services/shock-api/ --input_fasta_directory /mnt/search/v5/v5seqfiles --genome_list_file full_genomes_list
 #
 #
 ########################################
