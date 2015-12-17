@@ -1,14 +1,14 @@
-module KBaseGenomesCondensedPrototypeV2{ 
+module KBaseGenomeAnnotations{ 
 
 /*
 Reference to a taxon object 
-    @id ws KBaseGenomesCondensedPrototypeV2.Taxon
+    @id ws KBaseGenomeAnnotations.Taxon
 */
 typedef string taxon_ref;
 
 /*
 Reference to a taxon object 
-    @id ws KBaseGenomesCondensedPrototypeV2.TaxonSet
+    @id ws KBaseGenomeAnnotations.TaxonSet
 */
 typedef string taxon_set_ref;
 
@@ -43,6 +43,15 @@ typedef structure {
 
 
 /*
+The TaxonLookup holds first three letters of the scientific names as top level key.  Value is a mapping of scientific name or taxon aliases as the key, and the value is the taxonomy id.  This is populated by the names.dmp file from NCBI.
+
+*/
+typedef structure {
+  mapping<string scientific_name_abbreviation, mapping<string scientific_name_alias, string taxonomy_id>> taxon_lookup;
+} TaxonLookup;
+
+
+/*
 The TaxonSet object holds references to 1 or more taxons.  It can be used generically to hold multiple taxons.
 However the main usage will be to hold a list of children taxons.
 
@@ -63,7 +72,7 @@ typedef structure {
 
 /*
 Reference to a taxon object 
-    @id ws KBaseGenomesCondensedPrototypeV2.GenomeAnnotation
+    @id ws KBaseGenomeAnnotations.GenomeAnnotation
 */
 typedef string genome_annotation_ref;
 
@@ -144,7 +153,7 @@ typedef structure {
 
 /*
 Reference to an assembly object 
-    @id ws KBaseGenomesCondensedPrototypeV2.Assembly
+    @id ws KBaseGenomeAnnotations.Assembly
 */
 typedef string assembly_ref;
 
@@ -223,7 +232,7 @@ typedef structure {
 
 /* 
 Reference to a SeedRoles object
-    @id ws KBaseGenomesCondensedPrototypeV2.SeedRoles
+    @id ws KBaseGenomeAnnotations.SeedRoles
 */ 
 typedef string seed_roles_ref; 
 
@@ -267,13 +276,13 @@ typedef structure {
 
 /*
 Reference to an EvidenceContainer object 
-    @id ws KBaseGenomesCondensedPrototypeV2.EvidenceContainer
+    @id ws KBaseGenomeAnnotations.EvidenceContainer
 */
 typedef string evidence_container_ref;
 
 /*
 Reference to an ProteinContainer object 
-    @id ws KBaseGenomesCondensedPrototypeV2.ProteinContainer
+    @id ws KBaseGenomeAnnotations.ProteinContainer
 */
 typedef string protein_container_ref;
 
@@ -386,7 +395,7 @@ typedef structure {
 
 /*
 Reference to an FeatureContainer object 
-    @id ws KBaseGenomesCondensedPrototypeV2.FeatureContainer
+    @id ws KBaseGenomeAnnotations.FeatureContainer
 */
 typedef string feature_container_ref;
 
@@ -417,7 +426,7 @@ typedef mapping<string feature_key, list<tuple<feature_container_ref feature_con
 
 /*
 Reference to an FeatureContainer object 
-    @id ws KBaseGenomesCondensedPrototypeV2.AnnotationQuality
+    @id ws KBaseGenomeAnnotations.AnnotationQuality
 */
 typedef string annotation_quality_ref;
 
@@ -430,6 +439,8 @@ location and environment information (perhaps separate fields for latitude, long
 quality_score could be in genome_annotation_quality_detail instead
 
 methodology - Not sure if needed? example would be rast
+
+type -refers to representative, reference, user, etc
 
 taxon_ref is a versioned workspace reference
 annotation_quality_ref is a versioned workspace reference
@@ -461,6 +472,7 @@ typedef structure {
   string methodology; 
   counts_map counts_map;
   seed_roles_ref seed_roles_ref;
+  string type;
 } GenomeAnnotation; 
 
 };
