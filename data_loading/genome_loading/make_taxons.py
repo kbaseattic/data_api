@@ -58,23 +58,6 @@ def make_taxons(wsname=None,wsurl=None, taxon_files_dir = None):
     nodes_file =  "%s/nodes.dmp" % (taxon_files_dir[0])
     names_file =  "%s/names.dmp" % (taxon_files_dir[0]) 
 
-    #MAKE THE UNKNOWN TAXON 
-    unknown_taxon_dict = {"scientific_name":"Unknown","domain":"Unknown","scientific_lineage":"Unknown","genetic_code":0,"taxonomy_id":-1}
-    unknown_not_saved = True
-    unknown_provenance =  [{"script": __file__, "script_ver": "0.1", 
-                            "description": "Unknown taxon created to seed catch all taxonomy for when a taxon can not be determined."}] 
-
-    while unknown_not_saved:
-        try:
-            taxon_info =  ws_client.save_objects({"workspace": workspace_name,"objects":[ {"type":"KBaseGenomeAnnotations.Taxon",
-                                                                                           "data":unknown_taxon_dict,
-                                                                                           "name": "unknown_taxon",
-                                                                                           "provenance":unknown_provenance}] })
-            unknown_not_saved = False
-        except Exception, e:
-            print "SAVE FAILED ON UNKNOWN TAXON - GENERAL_EXCEPTION: " + str(sys.exc_info()[0]) + " Exception: " + str(e)
-            sys.exit(1)
-
     taxon_dict = dict()
     #key is the taxonomy_id, values is an inner dict (parent_id, children_ids (list), 
     # genetic_code, scientific_name, aliases(list), lineage, parent_tax_id, 
@@ -342,7 +325,7 @@ def make_taxons(wsname=None,wsurl=None, taxon_files_dir = None):
             save_start  = time.time()
             while taxons_not_saved:
                 try:
-                    taxon_info =  ws_client.save_objects({"workspace": workspace_name,"objects":[ {"type":"KBaseGenomeAnnotations.Taxon",
+                    taxon_info =  ws_client.save_objects({"workspace": workspace_name,"objects":[ {"type":"KBaseGenomesCondensedPrototypeV2.Taxon",
                                                                                                    "data":taxon_object, 
                                                                                                    "name": taxon_object_name, 
                                                                                                    "provenance":taxon_provenance}] }) 
@@ -372,7 +355,7 @@ if __name__ == "__main__":
     import argparse
     import os.path
 
-    parser = argparse.ArgumentParser(description='Create TaxonObjects')
+    parser = argparse.ArgumentParser(description='Create CondensedGenome from OriginalGenome')
     parser.add_argument('--wsname', nargs='?', help='workspace name to populate', required=True)
     parser.add_argument('--wsurl', action='store', type=str, nargs='?', required=True)
     parser.add_argument('--taxon_files_dir', nargs=1, help='directory that holds names.dump and nodes.dump files.', required=True)
