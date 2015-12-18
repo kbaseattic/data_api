@@ -1253,7 +1253,7 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
                 f["feature_aliases"] = {}
 
             if 'notes' in x:
-                f["feature_notes"] = x['notes']
+                f["feature_notes"] = [ x['notes'] ]
             else:
                 f["feature_notes"] = []
 
@@ -1286,10 +1286,16 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
                 working_list = feature_containers[ref]
             
             for x in working_list:
-# need to check if list before making empty one
                 if x not in out_features:
                     out_features[x] = list()
-                out_features[x].append( fill_out_feature(features[x]) )
+                # this is a temporary hack to support get_features
+                # ideally this functionality should move to _get_feature_containers
+                # but that requires changes to _get_feature_data, which i don't have time for now
+                if feature_id_list is None:
+                    out_features[x].append( fill_out_feature(features[x]) )
+                else:
+                    if ttypes.Feature_tuple(feature_type=features[x]['type'],feature_id=x) in feature_tuple_list or ttypes.Feature_tuple(feature_type='all',feature_id=x) in feature_tuple_list:
+                        out_features[x].append( fill_out_feature(features[x]) )
 
         return out_features
 
