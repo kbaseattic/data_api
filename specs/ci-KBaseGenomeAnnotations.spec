@@ -448,8 +448,10 @@ evidence_container_ref would be a versioned workspace reference
 protein_container_ref would be a versioned workspace reference
 assembly_ref would be a versioned workspace reference
 
+genbank_handle_ref are handle service references to shock.
+
 @optional external_source external_source_id external_source_origination_date notes environmental_comments quality_score 
-@optional annotation_quality_ref publications evidence_container_ref methodology seed_roles_ref
+@optional annotation_quality_ref publications evidence_container_ref methodology seed_roles_ref genbank_handle_ref
 */
  
 typedef structure {
@@ -473,6 +475,7 @@ typedef structure {
   counts_map counts_map;
   seed_roles_ref seed_roles_ref;
   string type;
+  string genbank_handle_ref;
 } GenomeAnnotation; 
 
 };
