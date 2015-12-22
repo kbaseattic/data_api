@@ -395,7 +395,7 @@ def convert_original_genome_object_to_prototype(source_wsname=None,destination_w
                     counts_map['protein'] = len(protein_container['proteins']) 
                     while protein_container_not_saved:
                         try:
-                            protein_container_info =  destination_ws_client.save_objects({"workspace": destination_workspace_name,"objects":[ { "type":"KBaseGenomesCondensedPrototypeV2.ProteinContainer","data":protein_container,"name": protein_container_object_name,"provenance":protein_container_provenance}]})
+                            protein_container_info =  destination_ws_client.save_objects({"workspace": destination_workspace_name,"objects":[ { "type":"KBaseGenomeAnnotations.ProteinContainer","data":protein_container,"name": protein_container_object_name,"provenance":protein_container_provenance}]})
                             protein_container_not_saved = False
                         except doekbase.workspace.client.ServerError as err:
                             raise
@@ -418,11 +418,11 @@ def convert_original_genome_object_to_prototype(source_wsname=None,destination_w
                     feature_container['features'] = feature_type_containers[type]
                     feature_container['assembly_ref'] = assembly_reference
                     counts_map[type] = len(feature_type_containers[type])
-                    feature_container_provenance = [{"script": __file__, "script_ver": "0.1", "description": "proteins generated from old genome object %s in workspace %s " % (original_genome['data']['id'],source_wsname)}]
+                    feature_container_provenance = [{"script": __file__, "script_ver": "0.1", "description": "features generated from old genome object %s in workspace %s " % (original_genome['data']['id'],source_wsname)}]
                     feature_container_not_saved = True
                     while feature_container_not_saved: 
                         try: 
-                            feature_container_info =  destination_ws_client.save_objects({"workspace":destination_workspace_name,"objects":[ { "type":"KBaseGenomesCondensedPrototypeV2.FeatureContainer","data":feature_container,"name": feature_container_object_name,"provenance":feature_container_provenance}]}) 
+                            feature_container_info =  destination_ws_client.save_objects({"workspace":destination_workspace_name,"objects":[ { "type":"KBaseGenomeAnnotations.FeatureContainer","data":feature_container,"name": feature_container_object_name,"provenance":feature_container_provenance}]}) 
                             feature_container_not_saved = False 
                             print "Feature Container saved for %s" % (feature_container_object_name)
                         except doekbase.workspace.client.ServerError as err:
@@ -437,6 +437,8 @@ def convert_original_genome_object_to_prototype(source_wsname=None,destination_w
                 genome_annotation['protein_container_ref'] = "%s/%s" % (destination_workspace_name, protein_container_object_name)
                 genome_annotation['feature_container_references'] = feature_container_references
                 genome_annotation['counts_map'] = counts_map
+                genome_annotation['type'] = "KBase Reference"
+
                 genome_annotation_provenance = [{"script": __file__, "script_ver": "0.1", "description": "Genome Annotation generated from old genome object %s in workspace %s " % (original_genome['data']['id'],source_wsname)}] 
                 genome_annotation_not_saved = True
                 genome_annotation_object_name = core_object_name
@@ -445,7 +447,7 @@ def convert_original_genome_object_to_prototype(source_wsname=None,destination_w
 
                 while genome_annotation_not_saved: 
                     try: 
-                        genome_annotation_info =  destination_ws_client.save_objects({"workspace":destination_workspace_name,"objects":[ { "type":"KBaseGenomesCondensedPrototypeV2.GenomeAnnotation","data":genome_annotation,"name": genome_annotation_object_name,"provenance":genome_annotation_provenance}]}) 
+                        genome_annotation_info =  destination_ws_client.save_objects({"workspace":destination_workspace_name,"objects":[ { "type":"KBaseGenomeAnnotations.GenomeAnnotation","data":genome_annotation,"name": genome_annotation_object_name,"provenance":genome_annotation_provenance}]}) 
                         genome_annotation_not_saved = False
                         print "Genome Annotation saved for %s" % (core_object_name) 
                     except doekbase.workspace.client.ServerError as err:
