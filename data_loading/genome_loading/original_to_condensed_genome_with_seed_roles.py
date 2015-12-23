@@ -1,7 +1,7 @@
 import simplejson
 import time
 import sys
-import doekbase.workspace.client
+import biokbase.workspace.client
 import re
 import hashlib
 import traceback
@@ -11,8 +11,8 @@ import os.path
 def convert_original_genome_object_to_prototype(source_wsname=None,destination_wsname=None,taxon_wsname=None,source_wsurl=None, 
                                                 destination_wsurl = None, lineage_files_dir = None, taxon_names_file=None, genomes = []): 
 
-    source_ws_client = doekbase.workspace.client.Workspace(source_wsurl)
-    destination_ws_client = doekbase.workspace.client.Workspace(destination_wsurl)
+    source_ws_client = biokbase.workspace.client.Workspace(source_wsurl)
+    destination_ws_client = biokbase.workspace.client.Workspace(destination_wsurl)
 
     source_workspace_object = source_ws_client.get_workspace_info({'workspace':source_wsname})
     source_workspace_id = source_workspace_object[0]
@@ -164,6 +164,8 @@ def convert_original_genome_object_to_prototype(source_wsname=None,destination_w
                 mRNA_parent_gene_dict = dict()
                 CDS_associated_mRNA_dict = dict()
                 mRNA_associated_CDS_dict = dict()
+                seed_roles_dict = dict()
+
 
                 pattern = re.compile(r'\s+')
                 if os.path.isfile(potential_lineages_file):
@@ -305,6 +307,37 @@ def convert_original_genome_object_to_prototype(source_wsname=None,destination_w
                     if 'publications' in original_feature:
                         new_feature['publications'] = original_feature['publications']
 
+                    
+                    if ('subsystems' in original_feature) or ('subsystem_data' in original_feature):
+                        #need to merge the two lists
+                        subsystem_variant_role_dict = dict()
+                        subsystem_dict = dict()
+                        if ('subsystem_data' in original_feature):
+                            for tuple_list in original_feature['subsystem_data']:
+                                subsystem = tuple_list[0]
+                                variant_code = tuple_list[1]
+                                role = tuple_list[2]
+                                monster_key = "%s::%s::%s" % (subsystem,variant_code,role)
+                                subsystem_variant_role_dict[monster_key] = dict()
+                                subsystem_variant_role_dict[monster_key]["subsystem"] = subsystem
+                                subsystem_variant_role_dict[monster_key]["variant_code"] = variant_code
+                                subsystem_variant_role_dict[monster_key]["role"] = role
+                                subsystem_dict[subsystem] = 1;
+                        if ('subsystems' in original_feature):
+                            for subsystem in original_feature['subsystems']:
+                                if subsystem not in subsystem_dict:
+                                    monster_key = "%s::::" % (subsystem)
+                                    subsystem_variant_role_dict[monster_key] = dict()
+                                    subsystem_variant_role_dict[monster_key]["subsystem"] = subsystem
+                                    subsystem_dict[subsystem] = 1; 
+                        
+                        if len(subsystem_variant_role_dict) > 0:
+                            seed_roles_list = list()
+                            for temp_dict in subsystem_variant_role_dict:
+                                seed_roles_list.append(subsystem_variant_role_dict[temp_dict])
+
+                            seed_roles_dict[new_feature['feature_id']]= seed_roles_list
+
                     new_aliases = dict()
                     if 'aliases' in original_feature:
                         for alias in original_feature['aliases']:
@@ -397,7 +430,7 @@ def convert_original_genome_object_to_prototype(source_wsname=None,destination_w
                         try:
                             protein_container_info =  destination_ws_client.save_objects({"workspace": destination_workspace_name,"objects":[ { "type":"KBaseGenomeAnnotations.ProteinContainer","data":protein_container,"name": protein_container_object_name,"provenance":protein_container_provenance}]})
                             protein_container_not_saved = False
-                        except doekbase.workspace.client.ServerError as err:
+                        except biokbase.workspace.client.ServerError as err:
                             raise
 
                 #def save_feature_container()
@@ -425,10 +458,29 @@ def convert_original_genome_object_to_prototype(source_wsname=None,destination_w
                             feature_container_info =  destination_ws_client.save_objects({"workspace":destination_workspace_name,"objects":[ { "type":"KBaseGenomeAnnotations.FeatureContainer","data":feature_container,"name": feature_container_object_name,"provenance":feature_container_provenance}]}) 
                             feature_container_not_saved = False 
                             print "Feature Container saved for %s" % (feature_container_object_name)
-                        except doekbase.workspace.client.ServerError as err:
+                        except biokbase.workspace.client.ServerError as err: 
                             raise
 
                 #print "Feature lookup %s" % (feature_lookup)
+
+                if len(seed_roles_dict) > 0 :
+                    seed_roles = dict()
+                    seed_roles['feature_roles'] = seed_roles_dict
+#                    print (str(seed_roles))
+#                    sys.exit()
+                    seed_roles_object_name = "%s_seed_roles" % (core_object_name)
+                    seed_roles_object_ref = "%s/%s" % (destination_workspace_name,seed_roles_object_name)
+                    genome_annotation['seed_roles_ref'] = seed_roles_object_ref
+                    seed_roles_provenance = [{"script": __file__, "script_ver": "0.1", "description": "seed roles generated from old genome object %s in workspace %s " % (original_genome['data']['id'],source_wsname)}] 
+                    seed_roles_not_saved = True 
+                    while seed_roles_not_saved: 
+                        try: 
+                            seed_roles_info =  destination_ws_client.save_objects({"workspace":destination_workspace_name,"objects":[ { "type":"KBaseGenomeAnnotations.SeedRoles","data":seed_roles,"name": seed_roles_object_name,"provenance":seed_roles_provenance}]})
+                            seed_roles_not_saved = False
+                            print "SeedRoles saved for %s" % (seed_roles_object_name)
+                        except biokbase.workspace.client.ServerError as err:
+                            raise
+
 
                 #def save_genome_annotation()
 
@@ -437,12 +489,10 @@ def convert_original_genome_object_to_prototype(source_wsname=None,destination_w
                 genome_annotation['protein_container_ref'] = "%s/%s" % (destination_workspace_name, protein_container_object_name)
                 genome_annotation['feature_container_references'] = feature_container_references
                 genome_annotation['counts_map'] = counts_map
-                genome_annotation['type'] = "KBase Reference"
-
                 genome_annotation_provenance = [{"script": __file__, "script_ver": "0.1", "description": "Genome Annotation generated from old genome object %s in workspace %s " % (original_genome['data']['id'],source_wsname)}] 
                 genome_annotation_not_saved = True
                 genome_annotation_object_name = core_object_name
-
+                genome_annotation['type'] = "KBase Reference"
                 print "Genome Annotation id %s" % (genome_annotation['genome_annotation_id'])
 
                 while genome_annotation_not_saved: 
@@ -450,7 +500,7 @@ def convert_original_genome_object_to_prototype(source_wsname=None,destination_w
                         genome_annotation_info =  destination_ws_client.save_objects({"workspace":destination_workspace_name,"objects":[ { "type":"KBaseGenomeAnnotations.GenomeAnnotation","data":genome_annotation,"name": genome_annotation_object_name,"provenance":genome_annotation_provenance}]}) 
                         genome_annotation_not_saved = False
                         print "Genome Annotation saved for %s" % (core_object_name) 
-                    except doekbase.workspace.client.ServerError as err:
+                    except biokbase.workspace.client.ServerError as err: 
                         raise
                 object_counter = object_counter + 1
 
