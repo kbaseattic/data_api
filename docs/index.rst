@@ -4,23 +4,20 @@
    contain the root `toctree` directive.
 
 .. toctree::
-    :maxdepth: 4
+    :titlesonly:
+    :maxdepth: 1
 
-    annotation_api
-    assembly_api
-    taxon_api
-    developer
-    
-TODO: API Reference <_modules/index.html>
+    Python API <python>
+    JavaScript API <javascript>
+    Developer Notes <developer>
+
+.. TODO: API Reference <_modules/index.html>
 
 KBase Data API documentation
 ============================
 The Data API provides a unified entry point to retrieve and, eventually,
 store KBase data objects. This page covers concepts and installation instructions.
-For usage, see the API pages for each data type: :ref:`annotation_api`, :ref:`assembly_api`, and :ref:`taxon_api`.
-
-.. Skip this for now: contents:: Contents
-
+For usage, see the API pages for your selected language.
 
 Concepts
 --------
@@ -65,25 +62,6 @@ Unpackage the download file, change into the top-level directory, then run the s
 
 .. note:: You can re-run ``python setup.py install`` if you have edited files locally and want to test them out without having to reset the virtualenv.
 
-
-Hello, World
-------------
-Below is a simple example for each API.
-For detailed API documentation and more examples, see the object API pages for the :ref:`annotation_api`, :ref:`assembly_api` , and :ref:`taxon_api`.
-
-Python
-^^^^^^
-
-.. literalinclude:: ../lib/doekbase/data_api/tests/examples/hello_world.py
-    :linenos:
-
-JavaScript
-^^^^^^^^^^
-Sorry, not ready yet.
-
-Perl
-^^^^
-Sorry, not ready yet.
 
 Indices and tables
 ==================
