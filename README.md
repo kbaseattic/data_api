@@ -2,6 +2,10 @@
 
 <img src="GolgiVolvox.png" alt="Volvox" style="width: 100px;"/>
 
+**IMPORTANT NOTE**
+> The latest version of the code is currently in the [develop branch](https://github.com/kbase/data_api/tree/develop) of this repo. 
+> Please look there for source code and links to documentation.
+
 # data_api
 
 Towards a unified data api for KBase
