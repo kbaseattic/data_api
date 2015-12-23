@@ -235,4 +235,7 @@ For the JavaScript API, all the code and tests live under `jslib`. See the READM
 
 ### Example narratives
 
-	Retrieving and counting features for a genome [feature count example](https://narrative-ci.kbase.us/narrative/ws.3292.obj.1)
+	Retrieving and counting genomic features with a local data API client for a [GenomeAnnotation object] (https://narrative-ci.kbase.us/narrative/ws.3413.obj.1)
+	Retrieving and counting genomic features with direct data API access for a [GenomeAnnotation object] (https://narrative-ci.kbase.us/narrative/ws.3292.obj.1)
+	A of genome properties for all genomes belonging to a taxon [generates comparison table] (https://narrative-ci.kbase.us/narrative/ws.3524.obj.1)
+	Panel of data quality plots for [GenomeAnnotation and Assembly objects] (https://narrative-ci.kbase.us/narrative/ws.3413.obj.1)
