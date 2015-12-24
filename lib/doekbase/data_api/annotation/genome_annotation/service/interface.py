@@ -49,8 +49,8 @@ class GenomeAnnotationService:
     def server_method(func):
         def wrapper(self, token, ref, *args, **kwargs):
             error = None
-            _log.debug('method={meth} state=begin token={tok} ref={ref} args=({'
-                       'args}) kwargs={{{kw}}}'
+            _log.debug('method={meth} state=begin token={tok} ref={ref} args={'
+                       'args} kwargs={kw}'
                        .format(meth=func.__name__, tok=token, ref=ref,
                                args=args, kw=kwargs))
             t0 = time.time()
@@ -74,12 +74,12 @@ class GenomeAnnotationService:
             finally:
                 if error is None:
                     _log.debug('method={meth} state=end token={tok} ref={ref} '
-                               'args=({args}) kwargs={{{kw}}} dur={t:.3f}'
+                               'args={args} kwargs={kw} dur={t:.3f}'
                                .format(meth=func.__name__, tok=token, ref=ref,
                                        args=args, kw=kwargs, t=time.time() - t0))
                 else:
                     _log.error('method={meth} state=error token={tok} '
-                               'ref={ref} args=({args}) kwargs={{{kw}}}'
+                               'ref={ref} args={args} kwargs={kw}'
                                'error_message="{m}" dur={t:.3f}'
                                .format(meth=func.__name__, tok=token, ref=ref,
                                        args=args, kw=kwargs, m=error.message,
