@@ -1,4 +1,6 @@
 # Stdlib
+import logging
+import time
 import traceback
 
 # Third-party
@@ -17,7 +19,8 @@ from doekbase.data_api.annotation.genome_annotation.service import ttypes
 
 import doekbase.data_api.util
 
-_log = doekbase.data_api.util.get_logger("GenomeAnnotationService")
+
+_log = logging.getLogger('.'.join([__name__, 'service']))
 
 class GenomeAnnotationClientConnection(object):
     """
@@ -45,29 +48,62 @@ class GenomeAnnotationService:
 
     def server_method(func):
         def wrapper(self, token, ref, *args, **kwargs):
+            error = None
+            _log.debug('method={meth} state=begin token={tok} ref={ref} args=({'
+                       'args}) kwargs={{{kw}}}'
+                       .format(meth=func.__name__, tok=token, ref=ref,
+                               args=args, kw=kwargs))
+            t0 = time.time()
             try:
                 return func(self, token, ref, *args, **kwargs)
             except AttributeError, e:
+                error = e
                 raise ttypes.AttributeException(e.message, traceback.print_exc())
             except exceptions.AuthenticationError, e:
+                error = e
                 raise ttypes.AuthenticationException(e.message, traceback.print_exc())
             except exceptions.AuthorizationError, e:
+                error = e
                 raise ttypes.AuthorizationException(e.message, traceback.print_exc())
             except exceptions.TypeError, e:
+                error = e
                 raise ttypes.TypeException(e.message, traceback.print_exc())
             except Exception, e:
+                error = e
                 raise ttypes.ServiceException(e.message, traceback.print_exc(), {"ref": str(ref)})
+            finally:
+                if error is None:
+                    _log.debug('method={meth} state=end token={tok} ref={ref} '
+                               'args=({args}) kwargs={{{kw}}} dur={t:.3f}'
+                               .format(meth=func.__name__, tok=token, ref=ref,
+                                       args=args, kw=kwargs, t=time.time() - t0))
+                else:
+                    _log.error('method={meth} state=error token={tok} '
+                               'ref={ref} args=({args}) kwargs={{{kw}}}'
+                               'error_message="{m}" dur={t:.3f}'
+                               .format(meth=func.__name__, tok=token, ref=ref,
+                                       args=args, kw=kwargs, m=error.message,
+                                       t=time.time() - t0))
+
         return wrapper
 
     def __init__(self, services=None):
-        if services is None or not isinstance(services, dict):
-            raise TypeError("You must provide a service configuration " +
-                            "dictionary! Found {0}".format(type(services)))
-        elif not services.has_key("workspace_service_url"):
-            raise KeyError("Expecting workspace_service_url key!")
-
+        _log.debug('method=__init__ state=begin services={s}'
+                  .format(s=services))
+        try:
+            if services is None or not isinstance(services, dict):
+                raise TypeError("You must provide a service configuration " +
+                                "dictionary! Found {0}".format(type(services)))
+            elif not services.has_key("workspace_service_url"):
+                raise KeyError("Expecting workspace_service_url key!")
+        except Exception as e:
+            _log.error('method=__init__ state=error services={s}'
+                       'error_message="{m}"'
+                      .format(s=services, m=e.message))
+            raise
         self.services = services
-        self.logger = doekbase.data_api.util.get_logger("GenomeAnnotationService")
+        _log.debug('method=__init__ state=end services={s} '
+                   .format(s=services))
 
     @server_method
     def get_assembly(self, token=None, ref=None):
