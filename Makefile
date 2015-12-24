@@ -27,13 +27,15 @@ deploy-service-scripts:
 	mkdir -p $(SERVICE_DIR)/check_mk
 	cp $(SCRIPTS_DIR)/data_api_service $(SERVICE_DIR)/check_mk/
 
-test: shutdown
+test: shutdown startup
+	@echo '+- Run nosetests from the data_api source directory, which will use the test data'
+	KB_DEPLOY_URL=dir_nocache nosetests -c nose.cfg -c nose-local.cfg
+
+startup:
 	@echo '+- Start each of the API services'
 	nohup data_api_start_service.py --config deployment.cfg --service taxon --port 9101 & > taxonAPI.out
 	nohup data_api_start_service.py --config deployment.cfg --service assembly --port 9102 & > assemblyAPI.out        
 	nohup data_api_start_service.py --config deployment.cfg --service genome_annotation --port 9103 & > genome_annotationAPI.out
-	@echo '+- Run nosetests from the data_api source directory, which will use the test data'
-	KB_DEPLOY_URL=dir_nocache nosetests -c nose.cfg -c nose-local.cfg
 
 shutdown:
 	@printf "+- Shutdown\n"
