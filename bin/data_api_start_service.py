@@ -29,7 +29,7 @@ def main():
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", help="path to configuration file", required=True)
-    parser.add_argument("--log-config", default=None,
+    parser.add_argument("--log-config", default=None, dest='log_config',
                         help="path to logging configuration file (default"
                              "='logging.conf' in same directory as main "
                              "configuration file)", )
@@ -55,8 +55,9 @@ def main():
         config.read(args.config)
 
     # Load logging configuration, if there is one
-    log_config = args.log_config or os.path.join([
-        os.path.dirname(os.path.realpath('.')), 'logging.conf'])
+    default_logpath = os.path.join(
+            [os.path.dirname(os.path.realpath('.')), 'logging.conf'])
+    log_config = default_logpath if args.log_config is None else args.log_config
     if os.path.exists(log_config):
         try:
             logging_config.fileConfig(log_config)
