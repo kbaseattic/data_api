@@ -32,7 +32,7 @@ def main():
     parser.add_argument("--log-config", default=None, dest='log_config',
                         help="path to logging configuration file (default"
                              "='logging.conf' in same directory as main "
-                             "configuration file)", )
+                             "configuration file)")
     parser.add_argument("--service",
                         help="service name to start, one of {}".format(SERVICE_NAMES),
                         required=True)
@@ -56,7 +56,7 @@ def main():
 
     # Load logging configuration, if there is one
     default_logpath = os.path.join(
-            [os.path.dirname(os.path.realpath('.')), 'logging.conf'])
+            os.path.dirname(os.path.realpath('.')), 'logging.conf')
     log_config = default_logpath if args.log_config is None else args.log_config
     if os.path.exists(log_config):
         try:
