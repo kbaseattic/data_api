@@ -56,11 +56,11 @@ def server_method(func):
             result = func(self, token, ref, *args, **kwargs)
         except AttributeError, e:
             error = e
-            raise self.self.ttypes.AttributeException(e.message,
+            raise self.ttypes.AttributeException(e.message,
                                                       traceback.print_exc())
         except exceptions.AuthenticationError, e:
             error = e
-            raise self.self.ttypes.AuthenticationException(e.message,
+            raise self.ttypes.AuthenticationException(e.message,
                                                            traceback.print_exc())
         except exceptions.AuthorizationError, e:
             error = e
