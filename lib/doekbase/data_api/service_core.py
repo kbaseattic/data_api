@@ -20,7 +20,7 @@ from thrift.protocol import TBinaryProtocol
 from thrift.transport import TTwisted
 
 # Local
-from doekbase.data_api import exceptions
+from doekbase.data_api import exceptions, core
 
 # Global constants and variables
 # ------------------------------
@@ -46,6 +46,10 @@ def server_method(func):
         func (function): Function being wrapped
     """
     def wrapper(self, token, ref, *args, **kwargs):
+        assert hasattr(self, 'log'), 'Method in wrapped class must have "log" ' \
+                                     'attribute'
+        assert hasattr(self, 'ttypes'), 'Method in wrapped class must have ' \
+                                      '"ttypes" attribute'
         error, result = None, None
         self.log.debug('method={meth} state=begin token={tok} ref={ref} args={'
                        'args} kwargs={kw}'
@@ -57,21 +61,21 @@ def server_method(func):
         except AttributeError, e:
             error = e
             raise self.ttypes.AttributeException(e.message,
-                                                      traceback.print_exc())
+                                                 traceback.format_exc())
         except exceptions.AuthenticationError, e:
             error = e
             raise self.ttypes.AuthenticationException(e.message,
-                                                           traceback.print_exc())
+                                                      traceback.format_exc())
         except exceptions.AuthorizationError, e:
             error = e
             raise self.ttypes.AuthorizationException(e.message,
-                                                     traceback.print_exc())
+                                                     traceback.format_exc())
         except exceptions.TypeError, e:
             error = e
-            raise self.ttypes.TypeException(e.message, traceback.print_exc())
+            raise self.ttypes.TypeException(e.message, traceback.format_exc())
         except Exception, e:
             error = e
-            raise self.ttypes.ServiceException(e.message, traceback.print_exc(),
+            raise self.ttypes.ServiceException(e.message, traceback.format_exc(),
                                                {"ref": str(ref)})
         finally:
             if error is None:
@@ -99,6 +103,16 @@ class BaseService(object):
     as setting up instance variables for the @server_method decorator.
     """
     def __init__(self, log, ttypes_module, api_class, services=None):
+        """Constructor.
+
+        Args:
+            log (logging.Logger): For logging service activity
+            ttypes_module: Thrift ttypes module for the API
+            api_class: the API library class, e.g.,
+                       `doekbase.data_api.taxonomy.taxon.api.TaxonAPI`
+            services (dict): Service configuration dictionary, passed to
+                             constructor of the `api_class`.
+        """
         self.log = log
         self.ttypes = ttypes_module
         self._api_class = api_class
@@ -130,6 +144,9 @@ class BaseClientConnection(object):
     in the data_api.<api.path>.service.interface module.
     """
     def __init__(self, thrift_client, url):
+        if not hasattr(thrift_client, 'Client') or not callable(
+                thrift_client.Client):
+            raise AttributeError('Invalid "thrift_client" argument')
         self.client = None
         self.transport = None
         self.protocol = None
@@ -138,6 +155,8 @@ class BaseClientConnection(object):
             self.transport = THttpClient.THttpClient(url)
             self.protocol = TBinaryProtocol.TBinaryProtocol(self.transport)
             self.client = thrift_client.Client(self.protocol)
+        except AssertionError as err:
+            raise ValueError('Invalid Thrift client URL: "{}"'.format(url))
         except TTransport.TTransportException as err:
             raise RuntimeError(
                 'Cannot connect to remote Thrift service at {}: {}'
@@ -151,7 +170,25 @@ class BaseClientConnection(object):
 # TODO respond to kill signals
 # TODO on HUP reload of config
 def start_service(api_class, service_class, log,
-                  services=None, host=None, port=None):
+                  services=None, host='localhost', port=9100):
+    """Start a Data API service.
+
+    Args:
+        api_class (BaseService): The custom API service class, e.g.,
+                    `doekbase.data_api.taxonomy.taxon.api.TaxonService`
+        service_class (type): The Thrift auto-generated service class
+        log (logging.Logger): Logging object
+        services (dict): Service configuration dictionary, passed to
+                         constructor of the `api_class`.
+        host (str): Service host (will default to 'localhost')
+        port (int): Service port, e.g. 9101
+    """
+    assert issubclass(api_class, BaseService), \
+        'Invalid "api_class": must be a subclass of ' \
+        'doekbase.data_api.service_core.BaseService'
+    assert hasattr(service_class, 'Processor'), 'Invalid "service_class": ' \
+                                                'missing "Processor" attribute'
+    assert isinstance(port, int), 'The "port" must be an integer'
     log.debug('method=start_service state=begin host={host} port={port:d}'
                .format(host=host, port=port))
 
@@ -179,3 +216,6 @@ def start_service(api_class, service_class, log,
     finally:
         log.debug('method=twisted.internet.reactor.run state=end')
     return 0
+
+def stop_service():
+    twisted.internet.reactor.stop()
