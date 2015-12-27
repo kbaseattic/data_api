@@ -46,4 +46,4 @@ shutdown:
 	@ sleep 2
 
 clean:
-	echo not implemented
+	/bin/rm -f *.out *.pid
