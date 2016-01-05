@@ -288,7 +288,7 @@ typedef string protein_container_ref;
 
 
 /*
-  @optional EC_Number associated_mRNA parent_gene
+  @optional EC_Number associated_mRNA parent_gene codes_for_protein_ref
   
   NOTE THAT associated_mRNA feature type is there so you go up to the GenomeAnnotation object and pull its mRNA info from the feature_containers_map
   Same thing for the parent gene.
@@ -332,6 +332,14 @@ also want to capture authors, journal name (not in ER)
 typedef tuple<int, string, string, string, string, string, string> publication;
 
 /*
+Key is the key from the file
+Value is the value of the file.  
+This is a catch all for keys that do not directly map to an object field.  
+Downside, no API methods will know the keys and how tooperate on them.
+*/
+typedef mapping<string key, string value> additional_properties_map;
+ 
+/*
 Feature is a individual feature of the Genome annotation (Ex: a CDS, a promoter, etc)
 It has specific subobjects for particular feature types. (ex: CDS, mRNA, gene, operon, pathway) 
 This is expandable in the future to include more specific properties for more types.
@@ -343,8 +351,8 @@ Do we want to try and capture motifs. Orthologs? Orthologs get a little tricky i
 
 evidence_container_ref is a workspace reference.  The list of strings is ids into EvidenceContainer mapping.
  
-@optional function aliases publications notes inference feature_quality evidences CDS_properties mRNA_properties gene_properties
-
+@optional function aliases publications notes inference feature_quality evidences 
+@optional CDS_properties mRNA_properties gene_properties additional_properties trans_splicing
 */
 typedef structure {
   string feature_id;
@@ -364,9 +372,9 @@ typedef structure {
   CDS_properties CDS_properties;
   mRNA_properties mRNA_properties;
   gene_properties gene_properties;
+  additional_properties_map additional_properties;
+  int trans_splicing;
 } feature;
-
-
 
 
 /*
@@ -425,12 +433,23 @@ feature_container_ref is a WS reference
 typedef mapping<string feature_key, list<tuple<feature_container_ref feature_container_ref, string feature_id>> lookups> feature_lookup;
 
 /*
-Reference to an FeatureContainer object 
+Reference to an Annotation quality object 
     @id ws KBaseGenomeAnnotations.AnnotationQuality
 */
 typedef string annotation_quality_ref;
 
- 
+/*
+The key is alias source.
+This is designed for fast count lookup of all the allias sources instead of having to drill down into the containers
+*/
+typedef mapping<string type, int count> alias_source_counts_map;
+
+/*
+The key is interfeature relationship.
+This is designed for fast count lookup of all the interfeature relationships. instead of having to drill down into the containers
+*/
+typedef mapping<string type, int count> interfeature_relationship_counts_map;
+
 /*
 The GenomeAnnotation is the core central object. It is the annotation of a given organism and assembly.
 
@@ -451,7 +470,8 @@ assembly_ref would be a versioned workspace reference
 genbank_handle_ref are handle service references to shock.
 
 @optional external_source external_source_id external_source_origination_date notes environmental_comments quality_score 
-@optional annotation_quality_ref publications evidence_container_ref methodology seed_roles_ref genbank_handle_ref
+@optional annotation_quality_ref publications evidence_container_ref methodology seed_roles_ref genbank_handle_ref 
+@optional alias_source_counts_map interfeature_relationship_counts_map
 */
  
 typedef structure {
@@ -476,6 +496,8 @@ typedef structure {
   seed_roles_ref seed_roles_ref;
   string type;
   string genbank_handle_ref;
+  alias_source_counts_map alias_source_counts_map;  
+  interfeature_relationship_counts_map interfeature_relationship_counts_map;
 } GenomeAnnotation; 
 
 };
