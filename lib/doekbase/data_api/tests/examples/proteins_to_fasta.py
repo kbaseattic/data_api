@@ -20,10 +20,11 @@ def get_protein_fasta(data):
         if (i >3):
             break
         geneinfo=data[keys]
-        aliases=get_aliases(geneinfo["aliases"])
-        function=geneinfo["function"]
-        sequence = geneinfo["amino_acid_sequence"]
-        string += ">" + keys  +" " + function + " " + aliases + " " + "\n" + sequence +  "\n"
+        if(geneinfo["aliases"] != None):
+            aliases=get_aliases(geneinfo["aliases"])
+            function=geneinfo["function"]
+            sequence = geneinfo["amino_acid_sequence"]
+            string += ">" + keys  +" " + function + " " + aliases + " " + "\n" + sequence +  "\n"
     return string
 
 def run(ws_url='https://ci.kbase.us/services/ws/'):
