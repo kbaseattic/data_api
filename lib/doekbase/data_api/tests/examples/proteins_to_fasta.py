@@ -20,8 +20,8 @@ def get_protein_fasta(data):
         if (i >3):
             break
         geneinfo=data[keys]
-        if(geneinfo["aliases"] != None):
-            aliases=get_aliases(geneinfo["aliases"])
+        if(geneinfo["protein_aliases"] != None):
+            aliases=get_aliases(geneinfo["protein_aliases"])
             function=geneinfo["function"]
             sequence = geneinfo["amino_acid_sequence"]
             string += ">" + keys  +" " + function + " " + aliases + " " + "\n" + sequence +  "\n"
