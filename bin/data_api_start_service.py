@@ -3,6 +3,7 @@
 # stdlib
 import argparse
 import logging
+from logging import config as logging_config
 import os
 import sys
 import ConfigParser
@@ -28,6 +29,10 @@ def main():
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", help="path to configuration file", required=True)
+    parser.add_argument("--log-config", default=None, dest='log_config',
+                        help="path to logging configuration file (default"
+                             "='logging.conf' in same directory as main "
+                             "configuration file)")
     parser.add_argument("--service",
                         help="service name to start, one of {}".format(SERVICE_NAMES),
                         required=True)
@@ -48,6 +53,29 @@ def main():
     config = ConfigParser.ConfigParser()
     if args.config:
         config.read(args.config)
+
+    # Load logging configuration, if there is one
+    default_logpath = os.path.join(
+            os.path.realpath('.'), 'logging.conf')
+    log_config = default_logpath if args.log_config is None else args.log_config
+    if os.path.exists(log_config):
+        try:
+            logging_config.fileConfig(log_config)
+            logging.getLogger('data_api.').info('msg="Logging configured" '
+                                                'file={'
+                                     '}'.format(log_config))
+        except Exception as err:
+            parser.error('Eh? Error configuring logging from "{}": {}'.format(
+                    log_config, err))
+    elif args.log_config is not None:
+        parser.error('Nope! Logging configuration file "{}" does not '
+                     'exist'.format(log_config))
+    else:
+        logging.basicConfig()
+        root = logging.getLogger()
+        root.setLevel(logging.INFO)
+        root.info('No logging configuration found (tried "{}")'
+                  .format(default_logpath))
 
     if args.kbase_url not in KBASE_TARGETS:
         logger.info("Unrecognized KBase url {}".format(args.kbase_url))
