@@ -9,7 +9,7 @@ __date__ = '10/14/15'
 import os
 from genome_annotation_api import *
 from doekbase.data_api.tests import shared
-from doekbase.data_api.tests.examples.assembly import run
+from doekbase.data_api.sequence.assembly.api import AssemblyAPI
 #import doekbase.data_api.tests.examples.test_get_core_exons_for_gene
 #import doekbase.data_api.tests.examples.test_get_mRNAs_for_genes_to_GFF
 

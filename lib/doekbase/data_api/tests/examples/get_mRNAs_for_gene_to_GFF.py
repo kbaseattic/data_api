@@ -70,8 +70,6 @@ def get_gff(gene):
             string+=cds['contig_id']  + "\tphytozome9_0" + "\tCDS\t"  + str(cds['start']) + "\t" + str(stop) + "\t.\t" +  cds['strand']+ "\t.\t" + "ID="  + mrna_cds[mrna]  +".CDS." + str(j) + ";" + "Parent="+  mrna+"\n"
     return string       
 
-
-<<<<<<< HEAD
 def run(ws_url='https://ci.kbase.us/services/ws/'):
 
     genomeref = "ReferenceGenomeAnnotations/kb|g.166819"
@@ -83,16 +81,3 @@ def run(ws_url='https://ci.kbase.us/services/ws/'):
     print outfile
     with open(outfile, 'w') as f:
         f.write(gffdata)
-=======
-genomeref = "ReferenceGenomeAnnotations/kb|g.166828"
-genome = ObjectAPI(services, token=token, ref=genomeref)
-genome_annotation = GenomeAnnotationAPI(services, token, ref=genomeref)
-gene='kb|g.166828.locus.15345'    
-gffdata=get_gff(gene)
-
->>>>>>> upstream/develop
-
-outfile = 'g.166828.locus.15345.gff'
-print outfile
-with open(outfile, 'w') as f:
-    f.write(gffdata)
