@@ -78,9 +78,9 @@ def get_core_exons(gene, genome_annotation):
 
 def run(ws_url='https://ci.kbase.us/services/ws/'):
 
-    genomeref = "ReferenceGenomeAnnotations/kb|g.3157"
+    genomeref = "ReferenceGenomeAnnotations/kb|g.166819"
     genome_annotation = GenomeAnnotationAPI(services = {"workspace_service_url": ws_url}, token=os.environ.get('KB_AUTH_TOKEN'), ref=genomeref)
-    gene='kb|g.3157.locus.1'    
+    gene='kb|g.166819.locus.1'    
     exons=get_core_exons(gene, genome_annotation)
 
     print "Core exon(s) found in all mRNAs for gene "+gene

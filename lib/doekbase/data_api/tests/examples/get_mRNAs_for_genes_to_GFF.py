@@ -70,15 +70,15 @@ def get_gff(gene,genome_annotation):
 
 def run(ws_url='https://ci.kbase.us/services/ws/'):
 
-    genomeref = "ReferenceGenomeAnnotations/kb|g.3157"
+    genomeref = "ReferenceGenomeAnnotations/kb|g.166819"
     genome_annotation = GenomeAnnotationAPI(services = {"workspace_service_url": ws_url}, token=os.environ.get('KB_AUTH_TOKEN'), ref=genomeref)
-    genes=['kb|g.3157.locus.1','kb|g.3157.locus.2','kb|g.3157.locus.3']
+    genes=['kb|g.166819.locus.1','kb|g.166819.locus.2','kb|g.166819.locus.3']
 
     gffdata=""
     for s in genes:
         gffdata+=get_gff(s,genome_annotation)
 
-    outfile = 'g.3157.locus.1_2_3.gff'
+    outfile = 'g.166819.locus.1_2_3.gff'
     print outfile
     with open(outfile, 'w') as f:
         f.write(gffdata)

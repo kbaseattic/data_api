@@ -28,13 +28,13 @@ def get_protein_fasta(data):
 
 def run(ws_url='https://ci.kbase.us/services/ws/'):
 
-    genomeref = "ReferenceGenomeAnnotations/kb|g.3157"
+    genomeref = "ReferenceGenomeAnnotations/kb|g.166819"
     genome_annotation = GenomeAnnotationAPI(services = {"workspace_service_url": ws_url}, token=os.environ.get('KB_AUTH_TOKEN'), ref=genomeref)
         
     proteins= genome_annotation.get_proteins()
     fasta = get_protein_fasta(proteins)
 
-    outfile = '3157_prot.fasta'
+    outfile = '166819_prot.fasta'
     
     with open(outfile, 'w') as f:
         f.write(fasta)
