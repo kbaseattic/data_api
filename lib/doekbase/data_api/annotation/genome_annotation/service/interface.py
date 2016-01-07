@@ -105,13 +105,16 @@ class GenomeAnnotationService(service_core.BaseService):
         result = ga_api.get_features(feature_id_list)
 
         output = dict()
-        for k,v in result.items():
-            output[k] = ttypes.Feature_data(**v)
-            output[k].feature_locations = [ttypes.Region(contig_id=r[0],
-                                                         strand=r[2],
-                                                         start=r[1],
-                                                         length=r[3])
-                                           for r in v["feature_locations"]]
+        for k,lval in result.items():
+            output[k] = list()
+            for v in lval:
+                feature_data  = ttypes.Feature_data(**v)
+                feature_data.feature_locations = [ttypes.Region(contig_id=r[0],
+                                                             strand=r[2],
+                                                             start=r[1],
+                                                             length=r[3])
+                                               for r in v["feature_locations"]]
+                output[k].append(feature_data)
 
         return output
 
