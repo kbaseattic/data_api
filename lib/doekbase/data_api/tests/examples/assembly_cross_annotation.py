@@ -5,7 +5,7 @@ __date__ = '11/06/15'
 import doekbase.data_api
 from doekbase.data_api.annotation.genome_annotation.api import GenomeAnnotationAPI
 import os
-
+import json
 
 def contig_gc(genome_annotation, genome="kb|g.166819"):
     assembly = genome_annotation.get_assembly()
@@ -24,10 +24,12 @@ def run(ws_url='https://ci.kbase.us/services/ws/'):
          
     gc = contig_gc(genome_annotation, genomeref)
 
+    print gc
+
     outfile = '166819_GC.txt'
     
     with open(outfile, 'w') as f:
-        f.write(gc)
+        f.write(json.loads(gc))
 
 
 
