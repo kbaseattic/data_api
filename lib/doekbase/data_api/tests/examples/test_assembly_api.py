@@ -22,7 +22,7 @@ def test_examples():
     global temp_files
     url = shared.services['workspace_service_url']
     data=run(url)
-    temp_files.append()
+    #temp_files.append()
     #temp_files.append(test_get_core_exons_for_gene.run(url))
     #temp_files.append(test_get_mRNAs_for_genes_to_GFF.run(url))
 
