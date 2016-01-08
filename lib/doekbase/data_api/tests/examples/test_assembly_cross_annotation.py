@@ -1,10 +1,6 @@
-"""
-Verify that all examples in ``assembly_api`` are runnable.
 
-When you add a new example, add a call to it, here.
-"""
-__author__ = 'Dan Gunter <dkgunter@lbl.gov>'
-__date__ = '10/14/15'
+__author__ = 'Marcin Joachimiak <mjoachimiak@lbl.gov>'
+__date__ = '01/07/16'
 
 import os
 from genome_annotation_api import *
