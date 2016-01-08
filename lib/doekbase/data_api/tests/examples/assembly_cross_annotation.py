@@ -8,7 +8,6 @@ import os
 
 
 def contig_gc(genome_annotation, genome="kb|g.166819"):
-​
     assembly = genome_annotation.get_assembly()
     print "genome_annotation.get_assembly"
 
