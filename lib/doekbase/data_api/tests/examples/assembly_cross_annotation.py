@@ -3,7 +3,7 @@ __author__ = 'Marcin Joachimiak <mjoachimiak@lbl.gov>'
 __date__ = '11/06/15'
 
 import doekbase.data_api
-from doekbase.data_api.annotation.genome_annotation import GenomeAnnotationAPI
+from doekbase.data_api.annotation.genome_annotation.api import GenomeAnnotationAPI
 import os
 
 
