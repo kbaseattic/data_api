@@ -1,6 +1,7 @@
 import doekbase.data_api
 from doekbase.data_api.taxonomy.taxon.api import TaxonAPI
-from doekbase.data_api.annotation.genome_annotation import GenomeAnnotationAPI
+#from doekbase.data_api.annotation.genome_annotation import GenomeAnnotationAPI
+from doekbase.data_api.annotation.genome_annotation.api import GenomeAnnotationAPI
 from doekbase.data_api.sequence.assembly.api import AssemblyAPI
 from doekbase.data_api.core import ObjectAPI
 import time

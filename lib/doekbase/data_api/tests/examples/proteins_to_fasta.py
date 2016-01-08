@@ -22,9 +22,9 @@ def get_protein_fasta(data):
         geneinfo=data[keys]
         if(geneinfo["protein_aliases"] != None):
             aliases=get_aliases(geneinfo["protein_aliases"])
-            if(eneinfo["function"] != None):
-                function=geneinfo["function"]
-            sequence = geneinfo["amino_acid_sequence"]
+            if(geneinfo["protein_function"] != None):
+                function=geneinfo["protein_function"]
+            sequence = geneinfo["protein_amino_acid_sequence"]
             string += ">" + keys  +" " + function + " " + aliases + " " + "\n" + sequence +  "\n"
     return string
 
