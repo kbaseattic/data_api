@@ -5,13 +5,11 @@ from doekbase.data_api.annotation.genome_annotation.api import GenomeAnnotationA
 from doekbase.data_api.sequence.assembly.api import AssemblyAPI
 from doekbase.data_api.core import ObjectAPI
 import time
+import os
 
 services = {"workspace_service_url": "https://ci.kbase.us/services/ws/",
             "shock_service_url": "https://ci.kbase.us/services/shock-api/"}
 
-
-import os
-token = os.environ["KB_AUTH_TOKEN"]
 
 def get_gff(gene):
     t0 = time.time()

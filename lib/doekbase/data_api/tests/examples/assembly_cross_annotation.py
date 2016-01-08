@@ -12,7 +12,6 @@ def contig_gc(genome_annotation, genome="kb|g.166819"):
     assembly = genome_annotation.get_assembly()
     print "genome_annotation.get_assembly"
 
-    
     #get assembly info
     assembly_details = dict()
     assembly_details["number_of_contigs"] = assembly.get_number_contigs()
