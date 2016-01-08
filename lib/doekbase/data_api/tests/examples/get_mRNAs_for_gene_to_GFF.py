@@ -11,7 +11,7 @@ services = {"workspace_service_url": "https://ci.kbase.us/services/ws/",
             "shock_service_url": "https://ci.kbase.us/services/shock-api/"}
 
 
-def get_gff(gene):
+def get_gff(gene, genome_annotation):
     t0 = time.time()
     listmrna=genome_annotation.get_mrna_by_gene([gene])[gene]    
     t1 = time.time()
