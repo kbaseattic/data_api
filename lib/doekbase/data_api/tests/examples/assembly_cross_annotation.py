@@ -29,7 +29,7 @@ def run(ws_url='https://ci.kbase.us/services/ws/'):
     outfile = '166819_GC.txt'
     
     with open(outfile, 'w') as f:
-        f.write(json.loads(gc))
+        f.write(json.dumps(gc))
 
 
 
