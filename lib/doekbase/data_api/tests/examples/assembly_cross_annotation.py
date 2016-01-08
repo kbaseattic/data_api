@@ -19,7 +19,7 @@ def contig_gc(genome_annotation, genome="kb|g.166819"):
 
 def run(ws_url='https://ci.kbase.us/services/ws/'):
 
-    genomeref = "PrototypeReferenceGenomes/kb|g.166819"
+    genomeref = "ReferenceGenomeAnnotations/kb|g.166819"
     genome_annotation = GenomeAnnotationAPI(services = {"workspace_service_url": ws_url}, token=os.environ.get('KB_AUTH_TOKEN'), ref=genomeref)
          
     gc = contig_gc(proteins)
