@@ -152,12 +152,31 @@ def test_get_features_new():
 
 
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
+def test_get_features_one_new():
+    _log.debug("Input {}".format(genome_new))
+    for t_o in [t_new, t_new_e, t_client_new]:
+        features_t_o = t_o.get_features(["kb|g.166819.mRNA.0"])
+        assert isinstance(features_t_o, dict)
+        _log.debug("Output {}".format(len(features_t_o)))
+
+
+@skipUnless(shared.can_connect, 'Cannot connect to workspace')
 def test_get_proteins_new():
     _log.debug("Input {}".format(genome_new))
     for t_o in [t_new, t_new_e, t_client_new]:
         proteins_t_o = t_o.get_proteins()
         assert isinstance(proteins_t_o, dict)
         _log.debug("Output {}".format(len(proteins_t_o)))
+
+
+#@skipUnless(shared.can_connect, 'Cannot connect to workspace')
+#def test_get_mrna_utrs_new():
+#    pass
+
+
+#@skipUnless(shared.can_connect, 'Cannot connect to workspace')
+#def test_get_mrna_exons_new():
+#    pass
 
 
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
@@ -400,12 +419,31 @@ def test_get_features_old():
 
 
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
+def test_get_features_one_old():
+    _log.debug("Input {}".format(genome_old))
+    for t_o in [t_old, t_old_e, t_client_old]:
+        features_t_o = t_o.get_features(["kb|g.166819.mRNA.0"])
+        assert isinstance(features_t_o, dict)
+        _log.debug("Output {}".format(len(features_t_o)))
+
+
+@skipUnless(shared.can_connect, 'Cannot connect to workspace')
 def test_get_proteins_old():
     _log.debug("Input {}".format(genome_old))
     for t_o in [t_old, t_old_e, t_client_old]:
         proteins_t_o = t_o.get_proteins()
         assert isinstance(proteins_t_o, dict)
         _log.debug("Output {}".format(len(proteins_t_o)))
+
+
+#@skipUnless(shared.can_connect, 'Cannot connect to workspace')
+#def test_get_mrna_utrs_new():
+#    pass
+
+
+#@skipUnless(shared.can_connect, 'Cannot connect to workspace')
+#def test_get_mrna_exons_new():
+#    pass
 
 
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
