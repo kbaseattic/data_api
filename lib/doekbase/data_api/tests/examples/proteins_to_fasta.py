@@ -6,11 +6,6 @@ import doekbase.data_api
 from doekbase.data_api.annotation.genome_annotation.api import GenomeAnnotationAPI
 import os
 
-def get_aliases (data):
-    string=""
-    for keys in data:
-        string += str(keys) + " "
-    return string
 
 def get_protein_fasta(data):
     i=0
@@ -21,7 +16,7 @@ def get_protein_fasta(data):
             break
         geneinfo=data[keys]
         if(geneinfo["protein_aliases"] != None):
-            aliases=get_aliases(geneinfo["protein_aliases"])
+            aliases="".join(geneinfo["protein_aliases"])
             if(geneinfo["protein_function"] != None):
                 function=geneinfo["protein_function"]
             sequence = geneinfo["protein_amino_acid_sequence"]
