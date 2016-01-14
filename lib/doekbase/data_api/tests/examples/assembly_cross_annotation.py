@@ -12,9 +12,10 @@ def contig_gc(genome_annotation, genome="kb|g.166819"):
     assembly = genome_annotation.get_assembly()
     print "genome_annotation.get_assembly"
 
-    assembly_details = dict
+    assembly_details = dict()
     #retrieve the contig gc content
-    assembly_details["contig_gcs"] = assembly.get_contig_gc_content()
+    contig_gcs = assembly.get_contig_gc_content()
+    assembly_details["contig_gcs"] = contig_gcs
 
     return assembly_details["contig_gcs"]
 
