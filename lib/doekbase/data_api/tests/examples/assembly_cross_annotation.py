@@ -7,19 +7,22 @@ from doekbase.data_api.annotation.genome_annotation.api import GenomeAnnotationA
 import os
 import json
 
+#skeleton method demoonstrating how to retrieve various data about an assembly
 def contig_gc(genome_annotation, genome="kb|g.166819"):
     assembly = genome_annotation.get_assembly()
     print "genome_annotation.get_assembly"
 
-    #get assembly info
-    assembly_details = dict()
-    assembly_details["number_of_contigs"] = assembly.get_number_contigs()
+    assembly_details = dict
+    #retrieve the contig gc content
+    assembly_details["contig_gc"] = assembly.get_contig_gc_content()
 
-    return assembly.get_contig_gc_content()
+    return assembly_details["contig_gc"]
 
 def run(ws_url='https://ci.kbase.us/services/ws/'):
 
+    #an example KBase reference genome
     genomeref = "ReferenceGenomeAnnotations/kb|g.166819"
+    #creating a new GenomeAnnotation object
     genome_annotation = GenomeAnnotationAPI(services = {"workspace_service_url": ws_url}, token=os.environ.get('KB_AUTH_TOKEN'), ref=genomeref)
          
     gc = contig_gc(genome_annotation, genomeref)
