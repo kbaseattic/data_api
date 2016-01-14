@@ -62,7 +62,7 @@ def get_gff(gene,genome_annotation):
         cds=mrna_cds[mrna]
         infomrna=mrna_location[mrna]
         infocds=cds_location[mrna_cds[mrna]]
-        i=
+        i=0
         #output exon gene data
         for exon in infomrna:
             i=i+1
