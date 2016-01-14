@@ -14,9 +14,9 @@ def contig_gc(genome_annotation, genome="kb|g.166819"):
 
     assembly_details = dict
     #retrieve the contig gc content
-    assembly_details["contig_gc"] = assembly.get_contig_gc_content()
+    assembly_details["contig_gcs"] = assembly.get_contig_gc_content()
 
-    return assembly_details["contig_gc"]
+    return assembly_details["contig_gcs"]
 
 def run(ws_url='https://ci.kbase.us/services/ws/'):
 
