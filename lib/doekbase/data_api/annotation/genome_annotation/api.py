@@ -1,6 +1,6 @@
 """
 Data API for Genome Annotation entities.  This API provides methods for retrieving the
-Assembly and Taxon associated with an annotation, as well as retrieving individual features.
+Assembly and Taxon associated with an annotation, as well as retrieving individual Features.
 """
 
 # stdlib imports
@@ -20,9 +20,9 @@ _GENOME_TYPES = ['KBaseGenomes.Genome']
 _GENOME_ANNOTATION_TYPES = ['KBaseGenomeAnnotations.GenomeAnnotation']
 TYPES = _GENOME_TYPES + _GENOME_ANNOTATION_TYPES
 
-#: Mapping of feature type codes to descriptions
+#: Mapping of Feature type codes to descriptions
 #: of their meaning. The keys of this mapping give possible values for
-#: functions taking feature type identifiers, e.g.
+#: functions taking Feature type identifiers, e.g.
 #: :meth:`GenomeInterface.get_feature_types`.
 FEATURE_DESCRIPTIONS = {
     "CDS": "Coding Sequence",
@@ -83,16 +83,16 @@ class GenomeAnnotationInterface(object):
         pass
 
     def get_feature_type_descriptions(self, type_list=None):
-        """Retrieves a descriptive string for each feature type identifier.
+        """Retrieves a descriptive string for each Feature type identifier.
         
         Args:
-          type_list (list<str>): List of feature types. The known values for
+          type_list (list<str>): List of Feature types. The known values for
             these are enumerated in the module's  :data:`FEATURE_DESCRIPTIONS`.
             If this list is empty or None, then the whole mapping will be
             returned.
         
         Returns:
-          dict: Key/value pairs for each requested feature description.
+          dict: Key/value pairs for each requested Feature description.
         """
         
         if not type_list:
@@ -108,40 +108,40 @@ class GenomeAnnotationInterface(object):
 
     @abc.abstractmethod
     def get_feature_type_counts(self, type_list=None):
-        """Retrieve the number of Genome Features, grouped by
-        feature type identifier.
+        """Retrieve the numbers of genome Features, grouped by
+        Feature type identifier.
 
         Args:
-          type_list (list<str>): List of feature types. Each should match a
+          type_list (list<str>): List of Feature types. Each should match a
             value in :data:`FEATURE_DESCRIPTIONS`. If None,
             or empty, will retrieve all type counts.
 
         Returns:
-          dict: Map of string feature types to integer counts.
+          dict: Map of string Feature types to integer counts.
         """
         pass
 
     @abc.abstractmethod
     def get_feature_ids(self, filters=None, group_by="type"):
-        """Retrieves feature ids based on filters such as feature types,
+        """Retrieves Feature ids based on filters such as Feature types,
         regions, functional descriptions, aliases.
         
-        If no filters are applied, all feature ids will be returned.
+        If no filters are applied, all Feature ids will be returned.
         Only the group_by selected will be included in the results.
         
-        Retrieves feature ids based on filters such as feature types, regions, functional descriptions, aliases.
+        Retrieves Feature ids based on filters such as Feature types, regions, functional descriptions, aliases.
 
         Args:
           filters: Optional dictionary of filters that can be applied to object contents.
                    Recognized filter keys:
-                       "type_list" - List of feature type strings.
+                       "type_list" - List of Feature type strings.
                                      Should be findable in :data:`FEATURE_DESCRIPTIONS`.
                        "region_list" - List of region specs.
                                        e.g.,[{"contig_id": str, "strand": "+"|"-"|"?", "start": int, "length": int},...]
                        "function_list" - List of function strings to match.
                        "alias_ist" - List of alias strings to match.
 
-          group_by: Specify the grouping of feature ids returned.
+          group_by: Specify the grouping of Feature ids returned.
                     Recognized values are one of ["type","region","function","alias"]
                     Defaults to "type".
 
@@ -155,21 +155,21 @@ class GenomeAnnotationInterface(object):
 
     @abc.abstractmethod
     def get_features(self, feature_id_list=None):
-        """Retrieves all the available data for Genome Features.
+        """Retrieves all the available data for a genomes' Features.
 
         Args:
-          feature_id_list (list<str>): List of features to retrieve.
-            If None, returns all feature functions.
+          feature_id_list (list<str>): List of Features to retrieve data for.
+            If None, returns all Features.
 
         Returns:
-          dict<str,dict<str,list>>: Mapping from feature IDs to dicts
+          dict<str,dict<str,list>>: Mapping from Feature IDs to dicts
             of available data.
         """
         pass
 
     @abc.abstractmethod
     def get_proteins(self):
-        """Retrieves all the available proteins for genome features.
+        """Retrieves all the available proteins for a genome.
 
         Returns:
           list<dict>"""
@@ -177,54 +177,54 @@ class GenomeAnnotationInterface(object):
 
     @abc.abstractmethod
     def get_feature_locations(self, feature_id_list=None):
-        """Retrieves the location information for given genome features.
+        """Retrieves the location information for given genome Features.
         
         Args:
-          feature_id_list (list<str>): List of features to retrieve.
-            If None, returns all feature functions.
+          feature_id_list (list<str>): List of Features to retrieve data for.
+            If None, returns all Feature locations.
         
         Returns:
-          dict: Mapping from feature IDs to location information for each.
+          dict: Mapping from Feature IDs to location information for each.
           The location information has the following key/value pairs:
 
           contig_id : str
               The identifier for this contig
           strand : str
-              The strand for the contig ????
+              The strand for the feature
           start : int
-              The start position for the contig
+              The start position for the feature
           length : int
-              The length of the contig
+              The length of the feature
         """
         pass
     
     @abc.abstractmethod
     def get_feature_dna(self, feature_id_list=None):
-        """Retrieves the DNA sequence for genome features.
+        """Retrieves the DNA sequences for genome Features.
         
-        If `feature_id_list` is None, returns all feature dna.
+        If `feature_id_list` is None, returns DNA sequences for all features.
         
         Args:
-          feature_id_list (list<str>): List of features.
+          feature_id_list (list<str>): List of Features to retrieve data for.
         
         Returns:
-          dict<str,str>: Mapping of feature IDs to their values.
+          dict<str,str>: Mapping of Feature IDs to their DNA sequences.
         """
         pass
 
     @abc.abstractmethod
     def get_feature_functions(self, feature_id_list=None):
         """
-        Retrieves the functional description for given features.
+        Retrieves the functional description for given Features.
 
 
         Args:
-          feature_id_list (list<str>): List of features to retrieve.
-            If None, returns all feature functions.
+          feature_id_list (list<str>): List of Features to retrieve data for.
+            If None, returns all Feature functions.
 
         
         Returns:
-          dict<str,str>: Mapping from feature IDs to their functions.
+          dict<str,str>: Mapping from Feature IDs to their functions.
 
         """
         pass
@@ -234,8 +234,8 @@ class GenomeAnnotationInterface(object):
         """Retrieves the aliases for genome features.
 
         Args:
-          feature_id_list (list<str>): List of features to retrieve.
-            If None, returns all feature functions.
+          feature_id_list (list<str>): List of Features to retrieve data for.
+            If None, returns all Feature aliases.
         
         Returns:
           dict<str>: list<str>"""
@@ -243,11 +243,11 @@ class GenomeAnnotationInterface(object):
     
     @abc.abstractmethod
     def get_feature_publications(self, feature_id_list=None):
-        """Retrieves the publications for genome features.
+        """Retrieves the publications for genome Features.
 
         Args:
-          feature_id_list (list<str>): List of features to retrieve.
-            If None, returns all feature functions.
+          feature_id_list (list<str>): List of Features to retrieve data for.
+            If None, returns all Feature publications.
         
         Returns:
           dict<str>: list<dict>"""
@@ -255,11 +255,11 @@ class GenomeAnnotationInterface(object):
 
     @abc.abstractmethod
     def get_cds_by_mrna(self, mrna_feature_id_list=None):
-        """Retrieves coding sequences (cds) for given mRNA feature IDs.
+        """Retrieves coding sequence Features (cds) for given mRNA Feature IDs.
 
         Args:
-           mrna_feature_id_list (list<str>): List of mrna feature ids to map to cds feature ids.
-             If None, returns all mappings between mrna feature ids and cds feature ids.
+           mrna_feature_id_list (list<str>): List of mRNA Feature ids to map to cds Features.
+             If None, returns all mappings between mRNA Feature ids and cds Feature ids.
         Returns:
           dict<str>: str
         """
@@ -267,11 +267,11 @@ class GenomeAnnotationInterface(object):
 
     @abc.abstractmethod
     def get_mrna_by_cds(self, cds_feature_id_list=None):
-        """Retrieves mRNA for given coding sequences (cds) feature IDs.
+        """Retrieves mRNA Features for given coding sequences (cds) Feature IDs.
 
         Args:
-           cds_feature_id_list (list<str>): List of cds feature ids to map to mrna feature ids.
-             If None, returns all mappings between cds feature ids and mrna feature ids
+           cds_feature_id_list (list<str>): List of cds Feature ids to map to mRNA Features.
+             If None, returns all mappings between cds Feature ids and mRNA Feature ids
         Returns:
           dict<str>: str
         """
@@ -279,11 +279,11 @@ class GenomeAnnotationInterface(object):
 
     @abc.abstractmethod
     def get_gene_by_cds(self, cds_feature_id_list=None):
-        """Retrieves Genes for given coding sequence (cds)  feature IDs.
+        """Retrieves gene Features for given coding sequence (cds) Feature IDs.
 
         Args:
-           cds_feature_id_list (list<str>): List of features to retrieve.
-             If None, returns all values.
+           cds_feature_id_list (list<str>): List of cds Feature ids to map to gene Features.
+             If None, returns all mappings between cds Feature ids and gene Features.
         Returns:
           dict<str>: str
         """
@@ -291,11 +291,11 @@ class GenomeAnnotationInterface(object):
   
     @abc.abstractmethod
     def get_gene_by_mrna(self, mrna_feature_id_list=None):
-        """Retrieves Genes for given mRNA feature IDs.
+        """Retrieves gene Features for given mRNA Feature IDs.
 
         Args:
-           mrna_feature_id_list (list<str>): List of gene feature ids to map to mrna feature ids.
-             If None, returns all values.
+           mrna_feature_id_list (list<str>): List of mRNA Feature ids to map to gene Feature ids.
+             If None, returns all mappings between mRNA Feature ids and gene Feature ids.
         Returns:
           dict<str>: str
         """
@@ -303,11 +303,11 @@ class GenomeAnnotationInterface(object):
 
     @abc.abstractmethod
     def get_cds_by_gene(self, gene_feature_id_list=None):
-        """Retrieves coding sequences (cds) for given Gene feature IDs.
+        """Retrieves coding sequence Features (cds) for given gene Feature IDs.
 
         Args:
-           gene_feature_id_list (list<str>): List of features to retrieve.
-             If None, returns all values.
+           gene_feature_id_list (list<str>): List of gene Feature ids to map to cds Feature ids.
+             If None, returns all mappings between gene Feature ids and cds Feature ids.
         Returns:
           dict<str>: list<str>
         """
@@ -318,8 +318,8 @@ class GenomeAnnotationInterface(object):
         """Retrieves mRNA for given Gene feature IDs.
 
         Args:
-           gene_feature_id_list (list<str>): List of mrna feature ids to map to gene feature ids.
-             If None, returns all values.
+           gene_feature_id_list (list<str>): List of gene Feature ids to map to mRNA Feature ids.
+             If None, returns all mappings between gene Feature ids and mRNA Feature ids.
         Returns:
           dict<str>: list<str>
         """
@@ -594,7 +594,7 @@ class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
 
     def get_feature_type_counts(self, type_list=None):
         """
-        Retrieves number of Genome Features from a KBaseGenomes.Genome object, filtering on Feature type.
+        Retrieves the number of genome Features from a KBaseGenomes.Genome object, filtering on Feature type.
 
         Returns:
           dict<str>:int"""
@@ -929,8 +929,8 @@ class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
         return {}
 
     def _get_features(self):
-        """Get a *copy* of the features.
-        The original list of features should not be modified anywhere.
+        """Get a *copy* of the Features.
+        The original list of Features should not be modified anywhere.
         """
         # create/cache a 'blist' version of the features so copying will be cheap
         if self._data_features_blist is None:

@@ -23,7 +23,7 @@ TYPES = _GENOME_TYPES + _TAXON_TYPES
 
 
 class TaxonInterface(object):
-    """Represents a Taxonomic Unit, e.g., species.
+    """Represents a taxonomic unit, e.g., species.
 
     Built to support KBaseGenomeAnnotations.Taxon and
     KBaseGenomes.Genome.
@@ -32,24 +32,24 @@ class TaxonInterface(object):
 
     @abc.abstractmethod
     def get_parent(self, ref_only=False):
-        """Retrieve parent Taxon.
+        """Retrieve the parent Taxon.
 
         Args:
-          ref_only (bool): Return the reference instead of the full
+          ref_only (bool): Return a reference instead of the full
                            TaxonAPI object.
         Returns:
-          TaxonAPI, or str: Parent Taxon, either as an object or a
+          TaxonAPI, or str: parent Taxon, either as an object or a
                     reference.
 
         Raises:
-          AttributeError: If no Parent Taxon exists for this Taxon.
+          AttributeError: If no parent Taxon exists for this Taxon.
          """
         pass
 
     @abc.abstractmethod
     def get_children(self, ref_only=False):
         """Retrieve the children Taxon of this Taxon as TaxonAPI objects.
-        If this is accessing a Genome object, returns None.
+        If this is accessing a KBaseGenomes.Genome object, returns None.
 
         Returns:
           list<TaxonAPI>
@@ -58,8 +58,8 @@ class TaxonInterface(object):
 
     @abc.abstractmethod
     def get_genome_annotations(self, ref_only=False):
-        """Retrieve the GenomeAnnotations that refer to this Taxon.
-        If this is accessing a Genome object, returns None.
+        """Retrieve the GenomeAnnotation(s) that refer to this Taxon.
+        If this is accessing a KBaseGenomes.Genome object, returns None.
 
         Returns:
           list<GenomeAnnotationAPI>
@@ -73,7 +73,7 @@ class TaxonInterface(object):
         Returns:
           str
 
-          e.g., "Top unit;Middle unit;Lowest unit" """
+          e.g., "{Domain unit;Kingdom unit;Phylum unit" """
         pass
 
     @abc.abstractmethod
@@ -89,7 +89,7 @@ class TaxonInterface(object):
     @abc.abstractmethod
     def get_taxonomic_id(self):
         """Retrieve the NCBI taxonomic id of this Taxon.
-        The KBaseGenomes.Genome type's closest representative is source_id.
+        The KBaseGenomes.Genome types' closest representative is source_id.
 
         Returns:
           int
@@ -100,7 +100,7 @@ class TaxonInterface(object):
 
     @abc.abstractmethod
     def get_kingdom(self):
-        """Retrieve the kingdom associated with this Taxonomic Unit.
+        """Retrieve the kingdom associated with this Taxon.
 
         Returns:
           str"""
@@ -108,7 +108,7 @@ class TaxonInterface(object):
 
     @abc.abstractmethod
     def get_domain(self):
-        """Retrieve the domain associated with this Taxonomic Unit.
+        """Retrieve the domain associated with this Taxon.
 
         Returns:
           str"""
@@ -116,7 +116,7 @@ class TaxonInterface(object):
 
     @abc.abstractmethod
     def get_aliases(self):
-        """Retrieve the aliases for this Taxonomic Unit.
+        """Retrieve the taxonomic aliases for this Taxon.
 
         Returns:
           list<str>"""
@@ -124,7 +124,7 @@ class TaxonInterface(object):
 
     @abc.abstractmethod
     def get_genetic_code(self):
-        """Retrieve the genetic code for this Taxonomic Unit.
+        """Retrieve the genetic code for this Taxon.
 
         Returns:
           int"""

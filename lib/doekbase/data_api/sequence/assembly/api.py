@@ -1,7 +1,7 @@
 """
 Data API for Assembly entities.  This API provides methods for retrieving
-summary information such as GC content, total length, external source information
-as well as methods for retrieving individual contig sequences and gathering contig lengths and contig GC.
+summary information such as details about an Assembly (external source information, total length)
+and the underlying contigs (GC content, length).
 """
 
 # Stdlib
@@ -33,7 +33,7 @@ TYPES = _CONTIGSET_TYPES + _ASSEMBLY_TYPES
 g_stats = PerfCollector('AssemblyAPI')
 
 class AssemblyInterface(object):
-    """API for the assembled sequences associated with a Genome Annotation.
+    """API for a genome Assembly associated with a Genome Annotation.
     """
     
     __metaclass__ = abc.ABCMeta
@@ -49,7 +49,7 @@ class AssemblyInterface(object):
 
     @abc.abstractmethod    
     def get_genome_annotations(self, ref_only=False):
-        """Retrieve the GenomeAnnotations that refer to this Assembly.
+        """Retrieve the GenomeAnnotation(s) that refer to this Assembly.
         
         Returns:
           list<GenomeAnnotationAPI>: List of GenomeAnnotationAPI objects
@@ -83,7 +83,7 @@ class AssemblyInterface(object):
 
     @abc.abstractmethod    
     def get_number_contigs(self):
-        """Retrieve the number of contiguous sequences in this Assembly.
+        """Retrieve the number of contig sequences in this Assembly.
         
         Returns:
           int
@@ -110,35 +110,35 @@ class AssemblyInterface(object):
 
     @abc.abstractmethod    
     def get_contig_lengths(self, contig_id_list=None):
-        """Retrieve the length for every contiguous sequence.
+        """Retrieve the lengths for all contig sequence.
         
         Returns:
-          dict<str,int>: Mapping of sequence identifiers to lengths.
+          dict<str,int>: Mapping of contig identifiers to length.
         """
         pass
 
     @abc.abstractmethod    
     def get_contig_gc_content(self, contig_id_list=None):
-        """Retrieve the total GC content for each contiguous sequence
-        of this Assembly.
+        """Retrieve the total GC content for each contig sequence
+        in this Assembly.
         
         Returns:
-          dict<str,float>: Mapping of sequence identifiers to GC content.
+          dict<str,float>: Mapping of contig identifiers to GC content.
         """
         pass
 
     @abc.abstractmethod    
     def get_contig_ids(self):
-        """Retrieve the ids for every contiguous sequence in this Assembly.
+        """Retrieve the ids for every contig sequence in this Assembly.
         
         Returns:
-          list<str>: Sequence identifiers
+          list<str>: Contig identifiers
         """
         pass
 
     @abc.abstractmethod    
     def get_contigs(self, contig_id_list=None):
-        """Retrieve contiguous sequences from this Assembly by id.
+        """Retrieve contig sequences from this Assembly by id.
         
         Args:
           contig_id_list: list<str>
