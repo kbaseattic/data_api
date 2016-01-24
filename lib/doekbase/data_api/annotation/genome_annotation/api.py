@@ -8,22 +8,14 @@ import abc
 import hashlib
 
 # 3rd party imports
-import blist
 
 # local imports
 from doekbase.data_api.core import ObjectAPI
-from doekbase.data_api.util import get_logger, logged
-from doekbase.data_api import exceptions
-import doekbase.data_api.annotation.genome_annotation.service.ttypes as ttypes
 
 _GENOME_TYPES = ['KBaseGenomes.Genome']
-_GENOME_ANNOTATION_TYPES = ['KBaseGenomeAnnotations.GenomeAnnotation']
+_GENOME_ANNOTATION_TYPES = ['KBaseGenomesCondensedPrototypeV2.GenomeAnnotation']
 TYPES = _GENOME_TYPES + _GENOME_ANNOTATION_TYPES
 
-#: Mapping of feature type codes to descriptions
-#: of their meaning. The keys of this mapping give possible values for
-#: functions taking feature type identifiers, e.g.
-#: :meth:`GenomeInterface.get_feature_types`.
 FEATURE_DESCRIPTIONS = {
     "CDS": "Coding Sequence",
     "PEG": "Protein Encoding Genes",
@@ -45,293 +37,231 @@ FEATURE_DESCRIPTIONS = {
     "pp": "Prophage",
     "pi": "Pathogenicity Island",
     "rsw": "Riboswitch",
-    "trnspn": "Transposon"    
+    "trnspn": "Transposon"
 }
 
-_log = get_logger("GenomeAnnotationAPI")
 
-
-class GenomeAnnotationInterface(object):
+class GenomeInterface(object):
     __metaclass__ = abc.ABCMeta
 
     @abc.abstractmethod
-    def get_taxon(self, ref_only=False):
-        """Retrieves the Taxon assigned to this Genome Annotation.
-        
-        Returns:
-          TaxonAPI: Taxon object
+    def get_taxon(self):
         """
+        Retrieves the Taxon assigned to this Genome Annotation.
+
+        Returns:
+          TaxonAPI"""
         pass
 
     @abc.abstractmethod
-    def get_assembly(self, ref_only=False):
-        """Retrieves the Assembly used to create this Genome Annotation.
-        
-        Returns:
-          AssemblyAPI: Assembly object
+    def get_assembly(self):
         """
+        Retrieves the genome Assembly which was used for this Genome Annotation.
+
+        Returns:
+          AssemblyAPI"""
         pass
-    
+
     @abc.abstractmethod
     def get_feature_types(self):
-        """Retrieves the Genome Feature type identifiers available from this
-        Genome Annotation.
-        
-        Returns:
-          list<str>: List of feature type identifiers.
         """
+        Retrieves the genomic Feature type identifiers available from this Genome Annotation.
+
+        Returns:
+          list<str>"""
         pass
 
     def get_feature_type_descriptions(self, type_list=None):
-        """Retrieves a descriptive string for each feature type identifier.
-        
-        Args:
-          type_list (list<str>): List of feature types. The known values for
-            these are enumerated in the module's  :data:`FEATURE_DESCRIPTIONS`.
-            If this list is empty or None, then the whole mapping will be
-            returned.
-        
-        Returns:
-          dict: Key/value pairs for each requested feature description.
         """
-        
-        if not type_list:
-            result = FEATURE_DESCRIPTIONS
+        Retrieves a description for each Feature type identifier.
+
+        Args:
+          type_list: list<str>
+
+        Returns:
+          dict"""
+
+        if type_list is None:
+            return FEATURE_DESCRIPTIONS
+        elif isinstance(type_list, list) and len(type_list) > 0 and \
+             (isinstance(type_list[0], unicode) or isinstance(type_list[0],str)):
+            return {x: FEATURE_DESCRIPTIONS[x] for x in FEATURE_DESCRIPTIONS if x in type_list}
         else:
-            result = {}
-            for key in type_list:
-                if not isinstance(key, basestring):
-                    raise TypeError("key '{}' is type '{}', but type 'str' "
-                                    "expected".format(key, type(key)))
-                result[key] = FEATURE_DESCRIPTIONS[key]
-        return result
+            raise TypeError()
 
     @abc.abstractmethod
-    def get_feature_type_counts(self, type_list=None):
-        """Retrieve the number of Genome Features, grouped by
-        feature type identifier.
+    def get_feature_ids(self, type_list=None, region_list=None, function_list=None, alias_list=None):
+        """
+        Retrieves Feature ids based on filters such as Feature types, regions, functional descriptions, aliases.
+
+        If any argument is None, it will not be used as a filter.
+        If all arguments are None, all feature ids will be returned.
 
         Args:
-          type_list (list<str>): List of feature types. Each should match a
-            value in :data:`FEATURE_DESCRIPTIONS`. If None,
-            or empty, will retrieve all type counts.
+          type_list: list<str>
+          region_list: list<dict> e.g., [{"contig_id": str, "strand": "+"|"-"|"?", "start": int, "stop": int},...]
+          function_list: list<str>
+          alias_list: list<str>
 
         Returns:
-          dict: Map of string feature types to integer counts.
-        """
+          dict<str>:list<dict or str>"""
         pass
 
     @abc.abstractmethod
-    def get_feature_ids(self, filters=None, group_by="type"):
-        """Retrieves feature ids based on filters such as feature types,
-        regions, functional descriptions, aliases.
-        
-        If no filters are applied, all feature ids will be returned.
-        Only the group_by selected will be included in the results.
-        
-        Retrieves feature ids based on filters such as feature types, regions, functional descriptions, aliases.
+    def get_feature_type_counts(self, type_list=None):
+        """
+        Retrieve the counts of genomic Feature types available in this Genome Annotation.
+
+        If type_list is None, will retrieve all type counts.
 
         Args:
-          filters: Optional dictionary of filters that can be applied to object contents.
-                   Recognized filter keys:
-                       "type_list" - List of feature type strings.
-                                     Should be findable in :data:`FEATURE_DESCRIPTIONS`.
-                       "region_list" - List of region specs.
-                                       e.g.,[{"contig_id": str, "strand": "+"|"-"|"?", "start": int, "length": int},...]
-                       "function_list" - List of function strings to match.
-                       "alias_ist" - List of alias strings to match.
-
-          group_by: Specify the grouping of feature ids returned.
-                    Recognized values are one of ["type","region","function","alias"]
-                    Defaults to "type".
+          type_list: list<str>
 
         Returns:
-          {"by_type": dict<str feature_type, list<str feature_id>>,
-           "by_region": dict<str contig_id, dict<str strand, dict<string range, list<string feature_id>>>>,
-           "by_function": dict<str function, list<str feature_id>>,
-           "by_alias": dict<str alias, list<str feature_id>>}"""
+          dict<str>:<int>"""
+        pass
 
-        pass  # TODO: add examples in docs for function_list and alias_list
+    @abc.abstractmethod
+    def get_feature_locations(self, feature_id_list=None):
+        """
+        Retrieves the location information for genomic Features available in this Genome Annotation.
+
+        If feature_id_list is None, returns all feature locations.
+
+        Args:
+          feature_id_list: list<str>
+
+        Returns:
+          dict<str>: dict
+
+          {"contig_id": str,
+           "strand": str,
+           "start": int
+           "length": int}"""
+        pass
+
+    @abc.abstractmethod
+    def get_feature_dna(self, feature_id_list=None):
+        """
+        Retrieves the DNA sequence for genomic Features available in this Genome Annotation.
+
+        If feature_id_list is None, returns all feature dna.
+
+        Args:
+          feature_id_list: list<str>
+
+        Returns:
+          dict<str>: str"""
+        pass
+
+    @abc.abstractmethod
+    def get_feature_functions(self, feature_id_list=None):
+        """
+        Retrieves the functional description for genomic Features available in this Genome Annotation.
+
+        If feature_id_list is None, returns all Feature functions.
+
+        Args:
+          feature_id_list: list<str>
+
+        Returns:
+          dict<str>: str"""
+        pass
+
+    @abc.abstractmethod
+    def get_feature_aliases(self, feature_id_list=None):
+        """
+        Retrieves the aliases for genomic Features available in this Genome Annotation.
+
+        If feature_id_list is None, returns all feature aliases.
+
+        Args:
+          feature_id_list: list<str>
+
+        Returns:
+          dict<str>: list<str>"""
+        pass
+
+    @abc.abstractmethod
+    def get_feature_publications(self, feature_id_list=None):
+        """
+        Retrieves the publications for genomic Features available in this Genome Annotation.
+
+        If feature_id_list is None, returns all feature associated publications.
+
+        Args:
+          feature_id_list: list<str>
+
+        Returns:
+          dict<str>: list<dict>"""
+        pass
 
     @abc.abstractmethod
     def get_features(self, feature_id_list=None):
-        """Retrieves all the available data for Genome Features.
+        """
+        Retrieves all the available data for a genomic Feature(s) available in this Genome Annotation.
+
+        If feature_id_list is None, returns all feature data.
 
         Args:
-          feature_id_list (list<str>): List of features to retrieve.
-            If None, returns all feature functions.
+          feature_id_list: list<str>
 
         Returns:
-          dict<str,dict<str,list>>: Mapping from feature IDs to dicts
-            of available data.
-        """
+          dict<str>: dict<str>: list"""
         pass
 
     @abc.abstractmethod
     def get_proteins(self):
-        """Retrieves all the available proteins for genome features.
+        """
+        Retrieves all the available proteins available in this Genome Annotation.
 
         Returns:
           list<dict>"""
         pass
 
     @abc.abstractmethod
-    def get_feature_locations(self, feature_id_list=None):
-        """Retrieves the location information for given genome features.
-        
-        Args:
-          feature_id_list (list<str>): List of features to retrieve.
-            If None, returns all feature functions.
-        
-        Returns:
-          dict: Mapping from feature IDs to location information for each.
-          The location information has the following key/value pairs:
-
-          contig_id : str
-              The identifier for this contig
-          strand : str
-              The strand for the contig ????
-          start : int
-              The start position for the contig
-          length : int
-              The length of the contig
-        """
-        pass
-    
-    @abc.abstractmethod
-    def get_feature_dna(self, feature_id_list=None):
-        """Retrieves the DNA sequence for genome features.
-        
-        If `feature_id_list` is None, returns all feature dna.
-        
-        Args:
-          feature_id_list (list<str>): List of features.
-        
-        Returns:
-          dict<str,str>: Mapping of feature IDs to their values.
-        """
-        pass
-
-    @abc.abstractmethod
-    def get_feature_functions(self, feature_id_list=None):
-        """
-        Retrieves the functional description for given features.
-
-
-        Args:
-          feature_id_list (list<str>): List of features to retrieve.
-            If None, returns all feature functions.
-
-        
-        Returns:
-          dict<str,str>: Mapping from feature IDs to their functions.
-
-        """
-        pass
-
-    @abc.abstractmethod
-    def get_feature_aliases(self, feature_id_list=None):
-        """Retrieves the aliases for genome features.
-
-        Args:
-          feature_id_list (list<str>): List of features to retrieve.
-            If None, returns all feature functions.
-        
-        Returns:
-          dict<str>: list<str>"""
-        pass
-    
-    @abc.abstractmethod
-    def get_feature_publications(self, feature_id_list=None):
-        """Retrieves the publications for genome features.
-
-        Args:
-          feature_id_list (list<str>): List of features to retrieve.
-            If None, returns all feature functions.
-        
-        Returns:
-          dict<str>: list<dict>"""
-        pass
-
-    @abc.abstractmethod
     def get_cds_by_mrna(self, mrna_feature_id_list=None):
-        """Retrieves coding sequences (cds) for given mRNA feature IDs.
-
-        Args:
-           mrna_feature_id_list (list<str>): List of mrna feature ids to map to cds feature ids.
-             If None, returns all mappings between mrna feature ids and cds feature ids.
-        Returns:
-          dict<str>: str
+        """
         """
         pass
 
     @abc.abstractmethod
     def get_mrna_by_cds(self, cds_feature_id_list=None):
-        """Retrieves mRNA for given coding sequences (cds) feature IDs.
-
-        Args:
-           cds_feature_id_list (list<str>): List of cds feature ids to map to mrna feature ids.
-             If None, returns all mappings between cds feature ids and mrna feature ids
-        Returns:
-          dict<str>: str
+        """
         """
         pass
 
     @abc.abstractmethod
     def get_gene_by_cds(self, cds_feature_id_list=None):
-        """Retrieves Genes for given coding sequence (cds)  feature IDs.
-
-        Args:
-           cds_feature_id_list (list<str>): List of features to retrieve.
-             If None, returns all values.
-        Returns:
-          dict<str>: str
+        """
         """
         pass
-  
+
     @abc.abstractmethod
     def get_gene_by_mrna(self, mrna_feature_id_list=None):
-        """Retrieves Genes for given mRNA feature IDs.
-
-        Args:
-           mrna_feature_id_list (list<str>): List of gene feature ids to map to mrna feature ids.
-             If None, returns all values.
-        Returns:
-          dict<str>: str
+        """
         """
         pass
 
     @abc.abstractmethod
     def get_cds_by_gene(self, gene_feature_id_list=None):
-        """Retrieves coding sequences (cds) for given Gene feature IDs.
-
-        Args:
-           gene_feature_id_list (list<str>): List of features to retrieve.
-             If None, returns all values.
-        Returns:
-          dict<str>: list<str>
+        """
         """
         pass
-    
+
     @abc.abstractmethod
     def get_mrna_by_gene(self, gene_feature_id_list=None):
-        """Retrieves mRNA for given Gene feature IDs.
-
-        Args:
-           gene_feature_id_list (list<str>): List of mrna feature ids to map to gene feature ids.
-             If None, returns all values.
-        Returns:
-          dict<str>: list<str>
+        """
         """
         pass
 
 
 
-class GenomeAnnotationAPI(ObjectAPI, GenomeAnnotationInterface):
+class GenomeAnnotationAPI(ObjectAPI, GenomeInterface):
     """
     Factory class for instantiating a GenomeAnnotationAPI object of the correct subtype.
     """
-    
+
     def __init__(self, services, token, ref):
         super(GenomeAnnotationAPI, self).__init__(services, token, ref)
 
@@ -339,36 +269,36 @@ class GenomeAnnotationAPI(ObjectAPI, GenomeAnnotationInterface):
 
         is_annotation_type = generic_object._typestring.split('-')[0] in _GENOME_ANNOTATION_TYPES
         is_genome_type = generic_object._typestring.split('-')[0] in _GENOME_TYPES
-    
+
         if not (is_annotation_type or is_genome_type):
             raise TypeError("Invalid type! Expected one of {0}, received {1}".format(TYPES, generic_object._typestring))
 
         if is_annotation_type:
-            self.proxy = _GenomeAnnotation(services, token, ref)
+            self.proxy = _Prototype(services, token, ref)
         else:
             self.proxy = _KBaseGenomes_Genome(services, token, ref)
 
-    def get_taxon(self, ref_only=False):
-        return self.proxy.get_taxon(ref_only)
+    def get_taxon(self):
+        return self.proxy.get_taxon()
 
-    def get_assembly(self, ref_only=False):
-        return self.proxy.get_assembly(ref_only)
-    
+    def get_assembly(self):
+        return self.proxy.get_assembly()
+
     def get_feature_types(self):
         return self.proxy.get_feature_types()
 
-    def get_feature_ids(self, filters=None, group_by="type"):
-        return self.proxy.get_feature_ids(filters, group_by)
+    def get_feature_ids(self, type_list=None, region_list=None, function_list=None, alias_list=None):
+        return self.proxy.get_feature_ids(type_list, region_list, function_list, alias_list)
 
     def get_feature_type_counts(self, type_list=None):
         return self.proxy.get_feature_type_counts(type_list)
-    
+
     def get_cds_protein(self, cds_id_list=None):
         raise NotImplementedError
 
     def get_feature_locations(self, feature_id_list=None):
         return self.proxy.get_feature_locations(feature_id_list)
-    
+
     def get_feature_dna(self, feature_id_list=None):
         return self.proxy.get_feature_dna(feature_id_list)
 
@@ -377,7 +307,7 @@ class GenomeAnnotationAPI(ObjectAPI, GenomeAnnotationInterface):
 
     def get_feature_aliases(self, feature_id_list=None):
         return self.proxy.get_feature_aliases(feature_id_list)
-    
+
     def get_feature_publications(self, feature_id_list=None):
         return self.proxy.get_feature_publications(feature_id_list)
 
@@ -390,216 +320,219 @@ class GenomeAnnotationAPI(ObjectAPI, GenomeAnnotationInterface):
     def get_cds_by_mrna(self, mrna_feature_id_list=None):
         return self.proxy.get_cds_by_mrna(mrna_feature_id_list)
 
-    def get_mrna_by_cds(self, cds_feature_id_list=None): 
+    def get_mrna_by_cds(self, cds_feature_id_list=None):
         return self.proxy.get_mrna_by_cds(cds_feature_id_list)
 
     def get_gene_by_cds(self, cds_feature_id_list=None):
         return self.proxy.get_gene_by_cds(cds_feature_id_list)
-  
+
     def get_gene_by_mrna(self, mrna_feature_id_list=None):
         return self.proxy.get_gene_by_mrna(mrna_feature_id_list)
 
     def get_cds_by_gene(self, gene_feature_id_list=None):
         return self.proxy.get_cds_by_gene(gene_feature_id_list)
-    
+
     def get_mrna_by_gene(self, gene_feature_id_list=None):
         return self.proxy.get_mrna_by_gene(gene_feature_id_list)
-    
 
-class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
+
+
+class _KBaseGenomes_Genome(ObjectAPI, GenomeInterface):
     def __init__(self, services, token, ref):
         super(_KBaseGenomes_Genome, self).__init__(services, token, ref)
-        self._data_features_blist = None  # see self._get_features()
 
-    def get_taxon(self, ref_only=False):
+    def get_taxon(self):
         from doekbase.data_api.taxonomy.taxon.api import TaxonAPI
+        return TaxonAPI(self.services, token=self._token, ref=self.ref)
 
-        if ref_only:
-            return self.ref
-        else:
-            return TaxonAPI(self.services, token=self._token, ref=self.ref)
-
-    def get_assembly(self, ref_only=False):
-        from doekbase.data_api.sequence.assembly.api import AssemblyAPI
-
-        contigset_ref = self.get_data_subset(path_list=["contigset_ref"])["contigset_ref"]
-
-        if ref_only:
-            return contigset_ref
-        else:
-            return AssemblyAPI(self.services, self._token, ref=contigset_ref)
+    def get_assembly(self):
+        from doekbase.data_api.sequence.assembly import AssemblyAPI
+        return AssemblyAPI(self.services, self._token, ref=self.get_data_subset(path_list=["contigset_ref"])["contigset_ref"])
 
     def get_feature_types(self):
         feature_types = list()
-        features = self._get_features()
+        data = self.get_data()
+        features = data["features"]
 
         for x in features:
-            if "type" in x and x["type"] not in feature_types:
+            if x["type"] not in feature_types:
                 feature_types.append(x["type"])
 
         return feature_types
 
-    def get_feature_ids(self, filters=None, group_by="type"):
-        # no choice but to pull all features
-        features = self._get_features()
+    def get_feature_ids(self, type_list=None, region_list=None, function_list=None, alias_list=None):
+        """
+        Retrieves Feature ids based on filters such as Feature types, regions, functional descriptions, aliases.
 
-        _log.debug('get_feature_ids.start num_features={:d}'.format(len(
-            features)))
+        Returns:
+          list<str>"""
 
-        # now process all filters and reduce the data
-        if filters is None:
-            filters = dict()
+        if type_list is None and region_list is None and function_list is None and alias_list is None:
+            # just grab everything
+            features = self.get_data_subset(path_list=["features"])["features"]
+            feature_ids = dict()
+            feature_ids["type"] = dict()
+            for x in features:
+                if x["type"] not in feature_ids["type"]:
+                    feature_ids["type"][x["type"]] = list()
 
-        if "type_list" in filters and filters["type_list"] is not None:
-            if not isinstance(filters["type_list"], list):
+                feature_ids["type"][x["type"]].append(x['id'])
+
+            return feature_ids
+
+        # once we get here we have to start pulling and filtering Features
+        type_ids = None
+        region_ids = None
+        function_ids = None
+        alias_ids = None
+
+        data = self.get_data()
+
+        if type_list is not None:
+            if not isinstance(type_list, list):
                 raise TypeError("A list of strings indicating feature types is required.")
-            elif len(filters["type_list"]) == 0:
+            elif len(type_list) == 0:
                 raise TypeError("A list of strings indicating feature types is required, received an empty list.")
 
-            remove_features = list()
-            for i in xrange(len(features)):
-                if features[i]["type"] not in filters["type_list"]:
-                    remove_features.append(i)
-            if len(remove_features) > 0:
-                for i in reversed(remove_features):
-                    del features[i]
+            type_ids = dict()
+            for x in data["features"]:
+                if x["type"] not in type_ids:
+                    type_ids[x["type"]] = list()
 
-        if "region_list" in filters and filters["region_list"] is not None:
-            if not isinstance(filters["region_list"], list):
+                type_ids[x["type"]].append(x["id"])
+
+        if region_list is not None:
+            if not isinstance(region_list, list):
                 raise TypeError("A list of region dictionaries is required.")
-            elif len(filters["region_list"]) == 0:
-                raise TypeError("A list of region dictionaries is required, received an empty list.")
+            elif len(region_list) == 0:
+                raise TypeError("A list of region dictionaries is required, recieved an empty list.")
+
+            if type_list is None:
+                type_list = self.get_feature_types()
 
             def is_feature_in_regions(f, regions):
-                if "location" not in f:
-                    return False
+                location_key = None
 
-                for loc in f["location"]:
+                if "location" in f:
+                    location_key = "location"
+                elif "locations" in f:
+                    location_key = "locations"
+
+                for loc in f[location_key]:
                     for r in regions:
-                        if r["contig_id"] == loc[0] and \
-                           (loc[2] == r["strand"] or r["strand"] == "?"):
-
-                            if loc[2] == "+" and \
-                               max(loc[1], r["start"]) <= min(loc[1]+loc[3], r["start"] + r["length"]):
-                                return True
-                            elif loc[2] == "-" and \
-                               max(loc[1]+loc[3], r["start"]) <= min(loc[1], r["start"]):
-                                return True
+                        if (r["contig_id"] == loc[0]) and \
+                           (loc[2] == r["strand"] or r["strand"] == "?") and \
+                           (loc[1] <= r["stop"] and r["start"] <= loc[1] + loc[3]):
+                            return True
                 return False
 
-            remove_features = list()
-            for i in xrange(len(features)):
-                if not is_feature_in_regions(features[i], filters["region_list"]):
-                    remove_features.append(i)
-            if len(remove_features) > 0:
-                for i in reversed(remove_features):
-                    del features[i]
+            region_ids = dict()
+            for r in region_list:
+                region_ids[r["contig_id"]] = list()
 
-        if "function_list" in filters and filters["function_list"] is not None:
-            if not isinstance(filters["function_list"], list):
+            for x in data["features"]:
+                if is_feature_in_regions(x, region_list):
+                    region_ids[x["contig_id"]].append(x["id"])
+
+        if function_list is not None:
+            if not isinstance(function_list, list):
                 raise TypeError("A list of feature function strings is required.")
-            elif len(filters["function_list"]) == 0:
-                raise TypeError("A list of feature function strings is required, received an empty list.")
+            elif len(function_list) == 0:
+                raise TypeError("A list of feature function strings is required, recieved an empty list.")
 
-            remove_features = list()
-            for i in xrange(len(features)):
-                if "function" not in features[i]:
-                    remove_features.append(i)
-                else:
-                    found = False
-                    for f in filters["function_list"]:
-                        if features[i]["function"].find(f) >= 0:
-                            found = True
-                            break
+            if type_list is None:
+                type_list = self.get_feature_types()
 
-                    if not found:
-                        remove_features.append(i)
-            if len(remove_features) > 0:
-                for i in reversed(remove_features):
-                    del features[i]
+            def is_function_in_feature(feature, function_tokens):
+                if "function" not in feature:
+                    return False
 
-        if "alias_list" in filters and filters["alias_list"] is not None:
-            if not isinstance(filters["alias_list"], list):
+                tokens = feature["function"].split()
+
+                for t in tokens:
+                    if t in function_tokens:
+                        return True
+
+                return False
+
+            function_ids = dict()
+            for function in function_list:
+                function_tokens = function.split()
+                function_ids[function] = [x['id'] for x in data["features"] if is_function_in_feature(x, function_tokens)]
+
+        if alias_list is not None:
+            if not isinstance(alias_list, list):
                 raise TypeError("A list of feature alias strings is required.")
-            elif len(filters["alias_list"]) == 0:
-                raise TypeError("A list of feature alias strings is required, received an empty list.")
+            elif len(alias_list) == 0:
+                raise TypeError("A list of feature alias strings is required, recieved an empty list.")
 
-            remove_features = list()
-            for i in xrange(len(features)):
-                if "aliases" not in features[i]:
-                    remove_features.append(i)
-                else:
-                    found = False
-                    for alias in filters["alias_list"]:
-                        if alias in features[i]["aliases"]:
-                            found = True
+            if type_list is None:
+                type_list = self.get_feature_types()
 
-                    if not found:
-                        remove_features.append(i)
-            if len(remove_features) > 0:
-                for i in reversed(remove_features):
-                    del features[i]
+            alias_ids = dict()
+            for alias in alias_list:
+                alias_ids[alias] = list()
 
-        # now that filtering has been completed, attempt to group the data as requested
-        results = dict()
+            for x in data["features"]:
+                for alias in alias_list:
+                    if "aliases" in x and alias in x["aliases"]:
+                        alias_ids[alias].append(x["id"])
 
-        if group_by == "type":
-            results["by_type"] = dict()
-            for x in features:
-                if x["type"] not in results["by_type"]:
-                    results["by_type"][x["type"]] = list()
+        # collect the results and find the intersection
+        intersecting_ids = dict()
 
-                results["by_type"][x["type"]].append(x["id"])
-        elif group_by == "region":
-            results["by_region"] = dict()
-            for x in features:
-                for r in x["location"]:
-                    contig_id = r[0]
-                    strand = r[2]
-                    start = r[1]
-                    length = r[3]
-                    range = "{}-{}".format(start,start+length)
+        values_intersect = set()
+        type_values = set()
+        region_values = set()
+        function_values = set()
+        alias_values = set()
 
-                    if contig_id not in results["by_region"]:
-                        results["by_region"][contig_id] = dict()
+        # flatten the dictionaries to sets of ids
+        if type_ids:
+            intersecting_ids["type"] = type_ids
+            for x in type_ids:
+                type_values.update(type_ids[x])
 
-                    if strand not in results["by_region"][contig_id]:
-                        results["by_region"][contig_id][strand] = dict()
+        if region_ids:
+            intersecting_ids["region"] = region_ids
+            for x in region_ids:
+                region_values.update(region_ids[x])
 
-                    if range not in results["by_region"][contig_id][strand]:
-                        results["by_region"][contig_id][strand][range] = list()
+        if function_ids:
+            intersecting_ids["function"] = function_ids
+            for x in function_ids:
+                function_values.update(function_ids[x])
 
-                    results["by_region"][contig_id][strand][range].append(x["id"])
-        elif group_by == "function":
-            results["by_function"] = dict()
-            for x in features:
-                if x["function"] not in results["by_function"]:
-                    results["by_function"][x["function"]] = list()
+        if alias_ids:
+            intersecting_ids["alias"] = alias_ids
+            for x in alias_ids:
+                alias_values.update(alias_ids[x])
 
-                results["by_function"][x["function"]].append(x["id"])
-        elif group_by == "alias":
-            results["by_alias"] = dict()
-            for x in features:
-                for alias in x["aliases"]:
-                    if alias not in results["by_alias"]:
-                        results["by_alias"][alias] = list()
+        # eliminate empty sets
+        valid_sets = [x for x in [type_values, region_values, function_values, alias_values] if len(x) > 0]
 
-                    results["by_alias"][alias].append(x["id"])
+        if len(valid_sets) > 1:
+            # start with a union of all ids
+            for v in valid_sets:
+                values_intersect.update(v)
 
-        _log.debug('get_feature_ids.end num_features={:d}'.format(len(
-            features)))
+            # now compute the intersection
+            for v in valid_sets:
+                values_intersect.intersection_update(v)
 
-        return results
+            intersecting_ids["intersect"] = list(values_intersect)
 
+        return intersecting_ids
 
     def get_feature_type_counts(self, type_list=None):
         """
-        Retrieves number of Genome Features from a KBaseGenomes.Genome object, filtering on Feature type.
+        Retrieves counts of genomic Features from a KBaseGenomes.Genome object, filtering on Feature type.
 
         Returns:
           dict<str>:int"""
         counts = dict()
-        features = self.get_data()["features"]
+        data = self.get_data()
+        features = data["features"]
 
         if type_list is None:
             for x in features:
@@ -621,12 +554,13 @@ class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
             for x in features:
                 if x["type"] in type_list:
                     counts[x["type"]] += 1
-        
+
         return counts
 
     def get_feature_locations(self, feature_id_list=None):
         locations = dict()
-        features = self._get_features()
+        data = self.get_data()
+        features = data["features"]
 
         if feature_id_list is None:
             for x in features:
@@ -665,14 +599,15 @@ class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
 
     def get_feature_dna(self, feature_id_list=None):
         sequences = dict()
-        features = self._get_features()
+        data = self.get_data()
+        features = data["features"]
 
         if feature_id_list is None:
             for x in features:
                 if "sequence" in x:
                     sequences[x['id']] = x["sequence"]
                 else:
-                    sequences[x['id']] = ""
+                    sequences[x['id']] = None
         else:
             try:
                 feature_refs = ["features/" + x for x in feature_id_list]
@@ -687,13 +622,14 @@ class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
                     if "sequence" in x:
                         sequences[x['id']] = x["sequence"]
                     else:
-                        sequences[x['id']] = ""
+                        sequences[x['id']] = None
 
         return sequences
 
     def get_feature_functions(self, feature_id_list=None):
         functions = dict()
-        features = self._get_features()
+        data = self.get_data()
+        features = data["features"]
 
         if feature_id_list is None:
             for x in features:
@@ -721,7 +657,8 @@ class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
 
     def get_feature_aliases(self, feature_id_list=None):
         aliases = dict()
-        features = self._get_features()
+        data = self.get_data()
+        features = data["features"]
 
         if feature_id_list is None:
             for x in features:
@@ -746,10 +683,11 @@ class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
                         aliases[x['id']] = list()
 
         return aliases
-    
+
     def get_feature_publications(self, feature_id_list=None):
         publications = dict()
-        features = self._get_features()
+        data = self.get_data()
+        features = data["features"]
 
         if feature_id_list is None:
             for x in features:
@@ -777,7 +715,8 @@ class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
 
     def get_features(self, feature_id_list=None):
         out_features = dict()
-        features = self._get_features()
+        data = self.get_data()
+        features = data["features"]
 
         def fill_out_feature(x):
             f = dict()
@@ -795,8 +734,8 @@ class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
                 else:
                     f["feature_md5"] = hashlib.md5(x["dna_sequence"].upper()).hexdigest()
             else:
-                f["feature_dna_sequence"] = ""
-                f["feature_md5"] = ""
+                f["feature_dna_sequence"] = None
+                f["feature_md5"] = None
 
             if 'dna_sequence_length' in x:
                 f["feature_dna_sequence_length"] = x['dna_sequence_length']
@@ -809,19 +748,19 @@ class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
                 f["feature_publications"] = []
 
             if 'aliases' in x:
-                f["feature_aliases"] = {k: list() for k in x['aliases']}
+                f["feature_aliases"] = x['aliases']
             else:
-                f["feature_aliases"] = {}
+                f["feature_aliases"] = []
 
-            f["feature_notes"] = []
-            f["feature_inference"] = ""
+            f["feature_notes"] = None
+            f["feature_inference"] = None
 
             if "feature_quality_score" in x:
-                f["feature_quality_score"] = str(x['quality'])
+                f["feature_quality_score"] = x['quality']
             else:
-                f["feature_quality_score"] = ""
+                f["feature_quality_score"] = -1
 
-            f["feature_quality_warnings"] = []
+            f["feature_quality_warnings"] = None
 
             return f
 
@@ -845,22 +784,23 @@ class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
 
     def get_proteins(self):
         proteins = dict()
-        features = self._get_features()
-        
+        data = self.get_data()
+        features = data["features"]
+
         for f in features:
             if "protein_translation" in f and len(f["protein_translation"]) > 0:
                 protein_id = f['id'] + ".protein"
                 proteins[protein_id] = dict()
                 proteins[protein_id]["protein_id"] = protein_id
-                proteins[protein_id]["protein_amino_acid_sequence"] = f["protein_translation"]
-                proteins[protein_id]["protein_function"] = None
-                proteins[protein_id]["protein_aliases"] = None
-                proteins[protein_id]["protein_md5"] = hashlib.md5(f["protein_translation"].upper()).hexdigest()
+                proteins[protein_id]["amino_acid_sequence"] = f["protein_translation"]
+                proteins[protein_id]["function"] = None
+                proteins[protein_id]["aliases"] = None
+                proteins[protein_id]["md5"] = hashlib.md5(f["protein_translation"].upper()).hexdigest()
 
-                # may need to revisit this                
-                proteins[protein_id]["protein_domain_locations"] = None
-        
-        return proteins                
+                # may need to revisit this
+                proteins[protein_id]["domain_locations"] = None
+
+        return proteins
 
     def get_cds_by_mrna(self, mrna_feature_id_list=None):
         try:
@@ -870,19 +810,19 @@ class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
             raise TypeError("A list of strings indicating mrna feature identifiers is required.")
         except AssertionError:
             raise TypeError("A list of strings indicating mrna feature identifiers is required, received an empty list.")
- 
+
         return {}
 
-    def get_mrna_by_cds(self, cds_feature_id_list=None): 
+    def get_mrna_by_cds(self, cds_feature_id_list=None):
         try:
             feature_refs = ["features/" + x for x in cds_feature_id_list]
             assert len(feature_refs) > 0
         except TypeError:
             raise TypeError("A list of strings indicating CDS feature identifiers is required.")
         except AssertionError:
-            raise TypeError("A list of strings indicating CDS feature identifiers is required, received an empty list.") 
+            raise TypeError("A list of strings indicating CDS feature identifiers is required, received an empty list.")
 
-        return {} 
+        return {}
 
     def get_gene_by_cds(self, cds_feature_id_list=None):
         try:
@@ -892,9 +832,9 @@ class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
             raise TypeError("A list of strings indicating CDS feature identifiers is required.")
         except AssertionError:
             raise TypeError("A list of strings indicating CDS feature identifiers is required, received an empty list.")
- 
+
         return {}
-  
+
     def get_gene_by_mrna(self, mrna_feature_id_list=None):
         try:
             feature_refs = ["features/" + x for x in mrna_feature_id_list]
@@ -904,7 +844,7 @@ class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
         except AssertionError:
             raise TypeError("A list of strings indicating mrna feature identifiers is required, received an empty list.")
 
-        return {} 
+        return {}
 
     def get_cds_by_gene(self, gene_feature_id_list=None):
         try:
@@ -913,10 +853,10 @@ class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
         except TypeError:
             raise TypeError("A list of strings indicating gene feature identifiers is required.")
         except AssertionError:
-            raise TypeError("A list of strings indicating gene feature identifiers is required, received an empty list.") 
+            raise TypeError("A list of strings indicating gene feature identifiers is required, received an empty list.")
 
         return {}
-    
+
     def get_mrna_by_gene(self, gene_feature_id_list=None):
         try:
             feature_refs = ["features/" + x for x in gene_feature_id_list]
@@ -925,23 +865,14 @@ class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
             raise TypeError("A list of strings indicating gene feature identifiers is required.")
         except AssertionError:
             raise TypeError("A list of strings indicating gene feature identifiers is required, received an empty list.")
- 
+
         return {}
 
-    def _get_features(self):
-        """Get a *copy* of the features.
-        The original list of features should not be modified anywhere.
-        """
-        # create/cache a 'blist' version of the features so copying will be cheap
-        if self._data_features_blist is None:
-            self._data_features_blist = blist.blist(self.get_data()['features'])
-        # return a copy of the underlying list
-        return self._data_features_blist[:]
 
 
-class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
+class _Prototype(ObjectAPI, GenomeInterface):
     def __init__(self, services, token, ref):
-        super(_GenomeAnnotation, self).__init__(services, token, ref)
+        super(_Prototype, self).__init__(services, token, ref)
 
     def _get_feature_containers(self, feature_id_list=None):
         if feature_id_list is None:
@@ -966,179 +897,214 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
 
         return feature_containers
 
-    def get_taxon(self, ref_only=False):
+    def get_taxon(self):
         from doekbase.data_api.taxonomy.taxon.api import TaxonAPI
+        return TaxonAPI(self.services, token=self._token, ref=self.get_data_subset(path_list=["taxon_ref"])["taxon_ref"])
 
-        taxon_ref = self.get_data_subset(path_list=["taxon_ref"])["taxon_ref"]
-
-        if ref_only:
-            return taxon_ref
-        else:
-            return TaxonAPI(self.services, token=self._token, ref=taxon_ref)
-
-    def get_assembly(self, ref_only=False):
-        from doekbase.data_api.sequence.assembly.api import AssemblyAPI
-
-        assembly_ref = self.get_data_subset(path_list=["assembly_ref"])["assembly_ref"]
-
-        if ref_only:
-            return assembly_ref
-        else:
-            return AssemblyAPI(self.services, token=self._token, ref=assembly_ref)
+    def get_assembly(self):
+        from doekbase.data_api.sequence.assembly import AssemblyAPI
+        return AssemblyAPI(self.services, token=self._token, ref=self.get_data_subset(path_list=["assembly_ref"])["assembly_ref"])
 
     def get_feature_types(self):
         return self.get_data_subset(path_list=["feature_container_references"])["feature_container_references"].keys()
 
-    def get_feature_ids(self, filters=None, group_by="type"):
-        if filters is None:
-            filters = dict()
+    def get_feature_ids(self, type_list=None, region_list=None, function_list=None, alias_list=None):
+        """
+        Retrieves Feature ids based on filters such as Feature types, regions, functional descriptions, aliases.
+
+        Returns:
+          dict<str>:dict<str>:list<str>"""
+
+        if type_list is None and region_list is None and function_list is None and alias_list is None:
+            # just grab everything
+            feature_container_references = self.get_data_subset(path_list=["feature_container_references"])["feature_container_references"]
+
+            out_ids = {"type": {}}
+            for x in feature_container_references:
+                feature_container = ObjectAPI(self.services, self._token, feature_container_references[x])
+                container_data = feature_container.get_data()
+                out_ids[x] = container_data["features"].keys()
+            return out_ids
+
+        # once we get here we have to start pulling and filtering features
+        type_ids = None
+        region_ids = None
+        function_ids = None
+        alias_ids = None
 
         data = self.get_data()
 
         feature_container_references = data["feature_container_references"]
         features = dict()
 
-        # process all filters
-        if "type_list" in filters and filters["type_list"] is not None:
-            if not isinstance(filters["type_list"], list):
+        if type_list is not None:
+            if not isinstance(type_list, list):
                 raise TypeError("A list of strings indicating feature types is required.")
-            elif len(filters["type_list"]) == 0:
+            elif len(type_list) == 0:
                 raise TypeError("A list of strings indicating feature types is required, received an empty list.")
 
-            # only pull data for features that are in the type_list
-            for f in feature_container_references:
-                if f in filters["type_list"]:
-                    container_data = ObjectAPI(self.services, self._token, feature_container_references[f]).get_data()["features"]
-                    features.update(container_data)
-        else:
-            # pull down all features
-            for f in feature_container_references:
-                container_data = ObjectAPI(self.services, self._token, feature_container_references[f]).get_data()["features"]
-                features.update(container_data)
+            type_ids = dict()
+            for x in type_list:
+                type_ids[x] = list()
 
-        if "region_list" in filters and filters["region_list"] is not None:
-            if not isinstance(filters["region_list"], list):
+            for f in feature_container_references:
+                if f in type_list:
+                    if f not in features:
+                        features[f] = ObjectAPI(self.services, self._token, feature_container_references[f]).get_data()["features"]
+
+                    type_ids[f] = features[f].keys()
+
+        if region_list is not None:
+            if not isinstance(region_list, list):
                 raise TypeError("A list of region dictionaries is required.")
-            elif len(filters["region_list"]) == 0:
-                raise TypeError("A list of region dictionaries is required, received an empty list.")
+            elif len(region_list) == 0:
+                raise TypeError("A list of region dictionaries is required, recieved an empty list.")
 
-            def is_feature_in_regions(f, regions):
-                for loc in f["locations"]:
-                    for r in regions:
-                        if r["contig_id"] == loc[0] and \
-                           (loc[2] == r["strand"] or r["strand"] == "?"):
+            def is_feature_in_region(f, region):
+                location_key = None
 
-                            if loc[2] == "+" and \
-                               max(loc[1], r["start"]) <= min(loc[1]+loc[3], r["start"] + r["length"]):
-                                return True
-                            elif loc[2] == "-" and \
-                               max(loc[1]-loc[3], r["start"]) <= min(loc[1], r["start"] + r["length"]):
-                                return True
+                if "location" in f:
+                    location_key = "location"
+                elif "locations" in f:
+                    location_key = "locations"
+
+                for loc in f[location_key]:
+                    if (region["contig_id"] == loc[0]) and \
+                       (loc[2] == region["strand"] or region["strand"] == "?") and \
+                       (loc[1] <= region["stop"] and region["start"] <= loc[1] + loc[3]):
+                        return True
                 return False
 
-            remove_features = list()
+            region_ids = dict()
+            for r in region_list:
+                region_ids[r["contig_id"]] = list()
 
-            for f in features:
-                if not is_feature_in_regions(features[f], filters["region_list"]):
-                    remove_features.append(f)
+            for f in feature_container_references:
+                if f not in features:
+                    features[f] = ObjectAPI(self.services, self._token, feature_container_references[f]).get_data()["features"]
 
-            for f in remove_features:
-                del features[f]
+                for x in features[f]:
+                    for r in region_list:
+                        if is_feature_in_region(features[f][x], r):
+                            region_ids[r["contig_id"]].append(features[f][x]["feature_id"])
 
-        if "function_list" in filters and filters["function_list"] is not None:
-            if not isinstance(filters["function_list"], list):
+        if function_list is not None:
+            if not isinstance(function_list, list):
                 raise TypeError("A list of feature function strings is required.")
-            elif len(filters["function_list"]) == 0:
-                raise TypeError("A list of feature function strings is required, received an empty list.")
+            elif len(function_list) == 0:
+                raise TypeError("A list of feature function strings is required, recieved an empty list.")
 
-            remove_features = list()
+            function_tokens = list()
+            for x in function_list:
+                function_tokens.extend(x.split())
+            function_tokens = set(function_tokens)
 
-            for f in features:
-                if "function" not in features[f]:
-                    remove_features.append(f)
-                else:
-                    found = False
-                    for func in filters["function_list"]:
-                        if features[f]["function"].find(func) >= 0:
-                            found = True
+            def is_function_in_feature(feature, function_tokens):
+                if 'function' not in feature:
+                    return False
 
-                    if not found:
-                        remove_features.append(f)
+                tokens = feature['function'].split()
 
-            for f in remove_features:
-                del features[f]
+                for t in tokens:
+                    if t in function_tokens:
+                        return True
 
-        if "alias_list" in filters and filters["alias_list"] is not None:
-            if not isinstance(filters["alias_list"], list):
+                return False
+
+            function_ids = dict()
+            for function in function_list:
+                function_ids[function] = list()
+                function_tokens = function.split()
+
+                for f in feature_container_references:
+                    if f not in features:
+                        features[f] = ObjectAPI(self.services, self._token, feature_container_references[f]).get_data()["features"]
+
+                    for x in features[f]:
+                        if is_function_in_feature(features[f][x], function_tokens):
+                            function_ids[function].append(features[f][x]["feature_id"])
+
+        if alias_list is not None:
+            if not isinstance(alias_list, list):
                 raise TypeError("A list of feature alias strings is required.")
-            elif len(filters["alias_list"]) == 0:
+            elif len(alias_list) == 0:
                 raise TypeError("A list of feature alias strings is required, received an empty list.")
 
-            remove_features = list()
+            if type_list is None:
+                type_list = self.get_feature_types()
 
-            for f in features:
-                if "aliases" not in features[f]:
-                    remove_features.append(f)
-                else:
-                    found = False
-                    for alias in filters["alias_list"]:
-                        if alias in features[f]["aliases"]:
-                            found = True
+            feature_lookup = data["feature_lookup"]
 
-                    if not found:
-                        remove_features.append(f)
+            feature_containers = dict()
 
-            for f in remove_features:
-                del features[f]
+            out_ids = dict()
+            for alias in alias_list:
+                if alias in feature_lookup:
+                    ref = feature_lookup[alias][0]
 
-        # now that filtering has been completed, attempt to group the data as requested
-        results = dict()
+                    if ref not in feature_containers:
+                        feature_containers[ref] = list()
+                        for type_key in feature_container_references:
+                            if ref in feature_container_references[type_key]:
+                                out_ids[type_key] = list()
 
-        if group_by == "type":
-            results["by_type"] = dict()
-            for x in features:
-                if features[x]["type"] not in results["by_type"]:
-                    results["by_type"][features[x]["type"]] = list()
+                    feature_containers[ref].append(feature_lookup[alias][1])
 
-                results["by_type"][features[x]["type"]].append(features[x]["feature_id"])
-        elif group_by == "region":
-            results["by_region"] = dict()
-            for x in features:
-                for r in features[x]["locations"]:
-                    contig_id = r[0]
-                    strand = r[2]
-                    start = r[1]
-                    length = r[3]
-                    range = "{}-{}".format(start,start+length)
+            for ref in feature_containers:
+                for type_key in feature_container_references:
+                    for alias in alias_list:
+                        if alias in feature_container_references[type_key]:
+                            out_ids[type_key] = feature_containers[ref]
 
-                    if contig_id not in results["by_region"]:
-                        results["by_region"][contig_id] = dict()
+                            if type_key in type_list:
+                                out_ids[alias] = feature_containers[ref]
+            alias_ids = out_ids
 
-                    if strand not in results["by_region"][contig_id]:
-                        results["by_region"][contig_id][strand] = dict()
+        # collect the results and find the intersection
+        intersecting_ids = dict()
 
-                    if range not in results["by_region"][contig_id][strand]:
-                        results["by_region"][contig_id][strand][range] = list()
+        values_intersect = set()
+        type_values = set()
+        region_values = set()
+        function_values = set()
+        alias_values = set()
 
-                    results["by_region"][contig_id][strand][range].append(features[x]["feature_id"])
-        elif group_by == "function":
-            results["by_function"] = dict()
-            for x in features:
-                if features[x]["function"] not in results["by_function"]:
-                    results["by_function"][features[x]["function"]] = list()
+        # flatten the dictionaries to sets of Feature ids
+        if type_ids:
+            intersecting_ids["type"] = type_ids
+            for x in type_ids:
+                type_values.update(type_ids[x])
 
-                results["by_function"][features[x]["function"]].append(features[x]["feature_id"])
-        elif group_by == "alias":
-            results["by_alias"] = dict()
-            for x in features:
-                if "aliases" in features[x]:
-                    for alias in features[x]["aliases"]:
-                        if alias not in results["by_alias"]:
-                            results["by_alias"][alias] = list()
+        if region_ids:
+            intersecting_ids["region"] = region_ids
+            for x in region_ids:
+                region_values.update(region_ids[x])
 
-                        results["by_alias"][alias].append(features[x]["feature_id"])
+        if function_ids:
+            intersecting_ids["function"] = function_ids
+            for x in function_ids:
+                function_values.update(function_ids[x])
 
-        return results
+        if alias_ids:
+            intersecting_ids["alias"] = alias_ids
+            for x in alias_ids:
+                alias_values.update(alias_ids[x])
+
+        # eliminate empty sets
+        valid_sets = [x for x in [type_values, region_values, function_values, alias_values] if len(x) > 0]
+
+        if len(valid_sets) > 1:
+            # start with a union of all ids
+            for v in valid_sets:
+                values_intersect.update(v)
+
+            # now compute the intersection
+            for v in valid_sets:
+                values_intersect.intersection_update(v)
+
+            intersecting_ids["intersect"] = list(values_intersect)
+
+        return intersecting_ids
 
     def get_feature_type_counts(self, type_list=None):
         return self.get_data_subset(path_list=["counts_map"])["counts_map"]
@@ -1160,7 +1126,6 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
                                 "received an empty list.")
 
         for ref in feature_containers:
-            # Get list of feature IDs
             if feature_id_list is None:
                 features = ObjectAPI(self.services, self._token, ref).get_data()["features"]
                 working_list = features
@@ -1168,7 +1133,7 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
                 container = ObjectAPI(self.services, self._token, ref)
                 features = container.get_data_subset(path_list=feature_refs)["features"]
                 working_list = feature_id_list
-            # Pull out either aliases or locations from each feature
+
             if data == "aliases":
                 for feature_id in working_list:
                     if "aliases" in features[feature_id]:
@@ -1222,53 +1187,6 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
         out_features = dict()
         feature_containers = self._get_feature_containers(feature_id_list)
 
-        def fill_out_feature(x):
-            f = dict()
-            f["feature_id"] = x['feature_id']
-            f["feature_type"] = x['type']
-            f["feature_md5"] = x['md5']
-            f["feature_dna_sequence"] = x['dna_sequence']
-            f["feature_dna_sequence_length"] = x['dna_sequence_length']
-            f["feature_locations"] = x['locations']
-
-            if 'function' in x:
-                f["feature_function"] = x['function']
-            else:
-                f["feature_function"] = "Unknown"
-
-            if 'publications' in x:
-                f["feature_publications"] = x['publications']
-            else:
-                f["feature_publications"] = []
-
-            if 'aliases' in x:
-                f["feature_aliases"] = x['aliases']
-            else:
-                f["feature_aliases"] = {}
-
-            if 'notes' in x:
-                f["feature_notes"] = x['notes']
-            else:
-                f["feature_notes"] = []
-
-            if 'inference' in x:
-                f["feature_inference"] = x['inference']
-            else:
-                f["feature_inference"] = "Unknown"
-
-            if 'quality' in x:
-                f["feature_quality_score"] = x['quality']
-            else:
-                f["feature_quality_score"] = []
-
-            if 'quality_warnings' in x:
-                f["feature_quality_warnings"] = x['quality_warnings']
-            else:
-                f["feature_quality_warnings"] = []
-
-            return f
-
-
         for ref in feature_containers:
             container = ObjectAPI(self.services, self._token, ref)
             if feature_id_list is None:
@@ -1278,25 +1196,56 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
                 features = container.get_data_subset(
                     path_list=["features/" + x for x in feature_containers[ref]])["features"]
                 working_list = feature_containers[ref]
-            
+
             for x in working_list:
-                out_features[x] = fill_out_feature(features[x])
+                out_features[features[x]['feature_id']] = dict()
+                out_features[x]["feature_id"] = features[x]['feature_id']
+                out_features[x]["feature_type"] = features[x]['type']
+                out_features[x]["feature_md5"] = features[x]['md5']
+                out_features[x]["feature_dna_sequence"] = features[x]['dna_sequence']
+                out_features[x]["feature_dna_sequence_length"] = features[x]['dna_sequence_length']
+                out_features[x]["feature_locations"] = features[x]['locations']
+
+                if 'function' in features[x]:
+                    out_features[x]["feature_function"] = features[x]['function']
+                else:
+                    out_features[x]["feature_function"] = "Unknown"
+
+                if 'publications' in features[x]:
+                    out_features[x]["feature_publications"] = features[x]['publications']
+                else:
+                    out_features[x]["feature_publications"] = []
+
+                if 'aliases' in features[x]:
+                    out_features[x]["feature_aliases"] = features[x]['aliases']
+                else:
+                    out_features[x]["feature_aliases"] = []
+
+                if 'notes' in features[x]:
+                    out_features[x]["feature_notes"] = features[x]['notes']
+                else:
+                    out_features[x]["feature_notes"] = []
+
+                if 'inference' in features[x]:
+                    out_features[x]["feature_inference"] = features[x]['inference']
+                else:
+                    out_features[x]["feature_inference"] = "Unknown"
+
+                if 'quality' in features[x]:
+                    out_features[x]["feature_quality_score"] = features[x]['quality']
+                else:
+                    out_features[x]["feature_quality_score"] = []
+
+                if 'quality_warnings' in features[x]:
+                    out_features[x]["feature_quality_warnings"] = features[x]['quality_warnings']
+                else:
+                    out_features[x]["feature_quality_warnings"] = []
 
         return out_features
 
     def get_proteins(self):
         protein_container = ObjectAPI(self.services, self._token, self.get_data()["protein_container_ref"])
-        result = protein_container.get_data()["proteins"]
-
-        output = dict()
-        for x in result:
-            output[x] = dict()
-            for k in result[x]:
-                if k.startswith("protein_"):
-                    output[x][k] = result[x][k]
-                else:
-                    output[x]["protein_" + k] = result[x][k]
-        return output
+        return protein_container.get_data()["proteins"]
 
     def _get_by_mrna(self, feature_type=None, mrna_feature_id_list=None):
         out = dict()
@@ -1429,194 +1378,3 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
 
     def get_mrna_by_gene(self, gene_feature_id_list=None):
         return self._get_by_gene("mrna", gene_feature_id_list)
-
-
-_ga_log = get_logger('GenomeAnnotationClientAPI')
-
-class GenomeAnnotationClientAPI(GenomeAnnotationInterface):
-
-    def client_method(func):
-        def wrapper(self, *args, **kwargs):
-            if not self.transport.isOpen():
-                self.transport.open()
-
-            try:
-                return func(self, *args, **kwargs)
-            except ttypes.AttributeException, e:
-                raise AttributeError(e.message)
-            except ttypes.AuthenticationException, e:
-                raise exceptions.AuthenticationError(e.message)
-            except ttypes.AuthorizationException, e:
-                raise exceptions.AuthorizationError(e.message)
-            except ttypes.TypeException, e:
-                raise exceptions.TypeError(e.message)
-            except ttypes.ServiceException, e:
-                raise exceptions.ServiceError(e.message)
-            except Exception, e:
-                raise
-            finally:
-                self.transport.close()
-        return wrapper
-
-    @logged(_ga_log, log_name='init')
-    def __init__(self, url=None, token=None, ref=None):
-        from doekbase.data_api.annotation.genome_annotation.service.interface import GenomeAnnotationClientConnection
-
-        #TODO add exception handling and better error messages here
-        self.url = url
-        self.transport, self.client = GenomeAnnotationClientConnection(url).get_client()
-        self.ref = ref
-        self._token = token
-
-    @logged(_ga_log)
-    @client_method
-    def get_taxon(self, ref_only=False):
-        return self.client.get_taxon(self._token, self.ref)
-
-    @logged(_ga_log)
-    @client_method
-    def get_assembly(self, ref_only=False):
-        return self.client.get_assembly(self._token, self.ref)
-
-    @logged(_ga_log)
-    @client_method
-    def get_feature_types(self):
-        return self.client.get_feature_types(self._token, self.ref)
-    
-    @logged(_ga_log)
-    @client_method
-    def get_feature_type_descriptions(self, type_list=None):
-        return self.client.get_feature_type_descriptions(self._token, self.ref, type_list)
-
-    @logged(_ga_log)
-    @client_method
-    def get_feature_type_counts(self, type_list=None):
-        return self.client.get_feature_type_counts(self._token, self.ref, type_list)
-
-    @logged(_ga_log)
-    @client_method
-    def get_feature_ids(self, filters=None, group_by="type"):
-        converted_filters = ttypes.Feature_id_filters()
-        if filters is not None:
-            if "type_list" in filters:
-                type_list = filters["type_list"]
-            else:
-                type_list = list()
-
-            if "region_list" in filters:
-                region_list = [ttypes.Region(**x) for x in filters["region_list"]]
-            else:
-                region_list = list()
-
-            if "function_list" in filters:
-                function_list = filters["function_list"]
-            else:
-                function_list = list()
-
-            if "alias_list" in filters:
-                alias_list = filters["alias_list"]
-            else:
-                alias_list = list()
-
-            converted_filters = ttypes.Feature_id_filters(type_list=type_list,
-                                                          region_list=region_list,
-                                                          function_list=function_list,
-                                                          alias_list=alias_list)
-
-        result = self.client.get_feature_ids(self._token, self.ref, converted_filters, group_by)
-
-        group_key = "by_{}".format(group_by)
-
-        return {group_key: result.__dict__[group_key]}
-
-    @logged(_ga_log)
-    @client_method
-    def get_features(self, feature_id_list=None):
-        result = self.client.get_features(self._token, self.ref, feature_id_list)
-
-        output = dict()
-        for x in result:
-            output[x] = dict()
-
-            for k in result[x].__dict__:
-                output[x][k] = result[x].__dict__[k]
-
-        return output
-
-    @logged(_ga_log)
-    @client_method
-    def get_proteins(self):
-        result = self.client.get_proteins(self._token, self.ref)
-
-        output = dict()
-        for x in result:
-            output[x] = dict()
-
-            for k in result[x].__dict__:
-                output[x][k] = result[x].__dict__[k]
-
-        return output
-
-    @logged(_ga_log)
-    @client_method
-    def get_feature_locations(self, feature_id_list=None):
-        result = self.client.get_feature_locations(self._token, self.ref, feature_id_list)
-
-        output = dict()
-        for x in result:
-            output[x] = list()
-
-            for region in result[x]:
-                output[x].append({k: region.__dict__[k] for k in region.__dict__})
-
-        return output
-
-    @logged(_ga_log)
-    @client_method
-    def get_feature_dna(self, feature_id_list=None):
-        return self.client.get_feature_dna(self._token, self.ref, feature_id_list)
-
-    @logged(_ga_log)
-    @client_method
-    def get_feature_functions(self, feature_id_list=None):
-        return self.client.get_feature_functions(self._token, self.ref, feature_id_list)
-
-    @logged(_ga_log)
-    @client_method
-    def get_feature_aliases(self, feature_id_list=None):
-        return self.client.get_feature_aliases(self._token, self.ref, feature_id_list)
-
-    @logged(_ga_log)
-    @client_method
-    def get_feature_publications(self, feature_id_list=None):
-        return self.client.get_feature_publications(self._token, self.ref, feature_id_list)
-
-    @logged(_ga_log)
-    @client_method
-    def get_cds_by_mrna(self, mrna_feature_id_list=None):
-        return self.client.get_cds_by_mrna(self._token, self.ref, mrna_feature_id_list)
-
-    @logged(_ga_log)
-    @client_method
-    def get_mrna_by_cds(self, cds_feature_id_list=None):
-        return self.client.get_mrna_by_cds(self._token, self.ref, cds_feature_id_list)
-
-    @logged(_ga_log)
-    @client_method
-    def get_gene_by_cds(self, cds_feature_id_list=None):
-        return self.client.get_gene_by_cds(self._token, self.ref, cds_feature_id_list)
-
-    @logged(_ga_log)
-    @client_method
-    def get_gene_by_mrna(self, mrna_feature_id_list=None):
-        return self.client.get_gene_by_mrna(self._token, self.ref, mrna_feature_id_list)
-
-    @logged(_ga_log)
-    @client_method
-    def get_cds_by_gene(self, gene_feature_id_list=None):
-        return self.client.get_cds_by_gene(self._token, self.ref, gene_feature_id_list)
-
-    @logged(_ga_log)
-    @client_method
-    def get_mrna_by_gene(self, gene_feature_id_list=None):
-        return self.client.get_mrna_by_gene(self._token, self.ref, gene_feature_id_list)
