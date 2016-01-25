@@ -27,9 +27,14 @@ deploy-service-scripts:
 	mkdir -p $(SERVICE_DIR)/check_mk
 	cp $(SCRIPTS_DIR)/data_api_service $(SERVICE_DIR)/check_mk/
 
-test: shutdown startup
+test: subupdate shutdown startup
 	@echo '+- Run nosetests from the data_api source directory, which will use the test data'
 	KB_DEPLOY_URL=dir_nocache nosetests -c nose.cfg -c nose-local.cfg
+
+subupdate:
+	@echo 'Update submodule in test_resources, that has local data'
+	@echo 'This command will either execute very quickly, or take minutes..'
+	git submodule update --remote --merge
 
 startup:
 	@echo '+- Start each of the API services'
