@@ -1756,4 +1756,176 @@ genome_annotation.Protein_data.prototype.write = function(output) {
   return;
 };
 
+genome_annotation.Exon_data = function(args) {
+  this.exon_location = null;
+  this.exon_dna_sequence = null;
+  this.exon_ordinal = null;
+  if (args) {
+    if (args.exon_location !== undefined) {
+      this.exon_location = args.exon_location;
+    }
+    if (args.exon_dna_sequence !== undefined) {
+      this.exon_dna_sequence = args.exon_dna_sequence;
+    }
+    if (args.exon_ordinal !== undefined) {
+      this.exon_ordinal = args.exon_ordinal;
+    }
+  }
+};
+genome_annotation.Exon_data.prototype = {};
+genome_annotation.Exon_data.prototype.read = function(input) {
+  input.readStructBegin();
+  while (true)
+  {
+    var ret = input.readFieldBegin();
+    var fname = ret.fname;
+    var ftype = ret.ftype;
+    var fid = ret.fid;
+    if (ftype == Thrift.Type.STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 1:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.exon_location = new genome_annotation.Region();
+        this.exon_location.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 2:
+      if (ftype == Thrift.Type.STRING) {
+        this.exon_dna_sequence = input.readString().value;
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 3:
+      if (ftype == Thrift.Type.I64) {
+        this.exon_ordinal = input.readI64().value;
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      default:
+        input.skip(ftype);
+    }
+    input.readFieldEnd();
+  }
+  input.readStructEnd();
+  return;
+};
+
+genome_annotation.Exon_data.prototype.write = function(output) {
+  output.writeStructBegin('Exon_data');
+  if (this.exon_location !== null && this.exon_location !== undefined) {
+    output.writeFieldBegin('exon_location', Thrift.Type.STRUCT, 1);
+    this.exon_location.write(output);
+    output.writeFieldEnd();
+  }
+  if (this.exon_dna_sequence !== null && this.exon_dna_sequence !== undefined) {
+    output.writeFieldBegin('exon_dna_sequence', Thrift.Type.STRING, 2);
+    output.writeString(this.exon_dna_sequence);
+    output.writeFieldEnd();
+  }
+  if (this.exon_ordinal !== null && this.exon_ordinal !== undefined) {
+    output.writeFieldBegin('exon_ordinal', Thrift.Type.I64, 3);
+    output.writeI64(this.exon_ordinal);
+    output.writeFieldEnd();
+  }
+  output.writeFieldStop();
+  output.writeStructEnd();
+  return;
+};
+
+genome_annotation.UTR_data = function(args) {
+  this.utr_locations = null;
+  this.utr_dna_sequence = null;
+  if (args) {
+    if (args.utr_locations !== undefined) {
+      this.utr_locations = args.utr_locations;
+    }
+    if (args.utr_dna_sequence !== undefined) {
+      this.utr_dna_sequence = args.utr_dna_sequence;
+    }
+  }
+};
+genome_annotation.UTR_data.prototype = {};
+genome_annotation.UTR_data.prototype.read = function(input) {
+  input.readStructBegin();
+  while (true)
+  {
+    var ret = input.readFieldBegin();
+    var fname = ret.fname;
+    var ftype = ret.ftype;
+    var fid = ret.fid;
+    if (ftype == Thrift.Type.STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 1:
+      if (ftype == Thrift.Type.LIST) {
+        var _size216 = 0;
+        var _rtmp3220;
+        this.utr_locations = [];
+        var _etype219 = 0;
+        _rtmp3220 = input.readListBegin();
+        _etype219 = _rtmp3220.etype;
+        _size216 = _rtmp3220.size;
+        for (var _i221 = 0; _i221 < _size216; ++_i221)
+        {
+          var elem222 = null;
+          elem222 = new genome_annotation.Region();
+          elem222.read(input);
+          this.utr_locations.push(elem222);
+        }
+        input.readListEnd();
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 2:
+      if (ftype == Thrift.Type.STRING) {
+        this.utr_dna_sequence = input.readString().value;
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      default:
+        input.skip(ftype);
+    }
+    input.readFieldEnd();
+  }
+  input.readStructEnd();
+  return;
+};
+
+genome_annotation.UTR_data.prototype.write = function(output) {
+  output.writeStructBegin('UTR_data');
+  if (this.utr_locations !== null && this.utr_locations !== undefined) {
+    output.writeFieldBegin('utr_locations', Thrift.Type.LIST, 1);
+    output.writeListBegin(Thrift.Type.STRUCT, this.utr_locations.length);
+    for (var iter223 in this.utr_locations)
+    {
+      if (this.utr_locations.hasOwnProperty(iter223))
+      {
+        iter223 = this.utr_locations[iter223];
+        iter223.write(output);
+      }
+    }
+    output.writeListEnd();
+    output.writeFieldEnd();
+  }
+  if (this.utr_dna_sequence !== null && this.utr_dna_sequence !== undefined) {
+    output.writeFieldBegin('utr_dna_sequence', Thrift.Type.STRING, 2);
+    output.writeString(this.utr_dna_sequence);
+    output.writeFieldEnd();
+  }
+  output.writeFieldStop();
+  output.writeStructEnd();
+  return;
+};
+
 genome_annotation.VERSION = '{{version}}';

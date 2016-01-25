@@ -29,6 +29,7 @@ REF_PATTERN = re.compile("(.+/.+(/[0-9].+)?)|(ws\.[1-9][0-9]+\.[1-9][0-9]+)")
 
 g_ws_url = "https://ci.kbase.us/services/ws/"
 g_shock_url = "https://ci.kbase.us/services/shock-api/"
+g_handle_url = "https://ci.kbase.us/services/handle_service/"
 g_use_msgpack = True
 
 g_stats = PerfCollector('ObjectAPI')

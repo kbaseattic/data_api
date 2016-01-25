@@ -89,6 +89,101 @@ def test_get_feature_ids_new():
 
 
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
+def test_get_feature_ids_invalid_filters_new():
+    invalid_filters = {"invalid_key": ["kb|g.166819.mRNA.0"]}
+    _log.debug("Input {} {}".format(genome_new, invalid_filters))
+    for t_o in [t_new, t_new_e, t_client_new]:
+        error_caught = False
+        try:
+            feature_ids_t_o = t_o.get_feature_ids(invalid_filters)
+        except KeyError, e:
+            error_caught = True
+
+        assert error_caught
+        _log.debug("Output {}".format(error_caught))
+
+
+@skipUnless(shared.can_connect, 'Cannot connect to workspace')
+def test_get_feature_ids_invalid_groupby_new():
+    invalid_groupby = "invalid_group"
+    _log.debug("Input {} {}".format(genome_new, invalid_groupby))
+    for t_o in [t_new, t_new_e, t_client_new]:
+        error_caught = False
+        try:
+            feature_ids_t_o = t_o.get_feature_ids(group_by=invalid_groupby)
+        except ValueError, e:
+            error_caught = True
+
+        assert error_caught
+        _log.debug("Output {}".format(error_caught))
+
+
+@skipUnless(shared.can_connect, 'Cannot connect to workspace')
+def test_get_feature_ids_new_filter_minus_strand_by_region():
+    _log.debug("Input {}".format(genome_new))
+    for t_o in [t_new, t_new_e, t_client_new]:
+        feature_ids_t_o = t_o.get_feature_ids(filters={
+            "region_list": [{
+                "contig_id": "kb|g.166819.c.0",
+                "start": 1E9,
+                "strand": "-",
+                "length": 1E9
+            }]
+        },
+        group_by="region")
+        assert isinstance(feature_ids_t_o, dict)
+        _log.debug(feature_ids_t_o)
+        assert len(feature_ids_t_o["by_region"]["kb|g.166819.c.0"]["-"]) > 0
+        _log.debug("Output {}".format(len(feature_ids_t_o)))
+
+
+@skipUnless(shared.can_connect, 'Cannot connect to workspace')
+def test_get_feature_ids_new_filter_plus_strand_by_region():
+    _log.debug("Input {}".format(genome_new))
+    for t_o in [t_new, t_new_e, t_client_new]:
+        feature_ids_t_o = t_o.get_feature_ids(filters={
+            "region_list": [{
+                "contig_id": "kb|g.166819.c.0",
+                "start": 0,
+                "strand": "+",
+                "length": 1E9
+            }]
+        },
+        group_by="region")
+        assert isinstance(feature_ids_t_o, dict)
+        _log.debug(feature_ids_t_o)
+        assert len(feature_ids_t_o["by_region"]["kb|g.166819.c.0"]["+"]) > 0
+        _log.debug("Output {}".format(len(feature_ids_t_o)))
+
+
+@skipUnless(shared.can_connect, 'Cannot connect to workspace')
+def test_get_feature_ids_new_filter_either_strand_by_region():
+    _log.debug("Input {}".format(genome_new))
+    for t_o in [t_new, t_new_e, t_client_new]:
+        feature_ids_t_o = t_o.get_feature_ids(filters={
+            "region_list": [{
+                "contig_id": "kb|g.166819.c.0",
+                "start": 5000,
+                "strand": "?",
+                "length": 5000}]},
+        group_by="region")
+        assert isinstance(feature_ids_t_o, dict)
+        _log.debug(feature_ids_t_o)
+        assert len(feature_ids_t_o["by_region"]["kb|g.166819.c.0"]["+"]) > 0
+        assert len(feature_ids_t_o["by_region"]["kb|g.166819.c.0"]["-"]) > 0
+        _log.debug("Output {}".format(len(feature_ids_t_o)))
+
+
+@skipUnless(shared.can_connect, 'Cannot connect to workspace')
+def test_get_feature_ids_new():
+    _log.debug("Input {}".format(genome_new))
+    for t_o in [t_new, t_new_e, t_client_new]:
+        feature_ids_t_o = t_o.get_feature_ids()
+        assert isinstance(feature_ids_t_o, dict)
+        _log.debug("Output {}".format(len(feature_ids_t_o)))
+
+
+@skipUnless(shared.can_connect, 'Cannot connect to workspace')
 def test_get_feature_type_counts_new():
     _log.debug("Input {}".format(genome_new))
     for t_o in [t_new, t_new_e, t_client_new]:
@@ -169,14 +264,54 @@ def test_get_proteins_new():
         _log.debug("Output {}".format(len(proteins_t_o)))
 
 
-#@skipUnless(shared.can_connect, 'Cannot connect to workspace')
-#def test_get_mrna_utrs_new():
-#    pass
+@skipUnless(shared.can_connect, 'Cannot connect to workspace')
+def test_get_mrna_utrs_new():
+    _log.debug("Input {}".format(genome_new))
+
+    def validate_utrs(utrs):
+        for u in utrs:
+            utr_dna_length = len(utrs[u]["utr_dna_sequence"])
+            assert utrs[u]["utr_dna_sequence"] > 0
+
+            assert utrs[u]["utr_locations"] > 0
+            for loc in utrs[u]["utr_locations"]:
+                assert loc["start"] > 0
+                assert loc["strand"] == "+" or loc["strand"] == "-"
+                assert loc["length"] > 0
+
+            utr_location_sum = sum([z["length"] for z in utrs[u]["utr_locations"]])
+            assert utr_location_sum == utr_dna_length
+
+    for t_o in [t_new, t_new_e, t_client_new]:
+        utrs_t_o = t_o.get_mrna_utrs()
+        mrna_ids = t_o.get_feature_ids(filters={"type_list": ["mRNA"]})["by_type"]["mRNA"]
+        mrna_locations = t_o.get_feature_locations(mrna_ids)
+        cds_ids = t_o.get_cds_by_mrna(mrna_ids)
+        cds_locations = t_o.get_feature_locations(cds_ids.values())
+
+        for mrna_id in mrna_ids:
+            if len(mrna_locations[mrna_id]) != len(cds_locations[cds_ids[mrna_id]]):
+                assert len(utrs_t_o[mrna_id]) > 0
+                validate_utrs(utrs_t_o[mrna_id])
+            elif len(utrs_t_o[mrna_id]) > 0:
+                validate_utrs(utrs_t_o[mrna_id])
+
+        _log.debug("Output {}".format(len(utrs_t_o)))
 
 
-#@skipUnless(shared.can_connect, 'Cannot connect to workspace')
-#def test_get_mrna_exons_new():
-#    pass
+@skipUnless(shared.can_connect, 'Cannot connect to workspace')
+def test_get_mrna_exons_new():
+    _log.debug("Input {}".format(genome_new))
+    for t_o in [t_new, t_new_e, t_client_new]:
+        exons_t_o = t_o.get_mrna_exons()
+        mrna_data = t_o.get_features(
+            t_o.get_feature_ids(filters={"type_list": ["mRNA"]})["by_type"]["mRNA"])
+
+        for mrna_id in mrna_data:
+            dna = mrna_data[mrna_id]["feature_dna_sequence"]
+            assert dna == "".join([x["exon_dna_sequence"] for x in exons_t_o[mrna_id]])
+
+        _log.debug("Output {}".format(len(exons_t_o)))
 
 
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
@@ -356,6 +491,36 @@ def test_get_feature_ids_old():
 
 
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
+def test_get_feature_ids_invalid_filters_old():
+    invalid_filters = {"invalid_key": ["kb|g.166819.mRNA.0"]}
+    _log.debug("Input {} {}".format(genome_old, invalid_filters))
+    for t_o in [t_old, t_old_e, t_client_old]:
+        error_caught = False
+        try:
+            feature_ids_t_o = t_o.get_feature_ids(invalid_filters)
+        except KeyError, e:
+            error_caught = True
+
+        assert error_caught
+        _log.debug("Output {}".format(error_caught))
+
+
+@skipUnless(shared.can_connect, 'Cannot connect to workspace')
+def test_get_feature_ids_invalid_groupby_old():
+    invalid_groupby = "invalid_group"
+    _log.debug("Input {} {}".format(genome_old, invalid_groupby))
+    for t_o in [t_old, t_old_e, t_client_old]:
+        error_caught = False
+        try:
+            feature_ids_t_o = t_o.get_feature_ids(group_by=invalid_groupby)
+        except ValueError, e:
+            error_caught = True
+
+        assert error_caught
+        _log.debug("Output {}".format(error_caught))
+
+
+@skipUnless(shared.can_connect, 'Cannot connect to workspace')
 def test_get_feature_type_counts_old():
     _log.debug("Input {}".format(genome_old))
     for t_o in [t_old, t_old_e, t_client_old]:
@@ -436,14 +601,31 @@ def test_get_proteins_old():
         _log.debug("Output {}".format(len(proteins_t_o)))
 
 
-#@skipUnless(shared.can_connect, 'Cannot connect to workspace')
-#def test_get_mrna_utrs_new():
-#    pass
+@skipUnless(shared.can_connect, 'Cannot connect to workspace')
+def test_get_mrna_utrs_old():
+    _log.debug("Input {}".format(genome_old))
+    for t_o in [t_old, t_old_e, t_client_old]:
+        utrs_t_o = t_o.get_mrna_utrs()
+
+        for mrna_id in utrs_t_o:
+            assert len(utrs_t_o[mrna_id]) == 0
+
+        _log.debug("Output {}".format(len(utrs_t_o)))
 
 
-#@skipUnless(shared.can_connect, 'Cannot connect to workspace')
-#def test_get_mrna_exons_new():
-#    pass
+@skipUnless(shared.can_connect, 'Cannot connect to workspace')
+def test_get_mrna_exons_old():
+    _log.debug("Input {}".format(genome_old))
+    for t_o in [t_old, t_old_e, t_client_old]:
+        exons_t_o = t_o.get_mrna_exons()
+        mrna_data = t_o.get_features(
+            t_o.get_feature_ids(filters={"type_list": ["mRNA"]})["by_type"]["mRNA"])
+
+        for mrna_id in mrna_data:
+            dna = mrna_data[mrna_id]["feature_dna_sequence"]
+            assert dna == "".join([x["exon_dna_sequence"] for x in exons_t_o[mrna_id]])
+
+        _log.debug("Output {}".format(len(exons_t_o)))
 
 
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')

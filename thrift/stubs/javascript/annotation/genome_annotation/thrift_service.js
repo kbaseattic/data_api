@@ -641,18 +641,18 @@ genome_annotation.thrift_service_get_feature_types_result.prototype.read = funct
     {
       case 0:
       if (ftype == Thrift.Type.LIST) {
-        var _size216 = 0;
-        var _rtmp3220;
+        var _size224 = 0;
+        var _rtmp3228;
         this.success = [];
-        var _etype219 = 0;
-        _rtmp3220 = input.readListBegin();
-        _etype219 = _rtmp3220.etype;
-        _size216 = _rtmp3220.size;
-        for (var _i221 = 0; _i221 < _size216; ++_i221)
+        var _etype227 = 0;
+        _rtmp3228 = input.readListBegin();
+        _etype227 = _rtmp3228.etype;
+        _size224 = _rtmp3228.size;
+        for (var _i229 = 0; _i229 < _size224; ++_i229)
         {
-          var elem222 = null;
-          elem222 = input.readString().value;
-          this.success.push(elem222);
+          var elem230 = null;
+          elem230 = input.readString().value;
+          this.success.push(elem230);
         }
         input.readListEnd();
       } else {
@@ -721,12 +721,12 @@ genome_annotation.thrift_service_get_feature_types_result.prototype.write = func
   if (this.success !== null && this.success !== undefined) {
     output.writeFieldBegin('success', Thrift.Type.LIST, 0);
     output.writeListBegin(Thrift.Type.STRING, this.success.length);
-    for (var iter223 in this.success)
+    for (var iter231 in this.success)
     {
-      if (this.success.hasOwnProperty(iter223))
+      if (this.success.hasOwnProperty(iter231))
       {
-        iter223 = this.success[iter223];
-        output.writeString(iter223);
+        iter231 = this.success[iter231];
+        output.writeString(iter231);
       }
     }
     output.writeListEnd();
@@ -817,18 +817,18 @@ genome_annotation.thrift_service_get_feature_type_descriptions_args.prototype.re
       break;
       case 3:
       if (ftype == Thrift.Type.LIST) {
-        var _size224 = 0;
-        var _rtmp3228;
+        var _size232 = 0;
+        var _rtmp3236;
         this.feature_type_list = [];
-        var _etype227 = 0;
-        _rtmp3228 = input.readListBegin();
-        _etype227 = _rtmp3228.etype;
-        _size224 = _rtmp3228.size;
-        for (var _i229 = 0; _i229 < _size224; ++_i229)
+        var _etype235 = 0;
+        _rtmp3236 = input.readListBegin();
+        _etype235 = _rtmp3236.etype;
+        _size232 = _rtmp3236.size;
+        for (var _i237 = 0; _i237 < _size232; ++_i237)
         {
-          var elem230 = null;
-          elem230 = input.readString().value;
-          this.feature_type_list.push(elem230);
+          var elem238 = null;
+          elem238 = input.readString().value;
+          this.feature_type_list.push(elem238);
         }
         input.readListEnd();
       } else {
@@ -859,12 +859,12 @@ genome_annotation.thrift_service_get_feature_type_descriptions_args.prototype.wr
   if (this.feature_type_list !== null && this.feature_type_list !== undefined) {
     output.writeFieldBegin('feature_type_list', Thrift.Type.LIST, 3);
     output.writeListBegin(Thrift.Type.STRING, this.feature_type_list.length);
-    for (var iter231 in this.feature_type_list)
+    for (var iter239 in this.feature_type_list)
     {
-      if (this.feature_type_list.hasOwnProperty(iter231))
+      if (this.feature_type_list.hasOwnProperty(iter239))
       {
-        iter231 = this.feature_type_list[iter231];
-        output.writeString(iter231);
+        iter239 = this.feature_type_list[iter239];
+        output.writeString(iter239);
       }
     }
     output.writeListEnd();
@@ -947,27 +947,27 @@ genome_annotation.thrift_service_get_feature_type_descriptions_result.prototype.
     {
       case 0:
       if (ftype == Thrift.Type.MAP) {
-        var _size232 = 0;
-        var _rtmp3236;
+        var _size240 = 0;
+        var _rtmp3244;
         this.success = {};
-        var _ktype233 = 0;
-        var _vtype234 = 0;
-        _rtmp3236 = input.readMapBegin();
-        _ktype233 = _rtmp3236.ktype;
-        _vtype234 = _rtmp3236.vtype;
-        _size232 = _rtmp3236.size;
-        for (var _i237 = 0; _i237 < _size232; ++_i237)
+        var _ktype241 = 0;
+        var _vtype242 = 0;
+        _rtmp3244 = input.readMapBegin();
+        _ktype241 = _rtmp3244.ktype;
+        _vtype242 = _rtmp3244.vtype;
+        _size240 = _rtmp3244.size;
+        for (var _i245 = 0; _i245 < _size240; ++_i245)
         {
-          if (_i237 > 0 ) {
+          if (_i245 > 0 ) {
             if (input.rstack.length > input.rpos[input.rpos.length -1] + 1) {
               input.rstack.pop();
             }
           }
-          var key238 = null;
-          var val239 = null;
-          key238 = input.readString().value;
-          val239 = input.readString().value;
-          this.success[key238] = val239;
+          var key246 = null;
+          var val247 = null;
+          key246 = input.readString().value;
+          val247 = input.readString().value;
+          this.success[key246] = val247;
         }
         input.readMapEnd();
       } else {
@@ -1036,13 +1036,13 @@ genome_annotation.thrift_service_get_feature_type_descriptions_result.prototype.
   if (this.success !== null && this.success !== undefined) {
     output.writeFieldBegin('success', Thrift.Type.MAP, 0);
     output.writeMapBegin(Thrift.Type.STRING, Thrift.Type.STRING, Thrift.objectLength(this.success));
-    for (var kiter240 in this.success)
+    for (var kiter248 in this.success)
     {
-      if (this.success.hasOwnProperty(kiter240))
+      if (this.success.hasOwnProperty(kiter248))
       {
-        var viter241 = this.success[kiter240];
-        output.writeString(kiter240);
-        output.writeString(viter241);
+        var viter249 = this.success[kiter248];
+        output.writeString(kiter248);
+        output.writeString(viter249);
       }
     }
     output.writeMapEnd();
@@ -1133,18 +1133,18 @@ genome_annotation.thrift_service_get_feature_type_counts_args.prototype.read = f
       break;
       case 3:
       if (ftype == Thrift.Type.LIST) {
-        var _size242 = 0;
-        var _rtmp3246;
+        var _size250 = 0;
+        var _rtmp3254;
         this.feature_type_list = [];
-        var _etype245 = 0;
-        _rtmp3246 = input.readListBegin();
-        _etype245 = _rtmp3246.etype;
-        _size242 = _rtmp3246.size;
-        for (var _i247 = 0; _i247 < _size242; ++_i247)
+        var _etype253 = 0;
+        _rtmp3254 = input.readListBegin();
+        _etype253 = _rtmp3254.etype;
+        _size250 = _rtmp3254.size;
+        for (var _i255 = 0; _i255 < _size250; ++_i255)
         {
-          var elem248 = null;
-          elem248 = input.readString().value;
-          this.feature_type_list.push(elem248);
+          var elem256 = null;
+          elem256 = input.readString().value;
+          this.feature_type_list.push(elem256);
         }
         input.readListEnd();
       } else {
@@ -1175,12 +1175,12 @@ genome_annotation.thrift_service_get_feature_type_counts_args.prototype.write = 
   if (this.feature_type_list !== null && this.feature_type_list !== undefined) {
     output.writeFieldBegin('feature_type_list', Thrift.Type.LIST, 3);
     output.writeListBegin(Thrift.Type.STRING, this.feature_type_list.length);
-    for (var iter249 in this.feature_type_list)
+    for (var iter257 in this.feature_type_list)
     {
-      if (this.feature_type_list.hasOwnProperty(iter249))
+      if (this.feature_type_list.hasOwnProperty(iter257))
       {
-        iter249 = this.feature_type_list[iter249];
-        output.writeString(iter249);
+        iter257 = this.feature_type_list[iter257];
+        output.writeString(iter257);
       }
     }
     output.writeListEnd();
@@ -1263,27 +1263,27 @@ genome_annotation.thrift_service_get_feature_type_counts_result.prototype.read =
     {
       case 0:
       if (ftype == Thrift.Type.MAP) {
-        var _size250 = 0;
-        var _rtmp3254;
+        var _size258 = 0;
+        var _rtmp3262;
         this.success = {};
-        var _ktype251 = 0;
-        var _vtype252 = 0;
-        _rtmp3254 = input.readMapBegin();
-        _ktype251 = _rtmp3254.ktype;
-        _vtype252 = _rtmp3254.vtype;
-        _size250 = _rtmp3254.size;
-        for (var _i255 = 0; _i255 < _size250; ++_i255)
+        var _ktype259 = 0;
+        var _vtype260 = 0;
+        _rtmp3262 = input.readMapBegin();
+        _ktype259 = _rtmp3262.ktype;
+        _vtype260 = _rtmp3262.vtype;
+        _size258 = _rtmp3262.size;
+        for (var _i263 = 0; _i263 < _size258; ++_i263)
         {
-          if (_i255 > 0 ) {
+          if (_i263 > 0 ) {
             if (input.rstack.length > input.rpos[input.rpos.length -1] + 1) {
               input.rstack.pop();
             }
           }
-          var key256 = null;
-          var val257 = null;
-          key256 = input.readString().value;
-          val257 = input.readI64().value;
-          this.success[key256] = val257;
+          var key264 = null;
+          var val265 = null;
+          key264 = input.readString().value;
+          val265 = input.readI64().value;
+          this.success[key264] = val265;
         }
         input.readMapEnd();
       } else {
@@ -1352,13 +1352,13 @@ genome_annotation.thrift_service_get_feature_type_counts_result.prototype.write 
   if (this.success !== null && this.success !== undefined) {
     output.writeFieldBegin('success', Thrift.Type.MAP, 0);
     output.writeMapBegin(Thrift.Type.STRING, Thrift.Type.I64, Thrift.objectLength(this.success));
-    for (var kiter258 in this.success)
+    for (var kiter266 in this.success)
     {
-      if (this.success.hasOwnProperty(kiter258))
+      if (this.success.hasOwnProperty(kiter266))
       {
-        var viter259 = this.success[kiter258];
-        output.writeString(kiter258);
-        output.writeI64(viter259);
+        var viter267 = this.success[kiter266];
+        output.writeString(kiter266);
+        output.writeI64(viter267);
       }
     }
     output.writeMapEnd();
@@ -1729,18 +1729,18 @@ genome_annotation.thrift_service_get_features_args.prototype.read = function(inp
       break;
       case 3:
       if (ftype == Thrift.Type.LIST) {
-        var _size260 = 0;
-        var _rtmp3264;
+        var _size268 = 0;
+        var _rtmp3272;
         this.feature_id_list = [];
-        var _etype263 = 0;
-        _rtmp3264 = input.readListBegin();
-        _etype263 = _rtmp3264.etype;
-        _size260 = _rtmp3264.size;
-        for (var _i265 = 0; _i265 < _size260; ++_i265)
+        var _etype271 = 0;
+        _rtmp3272 = input.readListBegin();
+        _etype271 = _rtmp3272.etype;
+        _size268 = _rtmp3272.size;
+        for (var _i273 = 0; _i273 < _size268; ++_i273)
         {
-          var elem266 = null;
-          elem266 = input.readString().value;
-          this.feature_id_list.push(elem266);
+          var elem274 = null;
+          elem274 = input.readString().value;
+          this.feature_id_list.push(elem274);
         }
         input.readListEnd();
       } else {
@@ -1771,12 +1771,12 @@ genome_annotation.thrift_service_get_features_args.prototype.write = function(ou
   if (this.feature_id_list !== null && this.feature_id_list !== undefined) {
     output.writeFieldBegin('feature_id_list', Thrift.Type.LIST, 3);
     output.writeListBegin(Thrift.Type.STRING, this.feature_id_list.length);
-    for (var iter267 in this.feature_id_list)
+    for (var iter275 in this.feature_id_list)
     {
-      if (this.feature_id_list.hasOwnProperty(iter267))
+      if (this.feature_id_list.hasOwnProperty(iter275))
       {
-        iter267 = this.feature_id_list[iter267];
-        output.writeString(iter267);
+        iter275 = this.feature_id_list[iter275];
+        output.writeString(iter275);
       }
     }
     output.writeListEnd();
@@ -1859,28 +1859,28 @@ genome_annotation.thrift_service_get_features_result.prototype.read = function(i
     {
       case 0:
       if (ftype == Thrift.Type.MAP) {
-        var _size268 = 0;
-        var _rtmp3272;
+        var _size276 = 0;
+        var _rtmp3280;
         this.success = {};
-        var _ktype269 = 0;
-        var _vtype270 = 0;
-        _rtmp3272 = input.readMapBegin();
-        _ktype269 = _rtmp3272.ktype;
-        _vtype270 = _rtmp3272.vtype;
-        _size268 = _rtmp3272.size;
-        for (var _i273 = 0; _i273 < _size268; ++_i273)
+        var _ktype277 = 0;
+        var _vtype278 = 0;
+        _rtmp3280 = input.readMapBegin();
+        _ktype277 = _rtmp3280.ktype;
+        _vtype278 = _rtmp3280.vtype;
+        _size276 = _rtmp3280.size;
+        for (var _i281 = 0; _i281 < _size276; ++_i281)
         {
-          if (_i273 > 0 ) {
+          if (_i281 > 0 ) {
             if (input.rstack.length > input.rpos[input.rpos.length -1] + 1) {
               input.rstack.pop();
             }
           }
-          var key274 = null;
-          var val275 = null;
-          key274 = input.readString().value;
-          val275 = new genome_annotation.Feature_data();
-          val275.read(input);
-          this.success[key274] = val275;
+          var key282 = null;
+          var val283 = null;
+          key282 = input.readString().value;
+          val283 = new genome_annotation.Feature_data();
+          val283.read(input);
+          this.success[key282] = val283;
         }
         input.readMapEnd();
       } else {
@@ -1949,13 +1949,13 @@ genome_annotation.thrift_service_get_features_result.prototype.write = function(
   if (this.success !== null && this.success !== undefined) {
     output.writeFieldBegin('success', Thrift.Type.MAP, 0);
     output.writeMapBegin(Thrift.Type.STRING, Thrift.Type.STRUCT, Thrift.objectLength(this.success));
-    for (var kiter276 in this.success)
+    for (var kiter284 in this.success)
     {
-      if (this.success.hasOwnProperty(kiter276))
+      if (this.success.hasOwnProperty(kiter284))
       {
-        var viter277 = this.success[kiter276];
-        output.writeString(kiter276);
-        viter277.write(output);
+        var viter285 = this.success[kiter284];
+        output.writeString(kiter284);
+        viter285.write(output);
       }
     }
     output.writeMapEnd();
@@ -2138,28 +2138,28 @@ genome_annotation.thrift_service_get_proteins_result.prototype.read = function(i
     {
       case 0:
       if (ftype == Thrift.Type.MAP) {
-        var _size278 = 0;
-        var _rtmp3282;
+        var _size286 = 0;
+        var _rtmp3290;
         this.success = {};
-        var _ktype279 = 0;
-        var _vtype280 = 0;
-        _rtmp3282 = input.readMapBegin();
-        _ktype279 = _rtmp3282.ktype;
-        _vtype280 = _rtmp3282.vtype;
-        _size278 = _rtmp3282.size;
-        for (var _i283 = 0; _i283 < _size278; ++_i283)
+        var _ktype287 = 0;
+        var _vtype288 = 0;
+        _rtmp3290 = input.readMapBegin();
+        _ktype287 = _rtmp3290.ktype;
+        _vtype288 = _rtmp3290.vtype;
+        _size286 = _rtmp3290.size;
+        for (var _i291 = 0; _i291 < _size286; ++_i291)
         {
-          if (_i283 > 0 ) {
+          if (_i291 > 0 ) {
             if (input.rstack.length > input.rpos[input.rpos.length -1] + 1) {
               input.rstack.pop();
             }
           }
-          var key284 = null;
-          var val285 = null;
-          key284 = input.readString().value;
-          val285 = new genome_annotation.Protein_data();
-          val285.read(input);
-          this.success[key284] = val285;
+          var key292 = null;
+          var val293 = null;
+          key292 = input.readString().value;
+          val293 = new genome_annotation.Protein_data();
+          val293.read(input);
+          this.success[key292] = val293;
         }
         input.readMapEnd();
       } else {
@@ -2228,13 +2228,13 @@ genome_annotation.thrift_service_get_proteins_result.prototype.write = function(
   if (this.success !== null && this.success !== undefined) {
     output.writeFieldBegin('success', Thrift.Type.MAP, 0);
     output.writeMapBegin(Thrift.Type.STRING, Thrift.Type.STRUCT, Thrift.objectLength(this.success));
-    for (var kiter286 in this.success)
+    for (var kiter294 in this.success)
     {
-      if (this.success.hasOwnProperty(kiter286))
+      if (this.success.hasOwnProperty(kiter294))
       {
-        var viter287 = this.success[kiter286];
-        output.writeString(kiter286);
-        viter287.write(output);
+        var viter295 = this.success[kiter294];
+        output.writeString(kiter294);
+        viter295.write(output);
       }
     }
     output.writeMapEnd();
@@ -2325,18 +2325,18 @@ genome_annotation.thrift_service_get_feature_locations_args.prototype.read = fun
       break;
       case 3:
       if (ftype == Thrift.Type.LIST) {
-        var _size288 = 0;
-        var _rtmp3292;
+        var _size296 = 0;
+        var _rtmp3300;
         this.feature_id_list = [];
-        var _etype291 = 0;
-        _rtmp3292 = input.readListBegin();
-        _etype291 = _rtmp3292.etype;
-        _size288 = _rtmp3292.size;
-        for (var _i293 = 0; _i293 < _size288; ++_i293)
+        var _etype299 = 0;
+        _rtmp3300 = input.readListBegin();
+        _etype299 = _rtmp3300.etype;
+        _size296 = _rtmp3300.size;
+        for (var _i301 = 0; _i301 < _size296; ++_i301)
         {
-          var elem294 = null;
-          elem294 = input.readString().value;
-          this.feature_id_list.push(elem294);
+          var elem302 = null;
+          elem302 = input.readString().value;
+          this.feature_id_list.push(elem302);
         }
         input.readListEnd();
       } else {
@@ -2367,12 +2367,12 @@ genome_annotation.thrift_service_get_feature_locations_args.prototype.write = fu
   if (this.feature_id_list !== null && this.feature_id_list !== undefined) {
     output.writeFieldBegin('feature_id_list', Thrift.Type.LIST, 3);
     output.writeListBegin(Thrift.Type.STRING, this.feature_id_list.length);
-    for (var iter295 in this.feature_id_list)
+    for (var iter303 in this.feature_id_list)
     {
-      if (this.feature_id_list.hasOwnProperty(iter295))
+      if (this.feature_id_list.hasOwnProperty(iter303))
       {
-        iter295 = this.feature_id_list[iter295];
-        output.writeString(iter295);
+        iter303 = this.feature_id_list[iter303];
+        output.writeString(iter303);
       }
     }
     output.writeListEnd();
@@ -2455,41 +2455,41 @@ genome_annotation.thrift_service_get_feature_locations_result.prototype.read = f
     {
       case 0:
       if (ftype == Thrift.Type.MAP) {
-        var _size296 = 0;
-        var _rtmp3300;
+        var _size304 = 0;
+        var _rtmp3308;
         this.success = {};
-        var _ktype297 = 0;
-        var _vtype298 = 0;
-        _rtmp3300 = input.readMapBegin();
-        _ktype297 = _rtmp3300.ktype;
-        _vtype298 = _rtmp3300.vtype;
-        _size296 = _rtmp3300.size;
-        for (var _i301 = 0; _i301 < _size296; ++_i301)
+        var _ktype305 = 0;
+        var _vtype306 = 0;
+        _rtmp3308 = input.readMapBegin();
+        _ktype305 = _rtmp3308.ktype;
+        _vtype306 = _rtmp3308.vtype;
+        _size304 = _rtmp3308.size;
+        for (var _i309 = 0; _i309 < _size304; ++_i309)
         {
-          if (_i301 > 0 ) {
+          if (_i309 > 0 ) {
             if (input.rstack.length > input.rpos[input.rpos.length -1] + 1) {
               input.rstack.pop();
             }
           }
-          var key302 = null;
-          var val303 = null;
-          key302 = input.readString().value;
-          var _size304 = 0;
-          var _rtmp3308;
-          val303 = [];
-          var _etype307 = 0;
-          _rtmp3308 = input.readListBegin();
-          _etype307 = _rtmp3308.etype;
-          _size304 = _rtmp3308.size;
-          for (var _i309 = 0; _i309 < _size304; ++_i309)
+          var key310 = null;
+          var val311 = null;
+          key310 = input.readString().value;
+          var _size312 = 0;
+          var _rtmp3316;
+          val311 = [];
+          var _etype315 = 0;
+          _rtmp3316 = input.readListBegin();
+          _etype315 = _rtmp3316.etype;
+          _size312 = _rtmp3316.size;
+          for (var _i317 = 0; _i317 < _size312; ++_i317)
           {
-            var elem310 = null;
-            elem310 = new genome_annotation.Region();
-            elem310.read(input);
-            val303.push(elem310);
+            var elem318 = null;
+            elem318 = new genome_annotation.Region();
+            elem318.read(input);
+            val311.push(elem318);
           }
           input.readListEnd();
-          this.success[key302] = val303;
+          this.success[key310] = val311;
         }
         input.readMapEnd();
       } else {
@@ -2558,19 +2558,19 @@ genome_annotation.thrift_service_get_feature_locations_result.prototype.write = 
   if (this.success !== null && this.success !== undefined) {
     output.writeFieldBegin('success', Thrift.Type.MAP, 0);
     output.writeMapBegin(Thrift.Type.STRING, Thrift.Type.LIST, Thrift.objectLength(this.success));
-    for (var kiter311 in this.success)
+    for (var kiter319 in this.success)
     {
-      if (this.success.hasOwnProperty(kiter311))
+      if (this.success.hasOwnProperty(kiter319))
       {
-        var viter312 = this.success[kiter311];
-        output.writeString(kiter311);
-        output.writeListBegin(Thrift.Type.STRUCT, viter312.length);
-        for (var iter313 in viter312)
+        var viter320 = this.success[kiter319];
+        output.writeString(kiter319);
+        output.writeListBegin(Thrift.Type.STRUCT, viter320.length);
+        for (var iter321 in viter320)
         {
-          if (viter312.hasOwnProperty(iter313))
+          if (viter320.hasOwnProperty(iter321))
           {
-            iter313 = viter312[iter313];
-            iter313.write(output);
+            iter321 = viter320[iter321];
+            iter321.write(output);
           }
         }
         output.writeListEnd();
@@ -2664,18 +2664,18 @@ genome_annotation.thrift_service_get_feature_publications_args.prototype.read = 
       break;
       case 3:
       if (ftype == Thrift.Type.LIST) {
-        var _size314 = 0;
-        var _rtmp3318;
+        var _size322 = 0;
+        var _rtmp3326;
         this.feature_id_list = [];
-        var _etype317 = 0;
-        _rtmp3318 = input.readListBegin();
-        _etype317 = _rtmp3318.etype;
-        _size314 = _rtmp3318.size;
-        for (var _i319 = 0; _i319 < _size314; ++_i319)
+        var _etype325 = 0;
+        _rtmp3326 = input.readListBegin();
+        _etype325 = _rtmp3326.etype;
+        _size322 = _rtmp3326.size;
+        for (var _i327 = 0; _i327 < _size322; ++_i327)
         {
-          var elem320 = null;
-          elem320 = input.readString().value;
-          this.feature_id_list.push(elem320);
+          var elem328 = null;
+          elem328 = input.readString().value;
+          this.feature_id_list.push(elem328);
         }
         input.readListEnd();
       } else {
@@ -2706,12 +2706,12 @@ genome_annotation.thrift_service_get_feature_publications_args.prototype.write =
   if (this.feature_id_list !== null && this.feature_id_list !== undefined) {
     output.writeFieldBegin('feature_id_list', Thrift.Type.LIST, 3);
     output.writeListBegin(Thrift.Type.STRING, this.feature_id_list.length);
-    for (var iter321 in this.feature_id_list)
+    for (var iter329 in this.feature_id_list)
     {
-      if (this.feature_id_list.hasOwnProperty(iter321))
+      if (this.feature_id_list.hasOwnProperty(iter329))
       {
-        iter321 = this.feature_id_list[iter321];
-        output.writeString(iter321);
+        iter329 = this.feature_id_list[iter329];
+        output.writeString(iter329);
       }
     }
     output.writeListEnd();
@@ -2794,40 +2794,40 @@ genome_annotation.thrift_service_get_feature_publications_result.prototype.read 
     {
       case 0:
       if (ftype == Thrift.Type.MAP) {
-        var _size322 = 0;
-        var _rtmp3326;
+        var _size330 = 0;
+        var _rtmp3334;
         this.success = {};
-        var _ktype323 = 0;
-        var _vtype324 = 0;
-        _rtmp3326 = input.readMapBegin();
-        _ktype323 = _rtmp3326.ktype;
-        _vtype324 = _rtmp3326.vtype;
-        _size322 = _rtmp3326.size;
-        for (var _i327 = 0; _i327 < _size322; ++_i327)
+        var _ktype331 = 0;
+        var _vtype332 = 0;
+        _rtmp3334 = input.readMapBegin();
+        _ktype331 = _rtmp3334.ktype;
+        _vtype332 = _rtmp3334.vtype;
+        _size330 = _rtmp3334.size;
+        for (var _i335 = 0; _i335 < _size330; ++_i335)
         {
-          if (_i327 > 0 ) {
+          if (_i335 > 0 ) {
             if (input.rstack.length > input.rpos[input.rpos.length -1] + 1) {
               input.rstack.pop();
             }
           }
-          var key328 = null;
-          var val329 = null;
-          key328 = input.readString().value;
-          var _size330 = 0;
-          var _rtmp3334;
-          val329 = [];
-          var _etype333 = 0;
-          _rtmp3334 = input.readListBegin();
-          _etype333 = _rtmp3334.etype;
-          _size330 = _rtmp3334.size;
-          for (var _i335 = 0; _i335 < _size330; ++_i335)
+          var key336 = null;
+          var val337 = null;
+          key336 = input.readString().value;
+          var _size338 = 0;
+          var _rtmp3342;
+          val337 = [];
+          var _etype341 = 0;
+          _rtmp3342 = input.readListBegin();
+          _etype341 = _rtmp3342.etype;
+          _size338 = _rtmp3342.size;
+          for (var _i343 = 0; _i343 < _size338; ++_i343)
           {
-            var elem336 = null;
-            elem336 = input.readString().value;
-            val329.push(elem336);
+            var elem344 = null;
+            elem344 = input.readString().value;
+            val337.push(elem344);
           }
           input.readListEnd();
-          this.success[key328] = val329;
+          this.success[key336] = val337;
         }
         input.readMapEnd();
       } else {
@@ -2896,19 +2896,19 @@ genome_annotation.thrift_service_get_feature_publications_result.prototype.write
   if (this.success !== null && this.success !== undefined) {
     output.writeFieldBegin('success', Thrift.Type.MAP, 0);
     output.writeMapBegin(Thrift.Type.STRING, Thrift.Type.LIST, Thrift.objectLength(this.success));
-    for (var kiter337 in this.success)
+    for (var kiter345 in this.success)
     {
-      if (this.success.hasOwnProperty(kiter337))
+      if (this.success.hasOwnProperty(kiter345))
       {
-        var viter338 = this.success[kiter337];
-        output.writeString(kiter337);
-        output.writeListBegin(Thrift.Type.STRING, viter338.length);
-        for (var iter339 in viter338)
+        var viter346 = this.success[kiter345];
+        output.writeString(kiter345);
+        output.writeListBegin(Thrift.Type.STRING, viter346.length);
+        for (var iter347 in viter346)
         {
-          if (viter338.hasOwnProperty(iter339))
+          if (viter346.hasOwnProperty(iter347))
           {
-            iter339 = viter338[iter339];
-            output.writeString(iter339);
+            iter347 = viter346[iter347];
+            output.writeString(iter347);
           }
         }
         output.writeListEnd();
@@ -3002,18 +3002,18 @@ genome_annotation.thrift_service_get_feature_dna_args.prototype.read = function(
       break;
       case 3:
       if (ftype == Thrift.Type.LIST) {
-        var _size340 = 0;
-        var _rtmp3344;
+        var _size348 = 0;
+        var _rtmp3352;
         this.feature_id_list = [];
-        var _etype343 = 0;
-        _rtmp3344 = input.readListBegin();
-        _etype343 = _rtmp3344.etype;
-        _size340 = _rtmp3344.size;
-        for (var _i345 = 0; _i345 < _size340; ++_i345)
+        var _etype351 = 0;
+        _rtmp3352 = input.readListBegin();
+        _etype351 = _rtmp3352.etype;
+        _size348 = _rtmp3352.size;
+        for (var _i353 = 0; _i353 < _size348; ++_i353)
         {
-          var elem346 = null;
-          elem346 = input.readString().value;
-          this.feature_id_list.push(elem346);
+          var elem354 = null;
+          elem354 = input.readString().value;
+          this.feature_id_list.push(elem354);
         }
         input.readListEnd();
       } else {
@@ -3044,12 +3044,12 @@ genome_annotation.thrift_service_get_feature_dna_args.prototype.write = function
   if (this.feature_id_list !== null && this.feature_id_list !== undefined) {
     output.writeFieldBegin('feature_id_list', Thrift.Type.LIST, 3);
     output.writeListBegin(Thrift.Type.STRING, this.feature_id_list.length);
-    for (var iter347 in this.feature_id_list)
+    for (var iter355 in this.feature_id_list)
     {
-      if (this.feature_id_list.hasOwnProperty(iter347))
+      if (this.feature_id_list.hasOwnProperty(iter355))
       {
-        iter347 = this.feature_id_list[iter347];
-        output.writeString(iter347);
+        iter355 = this.feature_id_list[iter355];
+        output.writeString(iter355);
       }
     }
     output.writeListEnd();
@@ -3132,27 +3132,27 @@ genome_annotation.thrift_service_get_feature_dna_result.prototype.read = functio
     {
       case 0:
       if (ftype == Thrift.Type.MAP) {
-        var _size348 = 0;
-        var _rtmp3352;
+        var _size356 = 0;
+        var _rtmp3360;
         this.success = {};
-        var _ktype349 = 0;
-        var _vtype350 = 0;
-        _rtmp3352 = input.readMapBegin();
-        _ktype349 = _rtmp3352.ktype;
-        _vtype350 = _rtmp3352.vtype;
-        _size348 = _rtmp3352.size;
-        for (var _i353 = 0; _i353 < _size348; ++_i353)
+        var _ktype357 = 0;
+        var _vtype358 = 0;
+        _rtmp3360 = input.readMapBegin();
+        _ktype357 = _rtmp3360.ktype;
+        _vtype358 = _rtmp3360.vtype;
+        _size356 = _rtmp3360.size;
+        for (var _i361 = 0; _i361 < _size356; ++_i361)
         {
-          if (_i353 > 0 ) {
+          if (_i361 > 0 ) {
             if (input.rstack.length > input.rpos[input.rpos.length -1] + 1) {
               input.rstack.pop();
             }
           }
-          var key354 = null;
-          var val355 = null;
-          key354 = input.readString().value;
-          val355 = input.readString().value;
-          this.success[key354] = val355;
+          var key362 = null;
+          var val363 = null;
+          key362 = input.readString().value;
+          val363 = input.readString().value;
+          this.success[key362] = val363;
         }
         input.readMapEnd();
       } else {
@@ -3221,13 +3221,13 @@ genome_annotation.thrift_service_get_feature_dna_result.prototype.write = functi
   if (this.success !== null && this.success !== undefined) {
     output.writeFieldBegin('success', Thrift.Type.MAP, 0);
     output.writeMapBegin(Thrift.Type.STRING, Thrift.Type.STRING, Thrift.objectLength(this.success));
-    for (var kiter356 in this.success)
+    for (var kiter364 in this.success)
     {
-      if (this.success.hasOwnProperty(kiter356))
+      if (this.success.hasOwnProperty(kiter364))
       {
-        var viter357 = this.success[kiter356];
-        output.writeString(kiter356);
-        output.writeString(viter357);
+        var viter365 = this.success[kiter364];
+        output.writeString(kiter364);
+        output.writeString(viter365);
       }
     }
     output.writeMapEnd();
@@ -3318,18 +3318,18 @@ genome_annotation.thrift_service_get_feature_functions_args.prototype.read = fun
       break;
       case 3:
       if (ftype == Thrift.Type.LIST) {
-        var _size358 = 0;
-        var _rtmp3362;
+        var _size366 = 0;
+        var _rtmp3370;
         this.feature_id_list = [];
-        var _etype361 = 0;
-        _rtmp3362 = input.readListBegin();
-        _etype361 = _rtmp3362.etype;
-        _size358 = _rtmp3362.size;
-        for (var _i363 = 0; _i363 < _size358; ++_i363)
+        var _etype369 = 0;
+        _rtmp3370 = input.readListBegin();
+        _etype369 = _rtmp3370.etype;
+        _size366 = _rtmp3370.size;
+        for (var _i371 = 0; _i371 < _size366; ++_i371)
         {
-          var elem364 = null;
-          elem364 = input.readString().value;
-          this.feature_id_list.push(elem364);
+          var elem372 = null;
+          elem372 = input.readString().value;
+          this.feature_id_list.push(elem372);
         }
         input.readListEnd();
       } else {
@@ -3360,12 +3360,12 @@ genome_annotation.thrift_service_get_feature_functions_args.prototype.write = fu
   if (this.feature_id_list !== null && this.feature_id_list !== undefined) {
     output.writeFieldBegin('feature_id_list', Thrift.Type.LIST, 3);
     output.writeListBegin(Thrift.Type.STRING, this.feature_id_list.length);
-    for (var iter365 in this.feature_id_list)
+    for (var iter373 in this.feature_id_list)
     {
-      if (this.feature_id_list.hasOwnProperty(iter365))
+      if (this.feature_id_list.hasOwnProperty(iter373))
       {
-        iter365 = this.feature_id_list[iter365];
-        output.writeString(iter365);
+        iter373 = this.feature_id_list[iter373];
+        output.writeString(iter373);
       }
     }
     output.writeListEnd();
@@ -3448,27 +3448,27 @@ genome_annotation.thrift_service_get_feature_functions_result.prototype.read = f
     {
       case 0:
       if (ftype == Thrift.Type.MAP) {
-        var _size366 = 0;
-        var _rtmp3370;
+        var _size374 = 0;
+        var _rtmp3378;
         this.success = {};
-        var _ktype367 = 0;
-        var _vtype368 = 0;
-        _rtmp3370 = input.readMapBegin();
-        _ktype367 = _rtmp3370.ktype;
-        _vtype368 = _rtmp3370.vtype;
-        _size366 = _rtmp3370.size;
-        for (var _i371 = 0; _i371 < _size366; ++_i371)
+        var _ktype375 = 0;
+        var _vtype376 = 0;
+        _rtmp3378 = input.readMapBegin();
+        _ktype375 = _rtmp3378.ktype;
+        _vtype376 = _rtmp3378.vtype;
+        _size374 = _rtmp3378.size;
+        for (var _i379 = 0; _i379 < _size374; ++_i379)
         {
-          if (_i371 > 0 ) {
+          if (_i379 > 0 ) {
             if (input.rstack.length > input.rpos[input.rpos.length -1] + 1) {
               input.rstack.pop();
             }
           }
-          var key372 = null;
-          var val373 = null;
-          key372 = input.readString().value;
-          val373 = input.readString().value;
-          this.success[key372] = val373;
+          var key380 = null;
+          var val381 = null;
+          key380 = input.readString().value;
+          val381 = input.readString().value;
+          this.success[key380] = val381;
         }
         input.readMapEnd();
       } else {
@@ -3537,13 +3537,13 @@ genome_annotation.thrift_service_get_feature_functions_result.prototype.write = 
   if (this.success !== null && this.success !== undefined) {
     output.writeFieldBegin('success', Thrift.Type.MAP, 0);
     output.writeMapBegin(Thrift.Type.STRING, Thrift.Type.STRING, Thrift.objectLength(this.success));
-    for (var kiter374 in this.success)
+    for (var kiter382 in this.success)
     {
-      if (this.success.hasOwnProperty(kiter374))
+      if (this.success.hasOwnProperty(kiter382))
       {
-        var viter375 = this.success[kiter374];
-        output.writeString(kiter374);
-        output.writeString(viter375);
+        var viter383 = this.success[kiter382];
+        output.writeString(kiter382);
+        output.writeString(viter383);
       }
     }
     output.writeMapEnd();
@@ -3634,18 +3634,18 @@ genome_annotation.thrift_service_get_feature_aliases_args.prototype.read = funct
       break;
       case 3:
       if (ftype == Thrift.Type.LIST) {
-        var _size376 = 0;
-        var _rtmp3380;
+        var _size384 = 0;
+        var _rtmp3388;
         this.feature_id_list = [];
-        var _etype379 = 0;
-        _rtmp3380 = input.readListBegin();
-        _etype379 = _rtmp3380.etype;
-        _size376 = _rtmp3380.size;
-        for (var _i381 = 0; _i381 < _size376; ++_i381)
+        var _etype387 = 0;
+        _rtmp3388 = input.readListBegin();
+        _etype387 = _rtmp3388.etype;
+        _size384 = _rtmp3388.size;
+        for (var _i389 = 0; _i389 < _size384; ++_i389)
         {
-          var elem382 = null;
-          elem382 = input.readString().value;
-          this.feature_id_list.push(elem382);
+          var elem390 = null;
+          elem390 = input.readString().value;
+          this.feature_id_list.push(elem390);
         }
         input.readListEnd();
       } else {
@@ -3676,12 +3676,12 @@ genome_annotation.thrift_service_get_feature_aliases_args.prototype.write = func
   if (this.feature_id_list !== null && this.feature_id_list !== undefined) {
     output.writeFieldBegin('feature_id_list', Thrift.Type.LIST, 3);
     output.writeListBegin(Thrift.Type.STRING, this.feature_id_list.length);
-    for (var iter383 in this.feature_id_list)
+    for (var iter391 in this.feature_id_list)
     {
-      if (this.feature_id_list.hasOwnProperty(iter383))
+      if (this.feature_id_list.hasOwnProperty(iter391))
       {
-        iter383 = this.feature_id_list[iter383];
-        output.writeString(iter383);
+        iter391 = this.feature_id_list[iter391];
+        output.writeString(iter391);
       }
     }
     output.writeListEnd();
@@ -3764,40 +3764,40 @@ genome_annotation.thrift_service_get_feature_aliases_result.prototype.read = fun
     {
       case 0:
       if (ftype == Thrift.Type.MAP) {
-        var _size384 = 0;
-        var _rtmp3388;
+        var _size392 = 0;
+        var _rtmp3396;
         this.success = {};
-        var _ktype385 = 0;
-        var _vtype386 = 0;
-        _rtmp3388 = input.readMapBegin();
-        _ktype385 = _rtmp3388.ktype;
-        _vtype386 = _rtmp3388.vtype;
-        _size384 = _rtmp3388.size;
-        for (var _i389 = 0; _i389 < _size384; ++_i389)
+        var _ktype393 = 0;
+        var _vtype394 = 0;
+        _rtmp3396 = input.readMapBegin();
+        _ktype393 = _rtmp3396.ktype;
+        _vtype394 = _rtmp3396.vtype;
+        _size392 = _rtmp3396.size;
+        for (var _i397 = 0; _i397 < _size392; ++_i397)
         {
-          if (_i389 > 0 ) {
+          if (_i397 > 0 ) {
             if (input.rstack.length > input.rpos[input.rpos.length -1] + 1) {
               input.rstack.pop();
             }
           }
-          var key390 = null;
-          var val391 = null;
-          key390 = input.readString().value;
-          var _size392 = 0;
-          var _rtmp3396;
-          val391 = [];
-          var _etype395 = 0;
-          _rtmp3396 = input.readListBegin();
-          _etype395 = _rtmp3396.etype;
-          _size392 = _rtmp3396.size;
-          for (var _i397 = 0; _i397 < _size392; ++_i397)
+          var key398 = null;
+          var val399 = null;
+          key398 = input.readString().value;
+          var _size400 = 0;
+          var _rtmp3404;
+          val399 = [];
+          var _etype403 = 0;
+          _rtmp3404 = input.readListBegin();
+          _etype403 = _rtmp3404.etype;
+          _size400 = _rtmp3404.size;
+          for (var _i405 = 0; _i405 < _size400; ++_i405)
           {
-            var elem398 = null;
-            elem398 = input.readString().value;
-            val391.push(elem398);
+            var elem406 = null;
+            elem406 = input.readString().value;
+            val399.push(elem406);
           }
           input.readListEnd();
-          this.success[key390] = val391;
+          this.success[key398] = val399;
         }
         input.readMapEnd();
       } else {
@@ -3866,19 +3866,19 @@ genome_annotation.thrift_service_get_feature_aliases_result.prototype.write = fu
   if (this.success !== null && this.success !== undefined) {
     output.writeFieldBegin('success', Thrift.Type.MAP, 0);
     output.writeMapBegin(Thrift.Type.STRING, Thrift.Type.LIST, Thrift.objectLength(this.success));
-    for (var kiter399 in this.success)
+    for (var kiter407 in this.success)
     {
-      if (this.success.hasOwnProperty(kiter399))
+      if (this.success.hasOwnProperty(kiter407))
       {
-        var viter400 = this.success[kiter399];
-        output.writeString(kiter399);
-        output.writeListBegin(Thrift.Type.STRING, viter400.length);
-        for (var iter401 in viter400)
+        var viter408 = this.success[kiter407];
+        output.writeString(kiter407);
+        output.writeListBegin(Thrift.Type.STRING, viter408.length);
+        for (var iter409 in viter408)
         {
-          if (viter400.hasOwnProperty(iter401))
+          if (viter408.hasOwnProperty(iter409))
           {
-            iter401 = viter400[iter401];
-            output.writeString(iter401);
+            iter409 = viter408[iter409];
+            output.writeString(iter409);
           }
         }
         output.writeListEnd();
@@ -3972,18 +3972,18 @@ genome_annotation.thrift_service_get_cds_by_gene_args.prototype.read = function(
       break;
       case 3:
       if (ftype == Thrift.Type.LIST) {
-        var _size402 = 0;
-        var _rtmp3406;
+        var _size410 = 0;
+        var _rtmp3414;
         this.gene_id_list = [];
-        var _etype405 = 0;
-        _rtmp3406 = input.readListBegin();
-        _etype405 = _rtmp3406.etype;
-        _size402 = _rtmp3406.size;
-        for (var _i407 = 0; _i407 < _size402; ++_i407)
+        var _etype413 = 0;
+        _rtmp3414 = input.readListBegin();
+        _etype413 = _rtmp3414.etype;
+        _size410 = _rtmp3414.size;
+        for (var _i415 = 0; _i415 < _size410; ++_i415)
         {
-          var elem408 = null;
-          elem408 = input.readString().value;
-          this.gene_id_list.push(elem408);
+          var elem416 = null;
+          elem416 = input.readString().value;
+          this.gene_id_list.push(elem416);
         }
         input.readListEnd();
       } else {
@@ -4014,12 +4014,12 @@ genome_annotation.thrift_service_get_cds_by_gene_args.prototype.write = function
   if (this.gene_id_list !== null && this.gene_id_list !== undefined) {
     output.writeFieldBegin('gene_id_list', Thrift.Type.LIST, 3);
     output.writeListBegin(Thrift.Type.STRING, this.gene_id_list.length);
-    for (var iter409 in this.gene_id_list)
+    for (var iter417 in this.gene_id_list)
     {
-      if (this.gene_id_list.hasOwnProperty(iter409))
+      if (this.gene_id_list.hasOwnProperty(iter417))
       {
-        iter409 = this.gene_id_list[iter409];
-        output.writeString(iter409);
+        iter417 = this.gene_id_list[iter417];
+        output.writeString(iter417);
       }
     }
     output.writeListEnd();
@@ -4102,40 +4102,40 @@ genome_annotation.thrift_service_get_cds_by_gene_result.prototype.read = functio
     {
       case 0:
       if (ftype == Thrift.Type.MAP) {
-        var _size410 = 0;
-        var _rtmp3414;
+        var _size418 = 0;
+        var _rtmp3422;
         this.success = {};
-        var _ktype411 = 0;
-        var _vtype412 = 0;
-        _rtmp3414 = input.readMapBegin();
-        _ktype411 = _rtmp3414.ktype;
-        _vtype412 = _rtmp3414.vtype;
-        _size410 = _rtmp3414.size;
-        for (var _i415 = 0; _i415 < _size410; ++_i415)
+        var _ktype419 = 0;
+        var _vtype420 = 0;
+        _rtmp3422 = input.readMapBegin();
+        _ktype419 = _rtmp3422.ktype;
+        _vtype420 = _rtmp3422.vtype;
+        _size418 = _rtmp3422.size;
+        for (var _i423 = 0; _i423 < _size418; ++_i423)
         {
-          if (_i415 > 0 ) {
+          if (_i423 > 0 ) {
             if (input.rstack.length > input.rpos[input.rpos.length -1] + 1) {
               input.rstack.pop();
             }
           }
-          var key416 = null;
-          var val417 = null;
-          key416 = input.readString().value;
-          var _size418 = 0;
-          var _rtmp3422;
-          val417 = [];
-          var _etype421 = 0;
-          _rtmp3422 = input.readListBegin();
-          _etype421 = _rtmp3422.etype;
-          _size418 = _rtmp3422.size;
-          for (var _i423 = 0; _i423 < _size418; ++_i423)
+          var key424 = null;
+          var val425 = null;
+          key424 = input.readString().value;
+          var _size426 = 0;
+          var _rtmp3430;
+          val425 = [];
+          var _etype429 = 0;
+          _rtmp3430 = input.readListBegin();
+          _etype429 = _rtmp3430.etype;
+          _size426 = _rtmp3430.size;
+          for (var _i431 = 0; _i431 < _size426; ++_i431)
           {
-            var elem424 = null;
-            elem424 = input.readString().value;
-            val417.push(elem424);
+            var elem432 = null;
+            elem432 = input.readString().value;
+            val425.push(elem432);
           }
           input.readListEnd();
-          this.success[key416] = val417;
+          this.success[key424] = val425;
         }
         input.readMapEnd();
       } else {
@@ -4204,19 +4204,19 @@ genome_annotation.thrift_service_get_cds_by_gene_result.prototype.write = functi
   if (this.success !== null && this.success !== undefined) {
     output.writeFieldBegin('success', Thrift.Type.MAP, 0);
     output.writeMapBegin(Thrift.Type.STRING, Thrift.Type.LIST, Thrift.objectLength(this.success));
-    for (var kiter425 in this.success)
+    for (var kiter433 in this.success)
     {
-      if (this.success.hasOwnProperty(kiter425))
+      if (this.success.hasOwnProperty(kiter433))
       {
-        var viter426 = this.success[kiter425];
-        output.writeString(kiter425);
-        output.writeListBegin(Thrift.Type.STRING, viter426.length);
-        for (var iter427 in viter426)
+        var viter434 = this.success[kiter433];
+        output.writeString(kiter433);
+        output.writeListBegin(Thrift.Type.STRING, viter434.length);
+        for (var iter435 in viter434)
         {
-          if (viter426.hasOwnProperty(iter427))
+          if (viter434.hasOwnProperty(iter435))
           {
-            iter427 = viter426[iter427];
-            output.writeString(iter427);
+            iter435 = viter434[iter435];
+            output.writeString(iter435);
           }
         }
         output.writeListEnd();
@@ -4310,18 +4310,18 @@ genome_annotation.thrift_service_get_cds_by_mrna_args.prototype.read = function(
       break;
       case 3:
       if (ftype == Thrift.Type.LIST) {
-        var _size428 = 0;
-        var _rtmp3432;
+        var _size436 = 0;
+        var _rtmp3440;
         this.mrna_id_list = [];
-        var _etype431 = 0;
-        _rtmp3432 = input.readListBegin();
-        _etype431 = _rtmp3432.etype;
-        _size428 = _rtmp3432.size;
-        for (var _i433 = 0; _i433 < _size428; ++_i433)
+        var _etype439 = 0;
+        _rtmp3440 = input.readListBegin();
+        _etype439 = _rtmp3440.etype;
+        _size436 = _rtmp3440.size;
+        for (var _i441 = 0; _i441 < _size436; ++_i441)
         {
-          var elem434 = null;
-          elem434 = input.readString().value;
-          this.mrna_id_list.push(elem434);
+          var elem442 = null;
+          elem442 = input.readString().value;
+          this.mrna_id_list.push(elem442);
         }
         input.readListEnd();
       } else {
@@ -4352,12 +4352,12 @@ genome_annotation.thrift_service_get_cds_by_mrna_args.prototype.write = function
   if (this.mrna_id_list !== null && this.mrna_id_list !== undefined) {
     output.writeFieldBegin('mrna_id_list', Thrift.Type.LIST, 3);
     output.writeListBegin(Thrift.Type.STRING, this.mrna_id_list.length);
-    for (var iter435 in this.mrna_id_list)
+    for (var iter443 in this.mrna_id_list)
     {
-      if (this.mrna_id_list.hasOwnProperty(iter435))
+      if (this.mrna_id_list.hasOwnProperty(iter443))
       {
-        iter435 = this.mrna_id_list[iter435];
-        output.writeString(iter435);
+        iter443 = this.mrna_id_list[iter443];
+        output.writeString(iter443);
       }
     }
     output.writeListEnd();
@@ -4440,27 +4440,27 @@ genome_annotation.thrift_service_get_cds_by_mrna_result.prototype.read = functio
     {
       case 0:
       if (ftype == Thrift.Type.MAP) {
-        var _size436 = 0;
-        var _rtmp3440;
+        var _size444 = 0;
+        var _rtmp3448;
         this.success = {};
-        var _ktype437 = 0;
-        var _vtype438 = 0;
-        _rtmp3440 = input.readMapBegin();
-        _ktype437 = _rtmp3440.ktype;
-        _vtype438 = _rtmp3440.vtype;
-        _size436 = _rtmp3440.size;
-        for (var _i441 = 0; _i441 < _size436; ++_i441)
+        var _ktype445 = 0;
+        var _vtype446 = 0;
+        _rtmp3448 = input.readMapBegin();
+        _ktype445 = _rtmp3448.ktype;
+        _vtype446 = _rtmp3448.vtype;
+        _size444 = _rtmp3448.size;
+        for (var _i449 = 0; _i449 < _size444; ++_i449)
         {
-          if (_i441 > 0 ) {
+          if (_i449 > 0 ) {
             if (input.rstack.length > input.rpos[input.rpos.length -1] + 1) {
               input.rstack.pop();
             }
           }
-          var key442 = null;
-          var val443 = null;
-          key442 = input.readString().value;
-          val443 = input.readString().value;
-          this.success[key442] = val443;
+          var key450 = null;
+          var val451 = null;
+          key450 = input.readString().value;
+          val451 = input.readString().value;
+          this.success[key450] = val451;
         }
         input.readMapEnd();
       } else {
@@ -4529,13 +4529,13 @@ genome_annotation.thrift_service_get_cds_by_mrna_result.prototype.write = functi
   if (this.success !== null && this.success !== undefined) {
     output.writeFieldBegin('success', Thrift.Type.MAP, 0);
     output.writeMapBegin(Thrift.Type.STRING, Thrift.Type.STRING, Thrift.objectLength(this.success));
-    for (var kiter444 in this.success)
+    for (var kiter452 in this.success)
     {
-      if (this.success.hasOwnProperty(kiter444))
+      if (this.success.hasOwnProperty(kiter452))
       {
-        var viter445 = this.success[kiter444];
-        output.writeString(kiter444);
-        output.writeString(viter445);
+        var viter453 = this.success[kiter452];
+        output.writeString(kiter452);
+        output.writeString(viter453);
       }
     }
     output.writeMapEnd();
@@ -4626,18 +4626,18 @@ genome_annotation.thrift_service_get_gene_by_cds_args.prototype.read = function(
       break;
       case 3:
       if (ftype == Thrift.Type.LIST) {
-        var _size446 = 0;
-        var _rtmp3450;
+        var _size454 = 0;
+        var _rtmp3458;
         this.cds_id_list = [];
-        var _etype449 = 0;
-        _rtmp3450 = input.readListBegin();
-        _etype449 = _rtmp3450.etype;
-        _size446 = _rtmp3450.size;
-        for (var _i451 = 0; _i451 < _size446; ++_i451)
+        var _etype457 = 0;
+        _rtmp3458 = input.readListBegin();
+        _etype457 = _rtmp3458.etype;
+        _size454 = _rtmp3458.size;
+        for (var _i459 = 0; _i459 < _size454; ++_i459)
         {
-          var elem452 = null;
-          elem452 = input.readString().value;
-          this.cds_id_list.push(elem452);
+          var elem460 = null;
+          elem460 = input.readString().value;
+          this.cds_id_list.push(elem460);
         }
         input.readListEnd();
       } else {
@@ -4668,12 +4668,12 @@ genome_annotation.thrift_service_get_gene_by_cds_args.prototype.write = function
   if (this.cds_id_list !== null && this.cds_id_list !== undefined) {
     output.writeFieldBegin('cds_id_list', Thrift.Type.LIST, 3);
     output.writeListBegin(Thrift.Type.STRING, this.cds_id_list.length);
-    for (var iter453 in this.cds_id_list)
+    for (var iter461 in this.cds_id_list)
     {
-      if (this.cds_id_list.hasOwnProperty(iter453))
+      if (this.cds_id_list.hasOwnProperty(iter461))
       {
-        iter453 = this.cds_id_list[iter453];
-        output.writeString(iter453);
+        iter461 = this.cds_id_list[iter461];
+        output.writeString(iter461);
       }
     }
     output.writeListEnd();
@@ -4756,27 +4756,27 @@ genome_annotation.thrift_service_get_gene_by_cds_result.prototype.read = functio
     {
       case 0:
       if (ftype == Thrift.Type.MAP) {
-        var _size454 = 0;
-        var _rtmp3458;
+        var _size462 = 0;
+        var _rtmp3466;
         this.success = {};
-        var _ktype455 = 0;
-        var _vtype456 = 0;
-        _rtmp3458 = input.readMapBegin();
-        _ktype455 = _rtmp3458.ktype;
-        _vtype456 = _rtmp3458.vtype;
-        _size454 = _rtmp3458.size;
-        for (var _i459 = 0; _i459 < _size454; ++_i459)
+        var _ktype463 = 0;
+        var _vtype464 = 0;
+        _rtmp3466 = input.readMapBegin();
+        _ktype463 = _rtmp3466.ktype;
+        _vtype464 = _rtmp3466.vtype;
+        _size462 = _rtmp3466.size;
+        for (var _i467 = 0; _i467 < _size462; ++_i467)
         {
-          if (_i459 > 0 ) {
+          if (_i467 > 0 ) {
             if (input.rstack.length > input.rpos[input.rpos.length -1] + 1) {
               input.rstack.pop();
             }
           }
-          var key460 = null;
-          var val461 = null;
-          key460 = input.readString().value;
-          val461 = input.readString().value;
-          this.success[key460] = val461;
+          var key468 = null;
+          var val469 = null;
+          key468 = input.readString().value;
+          val469 = input.readString().value;
+          this.success[key468] = val469;
         }
         input.readMapEnd();
       } else {
@@ -4845,13 +4845,13 @@ genome_annotation.thrift_service_get_gene_by_cds_result.prototype.write = functi
   if (this.success !== null && this.success !== undefined) {
     output.writeFieldBegin('success', Thrift.Type.MAP, 0);
     output.writeMapBegin(Thrift.Type.STRING, Thrift.Type.STRING, Thrift.objectLength(this.success));
-    for (var kiter462 in this.success)
+    for (var kiter470 in this.success)
     {
-      if (this.success.hasOwnProperty(kiter462))
+      if (this.success.hasOwnProperty(kiter470))
       {
-        var viter463 = this.success[kiter462];
-        output.writeString(kiter462);
-        output.writeString(viter463);
+        var viter471 = this.success[kiter470];
+        output.writeString(kiter470);
+        output.writeString(viter471);
       }
     }
     output.writeMapEnd();
@@ -4942,18 +4942,18 @@ genome_annotation.thrift_service_get_gene_by_mrna_args.prototype.read = function
       break;
       case 3:
       if (ftype == Thrift.Type.LIST) {
-        var _size464 = 0;
-        var _rtmp3468;
+        var _size472 = 0;
+        var _rtmp3476;
         this.mrna_id_list = [];
-        var _etype467 = 0;
-        _rtmp3468 = input.readListBegin();
-        _etype467 = _rtmp3468.etype;
-        _size464 = _rtmp3468.size;
-        for (var _i469 = 0; _i469 < _size464; ++_i469)
+        var _etype475 = 0;
+        _rtmp3476 = input.readListBegin();
+        _etype475 = _rtmp3476.etype;
+        _size472 = _rtmp3476.size;
+        for (var _i477 = 0; _i477 < _size472; ++_i477)
         {
-          var elem470 = null;
-          elem470 = input.readString().value;
-          this.mrna_id_list.push(elem470);
+          var elem478 = null;
+          elem478 = input.readString().value;
+          this.mrna_id_list.push(elem478);
         }
         input.readListEnd();
       } else {
@@ -4984,12 +4984,12 @@ genome_annotation.thrift_service_get_gene_by_mrna_args.prototype.write = functio
   if (this.mrna_id_list !== null && this.mrna_id_list !== undefined) {
     output.writeFieldBegin('mrna_id_list', Thrift.Type.LIST, 3);
     output.writeListBegin(Thrift.Type.STRING, this.mrna_id_list.length);
-    for (var iter471 in this.mrna_id_list)
+    for (var iter479 in this.mrna_id_list)
     {
-      if (this.mrna_id_list.hasOwnProperty(iter471))
+      if (this.mrna_id_list.hasOwnProperty(iter479))
       {
-        iter471 = this.mrna_id_list[iter471];
-        output.writeString(iter471);
+        iter479 = this.mrna_id_list[iter479];
+        output.writeString(iter479);
       }
     }
     output.writeListEnd();
@@ -5072,27 +5072,27 @@ genome_annotation.thrift_service_get_gene_by_mrna_result.prototype.read = functi
     {
       case 0:
       if (ftype == Thrift.Type.MAP) {
-        var _size472 = 0;
-        var _rtmp3476;
+        var _size480 = 0;
+        var _rtmp3484;
         this.success = {};
-        var _ktype473 = 0;
-        var _vtype474 = 0;
-        _rtmp3476 = input.readMapBegin();
-        _ktype473 = _rtmp3476.ktype;
-        _vtype474 = _rtmp3476.vtype;
-        _size472 = _rtmp3476.size;
-        for (var _i477 = 0; _i477 < _size472; ++_i477)
+        var _ktype481 = 0;
+        var _vtype482 = 0;
+        _rtmp3484 = input.readMapBegin();
+        _ktype481 = _rtmp3484.ktype;
+        _vtype482 = _rtmp3484.vtype;
+        _size480 = _rtmp3484.size;
+        for (var _i485 = 0; _i485 < _size480; ++_i485)
         {
-          if (_i477 > 0 ) {
+          if (_i485 > 0 ) {
             if (input.rstack.length > input.rpos[input.rpos.length -1] + 1) {
               input.rstack.pop();
             }
           }
-          var key478 = null;
-          var val479 = null;
-          key478 = input.readString().value;
-          val479 = input.readString().value;
-          this.success[key478] = val479;
+          var key486 = null;
+          var val487 = null;
+          key486 = input.readString().value;
+          val487 = input.readString().value;
+          this.success[key486] = val487;
         }
         input.readMapEnd();
       } else {
@@ -5161,13 +5161,13 @@ genome_annotation.thrift_service_get_gene_by_mrna_result.prototype.write = funct
   if (this.success !== null && this.success !== undefined) {
     output.writeFieldBegin('success', Thrift.Type.MAP, 0);
     output.writeMapBegin(Thrift.Type.STRING, Thrift.Type.STRING, Thrift.objectLength(this.success));
-    for (var kiter480 in this.success)
+    for (var kiter488 in this.success)
     {
-      if (this.success.hasOwnProperty(kiter480))
+      if (this.success.hasOwnProperty(kiter488))
       {
-        var viter481 = this.success[kiter480];
-        output.writeString(kiter480);
-        output.writeString(viter481);
+        var viter489 = this.success[kiter488];
+        output.writeString(kiter488);
+        output.writeString(viter489);
       }
     }
     output.writeMapEnd();
@@ -5211,7 +5211,7 @@ genome_annotation.thrift_service_get_gene_by_mrna_result.prototype.write = funct
 genome_annotation.thrift_service_get_mrna_by_cds_args = function(args) {
   this.token = null;
   this.ref = null;
-  this.gene_id_list = null;
+  this.cds_id_list = null;
   if (args) {
     if (args.token !== undefined) {
       this.token = args.token;
@@ -5223,8 +5223,8 @@ genome_annotation.thrift_service_get_mrna_by_cds_args = function(args) {
     } else {
       throw new Thrift.TProtocolException(Thrift.TProtocolExceptionType.UNKNOWN, 'Required field ref is unset!');
     }
-    if (args.gene_id_list !== undefined) {
-      this.gene_id_list = args.gene_id_list;
+    if (args.cds_id_list !== undefined) {
+      this.cds_id_list = args.cds_id_list;
     }
   }
 };
@@ -5258,18 +5258,18 @@ genome_annotation.thrift_service_get_mrna_by_cds_args.prototype.read = function(
       break;
       case 3:
       if (ftype == Thrift.Type.LIST) {
-        var _size482 = 0;
-        var _rtmp3486;
-        this.gene_id_list = [];
-        var _etype485 = 0;
-        _rtmp3486 = input.readListBegin();
-        _etype485 = _rtmp3486.etype;
-        _size482 = _rtmp3486.size;
-        for (var _i487 = 0; _i487 < _size482; ++_i487)
+        var _size490 = 0;
+        var _rtmp3494;
+        this.cds_id_list = [];
+        var _etype493 = 0;
+        _rtmp3494 = input.readListBegin();
+        _etype493 = _rtmp3494.etype;
+        _size490 = _rtmp3494.size;
+        for (var _i495 = 0; _i495 < _size490; ++_i495)
         {
-          var elem488 = null;
-          elem488 = input.readString().value;
-          this.gene_id_list.push(elem488);
+          var elem496 = null;
+          elem496 = input.readString().value;
+          this.cds_id_list.push(elem496);
         }
         input.readListEnd();
       } else {
@@ -5297,15 +5297,15 @@ genome_annotation.thrift_service_get_mrna_by_cds_args.prototype.write = function
     output.writeString(this.ref);
     output.writeFieldEnd();
   }
-  if (this.gene_id_list !== null && this.gene_id_list !== undefined) {
-    output.writeFieldBegin('gene_id_list', Thrift.Type.LIST, 3);
-    output.writeListBegin(Thrift.Type.STRING, this.gene_id_list.length);
-    for (var iter489 in this.gene_id_list)
+  if (this.cds_id_list !== null && this.cds_id_list !== undefined) {
+    output.writeFieldBegin('cds_id_list', Thrift.Type.LIST, 3);
+    output.writeListBegin(Thrift.Type.STRING, this.cds_id_list.length);
+    for (var iter497 in this.cds_id_list)
     {
-      if (this.gene_id_list.hasOwnProperty(iter489))
+      if (this.cds_id_list.hasOwnProperty(iter497))
       {
-        iter489 = this.gene_id_list[iter489];
-        output.writeString(iter489);
+        iter497 = this.cds_id_list[iter497];
+        output.writeString(iter497);
       }
     }
     output.writeListEnd();
@@ -5388,27 +5388,27 @@ genome_annotation.thrift_service_get_mrna_by_cds_result.prototype.read = functio
     {
       case 0:
       if (ftype == Thrift.Type.MAP) {
-        var _size490 = 0;
-        var _rtmp3494;
+        var _size498 = 0;
+        var _rtmp3502;
         this.success = {};
-        var _ktype491 = 0;
-        var _vtype492 = 0;
-        _rtmp3494 = input.readMapBegin();
-        _ktype491 = _rtmp3494.ktype;
-        _vtype492 = _rtmp3494.vtype;
-        _size490 = _rtmp3494.size;
-        for (var _i495 = 0; _i495 < _size490; ++_i495)
+        var _ktype499 = 0;
+        var _vtype500 = 0;
+        _rtmp3502 = input.readMapBegin();
+        _ktype499 = _rtmp3502.ktype;
+        _vtype500 = _rtmp3502.vtype;
+        _size498 = _rtmp3502.size;
+        for (var _i503 = 0; _i503 < _size498; ++_i503)
         {
-          if (_i495 > 0 ) {
+          if (_i503 > 0 ) {
             if (input.rstack.length > input.rpos[input.rpos.length -1] + 1) {
               input.rstack.pop();
             }
           }
-          var key496 = null;
-          var val497 = null;
-          key496 = input.readString().value;
-          val497 = input.readString().value;
-          this.success[key496] = val497;
+          var key504 = null;
+          var val505 = null;
+          key504 = input.readString().value;
+          val505 = input.readString().value;
+          this.success[key504] = val505;
         }
         input.readMapEnd();
       } else {
@@ -5477,13 +5477,13 @@ genome_annotation.thrift_service_get_mrna_by_cds_result.prototype.write = functi
   if (this.success !== null && this.success !== undefined) {
     output.writeFieldBegin('success', Thrift.Type.MAP, 0);
     output.writeMapBegin(Thrift.Type.STRING, Thrift.Type.STRING, Thrift.objectLength(this.success));
-    for (var kiter498 in this.success)
+    for (var kiter506 in this.success)
     {
-      if (this.success.hasOwnProperty(kiter498))
+      if (this.success.hasOwnProperty(kiter506))
       {
-        var viter499 = this.success[kiter498];
-        output.writeString(kiter498);
-        output.writeString(viter499);
+        var viter507 = this.success[kiter506];
+        output.writeString(kiter506);
+        output.writeString(viter507);
       }
     }
     output.writeMapEnd();
@@ -5574,18 +5574,18 @@ genome_annotation.thrift_service_get_mrna_by_gene_args.prototype.read = function
       break;
       case 3:
       if (ftype == Thrift.Type.LIST) {
-        var _size500 = 0;
-        var _rtmp3504;
+        var _size508 = 0;
+        var _rtmp3512;
         this.gene_id_list = [];
-        var _etype503 = 0;
-        _rtmp3504 = input.readListBegin();
-        _etype503 = _rtmp3504.etype;
-        _size500 = _rtmp3504.size;
-        for (var _i505 = 0; _i505 < _size500; ++_i505)
+        var _etype511 = 0;
+        _rtmp3512 = input.readListBegin();
+        _etype511 = _rtmp3512.etype;
+        _size508 = _rtmp3512.size;
+        for (var _i513 = 0; _i513 < _size508; ++_i513)
         {
-          var elem506 = null;
-          elem506 = input.readString().value;
-          this.gene_id_list.push(elem506);
+          var elem514 = null;
+          elem514 = input.readString().value;
+          this.gene_id_list.push(elem514);
         }
         input.readListEnd();
       } else {
@@ -5616,12 +5616,12 @@ genome_annotation.thrift_service_get_mrna_by_gene_args.prototype.write = functio
   if (this.gene_id_list !== null && this.gene_id_list !== undefined) {
     output.writeFieldBegin('gene_id_list', Thrift.Type.LIST, 3);
     output.writeListBegin(Thrift.Type.STRING, this.gene_id_list.length);
-    for (var iter507 in this.gene_id_list)
+    for (var iter515 in this.gene_id_list)
     {
-      if (this.gene_id_list.hasOwnProperty(iter507))
+      if (this.gene_id_list.hasOwnProperty(iter515))
       {
-        iter507 = this.gene_id_list[iter507];
-        output.writeString(iter507);
+        iter515 = this.gene_id_list[iter515];
+        output.writeString(iter515);
       }
     }
     output.writeListEnd();
@@ -5704,40 +5704,40 @@ genome_annotation.thrift_service_get_mrna_by_gene_result.prototype.read = functi
     {
       case 0:
       if (ftype == Thrift.Type.MAP) {
-        var _size508 = 0;
-        var _rtmp3512;
+        var _size516 = 0;
+        var _rtmp3520;
         this.success = {};
-        var _ktype509 = 0;
-        var _vtype510 = 0;
-        _rtmp3512 = input.readMapBegin();
-        _ktype509 = _rtmp3512.ktype;
-        _vtype510 = _rtmp3512.vtype;
-        _size508 = _rtmp3512.size;
-        for (var _i513 = 0; _i513 < _size508; ++_i513)
+        var _ktype517 = 0;
+        var _vtype518 = 0;
+        _rtmp3520 = input.readMapBegin();
+        _ktype517 = _rtmp3520.ktype;
+        _vtype518 = _rtmp3520.vtype;
+        _size516 = _rtmp3520.size;
+        for (var _i521 = 0; _i521 < _size516; ++_i521)
         {
-          if (_i513 > 0 ) {
+          if (_i521 > 0 ) {
             if (input.rstack.length > input.rpos[input.rpos.length -1] + 1) {
               input.rstack.pop();
             }
           }
-          var key514 = null;
-          var val515 = null;
-          key514 = input.readString().value;
-          var _size516 = 0;
-          var _rtmp3520;
-          val515 = [];
-          var _etype519 = 0;
-          _rtmp3520 = input.readListBegin();
-          _etype519 = _rtmp3520.etype;
-          _size516 = _rtmp3520.size;
-          for (var _i521 = 0; _i521 < _size516; ++_i521)
+          var key522 = null;
+          var val523 = null;
+          key522 = input.readString().value;
+          var _size524 = 0;
+          var _rtmp3528;
+          val523 = [];
+          var _etype527 = 0;
+          _rtmp3528 = input.readListBegin();
+          _etype527 = _rtmp3528.etype;
+          _size524 = _rtmp3528.size;
+          for (var _i529 = 0; _i529 < _size524; ++_i529)
           {
-            var elem522 = null;
-            elem522 = input.readString().value;
-            val515.push(elem522);
+            var elem530 = null;
+            elem530 = input.readString().value;
+            val523.push(elem530);
           }
           input.readListEnd();
-          this.success[key514] = val515;
+          this.success[key522] = val523;
         }
         input.readMapEnd();
       } else {
@@ -5806,22 +5806,710 @@ genome_annotation.thrift_service_get_mrna_by_gene_result.prototype.write = funct
   if (this.success !== null && this.success !== undefined) {
     output.writeFieldBegin('success', Thrift.Type.MAP, 0);
     output.writeMapBegin(Thrift.Type.STRING, Thrift.Type.LIST, Thrift.objectLength(this.success));
-    for (var kiter523 in this.success)
+    for (var kiter531 in this.success)
     {
-      if (this.success.hasOwnProperty(kiter523))
+      if (this.success.hasOwnProperty(kiter531))
       {
-        var viter524 = this.success[kiter523];
-        output.writeString(kiter523);
-        output.writeListBegin(Thrift.Type.STRING, viter524.length);
-        for (var iter525 in viter524)
+        var viter532 = this.success[kiter531];
+        output.writeString(kiter531);
+        output.writeListBegin(Thrift.Type.STRING, viter532.length);
+        for (var iter533 in viter532)
         {
-          if (viter524.hasOwnProperty(iter525))
+          if (viter532.hasOwnProperty(iter533))
           {
-            iter525 = viter524[iter525];
-            output.writeString(iter525);
+            iter533 = viter532[iter533];
+            output.writeString(iter533);
           }
         }
         output.writeListEnd();
+      }
+    }
+    output.writeMapEnd();
+    output.writeFieldEnd();
+  }
+  if (this.generic_exception !== null && this.generic_exception !== undefined) {
+    output.writeFieldBegin('generic_exception', Thrift.Type.STRUCT, 1);
+    this.generic_exception.write(output);
+    output.writeFieldEnd();
+  }
+  if (this.authorization_exception !== null && this.authorization_exception !== undefined) {
+    output.writeFieldBegin('authorization_exception', Thrift.Type.STRUCT, 2);
+    this.authorization_exception.write(output);
+    output.writeFieldEnd();
+  }
+  if (this.authentication_exception !== null && this.authentication_exception !== undefined) {
+    output.writeFieldBegin('authentication_exception', Thrift.Type.STRUCT, 3);
+    this.authentication_exception.write(output);
+    output.writeFieldEnd();
+  }
+  if (this.reference_exception !== null && this.reference_exception !== undefined) {
+    output.writeFieldBegin('reference_exception', Thrift.Type.STRUCT, 4);
+    this.reference_exception.write(output);
+    output.writeFieldEnd();
+  }
+  if (this.attribute_exception !== null && this.attribute_exception !== undefined) {
+    output.writeFieldBegin('attribute_exception', Thrift.Type.STRUCT, 5);
+    this.attribute_exception.write(output);
+    output.writeFieldEnd();
+  }
+  if (this.type_exception !== null && this.type_exception !== undefined) {
+    output.writeFieldBegin('type_exception', Thrift.Type.STRUCT, 6);
+    this.type_exception.write(output);
+    output.writeFieldEnd();
+  }
+  output.writeFieldStop();
+  output.writeStructEnd();
+  return;
+};
+
+genome_annotation.thrift_service_get_mrna_exons_args = function(args) {
+  this.token = null;
+  this.ref = null;
+  this.mrna_id_list = null;
+  if (args) {
+    if (args.token !== undefined) {
+      this.token = args.token;
+    } else {
+      throw new Thrift.TProtocolException(Thrift.TProtocolExceptionType.UNKNOWN, 'Required field token is unset!');
+    }
+    if (args.ref !== undefined) {
+      this.ref = args.ref;
+    } else {
+      throw new Thrift.TProtocolException(Thrift.TProtocolExceptionType.UNKNOWN, 'Required field ref is unset!');
+    }
+    if (args.mrna_id_list !== undefined) {
+      this.mrna_id_list = args.mrna_id_list;
+    }
+  }
+};
+genome_annotation.thrift_service_get_mrna_exons_args.prototype = {};
+genome_annotation.thrift_service_get_mrna_exons_args.prototype.read = function(input) {
+  input.readStructBegin();
+  while (true)
+  {
+    var ret = input.readFieldBegin();
+    var fname = ret.fname;
+    var ftype = ret.ftype;
+    var fid = ret.fid;
+    if (ftype == Thrift.Type.STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 1:
+      if (ftype == Thrift.Type.STRING) {
+        this.token = input.readString().value;
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 2:
+      if (ftype == Thrift.Type.STRING) {
+        this.ref = input.readString().value;
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 3:
+      if (ftype == Thrift.Type.LIST) {
+        var _size534 = 0;
+        var _rtmp3538;
+        this.mrna_id_list = [];
+        var _etype537 = 0;
+        _rtmp3538 = input.readListBegin();
+        _etype537 = _rtmp3538.etype;
+        _size534 = _rtmp3538.size;
+        for (var _i539 = 0; _i539 < _size534; ++_i539)
+        {
+          var elem540 = null;
+          elem540 = input.readString().value;
+          this.mrna_id_list.push(elem540);
+        }
+        input.readListEnd();
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      default:
+        input.skip(ftype);
+    }
+    input.readFieldEnd();
+  }
+  input.readStructEnd();
+  return;
+};
+
+genome_annotation.thrift_service_get_mrna_exons_args.prototype.write = function(output) {
+  output.writeStructBegin('thrift_service_get_mrna_exons_args');
+  if (this.token !== null && this.token !== undefined) {
+    output.writeFieldBegin('token', Thrift.Type.STRING, 1);
+    output.writeString(this.token);
+    output.writeFieldEnd();
+  }
+  if (this.ref !== null && this.ref !== undefined) {
+    output.writeFieldBegin('ref', Thrift.Type.STRING, 2);
+    output.writeString(this.ref);
+    output.writeFieldEnd();
+  }
+  if (this.mrna_id_list !== null && this.mrna_id_list !== undefined) {
+    output.writeFieldBegin('mrna_id_list', Thrift.Type.LIST, 3);
+    output.writeListBegin(Thrift.Type.STRING, this.mrna_id_list.length);
+    for (var iter541 in this.mrna_id_list)
+    {
+      if (this.mrna_id_list.hasOwnProperty(iter541))
+      {
+        iter541 = this.mrna_id_list[iter541];
+        output.writeString(iter541);
+      }
+    }
+    output.writeListEnd();
+    output.writeFieldEnd();
+  }
+  output.writeFieldStop();
+  output.writeStructEnd();
+  return;
+};
+
+genome_annotation.thrift_service_get_mrna_exons_result = function(args) {
+  this.success = null;
+  this.generic_exception = null;
+  this.authorization_exception = null;
+  this.authentication_exception = null;
+  this.reference_exception = null;
+  this.attribute_exception = null;
+  this.type_exception = null;
+  if (args instanceof genome_annotation.ServiceException) {
+    this.generic_exception = args;
+    return;
+  }
+  if (args instanceof genome_annotation.AuthorizationException) {
+    this.authorization_exception = args;
+    return;
+  }
+  if (args instanceof genome_annotation.AuthenticationException) {
+    this.authentication_exception = args;
+    return;
+  }
+  if (args instanceof genome_annotation.ObjectReferenceException) {
+    this.reference_exception = args;
+    return;
+  }
+  if (args instanceof genome_annotation.AttributeException) {
+    this.attribute_exception = args;
+    return;
+  }
+  if (args instanceof genome_annotation.TypeException) {
+    this.type_exception = args;
+    return;
+  }
+  if (args) {
+    if (args.success !== undefined) {
+      this.success = args.success;
+    }
+    if (args.generic_exception !== undefined) {
+      this.generic_exception = args.generic_exception;
+    }
+    if (args.authorization_exception !== undefined) {
+      this.authorization_exception = args.authorization_exception;
+    }
+    if (args.authentication_exception !== undefined) {
+      this.authentication_exception = args.authentication_exception;
+    }
+    if (args.reference_exception !== undefined) {
+      this.reference_exception = args.reference_exception;
+    }
+    if (args.attribute_exception !== undefined) {
+      this.attribute_exception = args.attribute_exception;
+    }
+    if (args.type_exception !== undefined) {
+      this.type_exception = args.type_exception;
+    }
+  }
+};
+genome_annotation.thrift_service_get_mrna_exons_result.prototype = {};
+genome_annotation.thrift_service_get_mrna_exons_result.prototype.read = function(input) {
+  input.readStructBegin();
+  while (true)
+  {
+    var ret = input.readFieldBegin();
+    var fname = ret.fname;
+    var ftype = ret.ftype;
+    var fid = ret.fid;
+    if (ftype == Thrift.Type.STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 0:
+      if (ftype == Thrift.Type.MAP) {
+        var _size542 = 0;
+        var _rtmp3546;
+        this.success = {};
+        var _ktype543 = 0;
+        var _vtype544 = 0;
+        _rtmp3546 = input.readMapBegin();
+        _ktype543 = _rtmp3546.ktype;
+        _vtype544 = _rtmp3546.vtype;
+        _size542 = _rtmp3546.size;
+        for (var _i547 = 0; _i547 < _size542; ++_i547)
+        {
+          if (_i547 > 0 ) {
+            if (input.rstack.length > input.rpos[input.rpos.length -1] + 1) {
+              input.rstack.pop();
+            }
+          }
+          var key548 = null;
+          var val549 = null;
+          key548 = input.readString().value;
+          var _size550 = 0;
+          var _rtmp3554;
+          val549 = [];
+          var _etype553 = 0;
+          _rtmp3554 = input.readListBegin();
+          _etype553 = _rtmp3554.etype;
+          _size550 = _rtmp3554.size;
+          for (var _i555 = 0; _i555 < _size550; ++_i555)
+          {
+            var elem556 = null;
+            elem556 = new genome_annotation.Exon_data();
+            elem556.read(input);
+            val549.push(elem556);
+          }
+          input.readListEnd();
+          this.success[key548] = val549;
+        }
+        input.readMapEnd();
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 1:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.generic_exception = new genome_annotation.ServiceException();
+        this.generic_exception.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 2:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.authorization_exception = new genome_annotation.AuthorizationException();
+        this.authorization_exception.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 3:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.authentication_exception = new genome_annotation.AuthenticationException();
+        this.authentication_exception.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 4:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.reference_exception = new genome_annotation.ObjectReferenceException();
+        this.reference_exception.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 5:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.attribute_exception = new genome_annotation.AttributeException();
+        this.attribute_exception.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 6:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.type_exception = new genome_annotation.TypeException();
+        this.type_exception.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      default:
+        input.skip(ftype);
+    }
+    input.readFieldEnd();
+  }
+  input.readStructEnd();
+  return;
+};
+
+genome_annotation.thrift_service_get_mrna_exons_result.prototype.write = function(output) {
+  output.writeStructBegin('thrift_service_get_mrna_exons_result');
+  if (this.success !== null && this.success !== undefined) {
+    output.writeFieldBegin('success', Thrift.Type.MAP, 0);
+    output.writeMapBegin(Thrift.Type.STRING, Thrift.Type.LIST, Thrift.objectLength(this.success));
+    for (var kiter557 in this.success)
+    {
+      if (this.success.hasOwnProperty(kiter557))
+      {
+        var viter558 = this.success[kiter557];
+        output.writeString(kiter557);
+        output.writeListBegin(Thrift.Type.STRUCT, viter558.length);
+        for (var iter559 in viter558)
+        {
+          if (viter558.hasOwnProperty(iter559))
+          {
+            iter559 = viter558[iter559];
+            iter559.write(output);
+          }
+        }
+        output.writeListEnd();
+      }
+    }
+    output.writeMapEnd();
+    output.writeFieldEnd();
+  }
+  if (this.generic_exception !== null && this.generic_exception !== undefined) {
+    output.writeFieldBegin('generic_exception', Thrift.Type.STRUCT, 1);
+    this.generic_exception.write(output);
+    output.writeFieldEnd();
+  }
+  if (this.authorization_exception !== null && this.authorization_exception !== undefined) {
+    output.writeFieldBegin('authorization_exception', Thrift.Type.STRUCT, 2);
+    this.authorization_exception.write(output);
+    output.writeFieldEnd();
+  }
+  if (this.authentication_exception !== null && this.authentication_exception !== undefined) {
+    output.writeFieldBegin('authentication_exception', Thrift.Type.STRUCT, 3);
+    this.authentication_exception.write(output);
+    output.writeFieldEnd();
+  }
+  if (this.reference_exception !== null && this.reference_exception !== undefined) {
+    output.writeFieldBegin('reference_exception', Thrift.Type.STRUCT, 4);
+    this.reference_exception.write(output);
+    output.writeFieldEnd();
+  }
+  if (this.attribute_exception !== null && this.attribute_exception !== undefined) {
+    output.writeFieldBegin('attribute_exception', Thrift.Type.STRUCT, 5);
+    this.attribute_exception.write(output);
+    output.writeFieldEnd();
+  }
+  if (this.type_exception !== null && this.type_exception !== undefined) {
+    output.writeFieldBegin('type_exception', Thrift.Type.STRUCT, 6);
+    this.type_exception.write(output);
+    output.writeFieldEnd();
+  }
+  output.writeFieldStop();
+  output.writeStructEnd();
+  return;
+};
+
+genome_annotation.thrift_service_get_mrna_utrs_args = function(args) {
+  this.token = null;
+  this.ref = null;
+  this.mrna_id_list = null;
+  if (args) {
+    if (args.token !== undefined) {
+      this.token = args.token;
+    } else {
+      throw new Thrift.TProtocolException(Thrift.TProtocolExceptionType.UNKNOWN, 'Required field token is unset!');
+    }
+    if (args.ref !== undefined) {
+      this.ref = args.ref;
+    } else {
+      throw new Thrift.TProtocolException(Thrift.TProtocolExceptionType.UNKNOWN, 'Required field ref is unset!');
+    }
+    if (args.mrna_id_list !== undefined) {
+      this.mrna_id_list = args.mrna_id_list;
+    }
+  }
+};
+genome_annotation.thrift_service_get_mrna_utrs_args.prototype = {};
+genome_annotation.thrift_service_get_mrna_utrs_args.prototype.read = function(input) {
+  input.readStructBegin();
+  while (true)
+  {
+    var ret = input.readFieldBegin();
+    var fname = ret.fname;
+    var ftype = ret.ftype;
+    var fid = ret.fid;
+    if (ftype == Thrift.Type.STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 1:
+      if (ftype == Thrift.Type.STRING) {
+        this.token = input.readString().value;
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 2:
+      if (ftype == Thrift.Type.STRING) {
+        this.ref = input.readString().value;
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 3:
+      if (ftype == Thrift.Type.LIST) {
+        var _size560 = 0;
+        var _rtmp3564;
+        this.mrna_id_list = [];
+        var _etype563 = 0;
+        _rtmp3564 = input.readListBegin();
+        _etype563 = _rtmp3564.etype;
+        _size560 = _rtmp3564.size;
+        for (var _i565 = 0; _i565 < _size560; ++_i565)
+        {
+          var elem566 = null;
+          elem566 = input.readString().value;
+          this.mrna_id_list.push(elem566);
+        }
+        input.readListEnd();
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      default:
+        input.skip(ftype);
+    }
+    input.readFieldEnd();
+  }
+  input.readStructEnd();
+  return;
+};
+
+genome_annotation.thrift_service_get_mrna_utrs_args.prototype.write = function(output) {
+  output.writeStructBegin('thrift_service_get_mrna_utrs_args');
+  if (this.token !== null && this.token !== undefined) {
+    output.writeFieldBegin('token', Thrift.Type.STRING, 1);
+    output.writeString(this.token);
+    output.writeFieldEnd();
+  }
+  if (this.ref !== null && this.ref !== undefined) {
+    output.writeFieldBegin('ref', Thrift.Type.STRING, 2);
+    output.writeString(this.ref);
+    output.writeFieldEnd();
+  }
+  if (this.mrna_id_list !== null && this.mrna_id_list !== undefined) {
+    output.writeFieldBegin('mrna_id_list', Thrift.Type.LIST, 3);
+    output.writeListBegin(Thrift.Type.STRING, this.mrna_id_list.length);
+    for (var iter567 in this.mrna_id_list)
+    {
+      if (this.mrna_id_list.hasOwnProperty(iter567))
+      {
+        iter567 = this.mrna_id_list[iter567];
+        output.writeString(iter567);
+      }
+    }
+    output.writeListEnd();
+    output.writeFieldEnd();
+  }
+  output.writeFieldStop();
+  output.writeStructEnd();
+  return;
+};
+
+genome_annotation.thrift_service_get_mrna_utrs_result = function(args) {
+  this.success = null;
+  this.generic_exception = null;
+  this.authorization_exception = null;
+  this.authentication_exception = null;
+  this.reference_exception = null;
+  this.attribute_exception = null;
+  this.type_exception = null;
+  if (args instanceof genome_annotation.ServiceException) {
+    this.generic_exception = args;
+    return;
+  }
+  if (args instanceof genome_annotation.AuthorizationException) {
+    this.authorization_exception = args;
+    return;
+  }
+  if (args instanceof genome_annotation.AuthenticationException) {
+    this.authentication_exception = args;
+    return;
+  }
+  if (args instanceof genome_annotation.ObjectReferenceException) {
+    this.reference_exception = args;
+    return;
+  }
+  if (args instanceof genome_annotation.AttributeException) {
+    this.attribute_exception = args;
+    return;
+  }
+  if (args instanceof genome_annotation.TypeException) {
+    this.type_exception = args;
+    return;
+  }
+  if (args) {
+    if (args.success !== undefined) {
+      this.success = args.success;
+    }
+    if (args.generic_exception !== undefined) {
+      this.generic_exception = args.generic_exception;
+    }
+    if (args.authorization_exception !== undefined) {
+      this.authorization_exception = args.authorization_exception;
+    }
+    if (args.authentication_exception !== undefined) {
+      this.authentication_exception = args.authentication_exception;
+    }
+    if (args.reference_exception !== undefined) {
+      this.reference_exception = args.reference_exception;
+    }
+    if (args.attribute_exception !== undefined) {
+      this.attribute_exception = args.attribute_exception;
+    }
+    if (args.type_exception !== undefined) {
+      this.type_exception = args.type_exception;
+    }
+  }
+};
+genome_annotation.thrift_service_get_mrna_utrs_result.prototype = {};
+genome_annotation.thrift_service_get_mrna_utrs_result.prototype.read = function(input) {
+  input.readStructBegin();
+  while (true)
+  {
+    var ret = input.readFieldBegin();
+    var fname = ret.fname;
+    var ftype = ret.ftype;
+    var fid = ret.fid;
+    if (ftype == Thrift.Type.STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 0:
+      if (ftype == Thrift.Type.MAP) {
+        var _size568 = 0;
+        var _rtmp3572;
+        this.success = {};
+        var _ktype569 = 0;
+        var _vtype570 = 0;
+        _rtmp3572 = input.readMapBegin();
+        _ktype569 = _rtmp3572.ktype;
+        _vtype570 = _rtmp3572.vtype;
+        _size568 = _rtmp3572.size;
+        for (var _i573 = 0; _i573 < _size568; ++_i573)
+        {
+          if (_i573 > 0 ) {
+            if (input.rstack.length > input.rpos[input.rpos.length -1] + 1) {
+              input.rstack.pop();
+            }
+          }
+          var key574 = null;
+          var val575 = null;
+          key574 = input.readString().value;
+          var _size576 = 0;
+          var _rtmp3580;
+          val575 = {};
+          var _ktype577 = 0;
+          var _vtype578 = 0;
+          _rtmp3580 = input.readMapBegin();
+          _ktype577 = _rtmp3580.ktype;
+          _vtype578 = _rtmp3580.vtype;
+          _size576 = _rtmp3580.size;
+          for (var _i581 = 0; _i581 < _size576; ++_i581)
+          {
+            if (_i581 > 0 ) {
+              if (input.rstack.length > input.rpos[input.rpos.length -1] + 1) {
+                input.rstack.pop();
+              }
+            }
+            var key582 = null;
+            var val583 = null;
+            key582 = input.readString().value;
+            val583 = new genome_annotation.UTR_data();
+            val583.read(input);
+            val575[key582] = val583;
+          }
+          input.readMapEnd();
+          this.success[key574] = val575;
+        }
+        input.readMapEnd();
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 1:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.generic_exception = new genome_annotation.ServiceException();
+        this.generic_exception.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 2:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.authorization_exception = new genome_annotation.AuthorizationException();
+        this.authorization_exception.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 3:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.authentication_exception = new genome_annotation.AuthenticationException();
+        this.authentication_exception.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 4:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.reference_exception = new genome_annotation.ObjectReferenceException();
+        this.reference_exception.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 5:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.attribute_exception = new genome_annotation.AttributeException();
+        this.attribute_exception.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 6:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.type_exception = new genome_annotation.TypeException();
+        this.type_exception.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      default:
+        input.skip(ftype);
+    }
+    input.readFieldEnd();
+  }
+  input.readStructEnd();
+  return;
+};
+
+genome_annotation.thrift_service_get_mrna_utrs_result.prototype.write = function(output) {
+  output.writeStructBegin('thrift_service_get_mrna_utrs_result');
+  if (this.success !== null && this.success !== undefined) {
+    output.writeFieldBegin('success', Thrift.Type.MAP, 0);
+    output.writeMapBegin(Thrift.Type.STRING, Thrift.Type.MAP, Thrift.objectLength(this.success));
+    for (var kiter584 in this.success)
+    {
+      if (this.success.hasOwnProperty(kiter584))
+      {
+        var viter585 = this.success[kiter584];
+        output.writeString(kiter584);
+        output.writeMapBegin(Thrift.Type.STRING, Thrift.Type.STRUCT, Thrift.objectLength(viter585));
+        for (var kiter586 in viter585)
+        {
+          if (viter585.hasOwnProperty(kiter586))
+          {
+            var viter587 = viter585[kiter586];
+            output.writeString(kiter586);
+            viter587.write(output);
+          }
+        }
+        output.writeMapEnd();
       }
     }
     output.writeMapEnd();
@@ -6885,23 +7573,23 @@ genome_annotation.thrift_serviceClient.prototype.recv_get_gene_by_mrna = functio
   }
   throw 'get_gene_by_mrna failed: unknown result';
 };
-genome_annotation.thrift_serviceClient.prototype.get_mrna_by_cds = function(token, ref, gene_id_list, callback) {
+genome_annotation.thrift_serviceClient.prototype.get_mrna_by_cds = function(token, ref, cds_id_list, callback) {
   if (callback === undefined) {
-    this.send_get_mrna_by_cds(token, ref, gene_id_list);
+    this.send_get_mrna_by_cds(token, ref, cds_id_list);
     return this.recv_get_mrna_by_cds();
   } else {
-    var postData = this.send_get_mrna_by_cds(token, ref, gene_id_list, true);
+    var postData = this.send_get_mrna_by_cds(token, ref, cds_id_list, true);
     return this.output.getTransport()
       .jqRequest(this, postData, arguments, this.recv_get_mrna_by_cds);
   }
 };
 
-genome_annotation.thrift_serviceClient.prototype.send_get_mrna_by_cds = function(token, ref, gene_id_list, callback) {
+genome_annotation.thrift_serviceClient.prototype.send_get_mrna_by_cds = function(token, ref, cds_id_list, callback) {
   this.output.writeMessageBegin('get_mrna_by_cds', Thrift.MessageType.CALL, this.seqid);
   var args = new genome_annotation.thrift_service_get_mrna_by_cds_args();
   args.token = token;
   args.ref = ref;
-  args.gene_id_list = gene_id_list;
+  args.cds_id_list = cds_id_list;
   args.write(this.output);
   this.output.writeMessageEnd();
   return this.output.getTransport().flush(callback);
@@ -7004,4 +7692,124 @@ genome_annotation.thrift_serviceClient.prototype.recv_get_mrna_by_gene = functio
     return result.success;
   }
   throw 'get_mrna_by_gene failed: unknown result';
+};
+genome_annotation.thrift_serviceClient.prototype.get_mrna_exons = function(token, ref, mrna_id_list, callback) {
+  if (callback === undefined) {
+    this.send_get_mrna_exons(token, ref, mrna_id_list);
+    return this.recv_get_mrna_exons();
+  } else {
+    var postData = this.send_get_mrna_exons(token, ref, mrna_id_list, true);
+    return this.output.getTransport()
+      .jqRequest(this, postData, arguments, this.recv_get_mrna_exons);
+  }
+};
+
+genome_annotation.thrift_serviceClient.prototype.send_get_mrna_exons = function(token, ref, mrna_id_list, callback) {
+  this.output.writeMessageBegin('get_mrna_exons', Thrift.MessageType.CALL, this.seqid);
+  var args = new genome_annotation.thrift_service_get_mrna_exons_args();
+  args.token = token;
+  args.ref = ref;
+  args.mrna_id_list = mrna_id_list;
+  args.write(this.output);
+  this.output.writeMessageEnd();
+  return this.output.getTransport().flush(callback);
+};
+
+genome_annotation.thrift_serviceClient.prototype.recv_get_mrna_exons = function() {
+  var ret = this.input.readMessageBegin();
+  var fname = ret.fname;
+  var mtype = ret.mtype;
+  var rseqid = ret.rseqid;
+  if (mtype == Thrift.MessageType.EXCEPTION) {
+    var x = new Thrift.TApplicationException();
+    x.read(this.input);
+    this.input.readMessageEnd();
+    throw x;
+  }
+  var result = new genome_annotation.thrift_service_get_mrna_exons_result();
+  result.read(this.input);
+  this.input.readMessageEnd();
+
+  if (null !== result.generic_exception) {
+    throw result.generic_exception;
+  }
+  if (null !== result.authorization_exception) {
+    throw result.authorization_exception;
+  }
+  if (null !== result.authentication_exception) {
+    throw result.authentication_exception;
+  }
+  if (null !== result.reference_exception) {
+    throw result.reference_exception;
+  }
+  if (null !== result.attribute_exception) {
+    throw result.attribute_exception;
+  }
+  if (null !== result.type_exception) {
+    throw result.type_exception;
+  }
+  if (null !== result.success) {
+    return result.success;
+  }
+  throw 'get_mrna_exons failed: unknown result';
+};
+genome_annotation.thrift_serviceClient.prototype.get_mrna_utrs = function(token, ref, mrna_id_list, callback) {
+  if (callback === undefined) {
+    this.send_get_mrna_utrs(token, ref, mrna_id_list);
+    return this.recv_get_mrna_utrs();
+  } else {
+    var postData = this.send_get_mrna_utrs(token, ref, mrna_id_list, true);
+    return this.output.getTransport()
+      .jqRequest(this, postData, arguments, this.recv_get_mrna_utrs);
+  }
+};
+
+genome_annotation.thrift_serviceClient.prototype.send_get_mrna_utrs = function(token, ref, mrna_id_list, callback) {
+  this.output.writeMessageBegin('get_mrna_utrs', Thrift.MessageType.CALL, this.seqid);
+  var args = new genome_annotation.thrift_service_get_mrna_utrs_args();
+  args.token = token;
+  args.ref = ref;
+  args.mrna_id_list = mrna_id_list;
+  args.write(this.output);
+  this.output.writeMessageEnd();
+  return this.output.getTransport().flush(callback);
+};
+
+genome_annotation.thrift_serviceClient.prototype.recv_get_mrna_utrs = function() {
+  var ret = this.input.readMessageBegin();
+  var fname = ret.fname;
+  var mtype = ret.mtype;
+  var rseqid = ret.rseqid;
+  if (mtype == Thrift.MessageType.EXCEPTION) {
+    var x = new Thrift.TApplicationException();
+    x.read(this.input);
+    this.input.readMessageEnd();
+    throw x;
+  }
+  var result = new genome_annotation.thrift_service_get_mrna_utrs_result();
+  result.read(this.input);
+  this.input.readMessageEnd();
+
+  if (null !== result.generic_exception) {
+    throw result.generic_exception;
+  }
+  if (null !== result.authorization_exception) {
+    throw result.authorization_exception;
+  }
+  if (null !== result.authentication_exception) {
+    throw result.authentication_exception;
+  }
+  if (null !== result.reference_exception) {
+    throw result.reference_exception;
+  }
+  if (null !== result.attribute_exception) {
+    throw result.attribute_exception;
+  }
+  if (null !== result.type_exception) {
+    throw result.type_exception;
+  }
+  if (null !== result.success) {
+    return result.success;
+  }
+  throw 'get_mrna_utrs failed: unknown result';
 };

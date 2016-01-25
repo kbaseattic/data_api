@@ -107,10 +107,7 @@ class GenomeAnnotationService(service_core.BaseService):
         output = dict()
         for k,v in result.items():
             output[k] = ttypes.Feature_data(**v)
-            output[k].feature_locations = [ttypes.Region(contig_id=r[0],
-                                                         strand=r[2],
-                                                         start=r[1],
-                                                         length=r[3])
+            output[k].feature_locations = [ttypes.Region(**r)
                                            for r in v["feature_locations"]]
 
         return output
@@ -200,3 +197,33 @@ class GenomeAnnotationService(service_core.BaseService):
         result = ga_api.get_mrna_by_gene(gene_id_list)
 
         return result
+
+    @server_method
+    def get_mrna_exons(self, token=None, ref=None, mrna_id_list=None):
+        ga_api = self._get_instance(token, ref)
+        result = ga_api.get_mrna_exons(mrna_id_list)
+        output = {}
+        for mrna_id in result:
+            output[mrna_id] = [
+                ttypes.Exon_data(exon_location=ttypes.Region(**x["exon_location"]),
+                                 exon_dna_sequence=x["exon_dna_sequence"],
+                                 exon_ordinal=x["exon_ordinal"])\
+                for x in result[mrna_id]
+            ]
+
+        return output
+
+    @server_method
+    def get_mrna_utrs(self, token=None, ref=None, mrna_id_list=None):
+        ga_api = self._get_instance(token, ref)
+        result = ga_api.get_mrna_utrs(mrna_id_list)
+        output = {}
+        for mrna_id in result:
+            output[mrna_id] = {}
+            for utr_id in result[mrna_id]:
+                regions = result[mrna_id][utr_id]["utr_locations"]
+                output[mrna_id][utr_id] = ttypes.UTR_data(
+                    utr_locations=[ttypes.Region(**x) for x in regions],
+                    utr_dna_sequence=result[mrna_id][utr_id]["utr_dna_sequence"])
+
+        return output
