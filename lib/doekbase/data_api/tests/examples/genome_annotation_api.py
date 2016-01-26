@@ -58,7 +58,7 @@ def proteins_to_fasta(ws_url='https://ci.kbase.us/services/ws/'):
     # Get all the proteins with the Data API
     proteins = genome_annotation.get_proteins()
     # Create an output file and write to it
-    outfile = '/tmp/3899_prot.fasta'
+    outfile = '/tmp/166819_prot.fasta'
     with open(outfile, 'w') as f:
         for fasta_line in get_fasta(proteins):
             f.write(fasta_line)

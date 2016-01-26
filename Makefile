@@ -27,13 +27,23 @@ deploy-service-scripts:
 	mkdir -p $(SERVICE_DIR)/check_mk
 	cp $(SCRIPTS_DIR)/data_api_service $(SERVICE_DIR)/check_mk/
 
-test: shutdown
-	@echo '+- Start each of the API services'
-	nohup data_api_start_service.py --config deployment.cfg --service taxon --port 9101 & > taxonAPI.out
-	nohup data_api_start_service.py --config deployment.cfg --service assembly --port 9102 & > assemblyAPI.out        
-	nohup data_api_start_service.py --config deployment.cfg --service genome_annotation --port 9103 & > genome_annotationAPI.out
+test: subupdate shutdown startup
 	@echo '+- Run nosetests from the data_api source directory, which will use the test data'
 	KB_DEPLOY_URL=dir_nocache nosetests -c nose.cfg -c nose-local.cfg
+
+subupdate:
+	@echo 'Update submodule in test_resources, that has local data'
+	@echo 'This command will either execute very quickly, or take minutes..'
+	git submodule update --remote --merge
+
+startup:
+	@echo '+- Start each of the API services'
+	#nohup data_api_start_service.py --config deployment.cfg --service taxon --port 9101 & > taxonAPI.out
+	#nohup data_api_start_service.py --config deployment.cfg --service assembly --port 9102 & > assemblyAPI.out        
+	#nohup data_api_start_service.py --config deployment.cfg --service genome_annotation --port 9103 & > genome_annotationAPI.out
+	data_api_start_service.py --config deployment.cfg --service taxon --port 9101  >taxon.out 2>&1 &
+	data_api_start_service.py --config deployment.cfg --service assembly --port 9102 >assembly.out 2>&1 &
+	data_api_start_service.py --config deployment.cfg --service genome_annotation --port 9103 >genome_annotation.out 2>&1 &
 
 shutdown:
 	@printf "+- Shutdown\n"
@@ -41,4 +51,4 @@ shutdown:
 	@ sleep 2
 
 clean:
-	echo not implemented
+	/bin/rm -f *.out *.pid
