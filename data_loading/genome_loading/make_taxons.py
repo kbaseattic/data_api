@@ -1,7 +1,8 @@
 import simplejson
 import time
 import sys
-import doekbase.workspace.client
+import biokbase.workspace.client
+#import doekbase.workspace.client
 import re
 import hashlib
 import traceback
@@ -47,7 +48,8 @@ def make_taxons(wsname=None,wsurl=None, taxon_files_dir = None):
     start  = time.time()
     print "Start time " + str(start)
 
-    ws_client = doekbase.workspace.client.Workspace(wsurl)
+#    ws_client = doekbase.workspace.client.Workspace(wsurl)
+    ws_client = biokbase.workspace.client.Workspace(wsurl)
 
     workspace_object = ws_client.get_workspace_info({'workspace':wsname})
     
