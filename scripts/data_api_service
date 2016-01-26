@@ -7,9 +7,11 @@ then
     export KB_DEPLOYMENT_CONFIG=$KB_TOP/deployment.cfg
 fi
 
-source $script_dir/venv/bin/activate
+source $script_dir/../venv/bin/activate
 
-for api in assembly
+export KB_AUTH_TOKEN=$(cat /etc/check_mk/dataapitoken)
+
+for api in assembly taxon annotation
 do
-    test_api_service.py assembly https://ci.kbase.us/services/data/assembly
+    test_api_service.py $api https://ci.kbase.us/services/data/$api
 done
