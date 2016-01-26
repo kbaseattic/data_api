@@ -9,7 +9,7 @@ def test_api_service(service_name='assembly',apiurl='http://localhost',token=Non
         elif service_name == "assembly":
             #from doekbase.data_api.sequence.assembly.service import thrift_client
             from doekbase.data_api.sequence.assembly.api import AssemblyClientAPI
-            api = AssemblyClientAPI(apiurl, token, 'PrototypeReferenceGenomes/kb|g.166819_assembly')
+            api = AssemblyClientAPI(apiurl, token, 'ReferenceGenomeAnnotations/kb|g.166819_assembly')
         else:
             raise Exception("Service not activated: {}".format(service_name))
     except:
