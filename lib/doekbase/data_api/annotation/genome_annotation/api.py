@@ -54,6 +54,10 @@ _log = get_logger("GenomeAnnotationAPI")
 class GenomeAnnotationInterface(object):
     __metaclass__ = abc.ABCMeta
 
+    # filters and groups for get_feature_ids()
+    _valid_filters = ["type_list", "region_list", "function_list", "alias_list"]
+    _valid_groups = ["type", "region", "function", "alias"]
+
     @abc.abstractmethod
     def get_taxon(self, ref_only=False):
         """Retrieves the Taxon assigned to this Genome Annotation.
@@ -438,7 +442,6 @@ class GenomeAnnotationAPI(ObjectAPI, GenomeAnnotationInterface):
 class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
     def __init__(self, services, token, ref):
         super(_KBaseGenomes_Genome, self).__init__(services, token, ref)
-        self._data_features_blist = None  # see self._get_features()
 
     def get_taxon(self, ref_only=False):
         from doekbase.data_api.taxonomy.taxon.api import TaxonAPI
@@ -472,15 +475,12 @@ class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
         if filters is None:
             filters = {}
 
-        valid_filters = ["type_list", "region_list", "function_list", "alias_list"]
-        valid_groups = ["type", "region", "function", "alias"]
-
         for k in filters:
-            if k not in valid_filters:
-                raise KeyError("Invalid filter key {}, valid filters are {}".format(k, valid_filters))
+            if k not in self._valid_filters:
+                raise KeyError("Invalid filter key {}, valid filters are {}".format(k, self._valid_filters))
 
-        if group_by not in valid_groups:
-            raise ValueError("Invalid group_by {}, valid group_by values are {}".format(group_by, valid_groups))
+        if group_by not in self._valid_groups:
+            raise ValueError("Invalid group_by {}, valid group_by values are {}".format(group_by, self._valid_groups))
 
         # no choice but to pull all features
         features = self.get_data()['features']
@@ -889,120 +889,72 @@ class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
         return proteins                
 
     def get_mrna_utrs(self, mrna_feature_id_list=None):
-        if mrna_feature_id_list is None:
-            return {}
-
-        try:
-            feature_refs = ["features/" + x for x in mrna_feature_id_list]
-            assert len(feature_refs) > 0
-        except TypeError:
-            raise TypeError("A list of strings indicating mrna feature identifiers is required.")
-        except AssertionError:
-            raise TypeError("A list of strings indicating mrna feature identifiers is required, received an empty list.")
-
-        return {}
+        raise TypeError("The Genome type does not contain relationships between features." +
+                        "  This method cannot return valid results for this data type.")
 
     def get_mrna_exons(self, mrna_feature_id_list=None):
-        if mrna_feature_id_list is None:
-            mrna_feature_id_list = self.get_feature_ids(filters={"type_list": ["mRNA"]})["by_type"]["mRNA"]
-
-        # fetch the mrna feature data
-        mrna_data = self.get_features(mrna_feature_id_list)
+        data = self.get_data()
 
         exons = {}
 
-        for mrna_id in mrna_data:
-            exons[mrna_id] = []
-            mrna_sequence = mrna_data[mrna_id]["feature_dna_sequence"]
+        if mrna_feature_id_list is None:
+            mrna_feature_id_list = []
 
+        mrna_list_length = len(mrna_feature_id_list)
+
+        for feature_data in data["features"]:
+            if feature_data["type"] != "mRNA":
+                continue
+
+            if mrna_list_length > 0 and feature_data["id"] not in mrna_feature_id_list:
+                continue
+
+            if "dna_sequence" not in feature_data or "location" not in feature_data:
+                continue
+
+            feature_exons = []
             offset = 0
-            for i in xrange(len(mrna_data[mrna_id]["feature_locations"])):
-                exon_location = mrna_data[mrna_id]["feature_locations"][i]
-                exon_sequence = mrna_sequence[offset:offset + exon_location["length"]]
+            for i in xrange(len(feature_data["location"])):
+                exon_location = feature_data["location"][i]
 
-                exons[mrna_id].append({"exon_location": exon_location,
-                                       "exon_dna_sequence": exon_sequence,
-                                       "exon_ordinal": i})
+                feature_exons.append({
+                    "exon_location": {"contig_id": exon_location[0],
+                                      "start": exon_location[1],
+                                      "strand": exon_location[2],
+                                      "length": exon_location[3]},
+                    "exon_dna_sequence": feature_data["dna_sequence"][offset:offset + exon_location[3]],
+                    "exon_ordinal": i
+                })
 
-                offset += exon_location["length"]
+                offset += exon_location[3]
+
+            exons[feature_data["id"]] = feature_exons
 
         return exons
 
     def get_cds_by_mrna(self, mrna_feature_id_list=None):
-        try:
-            feature_refs = ["features/" + x for x in mrna_feature_id_list]
-            assert len(feature_refs) > 0
-        except TypeError:
-            raise TypeError("A list of strings indicating mrna feature identifiers is required.")
-        except AssertionError:
-            raise TypeError("A list of strings indicating mrna feature identifiers is required, received an empty list.")
- 
-        return {}
+        raise TypeError("The Genome type does not contain relationships between features." +
+                        "  This method cannot return valid results for this data type.")
 
     def get_mrna_by_cds(self, cds_feature_id_list=None):
-        try:
-            feature_refs = ["features/" + x for x in cds_feature_id_list]
-            assert len(feature_refs) > 0
-        except TypeError:
-            raise TypeError("A list of strings indicating CDS feature identifiers is required.")
-        except AssertionError:
-            raise TypeError("A list of strings indicating CDS feature identifiers is required, received an empty list.") 
-
-        return {} 
+        raise TypeError("The Genome type does not contain relationships between features." +
+                        "  This method cannot return valid results for this data type.")
 
     def get_gene_by_cds(self, cds_feature_id_list=None):
-        try:
-            feature_refs = ["features/" + x for x in cds_feature_id_list]
-            assert len(feature_refs) > 0
-        except TypeError:
-            raise TypeError("A list of strings indicating CDS feature identifiers is required.")
-        except AssertionError:
-            raise TypeError("A list of strings indicating CDS feature identifiers is required, received an empty list.")
- 
-        return {}
+        raise TypeError("The Genome type does not contain relationships between features." +
+                        "  This method cannot return valid results for this data type.")
   
     def get_gene_by_mrna(self, mrna_feature_id_list=None):
-        try:
-            feature_refs = ["features/" + x for x in mrna_feature_id_list]
-            assert len(feature_refs) > 0
-        except TypeError:
-            raise TypeError("A list of strings indicating mrna feature identifiers is required.")
-        except AssertionError:
-            raise TypeError("A list of strings indicating mrna feature identifiers is required, received an empty list.")
-
-        return {} 
+        raise TypeError("The Genome type does not contain relationships between features." +
+                        "  This method cannot return valid results for this data type.")
 
     def get_cds_by_gene(self, gene_feature_id_list=None):
-        try:
-            feature_refs = ["features/" + x for x in gene_feature_id_list]
-            assert len(feature_refs) > 0
-        except TypeError:
-            raise TypeError("A list of strings indicating gene feature identifiers is required.")
-        except AssertionError:
-            raise TypeError("A list of strings indicating gene feature identifiers is required, received an empty list.") 
+        raise TypeError("The Genome type does not contain relationships between features." +
+                        "  This method cannot return valid results for this data type.")
 
-        return {}
-    
     def get_mrna_by_gene(self, gene_feature_id_list=None):
-        try:
-            feature_refs = ["features/" + x for x in gene_feature_id_list]
-            assert len(feature_refs) > 0
-        except TypeError:
-            raise TypeError("A list of strings indicating gene feature identifiers is required.")
-        except AssertionError:
-            raise TypeError("A list of strings indicating gene feature identifiers is required, received an empty list.")
- 
-        return {}
-
-#    def _get_features(self):
-#        """Get a *copy* of the features.
-#        The original list of features should not be modified anywhere.
-#        """
-#        # create/cache a 'blist' version of the features so copying will be cheap
-#        if self._data_features_blist is None:
-#            self._data_features_blist = blist.blist(self.get_data()['features'])
-#        # return a copy of the underlying list
-#        return self._data_features_blist[:]
+        raise TypeError("The Genome type does not contain relationships between features." +
+                        "  This method cannot return valid results for this data type.")
 
 
 @fix_docs
@@ -1060,15 +1012,12 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
         if filters is None:
             filters = {}
 
-        valid_filters = ["type_list", "region_list", "function_list", "alias_list"]
-        valid_groups = ["type", "region", "function", "alias"]
-
         for k in filters:
-            if k not in valid_filters:
-                raise KeyError("Invalid filter key {}, valid filters are {}".format(k, valid_filters))
+            if k not in self._valid_filters:
+                raise KeyError("Invalid filter key {}, valid filters are {}".format(k, self._valid_filters))
 
-        if group_by not in valid_groups:
-            raise ValueError("Invalid group_by {}, valid group_by values are {}".format(group_by, valid_groups))
+        if group_by not in self._valid_groups:
+            raise ValueError("Invalid group_by {}, valid group_by values are {}".format(group_by, self._valid_groups))
 
         data = self.get_data()
 
@@ -1254,14 +1203,12 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
                         out[feature_id] = []
             elif data == "locations":
                 for feature_id in working_list:
-                    out[feature_id] = []
-                    for loc in features[feature_id]["locations"]:
-                        out[feature_id].append({
-                            "contig_id": loc[0],
-                            "strand": loc[2],
-                            "start": loc[1],
-                            "length": loc[3]
-                    })
+                    out[feature_id] = [
+                        {"contig_id": loc[0],
+                         "strand": loc[2],
+                         "start": loc[1],
+                         "length": loc[3]} \
+                        for loc in features[feature_id]["locations"]]
             elif data == "dna":
                 for feature_id in working_list:
                     out[feature_id] = features[feature_id]["dna_sequence"]
@@ -1565,35 +1512,41 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
         return utrs
 
     def get_mrna_exons(self, mrna_feature_id_list=None):
+        feature_container_references = self.get_data_subset(
+            path_list=["feature_container_references"])["feature_container_references"]
+
+        mrna_feature_container_ref = feature_container_references["mRNA"]
+        mrna_feature_container = ObjectAPI(self.services,
+                                           self._token,
+                                           mrna_feature_container_ref)
+
         if mrna_feature_id_list is None:
-            feature_container_references = self.get_data_subset(
-                path_list=["feature_container_references"])["feature_container_references"]
-
-            mrna_feature_container_ref = feature_container_references["mRNA"]
-            mrna_feature_container = ObjectAPI(self.services,
-                                               self._token,
-                                               mrna_feature_container_ref)
-            mrna_feature_id_list = mrna_feature_container.get_data()["features"].keys()
-
-        # fetch the mrna feature data
-        mrna_data = self.get_features(mrna_feature_id_list)
+            mrna_data = mrna_feature_container.get_data()
+        else:
+            mrna_data = mrna_feature_container.get_data_subset(
+                path_list=["features/" + x for x in mrna_feature_id_list])
 
         exons = {}
-
-        for mrna_id in mrna_data:
-            exons[mrna_id] = []
-            mrna_sequence = mrna_data[mrna_id]["feature_dna_sequence"]
+        for mrna_id in mrna_data["features"]:
+            feature_exons = []
+            mrna_sequence = mrna_data["features"][mrna_id]["dna_sequence"]
 
             offset = 0
-            for i in xrange(len(mrna_data[mrna_id]["feature_locations"])):
-                exon_location = mrna_data[mrna_id]["feature_locations"][i]
-                exon_sequence = mrna_sequence[offset:offset + exon_location["length"]]
+            for i in xrange(len(mrna_data["features"][mrna_id]["locations"])):
+                exon_location = mrna_data["features"][mrna_id]["locations"][i]
+                exon_sequence = mrna_sequence[offset:offset + exon_location[3]]
 
-                exons[mrna_id].append({"exon_location": exon_location,
+                feature_exons.append({"exon_location": {"contig_id": exon_location[0],
+                                                        "start": exon_location[1],
+                                                        "strand": exon_location[2],
+                                                        "length": exon_location[3]},
                                        "exon_dna_sequence": exon_sequence,
                                        "exon_ordinal": i})
 
-                offset += exon_location["length"]
+                offset += exon_location[3]
+
+            # assign here to avoid multiple memory reallocations of the dict
+            exons[mrna_id] = feature_exons
 
         return exons
 
@@ -1710,7 +1663,7 @@ class GenomeAnnotationClientAPI(GenomeAnnotationInterface):
             except ttypes.AuthorizationException, e:
                 raise exceptions.AuthorizationError(e.message)
             except ttypes.TypeException, e:
-                raise exceptions.TypeError(e.message)
+                raise TypeError(e.message)
             except ttypes.ServiceException, e:
                 raise exceptions.ServiceError(e.message)
             except Exception, e:
@@ -1759,17 +1712,13 @@ class GenomeAnnotationClientAPI(GenomeAnnotationInterface):
     def get_feature_ids(self, filters=None, group_by="type"):
         converted_filters = ttypes.Feature_id_filters()
 
-        valid_groups = ["type", "region", "function", "alias"]
-
-        if group_by not in valid_groups:
-            raise ValueError("Invalid group_by {}, valid group_by values are {}".format(group_by, valid_groups))
+        if group_by not in self._valid_groups:
+            raise ValueError("Invalid group_by {}, valid group_by values are {}".format(group_by, self._valid_groups))
 
         if filters is not None:
-            valid_filters = ["type_list", "region_list", "function_list", "alias_list"]
-
             for k in filters:
-                if k not in valid_filters:
-                    raise KeyError("Invalid filter key {}, valid filters are {}".format(k, valid_filters))
+                if k not in self._valid_filters:
+                    raise KeyError("Invalid filter key {}, valid filters are {}".format(k, self._valid_filters))
 
             if "type_list" in filters:
                 type_list = filters["type_list"]
