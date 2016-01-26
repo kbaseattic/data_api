@@ -2,9 +2,19 @@
 
 script_dir=$(dirname "$(readlink -f "$0")")
 
+logfile=$script_dir/log
+
+rm -f $logfile
+
 if [ -z $KB_DEPLOYMENT_CONFIG ]
 then
     export KB_DEPLOYMENT_CONFIG=$KB_TOP/deployment.cfg
+fi
+
+# something in python import complains when $HOME is not set
+if [ -z $HOME ]
+then
+    export HOME=/dev/null
 fi
 
 source $script_dir/../venv/bin/activate
@@ -13,5 +23,5 @@ export KB_AUTH_TOKEN=$(cat /etc/check_mk/dataapitoken)
 
 for api in assembly taxon annotation
 do
-    test_api_service.py $api https://ci.kbase.us/services/data/$api
+    test_api_service.py $api https://ci.kbase.us/services/data/$api 2>> $logfile
 done

@@ -16,8 +16,9 @@ def test_api_service(service_name='assembly',apiurl='http://localhost',token=Non
             api = GenomeAnnotationClientAPI(apiurl, token, None)
         else:
             raise Exception("Service not activated: {}".format(service_name))
-    except:
-        print '3 ' + service_name + '_api - UNKNOWN - could not load client library'
+    except Exception as e:
+        print '3 ' + service_name + '_api - UNKNOWN - could not load client library for ' + service_name + ' ' + str(sys.path) + ' ' + str(sys.exc_info()[0])
+        raise
 
     if service_name == 'annotation':
         try:
@@ -58,3 +59,4 @@ if __name__ == "__main__":
     apiurl=sys.argv[2]
     token=os.environ['KB_AUTH_TOKEN']
     test_api_service(service_name,apiurl,token)
+
