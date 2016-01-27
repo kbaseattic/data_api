@@ -1756,18 +1756,25 @@ class GenomeAnnotationClientAPI(GenomeAnnotationInterface):
     def get_features(self, feature_id_list=None):
         result = self.client.get_features(self._token, self.ref, feature_id_list)
 
-        output = {}
-        for x in result:
-            output[x] = {}
-
-            for k in result[x].__dict__:
-                output[x][k] = result[x].__dict__[k]
-
-            output[x]["feature_locations"] = [{"contig_id": loc.contig_id,
-                                               "start": loc.start,
-                                               "strand": loc.strand,
-                                               "length": loc.length
-                                              } for loc in result[x].feature_locations]
+        output = {x: {
+            "feature_id": result[x].feature_id,
+            "feature_type": result[x].feature_type,
+            "feature_function": result[x].feature_function,
+            "feature_aliases": result[x].feature_aliases,
+            "feature_dna_sequence_length": result[x].feature_dna_sequence_length,
+            "feature_dna_sequence": result[x].feature_dna_sequence,
+            "feature_md5": result[x].feature_md5,
+            "feature_locations": [{"contig_id": loc.contig_id,
+                                   "start": loc.start,
+                                   "strand": loc.strand,
+                                   "length": loc.length
+                                  } for loc in result[x].feature_locations],
+            "feature_publications": result[x].feature_publications,
+            "feature_quality_warnings": result[x].feature_quality_warnings,
+            "feature_quality_score": result[x].feature_quality_score,
+            "feature_notes": result[x].feature_notes,
+            "feature_inference": result[x].feature_inference
+        } for x in result}
 
         return output
 
