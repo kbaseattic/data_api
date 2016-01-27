@@ -222,7 +222,7 @@ class Iface(Interface):
     """
     pass
 
-  def get_mrna_by_cds(token, ref, gene_id_list):
+  def get_mrna_by_cds(token, ref, cds_id_list):
     """
     Retrieve the mRNA id for each CDS id in this GenomeAnnotation.
 
@@ -230,7 +230,7 @@ class Iface(Interface):
     Parameters:
      - token
      - ref
-     - gene_id_list
+     - cds_id_list
     """
     pass
 
@@ -243,6 +243,30 @@ class Iface(Interface):
      - token
      - ref
      - gene_id_list
+    """
+    pass
+
+  def get_mrna_exons(token, ref, mrna_id_list):
+    """
+    Retrieve Exon information for each mRNA id in this GenomeAnnotation.
+
+
+    Parameters:
+     - token
+     - ref
+     - mrna_id_list
+    """
+    pass
+
+  def get_mrna_utrs(token, ref, mrna_id_list):
+    """
+    Retrieve UTR information for each mRNA id in this GenomeAnnotation.
+
+
+    Parameters:
+     - token
+     - ref
+     - mrna_id_list
     """
     pass
 
@@ -1372,7 +1396,7 @@ class Client:
       return d.errback(result.type_exception)
     return d.errback(TApplicationException(TApplicationException.MISSING_RESULT, "get_gene_by_mrna failed: unknown result"))
 
-  def get_mrna_by_cds(self, token, ref, gene_id_list):
+  def get_mrna_by_cds(self, token, ref, cds_id_list):
     """
     Retrieve the mRNA id for each CDS id in this GenomeAnnotation.
 
@@ -1380,12 +1404,12 @@ class Client:
     Parameters:
      - token
      - ref
-     - gene_id_list
+     - cds_id_list
     """
     seqid = self._seqid = self._seqid + 1
     self._reqs[seqid] = defer.Deferred()
 
-    d = defer.maybeDeferred(self.send_get_mrna_by_cds, token, ref, gene_id_list)
+    d = defer.maybeDeferred(self.send_get_mrna_by_cds, token, ref, cds_id_list)
     d.addCallbacks(
       callback=self.cb_send_get_mrna_by_cds,
       callbackArgs=(seqid,),
@@ -1401,13 +1425,13 @@ class Client:
     d.errback(f)
     return d
 
-  def send_get_mrna_by_cds(self, token, ref, gene_id_list):
+  def send_get_mrna_by_cds(self, token, ref, cds_id_list):
     oprot = self._oprot_factory.getProtocol(self._transport)
     oprot.writeMessageBegin('get_mrna_by_cds', TMessageType.CALL, self._seqid)
     args = get_mrna_by_cds_args()
     args.token = token
     args.ref = ref
-    args.gene_id_list = gene_id_list
+    args.cds_id_list = cds_id_list
     args.write(oprot)
     oprot.writeMessageEnd()
     oprot.trans.flush()
@@ -1504,6 +1528,138 @@ class Client:
       return d.errback(result.type_exception)
     return d.errback(TApplicationException(TApplicationException.MISSING_RESULT, "get_mrna_by_gene failed: unknown result"))
 
+  def get_mrna_exons(self, token, ref, mrna_id_list):
+    """
+    Retrieve Exon information for each mRNA id in this GenomeAnnotation.
+
+
+    Parameters:
+     - token
+     - ref
+     - mrna_id_list
+    """
+    seqid = self._seqid = self._seqid + 1
+    self._reqs[seqid] = defer.Deferred()
+
+    d = defer.maybeDeferred(self.send_get_mrna_exons, token, ref, mrna_id_list)
+    d.addCallbacks(
+      callback=self.cb_send_get_mrna_exons,
+      callbackArgs=(seqid,),
+      errback=self.eb_send_get_mrna_exons,
+      errbackArgs=(seqid,))
+    return d
+
+  def cb_send_get_mrna_exons(self, _, seqid):
+    return self._reqs[seqid]
+
+  def eb_send_get_mrna_exons(self, f, seqid):
+    d = self._reqs.pop(seqid)
+    d.errback(f)
+    return d
+
+  def send_get_mrna_exons(self, token, ref, mrna_id_list):
+    oprot = self._oprot_factory.getProtocol(self._transport)
+    oprot.writeMessageBegin('get_mrna_exons', TMessageType.CALL, self._seqid)
+    args = get_mrna_exons_args()
+    args.token = token
+    args.ref = ref
+    args.mrna_id_list = mrna_id_list
+    args.write(oprot)
+    oprot.writeMessageEnd()
+    oprot.trans.flush()
+
+  def recv_get_mrna_exons(self, iprot, mtype, rseqid):
+    d = self._reqs.pop(rseqid)
+    if mtype == TMessageType.EXCEPTION:
+      x = TApplicationException()
+      x.read(iprot)
+      iprot.readMessageEnd()
+      return d.errback(x)
+    result = get_mrna_exons_result()
+    result.read(iprot)
+    iprot.readMessageEnd()
+    if result.success is not None:
+      return d.callback(result.success)
+    if result.generic_exception is not None:
+      return d.errback(result.generic_exception)
+    if result.authorization_exception is not None:
+      return d.errback(result.authorization_exception)
+    if result.authentication_exception is not None:
+      return d.errback(result.authentication_exception)
+    if result.reference_exception is not None:
+      return d.errback(result.reference_exception)
+    if result.attribute_exception is not None:
+      return d.errback(result.attribute_exception)
+    if result.type_exception is not None:
+      return d.errback(result.type_exception)
+    return d.errback(TApplicationException(TApplicationException.MISSING_RESULT, "get_mrna_exons failed: unknown result"))
+
+  def get_mrna_utrs(self, token, ref, mrna_id_list):
+    """
+    Retrieve UTR information for each mRNA id in this GenomeAnnotation.
+
+
+    Parameters:
+     - token
+     - ref
+     - mrna_id_list
+    """
+    seqid = self._seqid = self._seqid + 1
+    self._reqs[seqid] = defer.Deferred()
+
+    d = defer.maybeDeferred(self.send_get_mrna_utrs, token, ref, mrna_id_list)
+    d.addCallbacks(
+      callback=self.cb_send_get_mrna_utrs,
+      callbackArgs=(seqid,),
+      errback=self.eb_send_get_mrna_utrs,
+      errbackArgs=(seqid,))
+    return d
+
+  def cb_send_get_mrna_utrs(self, _, seqid):
+    return self._reqs[seqid]
+
+  def eb_send_get_mrna_utrs(self, f, seqid):
+    d = self._reqs.pop(seqid)
+    d.errback(f)
+    return d
+
+  def send_get_mrna_utrs(self, token, ref, mrna_id_list):
+    oprot = self._oprot_factory.getProtocol(self._transport)
+    oprot.writeMessageBegin('get_mrna_utrs', TMessageType.CALL, self._seqid)
+    args = get_mrna_utrs_args()
+    args.token = token
+    args.ref = ref
+    args.mrna_id_list = mrna_id_list
+    args.write(oprot)
+    oprot.writeMessageEnd()
+    oprot.trans.flush()
+
+  def recv_get_mrna_utrs(self, iprot, mtype, rseqid):
+    d = self._reqs.pop(rseqid)
+    if mtype == TMessageType.EXCEPTION:
+      x = TApplicationException()
+      x.read(iprot)
+      iprot.readMessageEnd()
+      return d.errback(x)
+    result = get_mrna_utrs_result()
+    result.read(iprot)
+    iprot.readMessageEnd()
+    if result.success is not None:
+      return d.callback(result.success)
+    if result.generic_exception is not None:
+      return d.errback(result.generic_exception)
+    if result.authorization_exception is not None:
+      return d.errback(result.authorization_exception)
+    if result.authentication_exception is not None:
+      return d.errback(result.authentication_exception)
+    if result.reference_exception is not None:
+      return d.errback(result.reference_exception)
+    if result.attribute_exception is not None:
+      return d.errback(result.attribute_exception)
+    if result.type_exception is not None:
+      return d.errback(result.type_exception)
+    return d.errback(TApplicationException(TApplicationException.MISSING_RESULT, "get_mrna_utrs failed: unknown result"))
+
 
 class Processor(TProcessor):
   implements(Iface)
@@ -1530,6 +1686,8 @@ class Processor(TProcessor):
     self._processMap["get_gene_by_mrna"] = Processor.process_get_gene_by_mrna
     self._processMap["get_mrna_by_cds"] = Processor.process_get_mrna_by_cds
     self._processMap["get_mrna_by_gene"] = Processor.process_get_mrna_by_gene
+    self._processMap["get_mrna_exons"] = Processor.process_get_mrna_exons
+    self._processMap["get_mrna_utrs"] = Processor.process_get_mrna_utrs
 
   def process(self, iprot, oprot):
     (name, type, seqid) = iprot.readMessageBegin()
@@ -2179,7 +2337,7 @@ class Processor(TProcessor):
     args.read(iprot)
     iprot.readMessageEnd()
     result = get_mrna_by_cds_result()
-    d = defer.maybeDeferred(self._handler.get_mrna_by_cds, args.token, args.ref, args.gene_id_list)
+    d = defer.maybeDeferred(self._handler.get_mrna_by_cds, args.token, args.ref, args.cds_id_list)
     d.addCallback(self.write_results_success_get_mrna_by_cds, result, seqid, oprot)
     d.addErrback(self.write_results_exception_get_mrna_by_cds, result, seqid, oprot)
     return d
@@ -2244,6 +2402,80 @@ class Processor(TProcessor):
     except TypeException, type_exception:
       result.type_exception = type_exception
     oprot.writeMessageBegin("get_mrna_by_gene", TMessageType.REPLY, seqid)
+    result.write(oprot)
+    oprot.writeMessageEnd()
+    oprot.trans.flush()
+
+  def process_get_mrna_exons(self, seqid, iprot, oprot):
+    args = get_mrna_exons_args()
+    args.read(iprot)
+    iprot.readMessageEnd()
+    result = get_mrna_exons_result()
+    d = defer.maybeDeferred(self._handler.get_mrna_exons, args.token, args.ref, args.mrna_id_list)
+    d.addCallback(self.write_results_success_get_mrna_exons, result, seqid, oprot)
+    d.addErrback(self.write_results_exception_get_mrna_exons, result, seqid, oprot)
+    return d
+
+  def write_results_success_get_mrna_exons(self, success, result, seqid, oprot):
+    result.success = success
+    oprot.writeMessageBegin("get_mrna_exons", TMessageType.REPLY, seqid)
+    result.write(oprot)
+    oprot.writeMessageEnd()
+    oprot.trans.flush()
+
+  def write_results_exception_get_mrna_exons(self, error, result, seqid, oprot):
+    try:
+      error.raiseException()
+    except ServiceException, generic_exception:
+      result.generic_exception = generic_exception
+    except AuthorizationException, authorization_exception:
+      result.authorization_exception = authorization_exception
+    except AuthenticationException, authentication_exception:
+      result.authentication_exception = authentication_exception
+    except ObjectReferenceException, reference_exception:
+      result.reference_exception = reference_exception
+    except AttributeException, attribute_exception:
+      result.attribute_exception = attribute_exception
+    except TypeException, type_exception:
+      result.type_exception = type_exception
+    oprot.writeMessageBegin("get_mrna_exons", TMessageType.REPLY, seqid)
+    result.write(oprot)
+    oprot.writeMessageEnd()
+    oprot.trans.flush()
+
+  def process_get_mrna_utrs(self, seqid, iprot, oprot):
+    args = get_mrna_utrs_args()
+    args.read(iprot)
+    iprot.readMessageEnd()
+    result = get_mrna_utrs_result()
+    d = defer.maybeDeferred(self._handler.get_mrna_utrs, args.token, args.ref, args.mrna_id_list)
+    d.addCallback(self.write_results_success_get_mrna_utrs, result, seqid, oprot)
+    d.addErrback(self.write_results_exception_get_mrna_utrs, result, seqid, oprot)
+    return d
+
+  def write_results_success_get_mrna_utrs(self, success, result, seqid, oprot):
+    result.success = success
+    oprot.writeMessageBegin("get_mrna_utrs", TMessageType.REPLY, seqid)
+    result.write(oprot)
+    oprot.writeMessageEnd()
+    oprot.trans.flush()
+
+  def write_results_exception_get_mrna_utrs(self, error, result, seqid, oprot):
+    try:
+      error.raiseException()
+    except ServiceException, generic_exception:
+      result.generic_exception = generic_exception
+    except AuthorizationException, authorization_exception:
+      result.authorization_exception = authorization_exception
+    except AuthenticationException, authentication_exception:
+      result.authentication_exception = authentication_exception
+    except ObjectReferenceException, reference_exception:
+      result.reference_exception = reference_exception
+    except AttributeException, attribute_exception:
+      result.attribute_exception = attribute_exception
+    except TypeException, type_exception:
+      result.type_exception = type_exception
+    oprot.writeMessageBegin("get_mrna_utrs", TMessageType.REPLY, seqid)
     result.write(oprot)
     oprot.writeMessageEnd()
     oprot.trans.flush()
@@ -2836,10 +3068,10 @@ class get_feature_types_result:
       if fid == 0:
         if ftype == TType.LIST:
           self.success = []
-          (_etype194, _size191) = iprot.readListBegin()
-          for _i195 in xrange(_size191):
-            _elem196 = iprot.readString();
-            self.success.append(_elem196)
+          (_etype201, _size198) = iprot.readListBegin()
+          for _i202 in xrange(_size198):
+            _elem203 = iprot.readString();
+            self.success.append(_elem203)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
@@ -2892,8 +3124,8 @@ class get_feature_types_result:
     if self.success is not None:
       oprot.writeFieldBegin('success', TType.LIST, 0)
       oprot.writeListBegin(TType.STRING, len(self.success))
-      for iter197 in self.success:
-        oprot.writeString(iter197)
+      for iter204 in self.success:
+        oprot.writeString(iter204)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     if self.generic_exception is not None:
@@ -2991,10 +3223,10 @@ class get_feature_type_descriptions_args:
       elif fid == 3:
         if ftype == TType.LIST:
           self.feature_type_list = []
-          (_etype201, _size198) = iprot.readListBegin()
-          for _i202 in xrange(_size198):
-            _elem203 = iprot.readString();
-            self.feature_type_list.append(_elem203)
+          (_etype208, _size205) = iprot.readListBegin()
+          for _i209 in xrange(_size205):
+            _elem210 = iprot.readString();
+            self.feature_type_list.append(_elem210)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
@@ -3019,8 +3251,8 @@ class get_feature_type_descriptions_args:
     if self.feature_type_list is not None:
       oprot.writeFieldBegin('feature_type_list', TType.LIST, 3)
       oprot.writeListBegin(TType.STRING, len(self.feature_type_list))
-      for iter204 in self.feature_type_list:
-        oprot.writeString(iter204)
+      for iter211 in self.feature_type_list:
+        oprot.writeString(iter211)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
@@ -3095,11 +3327,11 @@ class get_feature_type_descriptions_result:
       if fid == 0:
         if ftype == TType.MAP:
           self.success = {}
-          (_ktype206, _vtype207, _size205 ) = iprot.readMapBegin()
-          for _i209 in xrange(_size205):
-            _key210 = iprot.readString();
-            _val211 = iprot.readString();
-            self.success[_key210] = _val211
+          (_ktype213, _vtype214, _size212 ) = iprot.readMapBegin()
+          for _i216 in xrange(_size212):
+            _key217 = iprot.readString();
+            _val218 = iprot.readString();
+            self.success[_key217] = _val218
           iprot.readMapEnd()
         else:
           iprot.skip(ftype)
@@ -3152,9 +3384,9 @@ class get_feature_type_descriptions_result:
     if self.success is not None:
       oprot.writeFieldBegin('success', TType.MAP, 0)
       oprot.writeMapBegin(TType.STRING, TType.STRING, len(self.success))
-      for kiter212,viter213 in self.success.items():
-        oprot.writeString(kiter212)
-        oprot.writeString(viter213)
+      for kiter219,viter220 in self.success.items():
+        oprot.writeString(kiter219)
+        oprot.writeString(viter220)
       oprot.writeMapEnd()
       oprot.writeFieldEnd()
     if self.generic_exception is not None:
@@ -3252,10 +3484,10 @@ class get_feature_type_counts_args:
       elif fid == 3:
         if ftype == TType.LIST:
           self.feature_type_list = []
-          (_etype217, _size214) = iprot.readListBegin()
-          for _i218 in xrange(_size214):
-            _elem219 = iprot.readString();
-            self.feature_type_list.append(_elem219)
+          (_etype224, _size221) = iprot.readListBegin()
+          for _i225 in xrange(_size221):
+            _elem226 = iprot.readString();
+            self.feature_type_list.append(_elem226)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
@@ -3280,8 +3512,8 @@ class get_feature_type_counts_args:
     if self.feature_type_list is not None:
       oprot.writeFieldBegin('feature_type_list', TType.LIST, 3)
       oprot.writeListBegin(TType.STRING, len(self.feature_type_list))
-      for iter220 in self.feature_type_list:
-        oprot.writeString(iter220)
+      for iter227 in self.feature_type_list:
+        oprot.writeString(iter227)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
@@ -3356,11 +3588,11 @@ class get_feature_type_counts_result:
       if fid == 0:
         if ftype == TType.MAP:
           self.success = {}
-          (_ktype222, _vtype223, _size221 ) = iprot.readMapBegin()
-          for _i225 in xrange(_size221):
-            _key226 = iprot.readString();
-            _val227 = iprot.readI64();
-            self.success[_key226] = _val227
+          (_ktype229, _vtype230, _size228 ) = iprot.readMapBegin()
+          for _i232 in xrange(_size228):
+            _key233 = iprot.readString();
+            _val234 = iprot.readI64();
+            self.success[_key233] = _val234
           iprot.readMapEnd()
         else:
           iprot.skip(ftype)
@@ -3413,9 +3645,9 @@ class get_feature_type_counts_result:
     if self.success is not None:
       oprot.writeFieldBegin('success', TType.MAP, 0)
       oprot.writeMapBegin(TType.STRING, TType.I64, len(self.success))
-      for kiter228,viter229 in self.success.items():
-        oprot.writeString(kiter228)
-        oprot.writeI64(viter229)
+      for kiter235,viter236 in self.success.items():
+        oprot.writeString(kiter235)
+        oprot.writeI64(viter236)
       oprot.writeMapEnd()
       oprot.writeFieldEnd()
     if self.generic_exception is not None:
@@ -3771,10 +4003,10 @@ class get_features_args:
       elif fid == 3:
         if ftype == TType.LIST:
           self.feature_id_list = []
-          (_etype233, _size230) = iprot.readListBegin()
-          for _i234 in xrange(_size230):
-            _elem235 = iprot.readString();
-            self.feature_id_list.append(_elem235)
+          (_etype240, _size237) = iprot.readListBegin()
+          for _i241 in xrange(_size237):
+            _elem242 = iprot.readString();
+            self.feature_id_list.append(_elem242)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
@@ -3799,8 +4031,8 @@ class get_features_args:
     if self.feature_id_list is not None:
       oprot.writeFieldBegin('feature_id_list', TType.LIST, 3)
       oprot.writeListBegin(TType.STRING, len(self.feature_id_list))
-      for iter236 in self.feature_id_list:
-        oprot.writeString(iter236)
+      for iter243 in self.feature_id_list:
+        oprot.writeString(iter243)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
@@ -3875,12 +4107,12 @@ class get_features_result:
       if fid == 0:
         if ftype == TType.MAP:
           self.success = {}
-          (_ktype238, _vtype239, _size237 ) = iprot.readMapBegin()
-          for _i241 in xrange(_size237):
-            _key242 = iprot.readString();
-            _val243 = Feature_data()
-            _val243.read(iprot)
-            self.success[_key242] = _val243
+          (_ktype245, _vtype246, _size244 ) = iprot.readMapBegin()
+          for _i248 in xrange(_size244):
+            _key249 = iprot.readString();
+            _val250 = Feature_data()
+            _val250.read(iprot)
+            self.success[_key249] = _val250
           iprot.readMapEnd()
         else:
           iprot.skip(ftype)
@@ -3933,9 +4165,9 @@ class get_features_result:
     if self.success is not None:
       oprot.writeFieldBegin('success', TType.MAP, 0)
       oprot.writeMapBegin(TType.STRING, TType.STRUCT, len(self.success))
-      for kiter244,viter245 in self.success.items():
-        oprot.writeString(kiter244)
-        viter245.write(oprot)
+      for kiter251,viter252 in self.success.items():
+        oprot.writeString(kiter251)
+        viter252.write(oprot)
       oprot.writeMapEnd()
       oprot.writeFieldEnd()
     if self.generic_exception is not None:
@@ -4116,12 +4348,12 @@ class get_proteins_result:
       if fid == 0:
         if ftype == TType.MAP:
           self.success = {}
-          (_ktype247, _vtype248, _size246 ) = iprot.readMapBegin()
-          for _i250 in xrange(_size246):
-            _key251 = iprot.readString();
-            _val252 = Protein_data()
-            _val252.read(iprot)
-            self.success[_key251] = _val252
+          (_ktype254, _vtype255, _size253 ) = iprot.readMapBegin()
+          for _i257 in xrange(_size253):
+            _key258 = iprot.readString();
+            _val259 = Protein_data()
+            _val259.read(iprot)
+            self.success[_key258] = _val259
           iprot.readMapEnd()
         else:
           iprot.skip(ftype)
@@ -4174,9 +4406,9 @@ class get_proteins_result:
     if self.success is not None:
       oprot.writeFieldBegin('success', TType.MAP, 0)
       oprot.writeMapBegin(TType.STRING, TType.STRUCT, len(self.success))
-      for kiter253,viter254 in self.success.items():
-        oprot.writeString(kiter253)
-        viter254.write(oprot)
+      for kiter260,viter261 in self.success.items():
+        oprot.writeString(kiter260)
+        viter261.write(oprot)
       oprot.writeMapEnd()
       oprot.writeFieldEnd()
     if self.generic_exception is not None:
@@ -4274,10 +4506,10 @@ class get_feature_locations_args:
       elif fid == 3:
         if ftype == TType.LIST:
           self.feature_id_list = []
-          (_etype258, _size255) = iprot.readListBegin()
-          for _i259 in xrange(_size255):
-            _elem260 = iprot.readString();
-            self.feature_id_list.append(_elem260)
+          (_etype265, _size262) = iprot.readListBegin()
+          for _i266 in xrange(_size262):
+            _elem267 = iprot.readString();
+            self.feature_id_list.append(_elem267)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
@@ -4302,8 +4534,8 @@ class get_feature_locations_args:
     if self.feature_id_list is not None:
       oprot.writeFieldBegin('feature_id_list', TType.LIST, 3)
       oprot.writeListBegin(TType.STRING, len(self.feature_id_list))
-      for iter261 in self.feature_id_list:
-        oprot.writeString(iter261)
+      for iter268 in self.feature_id_list:
+        oprot.writeString(iter268)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
@@ -4378,17 +4610,17 @@ class get_feature_locations_result:
       if fid == 0:
         if ftype == TType.MAP:
           self.success = {}
-          (_ktype263, _vtype264, _size262 ) = iprot.readMapBegin()
-          for _i266 in xrange(_size262):
-            _key267 = iprot.readString();
-            _val268 = []
-            (_etype272, _size269) = iprot.readListBegin()
-            for _i273 in xrange(_size269):
-              _elem274 = Region()
-              _elem274.read(iprot)
-              _val268.append(_elem274)
+          (_ktype270, _vtype271, _size269 ) = iprot.readMapBegin()
+          for _i273 in xrange(_size269):
+            _key274 = iprot.readString();
+            _val275 = []
+            (_etype279, _size276) = iprot.readListBegin()
+            for _i280 in xrange(_size276):
+              _elem281 = Region()
+              _elem281.read(iprot)
+              _val275.append(_elem281)
             iprot.readListEnd()
-            self.success[_key267] = _val268
+            self.success[_key274] = _val275
           iprot.readMapEnd()
         else:
           iprot.skip(ftype)
@@ -4441,11 +4673,11 @@ class get_feature_locations_result:
     if self.success is not None:
       oprot.writeFieldBegin('success', TType.MAP, 0)
       oprot.writeMapBegin(TType.STRING, TType.LIST, len(self.success))
-      for kiter275,viter276 in self.success.items():
-        oprot.writeString(kiter275)
-        oprot.writeListBegin(TType.STRUCT, len(viter276))
-        for iter277 in viter276:
-          iter277.write(oprot)
+      for kiter282,viter283 in self.success.items():
+        oprot.writeString(kiter282)
+        oprot.writeListBegin(TType.STRUCT, len(viter283))
+        for iter284 in viter283:
+          iter284.write(oprot)
         oprot.writeListEnd()
       oprot.writeMapEnd()
       oprot.writeFieldEnd()
@@ -4544,10 +4776,10 @@ class get_feature_publications_args:
       elif fid == 3:
         if ftype == TType.LIST:
           self.feature_id_list = []
-          (_etype281, _size278) = iprot.readListBegin()
-          for _i282 in xrange(_size278):
-            _elem283 = iprot.readString();
-            self.feature_id_list.append(_elem283)
+          (_etype288, _size285) = iprot.readListBegin()
+          for _i289 in xrange(_size285):
+            _elem290 = iprot.readString();
+            self.feature_id_list.append(_elem290)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
@@ -4572,8 +4804,8 @@ class get_feature_publications_args:
     if self.feature_id_list is not None:
       oprot.writeFieldBegin('feature_id_list', TType.LIST, 3)
       oprot.writeListBegin(TType.STRING, len(self.feature_id_list))
-      for iter284 in self.feature_id_list:
-        oprot.writeString(iter284)
+      for iter291 in self.feature_id_list:
+        oprot.writeString(iter291)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
@@ -4648,16 +4880,16 @@ class get_feature_publications_result:
       if fid == 0:
         if ftype == TType.MAP:
           self.success = {}
-          (_ktype286, _vtype287, _size285 ) = iprot.readMapBegin()
-          for _i289 in xrange(_size285):
-            _key290 = iprot.readString();
-            _val291 = []
-            (_etype295, _size292) = iprot.readListBegin()
-            for _i296 in xrange(_size292):
-              _elem297 = iprot.readString();
-              _val291.append(_elem297)
+          (_ktype293, _vtype294, _size292 ) = iprot.readMapBegin()
+          for _i296 in xrange(_size292):
+            _key297 = iprot.readString();
+            _val298 = []
+            (_etype302, _size299) = iprot.readListBegin()
+            for _i303 in xrange(_size299):
+              _elem304 = iprot.readString();
+              _val298.append(_elem304)
             iprot.readListEnd()
-            self.success[_key290] = _val291
+            self.success[_key297] = _val298
           iprot.readMapEnd()
         else:
           iprot.skip(ftype)
@@ -4710,11 +4942,11 @@ class get_feature_publications_result:
     if self.success is not None:
       oprot.writeFieldBegin('success', TType.MAP, 0)
       oprot.writeMapBegin(TType.STRING, TType.LIST, len(self.success))
-      for kiter298,viter299 in self.success.items():
-        oprot.writeString(kiter298)
-        oprot.writeListBegin(TType.STRING, len(viter299))
-        for iter300 in viter299:
-          oprot.writeString(iter300)
+      for kiter305,viter306 in self.success.items():
+        oprot.writeString(kiter305)
+        oprot.writeListBegin(TType.STRING, len(viter306))
+        for iter307 in viter306:
+          oprot.writeString(iter307)
         oprot.writeListEnd()
       oprot.writeMapEnd()
       oprot.writeFieldEnd()
@@ -4813,10 +5045,10 @@ class get_feature_dna_args:
       elif fid == 3:
         if ftype == TType.LIST:
           self.feature_id_list = []
-          (_etype304, _size301) = iprot.readListBegin()
-          for _i305 in xrange(_size301):
-            _elem306 = iprot.readString();
-            self.feature_id_list.append(_elem306)
+          (_etype311, _size308) = iprot.readListBegin()
+          for _i312 in xrange(_size308):
+            _elem313 = iprot.readString();
+            self.feature_id_list.append(_elem313)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
@@ -4841,8 +5073,8 @@ class get_feature_dna_args:
     if self.feature_id_list is not None:
       oprot.writeFieldBegin('feature_id_list', TType.LIST, 3)
       oprot.writeListBegin(TType.STRING, len(self.feature_id_list))
-      for iter307 in self.feature_id_list:
-        oprot.writeString(iter307)
+      for iter314 in self.feature_id_list:
+        oprot.writeString(iter314)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
@@ -4917,11 +5149,11 @@ class get_feature_dna_result:
       if fid == 0:
         if ftype == TType.MAP:
           self.success = {}
-          (_ktype309, _vtype310, _size308 ) = iprot.readMapBegin()
-          for _i312 in xrange(_size308):
-            _key313 = iprot.readString();
-            _val314 = iprot.readString();
-            self.success[_key313] = _val314
+          (_ktype316, _vtype317, _size315 ) = iprot.readMapBegin()
+          for _i319 in xrange(_size315):
+            _key320 = iprot.readString();
+            _val321 = iprot.readString();
+            self.success[_key320] = _val321
           iprot.readMapEnd()
         else:
           iprot.skip(ftype)
@@ -4974,9 +5206,9 @@ class get_feature_dna_result:
     if self.success is not None:
       oprot.writeFieldBegin('success', TType.MAP, 0)
       oprot.writeMapBegin(TType.STRING, TType.STRING, len(self.success))
-      for kiter315,viter316 in self.success.items():
-        oprot.writeString(kiter315)
-        oprot.writeString(viter316)
+      for kiter322,viter323 in self.success.items():
+        oprot.writeString(kiter322)
+        oprot.writeString(viter323)
       oprot.writeMapEnd()
       oprot.writeFieldEnd()
     if self.generic_exception is not None:
@@ -5074,10 +5306,10 @@ class get_feature_functions_args:
       elif fid == 3:
         if ftype == TType.LIST:
           self.feature_id_list = []
-          (_etype320, _size317) = iprot.readListBegin()
-          for _i321 in xrange(_size317):
-            _elem322 = iprot.readString();
-            self.feature_id_list.append(_elem322)
+          (_etype327, _size324) = iprot.readListBegin()
+          for _i328 in xrange(_size324):
+            _elem329 = iprot.readString();
+            self.feature_id_list.append(_elem329)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
@@ -5102,8 +5334,8 @@ class get_feature_functions_args:
     if self.feature_id_list is not None:
       oprot.writeFieldBegin('feature_id_list', TType.LIST, 3)
       oprot.writeListBegin(TType.STRING, len(self.feature_id_list))
-      for iter323 in self.feature_id_list:
-        oprot.writeString(iter323)
+      for iter330 in self.feature_id_list:
+        oprot.writeString(iter330)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
@@ -5178,11 +5410,11 @@ class get_feature_functions_result:
       if fid == 0:
         if ftype == TType.MAP:
           self.success = {}
-          (_ktype325, _vtype326, _size324 ) = iprot.readMapBegin()
-          for _i328 in xrange(_size324):
-            _key329 = iprot.readString();
-            _val330 = iprot.readString();
-            self.success[_key329] = _val330
+          (_ktype332, _vtype333, _size331 ) = iprot.readMapBegin()
+          for _i335 in xrange(_size331):
+            _key336 = iprot.readString();
+            _val337 = iprot.readString();
+            self.success[_key336] = _val337
           iprot.readMapEnd()
         else:
           iprot.skip(ftype)
@@ -5235,9 +5467,9 @@ class get_feature_functions_result:
     if self.success is not None:
       oprot.writeFieldBegin('success', TType.MAP, 0)
       oprot.writeMapBegin(TType.STRING, TType.STRING, len(self.success))
-      for kiter331,viter332 in self.success.items():
-        oprot.writeString(kiter331)
-        oprot.writeString(viter332)
+      for kiter338,viter339 in self.success.items():
+        oprot.writeString(kiter338)
+        oprot.writeString(viter339)
       oprot.writeMapEnd()
       oprot.writeFieldEnd()
     if self.generic_exception is not None:
@@ -5335,10 +5567,10 @@ class get_feature_aliases_args:
       elif fid == 3:
         if ftype == TType.LIST:
           self.feature_id_list = []
-          (_etype336, _size333) = iprot.readListBegin()
-          for _i337 in xrange(_size333):
-            _elem338 = iprot.readString();
-            self.feature_id_list.append(_elem338)
+          (_etype343, _size340) = iprot.readListBegin()
+          for _i344 in xrange(_size340):
+            _elem345 = iprot.readString();
+            self.feature_id_list.append(_elem345)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
@@ -5363,8 +5595,8 @@ class get_feature_aliases_args:
     if self.feature_id_list is not None:
       oprot.writeFieldBegin('feature_id_list', TType.LIST, 3)
       oprot.writeListBegin(TType.STRING, len(self.feature_id_list))
-      for iter339 in self.feature_id_list:
-        oprot.writeString(iter339)
+      for iter346 in self.feature_id_list:
+        oprot.writeString(iter346)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
@@ -5439,16 +5671,16 @@ class get_feature_aliases_result:
       if fid == 0:
         if ftype == TType.MAP:
           self.success = {}
-          (_ktype341, _vtype342, _size340 ) = iprot.readMapBegin()
-          for _i344 in xrange(_size340):
-            _key345 = iprot.readString();
-            _val346 = []
-            (_etype350, _size347) = iprot.readListBegin()
-            for _i351 in xrange(_size347):
-              _elem352 = iprot.readString();
-              _val346.append(_elem352)
+          (_ktype348, _vtype349, _size347 ) = iprot.readMapBegin()
+          for _i351 in xrange(_size347):
+            _key352 = iprot.readString();
+            _val353 = []
+            (_etype357, _size354) = iprot.readListBegin()
+            for _i358 in xrange(_size354):
+              _elem359 = iprot.readString();
+              _val353.append(_elem359)
             iprot.readListEnd()
-            self.success[_key345] = _val346
+            self.success[_key352] = _val353
           iprot.readMapEnd()
         else:
           iprot.skip(ftype)
@@ -5501,11 +5733,11 @@ class get_feature_aliases_result:
     if self.success is not None:
       oprot.writeFieldBegin('success', TType.MAP, 0)
       oprot.writeMapBegin(TType.STRING, TType.LIST, len(self.success))
-      for kiter353,viter354 in self.success.items():
-        oprot.writeString(kiter353)
-        oprot.writeListBegin(TType.STRING, len(viter354))
-        for iter355 in viter354:
-          oprot.writeString(iter355)
+      for kiter360,viter361 in self.success.items():
+        oprot.writeString(kiter360)
+        oprot.writeListBegin(TType.STRING, len(viter361))
+        for iter362 in viter361:
+          oprot.writeString(iter362)
         oprot.writeListEnd()
       oprot.writeMapEnd()
       oprot.writeFieldEnd()
@@ -5604,10 +5836,10 @@ class get_cds_by_gene_args:
       elif fid == 3:
         if ftype == TType.LIST:
           self.gene_id_list = []
-          (_etype359, _size356) = iprot.readListBegin()
-          for _i360 in xrange(_size356):
-            _elem361 = iprot.readString();
-            self.gene_id_list.append(_elem361)
+          (_etype366, _size363) = iprot.readListBegin()
+          for _i367 in xrange(_size363):
+            _elem368 = iprot.readString();
+            self.gene_id_list.append(_elem368)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
@@ -5632,8 +5864,8 @@ class get_cds_by_gene_args:
     if self.gene_id_list is not None:
       oprot.writeFieldBegin('gene_id_list', TType.LIST, 3)
       oprot.writeListBegin(TType.STRING, len(self.gene_id_list))
-      for iter362 in self.gene_id_list:
-        oprot.writeString(iter362)
+      for iter369 in self.gene_id_list:
+        oprot.writeString(iter369)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
@@ -5708,16 +5940,16 @@ class get_cds_by_gene_result:
       if fid == 0:
         if ftype == TType.MAP:
           self.success = {}
-          (_ktype364, _vtype365, _size363 ) = iprot.readMapBegin()
-          for _i367 in xrange(_size363):
-            _key368 = iprot.readString();
-            _val369 = []
-            (_etype373, _size370) = iprot.readListBegin()
-            for _i374 in xrange(_size370):
-              _elem375 = iprot.readString();
-              _val369.append(_elem375)
+          (_ktype371, _vtype372, _size370 ) = iprot.readMapBegin()
+          for _i374 in xrange(_size370):
+            _key375 = iprot.readString();
+            _val376 = []
+            (_etype380, _size377) = iprot.readListBegin()
+            for _i381 in xrange(_size377):
+              _elem382 = iprot.readString();
+              _val376.append(_elem382)
             iprot.readListEnd()
-            self.success[_key368] = _val369
+            self.success[_key375] = _val376
           iprot.readMapEnd()
         else:
           iprot.skip(ftype)
@@ -5770,11 +6002,11 @@ class get_cds_by_gene_result:
     if self.success is not None:
       oprot.writeFieldBegin('success', TType.MAP, 0)
       oprot.writeMapBegin(TType.STRING, TType.LIST, len(self.success))
-      for kiter376,viter377 in self.success.items():
-        oprot.writeString(kiter376)
-        oprot.writeListBegin(TType.STRING, len(viter377))
-        for iter378 in viter377:
-          oprot.writeString(iter378)
+      for kiter383,viter384 in self.success.items():
+        oprot.writeString(kiter383)
+        oprot.writeListBegin(TType.STRING, len(viter384))
+        for iter385 in viter384:
+          oprot.writeString(iter385)
         oprot.writeListEnd()
       oprot.writeMapEnd()
       oprot.writeFieldEnd()
@@ -5873,10 +6105,10 @@ class get_cds_by_mrna_args:
       elif fid == 3:
         if ftype == TType.LIST:
           self.mrna_id_list = []
-          (_etype382, _size379) = iprot.readListBegin()
-          for _i383 in xrange(_size379):
-            _elem384 = iprot.readString();
-            self.mrna_id_list.append(_elem384)
+          (_etype389, _size386) = iprot.readListBegin()
+          for _i390 in xrange(_size386):
+            _elem391 = iprot.readString();
+            self.mrna_id_list.append(_elem391)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
@@ -5901,8 +6133,8 @@ class get_cds_by_mrna_args:
     if self.mrna_id_list is not None:
       oprot.writeFieldBegin('mrna_id_list', TType.LIST, 3)
       oprot.writeListBegin(TType.STRING, len(self.mrna_id_list))
-      for iter385 in self.mrna_id_list:
-        oprot.writeString(iter385)
+      for iter392 in self.mrna_id_list:
+        oprot.writeString(iter392)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
@@ -5977,11 +6209,11 @@ class get_cds_by_mrna_result:
       if fid == 0:
         if ftype == TType.MAP:
           self.success = {}
-          (_ktype387, _vtype388, _size386 ) = iprot.readMapBegin()
-          for _i390 in xrange(_size386):
-            _key391 = iprot.readString();
-            _val392 = iprot.readString();
-            self.success[_key391] = _val392
+          (_ktype394, _vtype395, _size393 ) = iprot.readMapBegin()
+          for _i397 in xrange(_size393):
+            _key398 = iprot.readString();
+            _val399 = iprot.readString();
+            self.success[_key398] = _val399
           iprot.readMapEnd()
         else:
           iprot.skip(ftype)
@@ -6034,9 +6266,9 @@ class get_cds_by_mrna_result:
     if self.success is not None:
       oprot.writeFieldBegin('success', TType.MAP, 0)
       oprot.writeMapBegin(TType.STRING, TType.STRING, len(self.success))
-      for kiter393,viter394 in self.success.items():
-        oprot.writeString(kiter393)
-        oprot.writeString(viter394)
+      for kiter400,viter401 in self.success.items():
+        oprot.writeString(kiter400)
+        oprot.writeString(viter401)
       oprot.writeMapEnd()
       oprot.writeFieldEnd()
     if self.generic_exception is not None:
@@ -6134,10 +6366,10 @@ class get_gene_by_cds_args:
       elif fid == 3:
         if ftype == TType.LIST:
           self.cds_id_list = []
-          (_etype398, _size395) = iprot.readListBegin()
-          for _i399 in xrange(_size395):
-            _elem400 = iprot.readString();
-            self.cds_id_list.append(_elem400)
+          (_etype405, _size402) = iprot.readListBegin()
+          for _i406 in xrange(_size402):
+            _elem407 = iprot.readString();
+            self.cds_id_list.append(_elem407)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
@@ -6162,8 +6394,8 @@ class get_gene_by_cds_args:
     if self.cds_id_list is not None:
       oprot.writeFieldBegin('cds_id_list', TType.LIST, 3)
       oprot.writeListBegin(TType.STRING, len(self.cds_id_list))
-      for iter401 in self.cds_id_list:
-        oprot.writeString(iter401)
+      for iter408 in self.cds_id_list:
+        oprot.writeString(iter408)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
@@ -6238,11 +6470,11 @@ class get_gene_by_cds_result:
       if fid == 0:
         if ftype == TType.MAP:
           self.success = {}
-          (_ktype403, _vtype404, _size402 ) = iprot.readMapBegin()
-          for _i406 in xrange(_size402):
-            _key407 = iprot.readString();
-            _val408 = iprot.readString();
-            self.success[_key407] = _val408
+          (_ktype410, _vtype411, _size409 ) = iprot.readMapBegin()
+          for _i413 in xrange(_size409):
+            _key414 = iprot.readString();
+            _val415 = iprot.readString();
+            self.success[_key414] = _val415
           iprot.readMapEnd()
         else:
           iprot.skip(ftype)
@@ -6295,9 +6527,9 @@ class get_gene_by_cds_result:
     if self.success is not None:
       oprot.writeFieldBegin('success', TType.MAP, 0)
       oprot.writeMapBegin(TType.STRING, TType.STRING, len(self.success))
-      for kiter409,viter410 in self.success.items():
-        oprot.writeString(kiter409)
-        oprot.writeString(viter410)
+      for kiter416,viter417 in self.success.items():
+        oprot.writeString(kiter416)
+        oprot.writeString(viter417)
       oprot.writeMapEnd()
       oprot.writeFieldEnd()
     if self.generic_exception is not None:
@@ -6395,10 +6627,10 @@ class get_gene_by_mrna_args:
       elif fid == 3:
         if ftype == TType.LIST:
           self.mrna_id_list = []
-          (_etype414, _size411) = iprot.readListBegin()
-          for _i415 in xrange(_size411):
-            _elem416 = iprot.readString();
-            self.mrna_id_list.append(_elem416)
+          (_etype421, _size418) = iprot.readListBegin()
+          for _i422 in xrange(_size418):
+            _elem423 = iprot.readString();
+            self.mrna_id_list.append(_elem423)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
@@ -6423,8 +6655,8 @@ class get_gene_by_mrna_args:
     if self.mrna_id_list is not None:
       oprot.writeFieldBegin('mrna_id_list', TType.LIST, 3)
       oprot.writeListBegin(TType.STRING, len(self.mrna_id_list))
-      for iter417 in self.mrna_id_list:
-        oprot.writeString(iter417)
+      for iter424 in self.mrna_id_list:
+        oprot.writeString(iter424)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
@@ -6499,11 +6731,11 @@ class get_gene_by_mrna_result:
       if fid == 0:
         if ftype == TType.MAP:
           self.success = {}
-          (_ktype419, _vtype420, _size418 ) = iprot.readMapBegin()
-          for _i422 in xrange(_size418):
-            _key423 = iprot.readString();
-            _val424 = iprot.readString();
-            self.success[_key423] = _val424
+          (_ktype426, _vtype427, _size425 ) = iprot.readMapBegin()
+          for _i429 in xrange(_size425):
+            _key430 = iprot.readString();
+            _val431 = iprot.readString();
+            self.success[_key430] = _val431
           iprot.readMapEnd()
         else:
           iprot.skip(ftype)
@@ -6556,9 +6788,9 @@ class get_gene_by_mrna_result:
     if self.success is not None:
       oprot.writeFieldBegin('success', TType.MAP, 0)
       oprot.writeMapBegin(TType.STRING, TType.STRING, len(self.success))
-      for kiter425,viter426 in self.success.items():
-        oprot.writeString(kiter425)
-        oprot.writeString(viter426)
+      for kiter432,viter433 in self.success.items():
+        oprot.writeString(kiter432)
+        oprot.writeString(viter433)
       oprot.writeMapEnd()
       oprot.writeFieldEnd()
     if self.generic_exception is not None:
@@ -6619,20 +6851,20 @@ class get_mrna_by_cds_args:
   Attributes:
    - token
    - ref
-   - gene_id_list
+   - cds_id_list
   """
 
   thrift_spec = (
     None, # 0
     (1, TType.STRING, 'token', None, None, ), # 1
     (2, TType.STRING, 'ref', None, None, ), # 2
-    (3, TType.LIST, 'gene_id_list', (TType.STRING,None), None, ), # 3
+    (3, TType.LIST, 'cds_id_list', (TType.STRING,None), None, ), # 3
   )
 
-  def __init__(self, token=None, ref=None, gene_id_list=None,):
+  def __init__(self, token=None, ref=None, cds_id_list=None,):
     self.token = token
     self.ref = ref
-    self.gene_id_list = gene_id_list
+    self.cds_id_list = cds_id_list
 
   def read(self, iprot):
     if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
@@ -6655,11 +6887,11 @@ class get_mrna_by_cds_args:
           iprot.skip(ftype)
       elif fid == 3:
         if ftype == TType.LIST:
-          self.gene_id_list = []
-          (_etype430, _size427) = iprot.readListBegin()
-          for _i431 in xrange(_size427):
-            _elem432 = iprot.readString();
-            self.gene_id_list.append(_elem432)
+          self.cds_id_list = []
+          (_etype437, _size434) = iprot.readListBegin()
+          for _i438 in xrange(_size434):
+            _elem439 = iprot.readString();
+            self.cds_id_list.append(_elem439)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
@@ -6681,11 +6913,11 @@ class get_mrna_by_cds_args:
       oprot.writeFieldBegin('ref', TType.STRING, 2)
       oprot.writeString(self.ref)
       oprot.writeFieldEnd()
-    if self.gene_id_list is not None:
-      oprot.writeFieldBegin('gene_id_list', TType.LIST, 3)
-      oprot.writeListBegin(TType.STRING, len(self.gene_id_list))
-      for iter433 in self.gene_id_list:
-        oprot.writeString(iter433)
+    if self.cds_id_list is not None:
+      oprot.writeFieldBegin('cds_id_list', TType.LIST, 3)
+      oprot.writeListBegin(TType.STRING, len(self.cds_id_list))
+      for iter440 in self.cds_id_list:
+        oprot.writeString(iter440)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
@@ -6703,7 +6935,7 @@ class get_mrna_by_cds_args:
     value = 17
     value = (value * 31) ^ hash(self.token)
     value = (value * 31) ^ hash(self.ref)
-    value = (value * 31) ^ hash(self.gene_id_list)
+    value = (value * 31) ^ hash(self.cds_id_list)
     return value
 
   def __repr__(self):
@@ -6760,11 +6992,11 @@ class get_mrna_by_cds_result:
       if fid == 0:
         if ftype == TType.MAP:
           self.success = {}
-          (_ktype435, _vtype436, _size434 ) = iprot.readMapBegin()
-          for _i438 in xrange(_size434):
-            _key439 = iprot.readString();
-            _val440 = iprot.readString();
-            self.success[_key439] = _val440
+          (_ktype442, _vtype443, _size441 ) = iprot.readMapBegin()
+          for _i445 in xrange(_size441):
+            _key446 = iprot.readString();
+            _val447 = iprot.readString();
+            self.success[_key446] = _val447
           iprot.readMapEnd()
         else:
           iprot.skip(ftype)
@@ -6817,9 +7049,9 @@ class get_mrna_by_cds_result:
     if self.success is not None:
       oprot.writeFieldBegin('success', TType.MAP, 0)
       oprot.writeMapBegin(TType.STRING, TType.STRING, len(self.success))
-      for kiter441,viter442 in self.success.items():
-        oprot.writeString(kiter441)
-        oprot.writeString(viter442)
+      for kiter448,viter449 in self.success.items():
+        oprot.writeString(kiter448)
+        oprot.writeString(viter449)
       oprot.writeMapEnd()
       oprot.writeFieldEnd()
     if self.generic_exception is not None:
@@ -6917,10 +7149,10 @@ class get_mrna_by_gene_args:
       elif fid == 3:
         if ftype == TType.LIST:
           self.gene_id_list = []
-          (_etype446, _size443) = iprot.readListBegin()
-          for _i447 in xrange(_size443):
-            _elem448 = iprot.readString();
-            self.gene_id_list.append(_elem448)
+          (_etype453, _size450) = iprot.readListBegin()
+          for _i454 in xrange(_size450):
+            _elem455 = iprot.readString();
+            self.gene_id_list.append(_elem455)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
@@ -6945,8 +7177,8 @@ class get_mrna_by_gene_args:
     if self.gene_id_list is not None:
       oprot.writeFieldBegin('gene_id_list', TType.LIST, 3)
       oprot.writeListBegin(TType.STRING, len(self.gene_id_list))
-      for iter449 in self.gene_id_list:
-        oprot.writeString(iter449)
+      for iter456 in self.gene_id_list:
+        oprot.writeString(iter456)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
@@ -7021,16 +7253,16 @@ class get_mrna_by_gene_result:
       if fid == 0:
         if ftype == TType.MAP:
           self.success = {}
-          (_ktype451, _vtype452, _size450 ) = iprot.readMapBegin()
-          for _i454 in xrange(_size450):
-            _key455 = iprot.readString();
-            _val456 = []
-            (_etype460, _size457) = iprot.readListBegin()
-            for _i461 in xrange(_size457):
-              _elem462 = iprot.readString();
-              _val456.append(_elem462)
+          (_ktype458, _vtype459, _size457 ) = iprot.readMapBegin()
+          for _i461 in xrange(_size457):
+            _key462 = iprot.readString();
+            _val463 = []
+            (_etype467, _size464) = iprot.readListBegin()
+            for _i468 in xrange(_size464):
+              _elem469 = iprot.readString();
+              _val463.append(_elem469)
             iprot.readListEnd()
-            self.success[_key455] = _val456
+            self.success[_key462] = _val463
           iprot.readMapEnd()
         else:
           iprot.skip(ftype)
@@ -7083,12 +7315,554 @@ class get_mrna_by_gene_result:
     if self.success is not None:
       oprot.writeFieldBegin('success', TType.MAP, 0)
       oprot.writeMapBegin(TType.STRING, TType.LIST, len(self.success))
-      for kiter463,viter464 in self.success.items():
-        oprot.writeString(kiter463)
-        oprot.writeListBegin(TType.STRING, len(viter464))
-        for iter465 in viter464:
-          oprot.writeString(iter465)
+      for kiter470,viter471 in self.success.items():
+        oprot.writeString(kiter470)
+        oprot.writeListBegin(TType.STRING, len(viter471))
+        for iter472 in viter471:
+          oprot.writeString(iter472)
         oprot.writeListEnd()
+      oprot.writeMapEnd()
+      oprot.writeFieldEnd()
+    if self.generic_exception is not None:
+      oprot.writeFieldBegin('generic_exception', TType.STRUCT, 1)
+      self.generic_exception.write(oprot)
+      oprot.writeFieldEnd()
+    if self.authorization_exception is not None:
+      oprot.writeFieldBegin('authorization_exception', TType.STRUCT, 2)
+      self.authorization_exception.write(oprot)
+      oprot.writeFieldEnd()
+    if self.authentication_exception is not None:
+      oprot.writeFieldBegin('authentication_exception', TType.STRUCT, 3)
+      self.authentication_exception.write(oprot)
+      oprot.writeFieldEnd()
+    if self.reference_exception is not None:
+      oprot.writeFieldBegin('reference_exception', TType.STRUCT, 4)
+      self.reference_exception.write(oprot)
+      oprot.writeFieldEnd()
+    if self.attribute_exception is not None:
+      oprot.writeFieldBegin('attribute_exception', TType.STRUCT, 5)
+      self.attribute_exception.write(oprot)
+      oprot.writeFieldEnd()
+    if self.type_exception is not None:
+      oprot.writeFieldBegin('type_exception', TType.STRUCT, 6)
+      self.type_exception.write(oprot)
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def validate(self):
+    return
+
+
+  def __hash__(self):
+    value = 17
+    value = (value * 31) ^ hash(self.success)
+    value = (value * 31) ^ hash(self.generic_exception)
+    value = (value * 31) ^ hash(self.authorization_exception)
+    value = (value * 31) ^ hash(self.authentication_exception)
+    value = (value * 31) ^ hash(self.reference_exception)
+    value = (value * 31) ^ hash(self.attribute_exception)
+    value = (value * 31) ^ hash(self.type_exception)
+    return value
+
+  def __repr__(self):
+    L = ['%s=%r' % (key, value)
+      for key, value in self.__dict__.iteritems()]
+    return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+  def __eq__(self, other):
+    return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+  def __ne__(self, other):
+    return not (self == other)
+
+class get_mrna_exons_args:
+  """
+  Attributes:
+   - token
+   - ref
+   - mrna_id_list
+  """
+
+  thrift_spec = (
+    None, # 0
+    (1, TType.STRING, 'token', None, None, ), # 1
+    (2, TType.STRING, 'ref', None, None, ), # 2
+    (3, TType.LIST, 'mrna_id_list', (TType.STRING,None), None, ), # 3
+  )
+
+  def __init__(self, token=None, ref=None, mrna_id_list=None,):
+    self.token = token
+    self.ref = ref
+    self.mrna_id_list = mrna_id_list
+
+  def read(self, iprot):
+    if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
+      fastbinary.decode_binary(self, iprot.trans, (self.__class__, self.thrift_spec))
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 1:
+        if ftype == TType.STRING:
+          self.token = iprot.readString();
+        else:
+          iprot.skip(ftype)
+      elif fid == 2:
+        if ftype == TType.STRING:
+          self.ref = iprot.readString();
+        else:
+          iprot.skip(ftype)
+      elif fid == 3:
+        if ftype == TType.LIST:
+          self.mrna_id_list = []
+          (_etype476, _size473) = iprot.readListBegin()
+          for _i477 in xrange(_size473):
+            _elem478 = iprot.readString();
+            self.mrna_id_list.append(_elem478)
+          iprot.readListEnd()
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
+      oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
+      return
+    oprot.writeStructBegin('get_mrna_exons_args')
+    if self.token is not None:
+      oprot.writeFieldBegin('token', TType.STRING, 1)
+      oprot.writeString(self.token)
+      oprot.writeFieldEnd()
+    if self.ref is not None:
+      oprot.writeFieldBegin('ref', TType.STRING, 2)
+      oprot.writeString(self.ref)
+      oprot.writeFieldEnd()
+    if self.mrna_id_list is not None:
+      oprot.writeFieldBegin('mrna_id_list', TType.LIST, 3)
+      oprot.writeListBegin(TType.STRING, len(self.mrna_id_list))
+      for iter479 in self.mrna_id_list:
+        oprot.writeString(iter479)
+      oprot.writeListEnd()
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def validate(self):
+    if self.token is None:
+      raise TProtocol.TProtocolException(message='Required field token is unset!')
+    if self.ref is None:
+      raise TProtocol.TProtocolException(message='Required field ref is unset!')
+    return
+
+
+  def __hash__(self):
+    value = 17
+    value = (value * 31) ^ hash(self.token)
+    value = (value * 31) ^ hash(self.ref)
+    value = (value * 31) ^ hash(self.mrna_id_list)
+    return value
+
+  def __repr__(self):
+    L = ['%s=%r' % (key, value)
+      for key, value in self.__dict__.iteritems()]
+    return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+  def __eq__(self, other):
+    return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+  def __ne__(self, other):
+    return not (self == other)
+
+class get_mrna_exons_result:
+  """
+  Attributes:
+   - success
+   - generic_exception
+   - authorization_exception
+   - authentication_exception
+   - reference_exception
+   - attribute_exception
+   - type_exception
+  """
+
+  thrift_spec = (
+    (0, TType.MAP, 'success', (TType.STRING,None,TType.LIST,(TType.STRUCT,(Exon_data, Exon_data.thrift_spec))), None, ), # 0
+    (1, TType.STRUCT, 'generic_exception', (ServiceException, ServiceException.thrift_spec), None, ), # 1
+    (2, TType.STRUCT, 'authorization_exception', (AuthorizationException, AuthorizationException.thrift_spec), None, ), # 2
+    (3, TType.STRUCT, 'authentication_exception', (AuthenticationException, AuthenticationException.thrift_spec), None, ), # 3
+    (4, TType.STRUCT, 'reference_exception', (ObjectReferenceException, ObjectReferenceException.thrift_spec), None, ), # 4
+    (5, TType.STRUCT, 'attribute_exception', (AttributeException, AttributeException.thrift_spec), None, ), # 5
+    (6, TType.STRUCT, 'type_exception', (TypeException, TypeException.thrift_spec), None, ), # 6
+  )
+
+  def __init__(self, success=None, generic_exception=None, authorization_exception=None, authentication_exception=None, reference_exception=None, attribute_exception=None, type_exception=None,):
+    self.success = success
+    self.generic_exception = generic_exception
+    self.authorization_exception = authorization_exception
+    self.authentication_exception = authentication_exception
+    self.reference_exception = reference_exception
+    self.attribute_exception = attribute_exception
+    self.type_exception = type_exception
+
+  def read(self, iprot):
+    if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
+      fastbinary.decode_binary(self, iprot.trans, (self.__class__, self.thrift_spec))
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 0:
+        if ftype == TType.MAP:
+          self.success = {}
+          (_ktype481, _vtype482, _size480 ) = iprot.readMapBegin()
+          for _i484 in xrange(_size480):
+            _key485 = iprot.readString();
+            _val486 = []
+            (_etype490, _size487) = iprot.readListBegin()
+            for _i491 in xrange(_size487):
+              _elem492 = Exon_data()
+              _elem492.read(iprot)
+              _val486.append(_elem492)
+            iprot.readListEnd()
+            self.success[_key485] = _val486
+          iprot.readMapEnd()
+        else:
+          iprot.skip(ftype)
+      elif fid == 1:
+        if ftype == TType.STRUCT:
+          self.generic_exception = ServiceException()
+          self.generic_exception.read(iprot)
+        else:
+          iprot.skip(ftype)
+      elif fid == 2:
+        if ftype == TType.STRUCT:
+          self.authorization_exception = AuthorizationException()
+          self.authorization_exception.read(iprot)
+        else:
+          iprot.skip(ftype)
+      elif fid == 3:
+        if ftype == TType.STRUCT:
+          self.authentication_exception = AuthenticationException()
+          self.authentication_exception.read(iprot)
+        else:
+          iprot.skip(ftype)
+      elif fid == 4:
+        if ftype == TType.STRUCT:
+          self.reference_exception = ObjectReferenceException()
+          self.reference_exception.read(iprot)
+        else:
+          iprot.skip(ftype)
+      elif fid == 5:
+        if ftype == TType.STRUCT:
+          self.attribute_exception = AttributeException()
+          self.attribute_exception.read(iprot)
+        else:
+          iprot.skip(ftype)
+      elif fid == 6:
+        if ftype == TType.STRUCT:
+          self.type_exception = TypeException()
+          self.type_exception.read(iprot)
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
+      oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
+      return
+    oprot.writeStructBegin('get_mrna_exons_result')
+    if self.success is not None:
+      oprot.writeFieldBegin('success', TType.MAP, 0)
+      oprot.writeMapBegin(TType.STRING, TType.LIST, len(self.success))
+      for kiter493,viter494 in self.success.items():
+        oprot.writeString(kiter493)
+        oprot.writeListBegin(TType.STRUCT, len(viter494))
+        for iter495 in viter494:
+          iter495.write(oprot)
+        oprot.writeListEnd()
+      oprot.writeMapEnd()
+      oprot.writeFieldEnd()
+    if self.generic_exception is not None:
+      oprot.writeFieldBegin('generic_exception', TType.STRUCT, 1)
+      self.generic_exception.write(oprot)
+      oprot.writeFieldEnd()
+    if self.authorization_exception is not None:
+      oprot.writeFieldBegin('authorization_exception', TType.STRUCT, 2)
+      self.authorization_exception.write(oprot)
+      oprot.writeFieldEnd()
+    if self.authentication_exception is not None:
+      oprot.writeFieldBegin('authentication_exception', TType.STRUCT, 3)
+      self.authentication_exception.write(oprot)
+      oprot.writeFieldEnd()
+    if self.reference_exception is not None:
+      oprot.writeFieldBegin('reference_exception', TType.STRUCT, 4)
+      self.reference_exception.write(oprot)
+      oprot.writeFieldEnd()
+    if self.attribute_exception is not None:
+      oprot.writeFieldBegin('attribute_exception', TType.STRUCT, 5)
+      self.attribute_exception.write(oprot)
+      oprot.writeFieldEnd()
+    if self.type_exception is not None:
+      oprot.writeFieldBegin('type_exception', TType.STRUCT, 6)
+      self.type_exception.write(oprot)
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def validate(self):
+    return
+
+
+  def __hash__(self):
+    value = 17
+    value = (value * 31) ^ hash(self.success)
+    value = (value * 31) ^ hash(self.generic_exception)
+    value = (value * 31) ^ hash(self.authorization_exception)
+    value = (value * 31) ^ hash(self.authentication_exception)
+    value = (value * 31) ^ hash(self.reference_exception)
+    value = (value * 31) ^ hash(self.attribute_exception)
+    value = (value * 31) ^ hash(self.type_exception)
+    return value
+
+  def __repr__(self):
+    L = ['%s=%r' % (key, value)
+      for key, value in self.__dict__.iteritems()]
+    return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+  def __eq__(self, other):
+    return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+  def __ne__(self, other):
+    return not (self == other)
+
+class get_mrna_utrs_args:
+  """
+  Attributes:
+   - token
+   - ref
+   - mrna_id_list
+  """
+
+  thrift_spec = (
+    None, # 0
+    (1, TType.STRING, 'token', None, None, ), # 1
+    (2, TType.STRING, 'ref', None, None, ), # 2
+    (3, TType.LIST, 'mrna_id_list', (TType.STRING,None), None, ), # 3
+  )
+
+  def __init__(self, token=None, ref=None, mrna_id_list=None,):
+    self.token = token
+    self.ref = ref
+    self.mrna_id_list = mrna_id_list
+
+  def read(self, iprot):
+    if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
+      fastbinary.decode_binary(self, iprot.trans, (self.__class__, self.thrift_spec))
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 1:
+        if ftype == TType.STRING:
+          self.token = iprot.readString();
+        else:
+          iprot.skip(ftype)
+      elif fid == 2:
+        if ftype == TType.STRING:
+          self.ref = iprot.readString();
+        else:
+          iprot.skip(ftype)
+      elif fid == 3:
+        if ftype == TType.LIST:
+          self.mrna_id_list = []
+          (_etype499, _size496) = iprot.readListBegin()
+          for _i500 in xrange(_size496):
+            _elem501 = iprot.readString();
+            self.mrna_id_list.append(_elem501)
+          iprot.readListEnd()
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
+      oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
+      return
+    oprot.writeStructBegin('get_mrna_utrs_args')
+    if self.token is not None:
+      oprot.writeFieldBegin('token', TType.STRING, 1)
+      oprot.writeString(self.token)
+      oprot.writeFieldEnd()
+    if self.ref is not None:
+      oprot.writeFieldBegin('ref', TType.STRING, 2)
+      oprot.writeString(self.ref)
+      oprot.writeFieldEnd()
+    if self.mrna_id_list is not None:
+      oprot.writeFieldBegin('mrna_id_list', TType.LIST, 3)
+      oprot.writeListBegin(TType.STRING, len(self.mrna_id_list))
+      for iter502 in self.mrna_id_list:
+        oprot.writeString(iter502)
+      oprot.writeListEnd()
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def validate(self):
+    if self.token is None:
+      raise TProtocol.TProtocolException(message='Required field token is unset!')
+    if self.ref is None:
+      raise TProtocol.TProtocolException(message='Required field ref is unset!')
+    return
+
+
+  def __hash__(self):
+    value = 17
+    value = (value * 31) ^ hash(self.token)
+    value = (value * 31) ^ hash(self.ref)
+    value = (value * 31) ^ hash(self.mrna_id_list)
+    return value
+
+  def __repr__(self):
+    L = ['%s=%r' % (key, value)
+      for key, value in self.__dict__.iteritems()]
+    return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+  def __eq__(self, other):
+    return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+  def __ne__(self, other):
+    return not (self == other)
+
+class get_mrna_utrs_result:
+  """
+  Attributes:
+   - success
+   - generic_exception
+   - authorization_exception
+   - authentication_exception
+   - reference_exception
+   - attribute_exception
+   - type_exception
+  """
+
+  thrift_spec = (
+    (0, TType.MAP, 'success', (TType.STRING,None,TType.MAP,(TType.STRING,None,TType.STRUCT,(UTR_data, UTR_data.thrift_spec))), None, ), # 0
+    (1, TType.STRUCT, 'generic_exception', (ServiceException, ServiceException.thrift_spec), None, ), # 1
+    (2, TType.STRUCT, 'authorization_exception', (AuthorizationException, AuthorizationException.thrift_spec), None, ), # 2
+    (3, TType.STRUCT, 'authentication_exception', (AuthenticationException, AuthenticationException.thrift_spec), None, ), # 3
+    (4, TType.STRUCT, 'reference_exception', (ObjectReferenceException, ObjectReferenceException.thrift_spec), None, ), # 4
+    (5, TType.STRUCT, 'attribute_exception', (AttributeException, AttributeException.thrift_spec), None, ), # 5
+    (6, TType.STRUCT, 'type_exception', (TypeException, TypeException.thrift_spec), None, ), # 6
+  )
+
+  def __init__(self, success=None, generic_exception=None, authorization_exception=None, authentication_exception=None, reference_exception=None, attribute_exception=None, type_exception=None,):
+    self.success = success
+    self.generic_exception = generic_exception
+    self.authorization_exception = authorization_exception
+    self.authentication_exception = authentication_exception
+    self.reference_exception = reference_exception
+    self.attribute_exception = attribute_exception
+    self.type_exception = type_exception
+
+  def read(self, iprot):
+    if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
+      fastbinary.decode_binary(self, iprot.trans, (self.__class__, self.thrift_spec))
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 0:
+        if ftype == TType.MAP:
+          self.success = {}
+          (_ktype504, _vtype505, _size503 ) = iprot.readMapBegin()
+          for _i507 in xrange(_size503):
+            _key508 = iprot.readString();
+            _val509 = {}
+            (_ktype511, _vtype512, _size510 ) = iprot.readMapBegin()
+            for _i514 in xrange(_size510):
+              _key515 = iprot.readString();
+              _val516 = UTR_data()
+              _val516.read(iprot)
+              _val509[_key515] = _val516
+            iprot.readMapEnd()
+            self.success[_key508] = _val509
+          iprot.readMapEnd()
+        else:
+          iprot.skip(ftype)
+      elif fid == 1:
+        if ftype == TType.STRUCT:
+          self.generic_exception = ServiceException()
+          self.generic_exception.read(iprot)
+        else:
+          iprot.skip(ftype)
+      elif fid == 2:
+        if ftype == TType.STRUCT:
+          self.authorization_exception = AuthorizationException()
+          self.authorization_exception.read(iprot)
+        else:
+          iprot.skip(ftype)
+      elif fid == 3:
+        if ftype == TType.STRUCT:
+          self.authentication_exception = AuthenticationException()
+          self.authentication_exception.read(iprot)
+        else:
+          iprot.skip(ftype)
+      elif fid == 4:
+        if ftype == TType.STRUCT:
+          self.reference_exception = ObjectReferenceException()
+          self.reference_exception.read(iprot)
+        else:
+          iprot.skip(ftype)
+      elif fid == 5:
+        if ftype == TType.STRUCT:
+          self.attribute_exception = AttributeException()
+          self.attribute_exception.read(iprot)
+        else:
+          iprot.skip(ftype)
+      elif fid == 6:
+        if ftype == TType.STRUCT:
+          self.type_exception = TypeException()
+          self.type_exception.read(iprot)
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
+      oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
+      return
+    oprot.writeStructBegin('get_mrna_utrs_result')
+    if self.success is not None:
+      oprot.writeFieldBegin('success', TType.MAP, 0)
+      oprot.writeMapBegin(TType.STRING, TType.MAP, len(self.success))
+      for kiter517,viter518 in self.success.items():
+        oprot.writeString(kiter517)
+        oprot.writeMapBegin(TType.STRING, TType.STRUCT, len(viter518))
+        for kiter519,viter520 in viter518.items():
+          oprot.writeString(kiter519)
+          viter520.write(oprot)
+        oprot.writeMapEnd()
       oprot.writeMapEnd()
       oprot.writeFieldEnd()
     if self.generic_exception is not None:
