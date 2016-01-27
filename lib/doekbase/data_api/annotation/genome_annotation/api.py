@@ -486,7 +486,7 @@ class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
         features = self.get_data()['features']
 
         # now process all filters and reduce the data
-        remove_features = []
+        remove_features = set()
 
         if "type_list" in filters and filters["type_list"] is not None:
             if not isinstance(filters["type_list"], list):
@@ -496,7 +496,7 @@ class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
 
             for i in xrange(len(features)):
                 if features[i]["type"] not in filters["type_list"]:
-                    remove_features.append(i)
+                    remove_features.add(i)
 
         if "region_list" in filters and filters["region_list"] is not None:
             if not isinstance(filters["region_list"], list):
@@ -523,7 +523,7 @@ class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
 
             for i in xrange(len(features)):
                 if not is_feature_in_regions(features[i], filters["region_list"]):
-                    remove_features.append(i)
+                    remove_features.add(i)
 
         if "function_list" in filters and filters["function_list"] is not None:
             if not isinstance(filters["function_list"], list):
@@ -533,7 +533,7 @@ class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
 
             for i in xrange(len(features)):
                 if "function" not in features[i]:
-                    remove_features.append(i)
+                    remove_features.add(i)
                 else:
                     found = False
                     for f in filters["function_list"]:
@@ -542,7 +542,7 @@ class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
                             break
 
                     if not found:
-                        remove_features.append(i)
+                        remove_features.add(i)
 
         if "alias_list" in filters and filters["alias_list"] is not None:
             if not isinstance(filters["alias_list"], list):
@@ -552,7 +552,7 @@ class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
 
             for i in xrange(len(features)):
                 if "aliases" not in features[i]:
-                    remove_features.append(i)
+                    remove_features.add(i)
                 else:
                     found = False
                     for alias in filters["alias_list"]:
@@ -560,7 +560,7 @@ class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
                             found = True
 
                     if not found:
-                        remove_features.append(i)
+                        remove_features.add(i)
 
         keep_features = [i for i in xrange(len(features)) if i not in remove_features]
 
