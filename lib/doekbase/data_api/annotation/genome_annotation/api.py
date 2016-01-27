@@ -1763,6 +1763,12 @@ class GenomeAnnotationClientAPI(GenomeAnnotationInterface):
             for k in result[x].__dict__:
                 output[x][k] = result[x].__dict__[k]
 
+            output[x]["feature_locations"] = [{"contig_id": loc.contig_id,
+                                               "start": loc.start,
+                                               "strand": loc.strand,
+                                               "length": loc.length
+                                              } for loc in result[x].feature_locations]
+
         return output
 
     @logged(_ga_log)
