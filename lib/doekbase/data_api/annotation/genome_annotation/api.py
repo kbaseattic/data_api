@@ -134,7 +134,6 @@ class GenomeAnnotationInterface(object):
         Only the group_by selected will be included in the results.
 
         Args:
-<<<<<<< HEAD
             filters (dict): Optional dictionary of filters that can be applied to
               contents. Recognized filter keys are:
 
