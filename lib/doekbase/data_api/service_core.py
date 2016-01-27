@@ -71,7 +71,7 @@ def server_method(func):
             error = e
             raise self.ttypes.AuthorizationException(e.message,
                                                      traceback.format_exc())
-        except exceptions.TypeError, e:
+        except TypeError, e:
             error = e
             raise self.ttypes.TypeException(e.message, traceback.format_exc())
         except Exception, e:

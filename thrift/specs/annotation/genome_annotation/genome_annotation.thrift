@@ -88,6 +88,18 @@ struct Protein_data {
     6: list<string> protein_domain_locations;
 }
 
+struct Exon_data {
+    1: Region exon_location;
+    2: string exon_dna_sequence;
+    3: i64 exon_ordinal;
+}
+
+struct UTR_data {
+    1: list<Region> utr_locations;
+    2: string utr_dna_sequence;
+}
+
+
 service thrift_service {
     /**
      * Retrieve the Taxon associated with this GenomeAnnotation.
@@ -330,7 +342,7 @@ service thrift_service {
      */
     map<string,string> get_mrna_by_cds(1:required string token,
                                        2:required ObjectReference ref,
-                                       3:list<string> gene_id_list) throws (
+                                       3:list<string> cds_id_list) throws (
         1:ServiceException generic_exception,
         2:AuthorizationException authorization_exception,
         3:AuthenticationException authentication_exception,
@@ -350,5 +362,34 @@ service thrift_service {
         3:AuthenticationException authentication_exception,
         4:ObjectReferenceException reference_exception,
         5:AttributeException attribute_exception,
+        6:TypeException type_exception),
+
+    /**
+     * Retrieve Exon information for each mRNA id in this GenomeAnnotation.
+     *
+     */
+    map<string, list<Exon_data>> get_mrna_exons(1:required string token,
+                                                2:required ObjectReference ref,
+                                                3:list<string> mrna_id_list) throws (
+        1:ServiceException generic_exception,
+        2:AuthorizationException authorization_exception,
+        3:AuthenticationException authentication_exception,
+        4:ObjectReferenceException reference_exception,
+        5:AttributeException attribute_exception,
+        6:TypeException type_exception),
+
+    /**
+     * Retrieve UTR information for each mRNA id in this GenomeAnnotation.
+     *
+     */
+    map<string, map<string, UTR_data>> get_mrna_utrs(1:required string token,
+                                                     2:required ObjectReference ref,
+                                                     3:list<string> mrna_id_list) throws (
+        1:ServiceException generic_exception,
+        2:AuthorizationException authorization_exception,
+        3:AuthenticationException authentication_exception,
+        4:ObjectReferenceException reference_exception,
+        5:AttributeException attribute_exception,
         6:TypeException type_exception)
+
 }
