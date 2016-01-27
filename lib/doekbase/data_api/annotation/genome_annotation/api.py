@@ -720,7 +720,7 @@ class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
                 if "function" in x:
                     functions[x['id']] = x["function"]
                 else:
-                    functions[x['id']] = "Unknown"
+                    functions[x['id']] = ""
         else:
             try:
                 feature_refs = ["features/" + x for x in feature_id_list]
@@ -735,7 +735,7 @@ class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
                     if "function" in x:
                         functions[x['id']] = x["function"]
                     else:
-                        functions[x['id']] = "Unknown"
+                        functions[x['id']] = ""
 
         return functions
 
@@ -1223,7 +1223,7 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
                     if "function" in features[feature_id]:
                         out[feature_id] = features[feature_id]["function"]
                     else:
-                        out[feature_id] = "Unknown"
+                        out[feature_id] = ""
 
         return out
 
@@ -1262,7 +1262,7 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
             if 'function' in x:
                 f["feature_function"] = x['function']
             else:
-                f["feature_function"] = "Unknown"
+                f["feature_function"] = ""
 
             if 'publications' in x:
                 f["feature_publications"] = x['publications']
@@ -1282,7 +1282,7 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
             if 'inference' in x:
                 f["feature_inference"] = x['inference']
             else:
-                f["feature_inference"] = "Unknown"
+                f["feature_inference"] = ""
 
             if 'quality' in x:
                 f["feature_quality_score"] = x['quality']
