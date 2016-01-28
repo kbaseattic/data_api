@@ -29,11 +29,21 @@ REF_PATTERN = re.compile("(.+/.+(/[0-9].+)?)|(ws\.[1-9][0-9]+\.[1-9][0-9]+)")
 
 g_ws_url = "https://ci.kbase.us/services/ws/"
 g_shock_url = "https://ci.kbase.us/services/shock-api/"
+g_handle_url = "https://ci.kbase.us/services/handle_service/"
 g_use_msgpack = True
 
 g_stats = PerfCollector('ObjectAPI')
 
-# Functions and Classes
+def fix_docs(cls):
+    for name, func in vars(cls).items():
+        if func is not None and func.__doc__ is None:
+            for parent in cls.__bases__:
+                if hasattr(parent, name):
+                    parfunc = getattr(parent, name)
+                    if parfunc and hasattr(parfunc, '__doc__'):
+                        func.__doc__ = parfunc.__doc__
+                        break
+    return cls
 
 #: Name positional parts of WorkspaceInfo tuple
 WorkspaceInfo = namedtuple('WorkspaceInfo', [
@@ -307,7 +317,7 @@ class ObjectAPI(object):
             description
         """
 
-        if self._provenance == None:
+        if self._provenance is None:
             result = self.ws_client.get_object_provenance([{"ref": self.ref}])
 
             if len(result) > 0:
@@ -408,23 +418,43 @@ class ObjectAPI(object):
                         "included": path_list}])[0]["data"]
 
     @collect_performance(g_stats)
-    def get_referrers(self):
+    def get_referrers(self, most_recent=True):
         """Retrieve a dictionary that indicates by type what objects are
         referring to this object.
-        
+
+        Args:
+          most_recent: True or False, defaults to True indicating that results
+              should be restricted to the latest version of any referencing object.
+              If this parameter is False, results will contain all versions of any
+              referencing objects.
+
         Returns:
           dict typestring -> object_reference"""
 
         referrers = self.ws_client.list_referencing_objects([{"ref": self.ref}])[0]
+
+        # sort all object references in descending order by time
+        referrers = sorted(referrers, cmp=lambda a,b: a[3] > b[3])
         
-        object_refs_by_type = dict()        
+        object_refs_by_type = {}
+
+        # keep track of which objects we have seen so far, the first instance will be the latest
+        # so only keep that reference
+        found_objects = {}
         for x in referrers:
             typestring = self.ws_client.translate_to_MD5_types([x[2]]).values()[0]
-            
+
             if typestring not in object_refs_by_type:
-                object_refs_by_type[typestring] = list()
-            
+                object_refs_by_type[typestring] = []
+
+            unversioned_ref = str(x[6]) + "/" + str(x[0])
+            if most_recent and unversioned_ref in found_objects:
+                continue
+
+            # Mark an entry for a new object
+            found_objects[unversioned_ref] = None
             object_refs_by_type[typestring].append(str(x[6]) + "/" + str(x[0]) + "/" + str(x[4]))
+
         return object_refs_by_type
 
     @collect_performance(g_stats)

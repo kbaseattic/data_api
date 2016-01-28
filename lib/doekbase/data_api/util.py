@@ -2,8 +2,11 @@
 Utility functions.
 
 Includes:
-    - Logging decorators
-    - Logging functions log_start() and log_end()
+
+- Logging initialization helper: get_logger()
+- Logging decorators: @logged, @collect_performance
+- Logging functions log_start() and log_end()
+
 """
 __author__ = 'Dan Gunter <dkgunter@lbl.gov>'
 __date__ = '8/4/15'
@@ -82,6 +85,7 @@ def logged(logger, log_level=logging.INFO, log_name=None, **kw):
         2015-08-26T01:02:30.123456 hello.begin
         hello dumb world
         2015-08-26T01:02:30.654321 hello.end
+    
     """
     def real_decorator(method, logger_name=logger.name):
         # choose name for logged event

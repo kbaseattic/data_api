@@ -1453,3 +1453,182 @@ class Protein_data(object):
 
   def __ne__(self, other):
     return not (self == other)
+
+class Exon_data(object):
+  """
+  Attributes:
+   - exon_location
+   - exon_dna_sequence
+   - exon_ordinal
+  """
+
+  thrift_spec = (
+    None, # 0
+    (1, TType.STRUCT, 'exon_location', (Region, Region.thrift_spec), None, ), # 1
+    (2, TType.STRING, 'exon_dna_sequence', None, None, ), # 2
+    (3, TType.I64, 'exon_ordinal', None, None, ), # 3
+  )
+
+  def __init__(self, exon_location=None, exon_dna_sequence=None, exon_ordinal=None,):
+    self.exon_location = exon_location
+    self.exon_dna_sequence = exon_dna_sequence
+    self.exon_ordinal = exon_ordinal
+
+  def read(self, iprot):
+    if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
+      fastbinary.decode_binary(self, iprot.trans, (self.__class__, self.thrift_spec))
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 1:
+        if ftype == TType.STRUCT:
+          self.exon_location = Region()
+          self.exon_location.read(iprot)
+        else:
+          iprot.skip(ftype)
+      elif fid == 2:
+        if ftype == TType.STRING:
+          self.exon_dna_sequence = iprot.readString();
+        else:
+          iprot.skip(ftype)
+      elif fid == 3:
+        if ftype == TType.I64:
+          self.exon_ordinal = iprot.readI64();
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
+      oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
+      return
+    oprot.writeStructBegin('Exon_data')
+    if self.exon_location is not None:
+      oprot.writeFieldBegin('exon_location', TType.STRUCT, 1)
+      self.exon_location.write(oprot)
+      oprot.writeFieldEnd()
+    if self.exon_dna_sequence is not None:
+      oprot.writeFieldBegin('exon_dna_sequence', TType.STRING, 2)
+      oprot.writeString(self.exon_dna_sequence)
+      oprot.writeFieldEnd()
+    if self.exon_ordinal is not None:
+      oprot.writeFieldBegin('exon_ordinal', TType.I64, 3)
+      oprot.writeI64(self.exon_ordinal)
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def validate(self):
+    return
+
+
+  def __hash__(self):
+    value = 17
+    value = (value * 31) ^ hash(self.exon_location)
+    value = (value * 31) ^ hash(self.exon_dna_sequence)
+    value = (value * 31) ^ hash(self.exon_ordinal)
+    return value
+
+  def __repr__(self):
+    L = ['%s=%r' % (key, value)
+      for key, value in self.__dict__.iteritems()]
+    return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+  def __eq__(self, other):
+    return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+  def __ne__(self, other):
+    return not (self == other)
+
+class UTR_data(object):
+  """
+  Attributes:
+   - utr_locations
+   - utr_dna_sequence
+  """
+
+  thrift_spec = (
+    None, # 0
+    (1, TType.LIST, 'utr_locations', (TType.STRUCT,(Region, Region.thrift_spec)), None, ), # 1
+    (2, TType.STRING, 'utr_dna_sequence', None, None, ), # 2
+  )
+
+  def __init__(self, utr_locations=None, utr_dna_sequence=None,):
+    self.utr_locations = utr_locations
+    self.utr_dna_sequence = utr_dna_sequence
+
+  def read(self, iprot):
+    if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
+      fastbinary.decode_binary(self, iprot.trans, (self.__class__, self.thrift_spec))
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 1:
+        if ftype == TType.LIST:
+          self.utr_locations = []
+          (_etype194, _size191) = iprot.readListBegin()
+          for _i195 in xrange(_size191):
+            _elem196 = Region()
+            _elem196.read(iprot)
+            self.utr_locations.append(_elem196)
+          iprot.readListEnd()
+        else:
+          iprot.skip(ftype)
+      elif fid == 2:
+        if ftype == TType.STRING:
+          self.utr_dna_sequence = iprot.readString();
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
+      oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
+      return
+    oprot.writeStructBegin('UTR_data')
+    if self.utr_locations is not None:
+      oprot.writeFieldBegin('utr_locations', TType.LIST, 1)
+      oprot.writeListBegin(TType.STRUCT, len(self.utr_locations))
+      for iter197 in self.utr_locations:
+        iter197.write(oprot)
+      oprot.writeListEnd()
+      oprot.writeFieldEnd()
+    if self.utr_dna_sequence is not None:
+      oprot.writeFieldBegin('utr_dna_sequence', TType.STRING, 2)
+      oprot.writeString(self.utr_dna_sequence)
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def validate(self):
+    return
+
+
+  def __hash__(self):
+    value = 17
+    value = (value * 31) ^ hash(self.utr_locations)
+    value = (value * 31) ^ hash(self.utr_dna_sequence)
+    return value
+
+  def __repr__(self):
+    L = ['%s=%r' % (key, value)
+      for key, value in self.__dict__.iteritems()]
+    return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+  def __eq__(self, other):
+    return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+  def __ne__(self, other):
+    return not (self == other)

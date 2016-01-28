@@ -51,9 +51,10 @@ def workspace_to_file(ref, workspace='narrative', token=None):
 
     Args:
       ref (str): Workspace object reference e.g. '1019/4/1'
-      workspace (str): Name or full URL for workspace to contact
-                       'narrative' or 'ci' are recognized
-       token (str): KBase auth token
+      workspace (str): Name or full URL for workspace to contact; 'narrative'
+        or 'ci' are recognized
+      token (str): KBase auth token
+
     Return:
        (dict) Object in the mock schema
     """
