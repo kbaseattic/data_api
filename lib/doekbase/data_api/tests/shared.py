@@ -47,6 +47,7 @@ def get_services():
 
     global_stanza_name = 'data_api' + ".kbase." + os.environ.get("KB_DEPLOY_URL", "dir_nocache")
     services["shock_service_url"] = deploy_config.get(global_stanza_name, "shock_service_url")
+    services["handle_service_url"] = deploy_config.get(global_stanza_name, "handle_service_url")
     services["workspace_service_url"] = deploy_config.get(global_stanza_name, "workspace_service_url")
     services["taxon_service_url"] = deploy_config.get(global_stanza_name, "taxon_service_url")
     services["assembly_service_url"] = deploy_config.get(global_stanza_name, "assembly_service_url")

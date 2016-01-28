@@ -18,7 +18,13 @@ import re
 # Local
 import doekbase
 import doekbase.workspace.client
-from doekbase.data_api.types import get_object_class
+
+# the types module is being removed:
+#from doekbase.data_api.types import get_object_class
+
+def get_object_class(type_pattern):
+    # XXX: This should return the class for a given type pattern
+    return None
 
 def add_dicts(a, b):
     """Add two dictionaries together and return a third."""
