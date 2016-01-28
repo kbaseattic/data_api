@@ -39,8 +39,9 @@ def server_method(func):
 
     The wrapper depends on the existence of two attributes in the
     class being wrapped:
-        - ttypes (module): Thrift type module, containing exception classes
-        - log (logging.Logger): Logger instance
+        
+    1. ttypes (module): Thrift type module, containing exception classes
+    2. log (logging.Logger): Logger instance
 
     Args:
         func (function): Function being wrapped

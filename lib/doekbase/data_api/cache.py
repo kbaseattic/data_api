@@ -1,7 +1,7 @@
 """
 Add simple, flexible caching layer.
 
-Uses `dogpile caching http://dogpilecache.readthedocs.org/en/latest/index.html`_.
+Uses [dogpile caching](http://dogpilecache.readthedocs.org/en/latest/index.html).
 """
 __author__ = 'Dan Gunter <dkgunter@lbl.gov>'
 __date__ = '9/26/15'

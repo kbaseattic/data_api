@@ -127,35 +127,38 @@ class GenomeAnnotationInterface(object):
 
     @abc.abstractmethod
     def get_feature_ids(self, filters=None, group_by="type"):
-        """Retrieves feature ids based on filters such as feature types,
+        """Retrieve feature ids based on filters such as feature types,
         regions, functional descriptions, aliases.
-        
-        If no filters are applied, all feature ids will be returned.
+
+        If no value is given for ``filters``, all feature ids will be returned.
         Only the group_by selected will be included in the results.
-        
-        Retrieves feature ids based on filters such as feature types, regions, functional descriptions, aliases.
 
         Args:
-          filters: Optional dictionary of filters that can be applied to object contents.
-                   Recognized filter keys:
-                       "type_list" - List of feature type strings.
-                                     Should be findable in :data:`FEATURE_DESCRIPTIONS`.
-                       "region_list" - List of region specs.
-                                       e.g.,[{"contig_id": str, "strand": "+"|"-"|"?", "start": int, "length": int},...]
-                       "function_list" - List of function strings to match.
-                       "alias_list" - List of alias strings to match.
+            filters (dict): Optional dictionary of filters that can be applied to
+              contents. Recognized filter keys are:
 
-                    NOTE: Unrecognized filter keys will raise a KeyError.
+            - `type_list`: List of feature type strings. Possible values in
+              `FEATURE_DESCRIPTIONS`.
 
-          group_by: Specify the grouping of feature ids returned.
-                    Recognized values are one of ["type","region","function","alias"]
-                    Defaults to "type".
+            - `region_list`: List of region specs.e.g.,
+              ``[{"contig_id": str, "strand": "+"|"-"|"?", "start": int, "length": int},...]``
+
+            - `function_list`: List of function strings to match.
+
+            - `alias_list`: List of alias strings to match.
+
+            group_by (str): Specify the grouping of feature ids returned.
+              Possible values are the same as the filter keys.
 
         Returns:
-          {"by_type": dict<str feature_type, list<str feature_id>>,
-           "by_region": dict<str contig_id, dict<str strand, dict<string range, list<string feature_id>>>>,
-           "by_function": dict<str function, list<str feature_id>>,
-           "by_alias": dict<str alias, list<str feature_id>>}"""
+            (dict) Result with values for requested grouping filled in under a
+            key named for that grouping::
+
+                {"by_type": dict<str feature_type, list<str feature_id>>,
+                 "by_region": dict<str contig_id, dict<str strand, dict<string range, list<string feature_id>>>>,
+                 "by_function": dict<str function, list<str feature_id>>,
+                 "by_alias": dict<str alias, list<str feature_id>>}
+        """
 
         pass  # TODO: add examples in docs for function_list and alias_list
 
