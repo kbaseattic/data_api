@@ -6,6 +6,8 @@ then
     export KB_DEPLOYMENT_CONFIG=$KB_TOP/deployment.cfg
 fi
 
+echo $script_dir
+
 source $script_dir/venv/bin/activate
 
 for pidfile in $script_dir/*.pid
