@@ -13,7 +13,7 @@ def test_api_service(service_name='assembly',apiurl='http://localhost',token=Non
         elif service_name == "annotation":
             #from doekbase.data_api.annotation.genome_annotation.service import thrift_client
             from doekbase.data_api.annotation.genome_annotation.api import GenomeAnnotationClientAPI
-            api = GenomeAnnotationClientAPI(apiurl, token, None)
+            api = GenomeAnnotationClientAPI(apiurl, token, 'ReferenceGenomeAnnotations/kb|g.166819')
         else:
             raise Exception("Service not activated: {}".format(service_name))
     except Exception as e:
@@ -22,10 +22,13 @@ def test_api_service(service_name='assembly',apiurl='http://localhost',token=Non
 
     if service_name == 'annotation':
         try:
-            #lineage=client.get_scientific_lineage(token,'ReferenceTaxons/511145_taxon')
-            print '3 ' + service_name + '_api - UNKNOWN - check not yet defined for ' + service_name
+            feature_types = api.get_feature_types()
+            if 'CDS' in feature_types:
+                print '0 ' + service_name + '_api - OK - feature_type returned ' + str(feature_types)
+            else:
+                print '2 ' + service_name + '_api - CRITICAL - unexpected feature_types returned ' + str(feature_types)
         except:
-            print '2 ' + service_name + '_api - CRITICAL'
+            print '2 ' + service_name + '_api - CRITICAL - unexpected error encountered ' + str(sys.exc_info()[0])
 
     if service_name == 'taxon':
         try:
