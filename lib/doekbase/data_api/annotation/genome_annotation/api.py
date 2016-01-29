@@ -1389,15 +1389,15 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
 
             utr5_locations = []
             utr3_locations = []
-            utr5_sequence = ""
-            utr3_sequence = ""
+            utr5_sequence = []
+            utr3_sequence = []
             offset = 0
 
-            # if minus strand, 5' starts at the largest value
+            # if minus strand, 5' starts at the largest value, and we subtract length from start
             if direction == "-":
-                cds_max = cds_locations[cds_ids[mrna_id]][-1]["start"]
-                cds_min = cds_locations[cds_ids[mrna_id]][0]["start"] - \
-                          cds_locations[cds_ids[mrna_id]][0]["length"]
+                cds_max = cds_locations[cds_ids[mrna_id]][0]["start"]
+                cds_min = cds_locations[cds_ids[mrna_id]][-1]["start"] - \
+                          cds_locations[cds_ids[mrna_id]][-1]["length"]
 
                 for x in mrna_locations:
                     exon_max = x["start"]
@@ -1406,26 +1406,24 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
                     if exon_min > cds_max:
                         # the exon ends before the cds starts
                         utr5_locations.append(x)
-                        utr5_sequence += mrna_sequence[offset:offset + x["length"]]
+                        utr5_sequence.append(mrna_sequence[offset:offset + x["length"]])
                     elif cds_max > exon_min and cds_max < exon_max:
                         # the cds starts inside this exon
                         utr_boundary = cds_max + 1
-                        utr_length = x["length"] - abs(utr_boundary - exon_max)
+                        utr_length = exon_max - utr_boundary + 1
 
                         utr5_locations.append({
                             "contig_id": x["contig_id"],
-                            "start": utr_boundary,
+                            "start": exon_max,
                             "strand": x["strand"],
                             "length": utr_length
                         })
-                        utr5_sequence += mrna_sequence[offset:offset + utr_length]
-                    elif exon_min < cds_max and exon_min >= cds_min:
-                        # the exon is fully contained in the cds
-                        pass
-                    elif cds_min > exon_min and cds_min < exon_max:
+                        utr5_sequence.append(mrna_sequence[offset:offset + utr_length])
+
+                    if cds_min > exon_min and cds_min < exon_max:
                         # the cds ends inside this exon
-                        utr_boundary = cds_min + 1
-                        utr_length = x["length"] - abs(utr_boundary - exon_max)
+                        utr_boundary = cds_min - 1
+                        utr_length = utr_boundary - exon_min + 1
 
                         utr3_locations.append({
                             "contig_id": x["contig_id"],
@@ -1433,20 +1431,17 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
                             "strand": x["strand"],
                             "length": utr_length
                         })
-                        utr3_sequence += mrna_sequence[offset:offset + utr_length]
+                        utr3_sequence.append(mrna_sequence[offset:offset + utr_length])
                     elif exon_max < cds_min:
                         # the exon begins after the cds ends
                         utr3_locations.append(x)
-                        utr3_sequence += mrna_sequence[offset:offset + x["length"]]
-                    else:
-                        # the exon has the same coordinates as the cds
-                        pass
+                        utr3_sequence.append(mrna_sequence[offset:offset + x["length"]])
 
                     offset += x["length"]
             elif direction == "+":
-                cds_min = cds_locations[cds_ids[mrna_id]][0]["start"]
                 cds_max = cds_locations[cds_ids[mrna_id]][-1]["start"] + \
                           cds_locations[cds_ids[mrna_id]][-1]["length"]
+                cds_min = cds_locations[cds_ids[mrna_id]][0]["start"]
 
                 for x in mrna_locations:
                     exon_min = x["start"]
@@ -1455,10 +1450,11 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
                     if exon_max < cds_min:
                         # the exon ends before the cds starts
                         utr5_locations.append(x)
-                        utr5_sequence += mrna_sequence[offset:offset + x["length"]]
+                        utr5_sequence.append(mrna_sequence[offset:offset + x["length"]])
                     elif cds_min > exon_min and cds_min < exon_max:
                         # the cds starts inside this exon
-                        utr_length = cds_min - 1 - exon_min
+                        utr_boundary = cds_min - 1
+                        utr_length = utr_boundary - exon_min + 1
 
                         utr5_locations.append({
                             "contig_id": x["contig_id"],
@@ -1466,28 +1462,24 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
                             "strand": x["strand"],
                             "length": utr_length
                         })
-                        utr5_sequence += mrna_sequence[offset:offset + utr_length]
-                    elif exon_min >= cds_min and exon_max <= cds_max:
-                        # the exon is entirely contained inside the cds
-                        pass
-                    elif cds_max > exon_min and cds_max < exon_max:
+                        utr5_sequence.append(mrna_sequence[offset:offset + utr_length])
+
+                    if cds_max > exon_min and cds_max < exon_max:
                         # the cds ends inside this exon
-                        utr_length = cds_max - 1 - exon_min
+                        utr_boundary = cds_max + 1
+                        utr_length = exon_max - utr_boundary + 1
 
                         utr3_locations.append({
                             "contig_id": x["contig_id"],
-                            "start": exon_min,
+                            "start": utr_boundary,
                             "strand": x["strand"],
                             "length": utr_length
                         })
-                        utr3_sequence += mrna_sequence[offset:offset + utr_length]
+                        utr3_sequence.append(mrna_sequence[offset:offset + utr_length])
                     elif exon_min > cds_max:
                         # the exon starts after the cds ends
                         utr3_locations.append(x)
-                        utr3_sequence += mrna_sequence[offset:offset + x["length"]]
-                    else:
-                        # the exon has the same coordinates as the cds
-                        pass
+                        utr3_sequence.append(mrna_sequence[offset:offset + x["length"]])
 
                     offset += x["length"]
             else:
@@ -1499,13 +1491,13 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
             if len(utr5_locations) > 0:
                 utrs[mrna_id]["5'UTR"] = {
                     "utr_locations": utr5_locations,
-                    "utr_dna_sequence": utr5_sequence
+                    "utr_dna_sequence": "".join(utr5_sequence)
                 }
 
             if len(utr3_locations) > 0:
                 utrs[mrna_id]["3'UTR"] = {
                     "utr_locations": utr3_locations,
-                    "utr_dna_sequence": utr3_sequence
+                    "utr_dna_sequence": "".join(utr3_sequence)
                 }
         #end outer for loop
 
