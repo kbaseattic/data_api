@@ -127,42 +127,45 @@ class GenomeAnnotationInterface(object):
 
     @abc.abstractmethod
     def get_feature_ids(self, filters=None, group_by="type"):
-        """Retrieves feature ids based on filters such as feature types,
+        """Retrieve feature ids based on filters such as feature types,
         regions, functional descriptions, aliases.
-        
-        If no filters are applied, all feature ids will be returned.
+
+        If no value is given for ``filters``, all feature ids will be returned.
         Only the group_by selected will be included in the results.
-        
-        Retrieves feature ids based on filters such as feature types, regions, functional descriptions, aliases.
 
         Args:
-          filters: Optional dictionary of filters that can be applied to object contents.
-                   Recognized filter keys:
-                       "type_list" - List of feature type strings.
-                                     Should be findable in :data:`FEATURE_DESCRIPTIONS`.
-                       "region_list" - List of region specs.
-                                       e.g.,[{"contig_id": str, "strand": "+"|"-"|"?", "start": int, "length": int},...]
+            filters (dict): Optional dictionary of filters that can be applied to
+              contents. Recognized filter keys are:
 
-                                       The feature sequence begin and end are calculated as follows:
-                                           [start, start + length) for "+" strand
-                                           (start - length, start] for "-" strand
+            - `type_list`: List of feature type strings. Possible values in
+              `FEATURE_DESCRIPTIONS`.
 
-                                       If passing in "?" for strand, meaning either, the above
-                                       calculations will apply to the correct strand type of the data.
-                       "function_list" - List of function strings to match.
-                       "alias_list" - List of alias strings to match.
+            - `region_list`: List of region specs. e.g.,
+              ``[{"contig_id": str, "strand": "+"|"-"|"?", "start": int, "length": int},...]``
 
-                    NOTE: Unrecognized filter keys will raise a KeyError.
+                The feature sequence begin and end are calculated as follows:
+                  [start, start + length) for "+" strand
+                  (start - length, start] for "-" strand
 
-          group_by: Specify the grouping of feature ids returned.
-                    Recognized values are one of ["type","region","function","alias"]
-                    Defaults to "type".
+                  If passing in "?" for strand, meaning either, the above
+                  calculations will apply to the correct strand type of the data.
+
+            - `function_list`: List of function strings to match.
+
+            - `alias_list`: List of alias strings to match.
+
+            group_by (str): Specify the grouping of feature ids returned.
+                Possible values are the same as the filter keys.
 
         Returns:
-          {"by_type": dict<str feature_type, list<str feature_id>>,
-           "by_region": dict<str contig_id, dict<str strand, dict<string range, list<string feature_id>>>>,
-           "by_function": dict<str function, list<str feature_id>>,
-           "by_alias": dict<str alias, list<str feature_id>>}"""
+            (dict) Result with values for requested grouping filled in under a
+            key named for that grouping::
+
+                {"by_type": dict<str feature_type, list<str feature_id>>,
+                 "by_region": dict<str contig_id, dict<str strand, dict<string range, list<string feature_id>>>>,
+                 "by_function": dict<str function, list<str feature_id>>,
+                 "by_alias": dict<str alias, list<str feature_id>>}
+        """
 
         pass  # TODO: add examples in docs for function_list and alias_list
 
@@ -178,35 +181,48 @@ class GenomeAnnotationInterface(object):
           dict: Mapping from feature IDs to dicts of available data.
           The feature data has the following key/value pairs:
 
-          feature_id: str
+          - feature_id: str
               Identifier for this feature
-          feature_type: str
+
+          - feature_type: str
               The feature type e.g., mRNA, CDS, gene
-          feature_function: str
+
+          - feature_function: str
               The functional annotation description
-          feature_locations: list<{"contig_id": str, "start": int, "strand": str, "length": int}>
+
+          - feature_locations: list<{"contig_id": str, "start": int, "strand": str, "length": int}>
               List of Feature regions, where the Feature bounds are calculated as follows:
                   For "+" strand, [start, start + length)
                   For "-" strand, (start - length, start]
-          feature_dna_sequence: str
+
+          - feature_dna_sequence: str
               String containing the DNA sequence of the feature
-          feature_dna_sequence_length: int
+
+          - feature_dna_sequence_length: int
               Integer representing the length of the DNA sequence for convenience
-          feature_md5: str
+
+          - feature_md5: str
               String containing the MD5 of the sequence, calculated from the uppercase string
-          feature_publications: list<int, str, str, str, str, str, str>
-              List of any known publications related to this Feature,
-          feature_aliases: dict<str, list<string>>
-              Dictionary of Alias string to List of source string identifiers,
-          feature_notes: str
-              Notes recorded about this Feature,
-          feature_inference: str
-              Inference information,
-          feature_quality_score: int
+
+          - feature_publications: list<int, str, str, str, str, str, str>
+              List of any known publications related to this Feature
+
+          - feature_aliases: dict<str, list<string>>
+              Dictionary of Alias string to List of source string identifiers
+
+          - feature_notes: str
+              Notes recorded about this Feature
+
+          - feature_inference: str
+              Inference information
+
+          - feature_quality_score: int
               Quality value with unknown algorithm for Genomes,
               not calculated yet for GenomeAnnotations
-          feature_quality_warnings: list<str>
-              List of strings indicating known data quality issues
+
+          - feature_quality_warnings: list<str>
+              List of strings indicating known data quality issues.
+              Note - not used for Genome type, but is used for GenomeAnnotation
         """
         pass
 
@@ -234,13 +250,16 @@ class GenomeAnnotationInterface(object):
           dict: Mapping from feature IDs to location information for each.
           The location information has the following key/value pairs:
 
-          contig_id : str
+          - contig_id : str
               The identifier for the contig this region corresponds to
-          strand : str
+
+          - strand : str
               Whether this region is located on the '+' or '-' strand
-          start : int
+
+          - start : int
               The starting position for this region
-          length : int
+
+          - length : int
               The distance from the start position that defines the end boundary for the region.
         """
         pass
@@ -305,6 +324,11 @@ class GenomeAnnotationInterface(object):
         """Retrieves the untranslated regions (UTRs) for mRNA features.
 
         UTRs are calculated between mRNA features and corresponding CDS features.
+        The return value for each mRNA can contain either:
+            no UTRs found (empty dict)
+            5' UTR only
+            3' UTR only
+            5' and 3' UTRs
 
         Note - The Genome data type does not contain interfeature relationship information
         and will raise a TypeError exception when this method is called.
@@ -314,14 +338,14 @@ class GenomeAnnotationInterface(object):
         Returns:
           dict<str mrna_feature_id>: {"5'UTR": UTR_data, "3'UTR": UTR_data}
 
-          UTR_data
-              utr_locations: list<Feature Region>
+          Where UTR_data is a dictionary with the following key/value pairs:
+              - utr_locations: list<Feature Region>
                   Feature Region is a dict with these key/value pairs:
                       contig_id: str
                       start: int
                       strand: str
                       length: int
-              utr_dna_sequence: str
+              - utr_dna_sequence: str
                   DNA sequence string for this UTR
           """
         pass
