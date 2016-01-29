@@ -142,6 +142,13 @@ class GenomeAnnotationInterface(object):
                                      Should be findable in :data:`FEATURE_DESCRIPTIONS`.
                        "region_list" - List of region specs.
                                        e.g.,[{"contig_id": str, "strand": "+"|"-"|"?", "start": int, "length": int},...]
+
+                                       The feature sequence begin and end are calculated as follows:
+                                           [start, start + length) for "+" strand
+                                           (start - length, start] for "-" strand
+
+                                       If passing in "?" for strand, meaning either, the above
+                                       calculations will apply to the correct strand type of the data.
                        "function_list" - List of function strings to match.
                        "alias_list" - List of alias strings to match.
 
@@ -165,11 +172,41 @@ class GenomeAnnotationInterface(object):
 
         Args:
           feature_id_list (list<str>): List of features to retrieve.
-            If None, returns all feature functions.
+              If None, returns all feature data.
 
         Returns:
-          dict<str,dict<str,list>>: Mapping from feature IDs to dicts
-            of available data.
+          dict: Mapping from feature IDs to dicts of available data.
+          The feature data has the following key/value pairs:
+
+          feature_id: str
+              Identifier for this feature
+          feature_type: str
+              The feature type e.g., mRNA, CDS, gene
+          feature_function: str
+              The functional annotation description
+          feature_locations: list<{"contig_id": str, "start": int, "strand": str, "length": int}>
+              List of Feature regions, where the Feature bounds are calculated as follows:
+                  For "+" strand, [start, start + length)
+                  For "-" strand, (start - length, start]
+          feature_dna_sequence: str
+              String containing the DNA sequence of the feature
+          feature_dna_sequence_length: int
+              Integer representing the length of the DNA sequence for convenience
+          feature_md5: str
+              String containing the MD5 of the sequence, calculated from the uppercase string
+          feature_publications: list<int, str, str, str, str, str, str>
+              List of any known publications related to this Feature,
+          feature_aliases: dict<str, list<string>>
+              Dictionary of Alias string to List of source string identifiers,
+          feature_notes: str
+              Notes recorded about this Feature,
+          feature_inference: str
+              Inference information,
+          feature_quality_score: int
+              Quality value with unknown algorithm for Genomes,
+              not calculated yet for GenomeAnnotations
+          feature_quality_warnings: list<str>
+              List of strings indicating known data quality issues
         """
         pass
 
@@ -187,8 +224,12 @@ class GenomeAnnotationInterface(object):
         
         Args:
           feature_id_list (list<str>): List of features to retrieve.
-            If None, returns all feature functions.
-        
+            If None, returns all feature locations.
+
+            The feature sequence begin and end are calculated as follows:
+                [start, start + length) for "+" strand
+                (start - length, start] for "-" strand
+
         Returns:
           dict: Mapping from feature IDs to location information for each.
           The location information has the following key/value pairs:
@@ -263,20 +304,50 @@ class GenomeAnnotationInterface(object):
     def get_mrna_utrs(self, mrna_feature_id_list=None):
         """Retrieves the untranslated regions (UTRs) for mRNA features.
 
+        UTRs are calculated between mRNA features and corresponding CDS features.
+
+        Note - The Genome data type does not contain interfeature relationship information
+        and will raise a TypeError exception when this method is called.
+
         Args:
           mrna_feature_id_list (list<str>): List of mRNA feature ids to retrieve UTRs from.
         Returns:
-          dict<str mrna_feature_id>: list<{"start": int, "length": int, "sequence": str}>"""
+          dict<str mrna_feature_id>: {"5'UTR": UTR_data, "3'UTR": UTR_data}
+
+          UTR_data
+              utr_locations: list<Feature Region>
+                  Feature Region is a dict with these key/value pairs:
+                      contig_id: str
+                      start: int
+                      strand: str
+                      length: int
+              utr_dna_sequence: str
+                  DNA sequence string for this UTR
+          """
         pass
 
     @abc.abstractmethod
     def get_mrna_exons(self, mrna_feature_id_list=None):
         """Retrieves the exon DNA sequence within mRNA features.
 
+        Exon_data = {
+            "exon_location": A feature region {"contig_id": str, "start": int, "strand": str, "length": int}
+        }
+
         Args:
           mrna_feature_id_list (list<str>): List of mRNA feature ids to retrieve Exons from.
         Returns:
-          dict<str mrna_feature_id>: list<str DNA sequence>"""
+          Dictionary mapping from mRNA feature id string to a list of Exon dictionary entries.
+          Each Exon dictionary has the following key/value pairs:
+              exon_location: {"contig_id": str, "start": int, "strand": str, "length": int}
+                  Feature region for the exon boundaries:
+                      For "+" strand, [start, start + length)
+                      For "-" strand, (start - length, start]
+              exon_dna_sequence: str
+                  DNA Sequence string for this Exon
+              exon_ordinal: int
+                  The position of the exon, ordered 5' to 3'.
+        """
         pass
 
     @abc.abstractmethod
