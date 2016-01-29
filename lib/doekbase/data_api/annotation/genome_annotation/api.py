@@ -140,15 +140,22 @@ class GenomeAnnotationInterface(object):
             - `type_list`: List of feature type strings. Possible values in
               `FEATURE_DESCRIPTIONS`.
 
-            - `region_list`: List of region specs.e.g.,
+            - `region_list`: List of region specs. e.g.,
               ``[{"contig_id": str, "strand": "+"|"-"|"?", "start": int, "length": int},...]``
+
+                The feature sequence begin and end are calculated as follows:
+                  [start, start + length) for "+" strand
+                  (start - length, start] for "-" strand
+
+                  If passing in "?" for strand, meaning either, the above
+                  calculations will apply to the correct strand type of the data.
 
             - `function_list`: List of function strings to match.
 
             - `alias_list`: List of alias strings to match.
 
             group_by (str): Specify the grouping of feature ids returned.
-              Possible values are the same as the filter keys.
+                Possible values are the same as the filter keys.
 
         Returns:
             (dict) Result with values for requested grouping filled in under a
@@ -168,11 +175,54 @@ class GenomeAnnotationInterface(object):
 
         Args:
           feature_id_list (list<str>): List of features to retrieve.
-            If None, returns all feature functions.
+              If None, returns all feature data.
 
         Returns:
-          dict<str,dict<str,list>>: Mapping from feature IDs to dicts
-            of available data.
+          dict: Mapping from feature IDs to dicts of available data.
+          The feature data has the following key/value pairs:
+
+          - feature_id: str
+              Identifier for this feature
+
+          - feature_type: str
+              The feature type e.g., mRNA, CDS, gene
+
+          - feature_function: str
+              The functional annotation description
+
+          - feature_locations: list<{"contig_id": str, "start": int, "strand": str, "length": int}>
+              List of Feature regions, where the Feature bounds are calculated as follows:
+                  For "+" strand, [start, start + length)
+                  For "-" strand, (start - length, start]
+
+          - feature_dna_sequence: str
+              String containing the DNA sequence of the feature
+
+          - feature_dna_sequence_length: int
+              Integer representing the length of the DNA sequence for convenience
+
+          - feature_md5: str
+              String containing the MD5 of the sequence, calculated from the uppercase string
+
+          - feature_publications: list<int, str, str, str, str, str, str>
+              List of any known publications related to this Feature
+
+          - feature_aliases: dict<str, list<string>>
+              Dictionary of Alias string to List of source string identifiers
+
+          - feature_notes: str
+              Notes recorded about this Feature
+
+          - feature_inference: str
+              Inference information
+
+          - feature_quality_score: int
+              Quality value with unknown algorithm for Genomes,
+              not calculated yet for GenomeAnnotations
+
+          - feature_quality_warnings: list<str>
+              List of strings indicating known data quality issues.
+              Note - not used for Genome type, but is used for GenomeAnnotation
         """
         pass
 
@@ -190,19 +240,26 @@ class GenomeAnnotationInterface(object):
         
         Args:
           feature_id_list (list<str>): List of features to retrieve.
-            If None, returns all feature functions.
-        
+            If None, returns all feature locations.
+
+            The feature sequence begin and end are calculated as follows:
+                [start, start + length) for "+" strand
+                (start - length, start] for "-" strand
+
         Returns:
           dict: Mapping from feature IDs to location information for each.
           The location information has the following key/value pairs:
 
-          contig_id : str
+          - contig_id : str
               The identifier for the contig this region corresponds to
-          strand : str
+
+          - strand : str
               Whether this region is located on the '+' or '-' strand
-          start : int
+
+          - start : int
               The starting position for this region
-          length : int
+
+          - length : int
               The distance from the start position that defines the end boundary for the region.
         """
         pass
@@ -266,20 +323,55 @@ class GenomeAnnotationInterface(object):
     def get_mrna_utrs(self, mrna_feature_id_list=None):
         """Retrieves the untranslated regions (UTRs) for mRNA features.
 
+        UTRs are calculated between mRNA features and corresponding CDS features.
+        The return value for each mRNA can contain either:
+            no UTRs found (empty dict)
+            5' UTR only
+            3' UTR only
+            5' and 3' UTRs
+
+        Note - The Genome data type does not contain interfeature relationship information
+        and will raise a TypeError exception when this method is called.
+
         Args:
           mrna_feature_id_list (list<str>): List of mRNA feature ids to retrieve UTRs from.
         Returns:
-          dict<str mrna_feature_id>: list<{"start": int, "length": int, "sequence": str}>"""
+          dict<str mrna_feature_id>: {"5'UTR": UTR_data, "3'UTR": UTR_data}
+
+          Where UTR_data is a dictionary with the following key/value pairs:
+              - utr_locations: list<Feature Region>
+                  Feature Region is a dict with these key/value pairs:
+                      contig_id: str
+                      start: int
+                      strand: str
+                      length: int
+              - utr_dna_sequence: str
+                  DNA sequence string for this UTR
+          """
         pass
 
     @abc.abstractmethod
     def get_mrna_exons(self, mrna_feature_id_list=None):
         """Retrieves the exon DNA sequence within mRNA features.
 
+        Exon_data = {
+            "exon_location": A feature region {"contig_id": str, "start": int, "strand": str, "length": int}
+        }
+
         Args:
           mrna_feature_id_list (list<str>): List of mRNA feature ids to retrieve Exons from.
         Returns:
-          dict<str mrna_feature_id>: list<str DNA sequence>"""
+          Dictionary mapping from mRNA feature id string to a list of Exon dictionary entries.
+          Each Exon dictionary has the following key/value pairs:
+              exon_location: {"contig_id": str, "start": int, "strand": str, "length": int}
+                  Feature region for the exon boundaries:
+                      For "+" strand, [start, start + length)
+                      For "-" strand, (start - length, start]
+              exon_dna_sequence: str
+                  DNA Sequence string for this Exon
+              exon_ordinal: int
+                  The position of the exon, ordered 5' to 3'.
+        """
         pass
 
     @abc.abstractmethod
@@ -1392,15 +1484,15 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
 
             utr5_locations = []
             utr3_locations = []
-            utr5_sequence = ""
-            utr3_sequence = ""
+            utr5_sequence = []
+            utr3_sequence = []
             offset = 0
 
-            # if minus strand, 5' starts at the largest value
+            # if minus strand, 5' starts at the largest value, and we subtract length from start
             if direction == "-":
-                cds_max = cds_locations[cds_ids[mrna_id]][-1]["start"]
-                cds_min = cds_locations[cds_ids[mrna_id]][0]["start"] - \
-                          cds_locations[cds_ids[mrna_id]][0]["length"]
+                cds_max = cds_locations[cds_ids[mrna_id]][0]["start"]
+                cds_min = cds_locations[cds_ids[mrna_id]][-1]["start"] - \
+                          cds_locations[cds_ids[mrna_id]][-1]["length"]
 
                 for x in mrna_locations:
                     exon_max = x["start"]
@@ -1409,26 +1501,24 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
                     if exon_min > cds_max:
                         # the exon ends before the cds starts
                         utr5_locations.append(x)
-                        utr5_sequence += mrna_sequence[offset:offset + x["length"]]
+                        utr5_sequence.append(mrna_sequence[offset:offset + x["length"]])
                     elif cds_max > exon_min and cds_max < exon_max:
                         # the cds starts inside this exon
                         utr_boundary = cds_max + 1
-                        utr_length = x["length"] - abs(utr_boundary - exon_max)
+                        utr_length = exon_max - utr_boundary + 1
 
                         utr5_locations.append({
                             "contig_id": x["contig_id"],
-                            "start": utr_boundary,
+                            "start": exon_max,
                             "strand": x["strand"],
                             "length": utr_length
                         })
-                        utr5_sequence += mrna_sequence[offset:offset + utr_length]
-                    elif exon_min < cds_max and exon_min >= cds_min:
-                        # the exon is fully contained in the cds
-                        pass
-                    elif cds_min > exon_min and cds_min < exon_max:
+                        utr5_sequence.append(mrna_sequence[offset:offset + utr_length])
+
+                    if cds_min > exon_min and cds_min < exon_max:
                         # the cds ends inside this exon
-                        utr_boundary = cds_min + 1
-                        utr_length = x["length"] - abs(utr_boundary - exon_max)
+                        utr_boundary = cds_min - 1
+                        utr_length = utr_boundary - exon_min + 1
 
                         utr3_locations.append({
                             "contig_id": x["contig_id"],
@@ -1436,20 +1526,17 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
                             "strand": x["strand"],
                             "length": utr_length
                         })
-                        utr3_sequence += mrna_sequence[offset:offset + utr_length]
+                        utr3_sequence.append(mrna_sequence[offset:offset + utr_length])
                     elif exon_max < cds_min:
                         # the exon begins after the cds ends
                         utr3_locations.append(x)
-                        utr3_sequence += mrna_sequence[offset:offset + x["length"]]
-                    else:
-                        # the exon has the same coordinates as the cds
-                        pass
+                        utr3_sequence.append(mrna_sequence[offset:offset + x["length"]])
 
                     offset += x["length"]
             elif direction == "+":
-                cds_min = cds_locations[cds_ids[mrna_id]][0]["start"]
                 cds_max = cds_locations[cds_ids[mrna_id]][-1]["start"] + \
                           cds_locations[cds_ids[mrna_id]][-1]["length"]
+                cds_min = cds_locations[cds_ids[mrna_id]][0]["start"]
 
                 for x in mrna_locations:
                     exon_min = x["start"]
@@ -1458,10 +1545,11 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
                     if exon_max < cds_min:
                         # the exon ends before the cds starts
                         utr5_locations.append(x)
-                        utr5_sequence += mrna_sequence[offset:offset + x["length"]]
+                        utr5_sequence.append(mrna_sequence[offset:offset + x["length"]])
                     elif cds_min > exon_min and cds_min < exon_max:
                         # the cds starts inside this exon
-                        utr_length = cds_min - 1 - exon_min
+                        utr_boundary = cds_min - 1
+                        utr_length = utr_boundary - exon_min + 1
 
                         utr5_locations.append({
                             "contig_id": x["contig_id"],
@@ -1469,28 +1557,24 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
                             "strand": x["strand"],
                             "length": utr_length
                         })
-                        utr5_sequence += mrna_sequence[offset:offset + utr_length]
-                    elif exon_min >= cds_min and exon_max <= cds_max:
-                        # the exon is entirely contained inside the cds
-                        pass
-                    elif cds_max > exon_min and cds_max < exon_max:
+                        utr5_sequence.append(mrna_sequence[offset:offset + utr_length])
+
+                    if cds_max > exon_min and cds_max < exon_max:
                         # the cds ends inside this exon
-                        utr_length = cds_max - 1 - exon_min
+                        utr_boundary = cds_max + 1
+                        utr_length = exon_max - utr_boundary + 1
 
                         utr3_locations.append({
                             "contig_id": x["contig_id"],
-                            "start": exon_min,
+                            "start": utr_boundary,
                             "strand": x["strand"],
                             "length": utr_length
                         })
-                        utr3_sequence += mrna_sequence[offset:offset + utr_length]
+                        utr3_sequence.append(mrna_sequence[offset:offset + utr_length])
                     elif exon_min > cds_max:
                         # the exon starts after the cds ends
                         utr3_locations.append(x)
-                        utr3_sequence += mrna_sequence[offset:offset + x["length"]]
-                    else:
-                        # the exon has the same coordinates as the cds
-                        pass
+                        utr3_sequence.append(mrna_sequence[offset:offset + x["length"]])
 
                     offset += x["length"]
             else:
@@ -1502,13 +1586,13 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
             if len(utr5_locations) > 0:
                 utrs[mrna_id]["5'UTR"] = {
                     "utr_locations": utr5_locations,
-                    "utr_dna_sequence": utr5_sequence
+                    "utr_dna_sequence": "".join(utr5_sequence)
                 }
 
             if len(utr3_locations) > 0:
                 utrs[mrna_id]["3'UTR"] = {
                     "utr_locations": utr3_locations,
-                    "utr_dna_sequence": utr3_sequence
+                    "utr_dna_sequence": "".join(utr3_sequence)
                 }
         #end outer for loop
 
