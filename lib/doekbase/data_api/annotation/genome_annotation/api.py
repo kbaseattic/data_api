@@ -32,7 +32,7 @@ FEATURE_DESCRIPTIONS = {
     "crs": "Clustered Regularly Interspaced Short Palindromic Repeats",
     "mRNA": "Messenger RNA",
     "sRNA": "Small RNA",
-    "loci": "Loci or Gene (Genbank)",
+    "loci": "Loci or Genes (Genbank)",
     "locus": "Locus or Gene (Genbank)",
     "gene": "Gene",
     "opr": "Operons",
@@ -82,7 +82,7 @@ class GenomeAnnotationInterface(object):
         Genome Annotation.
         
         Returns:
-          list<str>: List of feature type identifiers.
+          list<str>: List of Feature type identifiers.
         """
         pass
 
@@ -137,7 +137,7 @@ class GenomeAnnotationInterface(object):
             filters (dict): Optional dictionary of filters that can be applied to
               contents. Recognized filter keys are:
 
-            - `type_list`: List of feature type strings. Possible values in
+            - `type_list`: List of Feature type strings. Possible values in
               `FEATURE_DESCRIPTIONS`.
 
             - `region_list`: List of region specs. e.g.,
@@ -183,10 +183,10 @@ class GenomeAnnotationInterface(object):
           The Feature data has the following key/value pairs:
 
           - feature_id: str
-              Identifier for this feature
+              Identifier for this Feature
 
           - feature_type: str
-              The feature type e.g., mRNA, CDS, gene
+              The Feature type e.g., mRNA, CDS, gene
 
           - feature_function: str
               The functional annotation description
@@ -336,7 +336,7 @@ class GenomeAnnotationInterface(object):
         and will raise a TypeError exception when this method is called.
 
         Args:
-          mrna_feature_id_list (list<str>): List of mRNA feature ids to retrieve UTRs from.
+          mrna_feature_id_list (list<str>): List of mRNA Feature ids to retrieve UTRs from.
         Returns:
           dict<str mrna_feature_id>: {"5'UTR": UTR_data, "3'UTR": UTR_data}
 
@@ -357,20 +357,20 @@ class GenomeAnnotationInterface(object):
         """Retrieves the exon DNA sequence within mRNA features.
 
         Exon_data = {
-            "exon_location": A feature region {"contig_id": str, "start": int, "strand": str, "length": int}
+            "exon_location": A Feature region {"contig_id": str, "start": int, "strand": str, "length": int}
         }
 
         Args:
-          mrna_feature_id_list (list<str>): List of mRNA feature ids to retrieve Exons from.
+          mrna_feature_id_list (list<str>): List of mRNA Feature ids to retrieve exons for.
         Returns:
-          Dictionary mapping from mRNA feature id string to a list of Exon dictionary entries.
-          Each Exon dictionary has the following key/value pairs:
+          Dictionary mapping from mRNA Feature id string to a list of exon dictionary entries.
+          Each exon dictionary has the following key/value pairs:
               exon_location: {"contig_id": str, "start": int, "strand": str, "length": int}
                   Feature region for the exon boundaries:
                       For "+" strand, [start, start + length)
                       For "-" strand, (start - length, start]
               exon_dna_sequence: str
-                  DNA Sequence string for this Exon
+                  DNA Sequence string for this exon
               exon_ordinal: int
                   The position of the exon, ordered 5' to 3'.
         """
@@ -438,7 +438,7 @@ class GenomeAnnotationInterface(object):
     
     @abc.abstractmethod
     def get_mrna_by_gene(self, gene_feature_id_list=None):
-        """Retrieves mRNA for given Gene feature IDs.
+        """Retrieves mRNA for given gene Feature IDs.
 
         Args:
            gene_feature_id_list (list<str>): List of gene Feature ids to map to mRNA Feature ids.
@@ -587,9 +587,9 @@ class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
 
         if "type_list" in filters and filters["type_list"] is not None:
             if not isinstance(filters["type_list"], list):
-                raise TypeError("A list of strings indicating feature types is required.")
+                raise TypeError("A list of strings indicating Feature types is required.")
             elif len(filters["type_list"]) == 0:
-                raise TypeError("A list of strings indicating feature types is required, received an empty list.")
+                raise TypeError("A list of strings indicating Feature types is required, received an empty list.")
 
             for i in xrange(len(features)):
                 if features[i]["type"] not in filters["type_list"]:
@@ -624,9 +624,9 @@ class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
 
         if "function_list" in filters and filters["function_list"] is not None:
             if not isinstance(filters["function_list"], list):
-                raise TypeError("A list of feature function strings is required.")
+                raise TypeError("A list of Feature function strings is required.")
             elif len(filters["function_list"]) == 0:
-                raise TypeError("A list of feature function strings is required, received an empty list.")
+                raise TypeError("A list of Feature function strings is required, received an empty list.")
 
             for i in xrange(len(features)):
                 if "function" not in features[i]:
@@ -643,9 +643,9 @@ class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
 
         if "alias_list" in filters and filters["alias_list"] is not None:
             if not isinstance(filters["alias_list"], list):
-                raise TypeError("A list of feature alias strings is required.")
+                raise TypeError("A list of Feature alias strings is required.")
             elif len(filters["alias_list"]) == 0:
-                raise TypeError("A list of feature alias strings is required, received an empty list.")
+                raise TypeError("A list of Feature alias strings is required, received an empty list.")
 
             for i in xrange(len(features)):
                 if "aliases" not in features[i]:
@@ -731,9 +731,9 @@ class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
                 for t in type_list:
                     counts[t] = 0
             except TypeError:
-                raise TypeError("A list of strings indicating feature types is required.")
+                raise TypeError("A list of strings indicating Feature types is required.")
             except AssertionError:
-                raise TypeError("A list of strings indicating feature types is required, received an empty list.")
+                raise TypeError("A list of strings indicating Feature types is required, received an empty list.")
 
             for x in features:
                 if x["type"] in type_list:
@@ -761,9 +761,9 @@ class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
                 feature_refs = ["features/" + x for x in feature_id_list]
                 assert len(feature_refs) > 0
             except TypeError:
-                raise TypeError("A list of strings indicating feature identifiers is required.")
+                raise TypeError("A list of strings indicating Feature identifiers is required.")
             except AssertionError:
-                raise TypeError("A list of strings indicating feature identifiers is required, received an empty list.")
+                raise TypeError("A list of strings indicating Feature identifiers is required, received an empty list.")
 
             for x in features:
                 if x['id'] in feature_id_list:
@@ -795,9 +795,9 @@ class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
                 feature_refs = ["features/" + x for x in feature_id_list]
                 assert len(feature_refs) > 0
             except TypeError:
-                raise TypeError("A list of strings indicating feature identifiers is required.")
+                raise TypeError("A list of strings indicating Feature identifiers is required.")
             except AssertionError:
-                raise TypeError("A list of strings indicating feature identifiers is required, received an empty list.")
+                raise TypeError("A list of strings indicating Feature identifiers is required, received an empty list.")
 
             for x in features:
                 if x['id'] in feature_id_list:
@@ -823,9 +823,9 @@ class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
                 feature_refs = ["features/" + x for x in feature_id_list]
                 assert len(feature_refs) > 0
             except TypeError:
-                raise TypeError("A list of strings indicating feature identifiers is required.")
+                raise TypeError("A list of strings indicating Feature identifiers is required.")
             except AssertionError:
-                raise TypeError("A list of strings indicating feature identifiers is required, received an empty list.")
+                raise TypeError("A list of strings indicating Feature identifiers is required, received an empty list.")
 
             for x in features:
                 if x['id'] in feature_id_list:
@@ -851,9 +851,9 @@ class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
                 feature_refs = ["features/" + x for x in feature_id_list]
                 assert len(feature_refs) > 0
             except TypeError:
-                raise TypeError("A list of strings indicating feature identifiers is required.")
+                raise TypeError("A list of strings indicating Feature identifiers is required.")
             except AssertionError:
-                raise TypeError("A list of strings indicating feature identifiers is required, received an empty list.")
+                raise TypeError("A list of strings indicating Feature identifiers is required, received an empty list.")
 
             for x in features:
                 if x['id'] in feature_id_list:
@@ -879,9 +879,9 @@ class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
                 feature_refs = ["features/" + x for x in feature_id_list]
                 assert len(feature_refs) > 0
             except TypeError:
-                raise TypeError("A list of strings indicating feature identifiers is required.")
+                raise TypeError("A list of strings indicating Feature identifiers is required.")
             except AssertionError:
-                raise TypeError("A list of strings indicating feature identifiers is required, received an empty list.")
+                raise TypeError("A list of strings indicating Feature identifiers is required, received an empty list.")
 
             for x in features:
                 if x['id'] in feature_id_list:
@@ -956,9 +956,9 @@ class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
                 feature_refs = ["features/" + x for x in feature_id_list]
                 assert len(feature_refs) > 0
             except TypeError:
-                raise TypeError("A list of strings indicating feature identifiers is required.")
+                raise TypeError("A list of strings indicating Feature identifiers is required.")
             except AssertionError:
-                raise TypeError("A list of strings indicating feature identifiers is required, received an empty list.")
+                raise TypeError("A list of strings indicating Feature identifiers is required, received an empty list.")
 
             for x in features:
                 if x['id'] in feature_id_list:
@@ -1077,9 +1077,9 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
 
                         feature_containers[feature_ref[0]].append(feature_ref[1])
             except TypeError:
-                raise TypeError("A list of strings indicating feature identifiers is required.")
+                raise TypeError("A list of strings indicating Feature identifiers is required.")
             except AssertionError:
-                raise TypeError("A list of strings indicating feature identifiers is required, received an empty list.")
+                raise TypeError("A list of strings indicating Feature identifiers is required, received an empty list.")
 
         return feature_containers
 
@@ -1125,9 +1125,9 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
         # process all filters
         if "type_list" in filters and filters["type_list"] is not None:
             if not isinstance(filters["type_list"], list):
-                raise TypeError("A list of strings indicating feature types is required.")
+                raise TypeError("A list of strings indicating Feature types is required.")
             elif len(filters["type_list"]) == 0:
-                raise TypeError("A list of strings indicating feature types is required, received an empty list.")
+                raise TypeError("A list of strings indicating Feature types is required, received an empty list.")
 
             # only pull data for features that are in the type_list
             for f in feature_container_references:
@@ -1171,9 +1171,9 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
 
         if "function_list" in filters and filters["function_list"] is not None:
             if not isinstance(filters["function_list"], list):
-                raise TypeError("A list of feature function strings is required.")
+                raise TypeError("A list of Feature function strings is required.")
             elif len(filters["function_list"]) == 0:
-                raise TypeError("A list of feature function strings is required, received an empty list.")
+                raise TypeError("A list of Feature function strings is required, received an empty list.")
 
             remove_features = []
 
@@ -1194,9 +1194,9 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
 
         if "alias_list" in filters and filters["alias_list"] is not None:
             if not isinstance(filters["alias_list"], list):
-                raise TypeError("A list of feature alias strings is required.")
+                raise TypeError("A list of Feature alias strings is required.")
             elif len(filters["alias_list"]) == 0:
-                raise TypeError("A list of feature alias strings is required, received an empty list.")
+                raise TypeError("A list of Feature alias strings is required, received an empty list.")
 
             remove_features = []
 
@@ -1276,15 +1276,15 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
                 feature_refs = ["features/" + x for x in feature_id_list]
                 assert len(feature_refs) > 0
             except TypeError:
-                raise TypeError("A list of strings indicating feature " +
+                raise TypeError("A list of strings indicating Feature " +
                                 "identifiers is required.")
             except AssertionError:
-                raise TypeError("A list of strings indicating feature " +
+                raise TypeError("A list of strings indicating Feature " +
                                 "identifiers is required, " +
                                 "received an empty list.")
 
         for ref in feature_containers:
-            # Get list of feature IDs
+            # Get list of Feature IDs
             if feature_id_list is None:
                 features = ObjectAPI(self.services, self._token, ref).get_data()["features"]
                 working_list = features
@@ -1292,7 +1292,7 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
                 container = ObjectAPI(self.services, self._token, ref)
                 features = container.get_data_subset(path_list=feature_refs)["features"]
                 working_list = feature_id_list
-            # Pull out a specific type of data from each feature
+            # Pull out a specific type of data from each Feature
             if data == "aliases":
                 for feature_id in working_list:
                     if "aliases" in features[feature_id]:
@@ -1432,10 +1432,10 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
                 mrna_refs = ["features/" + x for x in mrna_feature_id_list]
                 assert len(mrna_refs) > 0
             except TypeError:
-                raise TypeError("A list of strings indicating feature " +
+                raise TypeError("A list of strings indicating Feature " +
                                 "identifiers is required.")
             except AssertionError:
-                raise TypeError("A list of strings indicating feature " +
+                raise TypeError("A list of strings indicating Feature " +
                                 "identifiers is required, " +
                                 "received an empty list.")
 
@@ -1474,7 +1474,7 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
         cds_ids = self.get_cds_by_mrna(mrna_feature_id_list)
         cds_locations = self._get_feature_data("locations", cds_ids.values())
 
-        # fetch the mrna feature data
+        # fetch the mrna Feature data
         mrna_data = self.get_features(mrna_feature_id_list)
 
         utrs = {}
@@ -1657,10 +1657,10 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
                 cds_refs = ["features/" + x for x in cds_feature_id_list]
                 assert len(cds_refs) > 0
             except TypeError:
-                raise TypeError("A list of strings indicating feature " +
+                raise TypeError("A list of strings indicating Feature " +
                                 "identifiers is required.")
             except AssertionError:
-                raise TypeError("A list of strings indicating feature " +
+                raise TypeError("A list of strings indicating Feature " +
                                 "identifiers is required, " +
                                 "received an empty list.")
 
@@ -1701,10 +1701,10 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
                 gene_refs = ["features/" + x for x in gene_feature_id_list]
                 assert len(gene_refs) > 0
             except TypeError:
-                raise TypeError("A list of strings indicating feature " +
+                raise TypeError("A list of strings indicating Feature " +
                                 "identifiers is required.")
             except AssertionError:
-                raise TypeError("A list of strings indicating feature " +
+                raise TypeError("A list of strings indicating Feature " +
                                 "identifiers is required, " +
                                 "received an empty list.")
 
