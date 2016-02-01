@@ -9,7 +9,7 @@ The Assembly API can be used as a client of the Python server.
 .. contents::
 
 Creating an Assembly object
---------
+---------------------------
 To create a new object, instantiate :js:class:`Assembly`
 using a configuration object as the input argument.
 
@@ -24,13 +24,15 @@ using a configuration object as the input argument.
     })
 
 Assembly interface
------------------
+------------------
 .. js:class:: Assembly(config)
 
-    :param object config: Configuration object. This object has the following fields:
-    * ref - The object reference for the object to be accessed in the format expected by the workspace: |wsref|.
-    * url - The url for the GenomeAnnotation Service endpoint.
-    * token - The KBase authorization token to be used to access the service.
+    :param object config: Configuration object. This object has the following
+    fields:
+        * ref - The object reference for the object to be accessed in the format expected by the workspace: |wsref|.
+        * url - The url for the GenomeAnnotation Service endpoint.
+        * token - The KBase authorization token to be used to access the service.
+
     :throws ArgumentError:
 
 .. js:function:: get_assembly_id()

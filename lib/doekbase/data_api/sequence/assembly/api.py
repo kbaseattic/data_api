@@ -21,6 +21,7 @@ from doekbase.data_api.core import ObjectAPI
 from doekbase.data_api.util import get_logger, logged, PerfCollector, collect_performance
 from doekbase.data_api import exceptions
 from doekbase.data_api.taxonomy.taxon.service import ttypes
+from doekbase.handle.Client import AbstractHandle as handleClient
 
 _log = get_logger(__file__)
 
@@ -365,7 +366,7 @@ class _KBaseGenomes_ContigSet(ObjectAPI, AssemblyInterface):
                    }
 
             gc_count = self._sequence_gc(i, c['sequence'])
-            cid['gc_content'] = gc_count / cid['length'] * 1.0
+            cid['gc_content'] = gc_count / (cid['length'] * 1.0)
 
             contigs[c['id']] = cid
 
@@ -466,13 +467,22 @@ class _Assembly(ObjectAPI, AssemblyInterface):
         fasta_ref = data["fasta_handle_ref"]
         contigs = data["contigs"]
 
+        shock_node_id = None
+        try:
+            hc = handleClient(url=self.services["handle_service_url"], token=self._token)
+            handle = hc.hids_to_handles([fasta_ref])[0]
+            shock_node_id = handle["id"]
+        except Exception, e:
+            shock_node_id = fasta_ref
+
+
         copy_keys = ["contig_id", "length", "gc_content", "md5", "name", "description", "is_complete", "is_circular"]
 
         header = dict()
         header["Authorization"] = "Oauth {0}".format(self._token)
 
         if num_contigs > total_contigs/3 or num_contigs == 0:
-            Retrieve_url = self.services["shock_service_url"] + "node/" + fasta_ref + "?download_raw"
+            Retrieve_url = self.services["shock_service_url"] + "node/" + shock_node_id + "?download_raw"
 
             #Retrieve all sequence
             data = requests.get(Retrieve_url, headers=header, stream=True)                
@@ -500,7 +510,7 @@ class _Assembly(ObjectAPI, AssemblyInterface):
                                             contigs[c]["num_bytes"]].translate(None, string.whitespace)
         else:                
             def fetch_contig(start, length):
-                fetch_url = self.services["shock_service_url"] + "node/" + fasta_ref + \
+                fetch_url = self.services["shock_service_url"] + "node/" + shock_node_id + \
                             "?download&seek=" + str(start) + \
                             "&length=" + str(length)
 

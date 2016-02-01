@@ -36,7 +36,7 @@ class Incomplete1(object):
 
     @sc.server_method
     def wrapped_type_error(self, *args, **kwargs):
-        raise dapi_exc.TypeError('X')
+        raise TypeError('X')
 
     @sc.server_method
     def wrapped_other_error(self, *args, **kwargs):
