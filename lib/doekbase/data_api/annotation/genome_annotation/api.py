@@ -1,6 +1,6 @@
 """
 Data API for Genome Annotation entities.  This API provides methods for retrieving the
-Assembly and Taxon associated with an annotation, as well as retrieving individual features.
+Assembly and Taxon associated with an annotation, as well as retrieving individual Features.
 """
 
 # stdlib imports
@@ -20,9 +20,9 @@ _GENOME_TYPES = ['KBaseGenomes.Genome']
 _GENOME_ANNOTATION_TYPES = ['KBaseGenomeAnnotations.GenomeAnnotation']
 TYPES = _GENOME_TYPES + _GENOME_ANNOTATION_TYPES
 
-#: Mapping of feature type codes to descriptions
+#: Mapping of Feature type codes to descriptions
 #: of their meaning. The keys of this mapping give possible values for
-#: functions taking feature type identifiers, e.g.
+#: functions taking Feature type identifiers, e.g.
 #: :meth:`GenomeInterface.get_feature_types`.
 FEATURE_DESCRIPTIONS = {
     "CDS": "Coding Sequence",
@@ -32,7 +32,7 @@ FEATURE_DESCRIPTIONS = {
     "crs": "Clustered Regularly Interspaced Short Palindromic Repeats",
     "mRNA": "Messenger RNA",
     "sRNA": "Small RNA",
-    "loci": "Loci or Gene (Genbank)",
+    "loci": "Loci or Genes (Genbank)",
     "locus": "Locus or Gene (Genbank)",
     "gene": "Gene",
     "opr": "Operons",
@@ -82,21 +82,21 @@ class GenomeAnnotationInterface(object):
         Genome Annotation.
         
         Returns:
-          list<str>: List of feature type identifiers.
+          list<str>: List of Feature type identifiers.
         """
         pass
 
     def get_feature_type_descriptions(self, type_list=None):
-        """Retrieves a descriptive string for each feature type identifier.
+        """Retrieves a descriptive string for each Feature type identifier.
         
         Args:
-          type_list (list<str>): List of feature types. The known values for
+          type_list (list<str>): List of Feature types. The known values for
             these are enumerated in the module's  :data:`FEATURE_DESCRIPTIONS`.
             If this list is empty or None, then the whole mapping will be
             returned.
         
         Returns:
-          dict: Key/value pairs for each requested feature description.
+          dict: Key/value pairs for each requested Feature description.
         """
         
         if not type_list:
@@ -112,38 +112,38 @@ class GenomeAnnotationInterface(object):
 
     @abc.abstractmethod
     def get_feature_type_counts(self, type_list=None):
-        """Retrieve the number of Genome Features, grouped by
-        feature type identifier.
+        """Retrieve the numbers of genome Features, grouped by
+        Feature type identifier.
 
         Args:
-          type_list (list<str>): List of feature types. Each should match a
+          type_list (list<str>): List of Feature types. Each should match a
             value in :data:`FEATURE_DESCRIPTIONS`. If None,
             or empty, will retrieve all type counts.
 
         Returns:
-          dict: Map of string feature types to integer counts.
+          dict: Map of string Feature types to integer counts.
         """
         pass
 
     @abc.abstractmethod
     def get_feature_ids(self, filters=None, group_by="type"):
-        """Retrieve feature ids based on filters such as feature types,
+        """Retrieve Feature ids based on filters such as Feature types,
         regions, functional descriptions, aliases.
 
-        If no value is given for ``filters``, all feature ids will be returned.
+        If no value is given for ``filters``, all Feature ids will be returned.
         Only the group_by selected will be included in the results.
 
         Args:
             filters (dict): Optional dictionary of filters that can be applied to
               contents. Recognized filter keys are:
 
-            - `type_list`: List of feature type strings. Possible values in
+            - `type_list`: List of Feature type strings. Possible values in
               `FEATURE_DESCRIPTIONS`.
 
             - `region_list`: List of region specs. e.g.,
               ``[{"contig_id": str, "strand": "+"|"-"|"?", "start": int, "length": int},...]``
 
-                The feature sequence begin and end are calculated as follows:
+                The Feature sequence begin and end are calculated as follows:
                   [start, start + length) for "+" strand
                   (start - length, start] for "-" strand
 
@@ -154,7 +154,7 @@ class GenomeAnnotationInterface(object):
 
             - `alias_list`: List of alias strings to match.
 
-            group_by (str): Specify the grouping of feature ids returned.
+            group_by (str): Specify the grouping of Feature ids returned.
                 Possible values are the same as the filter keys.
 
         Returns:
@@ -171,21 +171,22 @@ class GenomeAnnotationInterface(object):
 
     @abc.abstractmethod
     def get_features(self, feature_id_list=None):
-        """Retrieves all the available data for Genome Features.
+        """Retrieves all the available data for a genomes' Features.
 
         Args:
-          feature_id_list (list<str>): List of features to retrieve.
-              If None, returns all feature data.
+
+          feature_id_list (list<str>): List of Features to retrieve.
+              If None, returns all Feature data.
 
         Returns:
-          dict: Mapping from feature IDs to dicts of available data.
-          The feature data has the following key/value pairs:
+          dict: Mapping from Feature IDs to dicts of available data.
+          The Feature data has the following key/value pairs:
 
           - feature_id: str
-              Identifier for this feature
+              Identifier for this Feature
 
           - feature_type: str
-              The feature type e.g., mRNA, CDS, gene
+              The Feature type e.g., mRNA, CDS, gene
 
           - feature_function: str
               The functional annotation description
@@ -196,7 +197,7 @@ class GenomeAnnotationInterface(object):
                   For "-" strand, (start - length, start]
 
           - feature_dna_sequence: str
-              String containing the DNA sequence of the feature
+              String containing the DNA sequence of the Feature
 
           - feature_dna_sequence_length: int
               Integer representing the length of the DNA sequence for convenience
@@ -228,7 +229,7 @@ class GenomeAnnotationInterface(object):
 
     @abc.abstractmethod
     def get_proteins(self):
-        """Retrieves all the available proteins for genome features.
+        """Retrieves all the available proteins for a genome.
 
         Returns:
           list<dict>"""
@@ -236,18 +237,19 @@ class GenomeAnnotationInterface(object):
 
     @abc.abstractmethod
     def get_feature_locations(self, feature_id_list=None):
-        """Retrieves the location information for given genome features.
+        """Retrieves the location information for given genome Features.
         
         Args:
-          feature_id_list (list<str>): List of features to retrieve.
-            If None, returns all feature locations.
 
-            The feature sequence begin and end are calculated as follows:
+          feature_id_list (list<str>): List of Features to retrieve.
+            If None, returns all Feature locations.
+
+            The Feature sequence begin and end are calculated as follows:
                 [start, start + length) for "+" strand
                 (start - length, start] for "-" strand
 
         Returns:
-          dict: Mapping from feature IDs to location information for each.
+          dict: Mapping from Feature IDs to location information for each.
           The location information has the following key/value pairs:
 
           - contig_id : str
@@ -266,31 +268,31 @@ class GenomeAnnotationInterface(object):
     
     @abc.abstractmethod
     def get_feature_dna(self, feature_id_list=None):
-        """Retrieves the DNA sequence for genome features.
+        """Retrieves the DNA sequences for genome Features.
         
-        If `feature_id_list` is None, returns all feature dna.
+        If `feature_id_list` is None, returns DNA sequences for all features.
         
         Args:
-          feature_id_list (list<str>): List of features.
+          feature_id_list (list<str>): List of Features to retrieve data for.
         
         Returns:
-          dict<str,str>: Mapping of feature IDs to their DNA sequence.
+
+          dict<str,str>: Mapping of Feature IDs to their DNA sequence.
         """
         pass
 
     @abc.abstractmethod
     def get_feature_functions(self, feature_id_list=None):
         """
-        Retrieves the functional description for given features.
-
+        Retrieves the functional description for given Features.
 
         Args:
-          feature_id_list (list<str>): List of features to retrieve.
-            If None, returns all feature functions.
+          feature_id_list (list<str>): List of Features to retrieve data for.
+            If None, returns all Feature functions.
 
         
         Returns:
-          dict<str,str>: Mapping from feature IDs to their functions.
+          dict<str,str>: Mapping from Feature IDs to their functions.
 
         """
         pass
@@ -300,8 +302,8 @@ class GenomeAnnotationInterface(object):
         """Retrieves the aliases for genome features.
 
         Args:
-          feature_id_list (list<str>): List of features to retrieve.
-            If None, returns all feature functions.
+          feature_id_list (list<str>): List of Features to retrieve data for.
+            If None, returns all Feature aliases.
         
         Returns:
           dict<str>: list<str>"""
@@ -309,11 +311,11 @@ class GenomeAnnotationInterface(object):
     
     @abc.abstractmethod
     def get_feature_publications(self, feature_id_list=None):
-        """Retrieves the publications for genome features.
+        """Retrieves the publications for genome Features.
 
         Args:
-          feature_id_list (list<str>): List of features to retrieve.
-            If None, returns all feature functions.
+          feature_id_list (list<str>): List of Features to retrieve data for.
+            If None, returns all Feature publications.
         
         Returns:
           dict<str>: list<dict>"""
@@ -334,7 +336,7 @@ class GenomeAnnotationInterface(object):
         and will raise a TypeError exception when this method is called.
 
         Args:
-          mrna_feature_id_list (list<str>): List of mRNA feature ids to retrieve UTRs from.
+          mrna_feature_id_list (list<str>): List of mRNA Feature ids to retrieve UTRs from.
         Returns:
           dict<str mrna_feature_id>: {"5'UTR": UTR_data, "3'UTR": UTR_data}
 
@@ -355,20 +357,20 @@ class GenomeAnnotationInterface(object):
         """Retrieves the exon DNA sequence within mRNA features.
 
         Exon_data = {
-            "exon_location": A feature region {"contig_id": str, "start": int, "strand": str, "length": int}
+            "exon_location": A Feature region {"contig_id": str, "start": int, "strand": str, "length": int}
         }
 
         Args:
-          mrna_feature_id_list (list<str>): List of mRNA feature ids to retrieve Exons from.
+          mrna_feature_id_list (list<str>): List of mRNA Feature ids to retrieve exons for.
         Returns:
-          Dictionary mapping from mRNA feature id string to a list of Exon dictionary entries.
-          Each Exon dictionary has the following key/value pairs:
+          Dictionary mapping from mRNA Feature id string to a list of exon dictionary entries.
+          Each exon dictionary has the following key/value pairs:
               exon_location: {"contig_id": str, "start": int, "strand": str, "length": int}
                   Feature region for the exon boundaries:
                       For "+" strand, [start, start + length)
                       For "-" strand, (start - length, start]
               exon_dna_sequence: str
-                  DNA Sequence string for this Exon
+                  DNA Sequence string for this exon
               exon_ordinal: int
                   The position of the exon, ordered 5' to 3'.
         """
@@ -376,11 +378,11 @@ class GenomeAnnotationInterface(object):
 
     @abc.abstractmethod
     def get_cds_by_mrna(self, mrna_feature_id_list=None):
-        """Retrieves coding sequences (cds) for given mRNA feature IDs.
+        """Retrieves coding sequence Features (cds) for given mRNA Feature IDs.
 
         Args:
-           mrna_feature_id_list (list<str>): List of mrna feature ids to map to cds feature ids.
-             If None, returns all mappings between mrna feature ids and cds feature ids.
+           mrna_feature_id_list (list<str>): List of mRNA Feature ids to map to cds Features.
+             If None, returns all mappings between mRNA Feature ids and cds Feature ids.
         Returns:
           dict<str>: str
         """
@@ -388,11 +390,11 @@ class GenomeAnnotationInterface(object):
 
     @abc.abstractmethod
     def get_mrna_by_cds(self, cds_feature_id_list=None):
-        """Retrieves mRNA for given coding sequences (cds) feature IDs.
+        """Retrieves mRNA Features for given coding sequences (cds) Feature IDs.
 
         Args:
-           cds_feature_id_list (list<str>): List of cds feature ids to map to mrna feature ids.
-             If None, returns all mappings between cds feature ids and mrna feature ids
+           cds_feature_id_list (list<str>): List of cds Feature ids to map to mRNA Features.
+             If None, returns all mappings between cds Feature ids and mRNA Feature ids
         Returns:
           dict<str>: str
         """
@@ -400,11 +402,11 @@ class GenomeAnnotationInterface(object):
 
     @abc.abstractmethod
     def get_gene_by_cds(self, cds_feature_id_list=None):
-        """Retrieves Genes for given coding sequence (cds)  feature IDs.
+        """Retrieves gene Features for given coding sequence (cds) Feature IDs.
 
         Args:
-           cds_feature_id_list (list<str>): List of features to retrieve.
-             If None, returns all values.
+           cds_feature_id_list (list<str>): List of cds Feature ids to map to gene Features.
+             If None, returns all mappings between cds Feature ids and gene Features.
         Returns:
           dict<str>: str
         """
@@ -412,11 +414,11 @@ class GenomeAnnotationInterface(object):
   
     @abc.abstractmethod
     def get_gene_by_mrna(self, mrna_feature_id_list=None):
-        """Retrieves Genes for given mRNA feature IDs.
+        """Retrieves gene Features for given mRNA Feature IDs.
 
         Args:
-           mrna_feature_id_list (list<str>): List of gene feature ids to map to mrna feature ids.
-             If None, returns all values.
+           mrna_feature_id_list (list<str>): List of mRNA Feature ids to map to gene Feature ids.
+             If None, returns all mappings between mRNA Feature ids and gene Feature ids.
         Returns:
           dict<str>: str
         """
@@ -424,11 +426,11 @@ class GenomeAnnotationInterface(object):
 
     @abc.abstractmethod
     def get_cds_by_gene(self, gene_feature_id_list=None):
-        """Retrieves coding sequences (cds) for given Gene feature IDs.
+        """Retrieves coding sequence Features (cds) for given gene Feature IDs.
 
         Args:
-           gene_feature_id_list (list<str>): List of features to retrieve.
-             If None, returns all values.
+           gene_feature_id_list (list<str>): List of gene Feature ids to map to cds Feature ids.
+             If None, returns all mappings between gene Feature ids and cds Feature ids.
         Returns:
           dict<str>: list<str>
         """
@@ -436,11 +438,11 @@ class GenomeAnnotationInterface(object):
     
     @abc.abstractmethod
     def get_mrna_by_gene(self, gene_feature_id_list=None):
-        """Retrieves mRNA for given Gene feature IDs.
+        """Retrieves mRNA for given gene Feature IDs.
 
         Args:
-           gene_feature_id_list (list<str>): List of mrna feature ids to map to gene feature ids.
-             If None, returns all values.
+           gene_feature_id_list (list<str>): List of gene Feature ids to map to mRNA Feature ids.
+             If None, returns all mappings between gene Feature ids and mRNA Feature ids.
         Returns:
           dict<str>: list<str>
         """
@@ -585,9 +587,9 @@ class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
 
         if "type_list" in filters and filters["type_list"] is not None:
             if not isinstance(filters["type_list"], list):
-                raise TypeError("A list of strings indicating feature types is required.")
+                raise TypeError("A list of strings indicating Feature types is required.")
             elif len(filters["type_list"]) == 0:
-                raise TypeError("A list of strings indicating feature types is required, received an empty list.")
+                raise TypeError("A list of strings indicating Feature types is required, received an empty list.")
 
             for i in xrange(len(features)):
                 if features[i]["type"] not in filters["type_list"]:
@@ -622,9 +624,9 @@ class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
 
         if "function_list" in filters and filters["function_list"] is not None:
             if not isinstance(filters["function_list"], list):
-                raise TypeError("A list of feature function strings is required.")
+                raise TypeError("A list of Feature function strings is required.")
             elif len(filters["function_list"]) == 0:
-                raise TypeError("A list of feature function strings is required, received an empty list.")
+                raise TypeError("A list of Feature function strings is required, received an empty list.")
 
             for i in xrange(len(features)):
                 if "function" not in features[i]:
@@ -641,9 +643,9 @@ class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
 
         if "alias_list" in filters and filters["alias_list"] is not None:
             if not isinstance(filters["alias_list"], list):
-                raise TypeError("A list of feature alias strings is required.")
+                raise TypeError("A list of Feature alias strings is required.")
             elif len(filters["alias_list"]) == 0:
-                raise TypeError("A list of feature alias strings is required, received an empty list.")
+                raise TypeError("A list of Feature alias strings is required, received an empty list.")
 
             for i in xrange(len(features)):
                 if "aliases" not in features[i]:
@@ -709,7 +711,7 @@ class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
 
     def get_feature_type_counts(self, type_list=None):
         """
-        Retrieves number of Genome Features from a KBaseGenomes.Genome object, filtering on Feature type.
+        Retrieves the number of genome Features from a KBaseGenomes.Genome object, filtering on Feature type.
 
         Returns:
           dict<str>:int"""
@@ -729,9 +731,9 @@ class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
                 for t in type_list:
                     counts[t] = 0
             except TypeError:
-                raise TypeError("A list of strings indicating feature types is required.")
+                raise TypeError("A list of strings indicating Feature types is required.")
             except AssertionError:
-                raise TypeError("A list of strings indicating feature types is required, received an empty list.")
+                raise TypeError("A list of strings indicating Feature types is required, received an empty list.")
 
             for x in features:
                 if x["type"] in type_list:
@@ -759,9 +761,9 @@ class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
                 feature_refs = ["features/" + x for x in feature_id_list]
                 assert len(feature_refs) > 0
             except TypeError:
-                raise TypeError("A list of strings indicating feature identifiers is required.")
+                raise TypeError("A list of strings indicating Feature identifiers is required.")
             except AssertionError:
-                raise TypeError("A list of strings indicating feature identifiers is required, received an empty list.")
+                raise TypeError("A list of strings indicating Feature identifiers is required, received an empty list.")
 
             for x in features:
                 if x['id'] in feature_id_list:
@@ -793,9 +795,9 @@ class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
                 feature_refs = ["features/" + x for x in feature_id_list]
                 assert len(feature_refs) > 0
             except TypeError:
-                raise TypeError("A list of strings indicating feature identifiers is required.")
+                raise TypeError("A list of strings indicating Feature identifiers is required.")
             except AssertionError:
-                raise TypeError("A list of strings indicating feature identifiers is required, received an empty list.")
+                raise TypeError("A list of strings indicating Feature identifiers is required, received an empty list.")
 
             for x in features:
                 if x['id'] in feature_id_list:
@@ -821,9 +823,9 @@ class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
                 feature_refs = ["features/" + x for x in feature_id_list]
                 assert len(feature_refs) > 0
             except TypeError:
-                raise TypeError("A list of strings indicating feature identifiers is required.")
+                raise TypeError("A list of strings indicating Feature identifiers is required.")
             except AssertionError:
-                raise TypeError("A list of strings indicating feature identifiers is required, received an empty list.")
+                raise TypeError("A list of strings indicating Feature identifiers is required, received an empty list.")
 
             for x in features:
                 if x['id'] in feature_id_list:
@@ -849,9 +851,9 @@ class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
                 feature_refs = ["features/" + x for x in feature_id_list]
                 assert len(feature_refs) > 0
             except TypeError:
-                raise TypeError("A list of strings indicating feature identifiers is required.")
+                raise TypeError("A list of strings indicating Feature identifiers is required.")
             except AssertionError:
-                raise TypeError("A list of strings indicating feature identifiers is required, received an empty list.")
+                raise TypeError("A list of strings indicating Feature identifiers is required, received an empty list.")
 
             for x in features:
                 if x['id'] in feature_id_list:
@@ -877,9 +879,9 @@ class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
                 feature_refs = ["features/" + x for x in feature_id_list]
                 assert len(feature_refs) > 0
             except TypeError:
-                raise TypeError("A list of strings indicating feature identifiers is required.")
+                raise TypeError("A list of strings indicating Feature identifiers is required.")
             except AssertionError:
-                raise TypeError("A list of strings indicating feature identifiers is required, received an empty list.")
+                raise TypeError("A list of strings indicating Feature identifiers is required, received an empty list.")
 
             for x in features:
                 if x['id'] in feature_id_list:
@@ -954,9 +956,9 @@ class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
                 feature_refs = ["features/" + x for x in feature_id_list]
                 assert len(feature_refs) > 0
             except TypeError:
-                raise TypeError("A list of strings indicating feature identifiers is required.")
+                raise TypeError("A list of strings indicating Feature identifiers is required.")
             except AssertionError:
-                raise TypeError("A list of strings indicating feature identifiers is required, received an empty list.")
+                raise TypeError("A list of strings indicating Feature identifiers is required, received an empty list.")
 
             for x in features:
                 if x['id'] in feature_id_list:
@@ -1048,7 +1050,8 @@ class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
                         "  This method cannot return valid results for this data type.")
 
     def get_mrna_by_gene(self, gene_feature_id_list=None):
-        raise TypeError("The Genome type does not contain relationships between features." +
+
+        raise TypeError("The Genome type does not contain relationships between Features." +
                         "  This method cannot return valid results for this data type.")
 
 
@@ -1074,9 +1077,9 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
 
                         feature_containers[feature_ref[0]].append(feature_ref[1])
             except TypeError:
-                raise TypeError("A list of strings indicating feature identifiers is required.")
+                raise TypeError("A list of strings indicating Feature identifiers is required.")
             except AssertionError:
-                raise TypeError("A list of strings indicating feature identifiers is required, received an empty list.")
+                raise TypeError("A list of strings indicating Feature identifiers is required, received an empty list.")
 
         return feature_containers
 
@@ -1122,9 +1125,9 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
         # process all filters
         if "type_list" in filters and filters["type_list"] is not None:
             if not isinstance(filters["type_list"], list):
-                raise TypeError("A list of strings indicating feature types is required.")
+                raise TypeError("A list of strings indicating Feature types is required.")
             elif len(filters["type_list"]) == 0:
-                raise TypeError("A list of strings indicating feature types is required, received an empty list.")
+                raise TypeError("A list of strings indicating Feature types is required, received an empty list.")
 
             # only pull data for features that are in the type_list
             for f in feature_container_references:
@@ -1168,9 +1171,9 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
 
         if "function_list" in filters and filters["function_list"] is not None:
             if not isinstance(filters["function_list"], list):
-                raise TypeError("A list of feature function strings is required.")
+                raise TypeError("A list of Feature function strings is required.")
             elif len(filters["function_list"]) == 0:
-                raise TypeError("A list of feature function strings is required, received an empty list.")
+                raise TypeError("A list of Feature function strings is required, received an empty list.")
 
             remove_features = []
 
@@ -1191,9 +1194,9 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
 
         if "alias_list" in filters and filters["alias_list"] is not None:
             if not isinstance(filters["alias_list"], list):
-                raise TypeError("A list of feature alias strings is required.")
+                raise TypeError("A list of Feature alias strings is required.")
             elif len(filters["alias_list"]) == 0:
-                raise TypeError("A list of feature alias strings is required, received an empty list.")
+                raise TypeError("A list of Feature alias strings is required, received an empty list.")
 
             remove_features = []
 
@@ -1273,15 +1276,15 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
                 feature_refs = ["features/" + x for x in feature_id_list]
                 assert len(feature_refs) > 0
             except TypeError:
-                raise TypeError("A list of strings indicating feature " +
+                raise TypeError("A list of strings indicating Feature " +
                                 "identifiers is required.")
             except AssertionError:
-                raise TypeError("A list of strings indicating feature " +
+                raise TypeError("A list of strings indicating Feature " +
                                 "identifiers is required, " +
                                 "received an empty list.")
 
         for ref in feature_containers:
-            # Get list of feature IDs
+            # Get list of Feature IDs
             if feature_id_list is None:
                 features = ObjectAPI(self.services, self._token, ref).get_data()["features"]
                 working_list = features
@@ -1289,7 +1292,7 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
                 container = ObjectAPI(self.services, self._token, ref)
                 features = container.get_data_subset(path_list=feature_refs)["features"]
                 working_list = feature_id_list
-            # Pull out a specific type of data from each feature
+            # Pull out a specific type of data from each Feature
             if data == "aliases":
                 for feature_id in working_list:
                     if "aliases" in features[feature_id]:
@@ -1429,10 +1432,10 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
                 mrna_refs = ["features/" + x for x in mrna_feature_id_list]
                 assert len(mrna_refs) > 0
             except TypeError:
-                raise TypeError("A list of strings indicating feature " +
+                raise TypeError("A list of strings indicating Feature " +
                                 "identifiers is required.")
             except AssertionError:
-                raise TypeError("A list of strings indicating feature " +
+                raise TypeError("A list of strings indicating Feature " +
                                 "identifiers is required, " +
                                 "received an empty list.")
 
@@ -1471,7 +1474,7 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
         cds_ids = self.get_cds_by_mrna(mrna_feature_id_list)
         cds_locations = self._get_feature_data("locations", cds_ids.values())
 
-        # fetch the mrna feature data
+        # fetch the mrna Feature data
         mrna_data = self.get_features(mrna_feature_id_list)
 
         utrs = {}
@@ -1654,10 +1657,10 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
                 cds_refs = ["features/" + x for x in cds_feature_id_list]
                 assert len(cds_refs) > 0
             except TypeError:
-                raise TypeError("A list of strings indicating feature " +
+                raise TypeError("A list of strings indicating Feature " +
                                 "identifiers is required.")
             except AssertionError:
-                raise TypeError("A list of strings indicating feature " +
+                raise TypeError("A list of strings indicating Feature " +
                                 "identifiers is required, " +
                                 "received an empty list.")
 
@@ -1698,10 +1701,10 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
                 gene_refs = ["features/" + x for x in gene_feature_id_list]
                 assert len(gene_refs) > 0
             except TypeError:
-                raise TypeError("A list of strings indicating feature " +
+                raise TypeError("A list of strings indicating Feature " +
                                 "identifiers is required.")
             except AssertionError:
-                raise TypeError("A list of strings indicating feature " +
+                raise TypeError("A list of strings indicating Feature " +
                                 "identifiers is required, " +
                                 "received an empty list.")
 
