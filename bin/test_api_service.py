@@ -10,7 +10,7 @@ def test_api_service(service_name='assembly',apiurl='http://localhost',token=Non
             #from doekbase.data_api.sequence.assembly.service import thrift_client
             from doekbase.data_api.sequence.assembly.api import AssemblyClientAPI
             api = AssemblyClientAPI(apiurl, token, 'ReferenceGenomeAnnotations/kb|g.166819_assembly')
-        elif service_name == "annotation":
+        elif service_name == "genome_annotation":
             #from doekbase.data_api.annotation.genome_annotation.service import thrift_client
             from doekbase.data_api.annotation.genome_annotation.api import GenomeAnnotationClientAPI
             api = GenomeAnnotationClientAPI(apiurl, token, 'ReferenceGenomeAnnotations/kb|g.166819')
@@ -20,7 +20,7 @@ def test_api_service(service_name='assembly',apiurl='http://localhost',token=Non
         print '3 ' + service_name + '_api - UNKNOWN - could not load client library for ' + service_name + ' ' + str(sys.path) + ' ' + str(sys.exc_info()[0])
         raise
 
-    if service_name == 'annotation':
+    if service_name == 'genome_annotation':
         try:
             feature_types = api.get_feature_types()
             if 'CDS' in feature_types:
