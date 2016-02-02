@@ -472,25 +472,45 @@ class _Assembly(ObjectAPI, AssemblyInterface):
         except Exception, e:
             _log.debug("Failed to retrieve handle {} from {}".format(fasta_ref,
                                                                      self.services["handle_service_url"]))
+            _log.exception(e)
             shock_node_id = fasta_ref
-
 
         copy_keys = ["contig_id", "length", "gc_content", "md5", "name", "description", "is_complete", "is_circular"]
 
         header = {}
         header["Authorization"] = "Oauth {0}".format(self._token)
 
-        if num_contigs > total_contigs/3 or num_contigs == 0:
-            Retrieve_url = self.services["shock_service_url"] + "node/" + shock_node_id + "?download_raw"
+        def fetch_data(shock_node_id, start=0, length=0):
+            fetch_url = self.services["shock_service_url"] + "node/" + shock_node_id
 
-            #Retrieve all sequence
-            data = requests.get(Retrieve_url, headers=header, stream=True)                
+            subset = False
+            if start == 0 and length == 0:
+                fetch_url += "?download_raw"
+            else:
+                fetch_url += "?download&seek=" + str(start) + "&length=" + str(length)
+                subset = True
+
+            #Retrieve individual sequences
+            data = requests.get(fetch_url, headers=header, stream=True)
             buffer = StringIO.StringIO()
-            for chunk in data.iter_content(CHUNK_SIZE):
-                if chunk:
-                    buffer.write(chunk)
-            sequence_data = buffer.getvalue()
-            buffer.close()
+            try:
+                for chunk in data.iter_content(CHUNK_SIZE):
+                    if chunk:
+                        buffer.write(chunk)
+
+                data = buffer.getvalue()
+            except:
+                raise
+            finally:
+                buffer.close()
+
+            return data
+
+        if num_contigs > total_contigs/3 or num_contigs == 0:
+            try:
+                sequence_data = fetch_data(shock_node_id)
+            except Exception, e:
+                raise
 
             if num_contigs == 0:
                 contig_id_list = contigs.keys()
@@ -507,31 +527,11 @@ class _Assembly(ObjectAPI, AssemblyInterface):
 
                 outContigs[c]["sequence"] = sequence_data[contigs[c]["start_position"]:contigs[c]["start_position"] + \
                                             contigs[c]["num_bytes"]].translate(None, string.whitespace)
-        else:                
-            def fetch_contig(start, length):
-                fetch_url = self.services["shock_service_url"] + "node/" + shock_node_id + \
-                            "?download&seek=" + str(start) + \
-                            "&length=" + str(length)
-
-                #Retrieve individual sequences
-                data = requests.get(fetch_url, headers=header, stream=True)                
-                buffer = StringIO.StringIO()
-                try:
-                    for chunk in data.iter_content(CHUNK_SIZE):
-                        if chunk:
-                            buffer.write(chunk)
-
-                    sequence = buffer.getvalue().translate(None, string.whitespace)
-                except:
-                    raise
-                finally:
-                    buffer.close()
-                
-                return sequence
-                            
+        else:
             outContigs = {}
             sorted_contigs = sorted(contig_id_list,
-                             cmp=lambda a,b: cmp(contigs[a]["start_position"], contigs[b]["start_position"]))
+                             cmp=lambda a,b: cmp(contigs[a]["start_position"],
+                                                 contigs[b]["start_position"]))
 
             for c in sorted_contigs:
                 outContigs[c] = {}
@@ -539,7 +539,10 @@ class _Assembly(ObjectAPI, AssemblyInterface):
                     if k in contigs[c]:
                         outContigs[c][k] = contigs[c][k]
 
-                outContigs[c]["sequence"] = fetch_contig(contigs[c]["start_position"],contigs[c]["num_bytes"])
+                outContigs[c]["sequence"] = fetch_data(shock_node_id,
+                                                       contigs[c]["start_position"],
+                                                       contigs[c]["num_bytes"])\
+                                                       .translate(None, string.whitespace)
 
         return outContigs
 
