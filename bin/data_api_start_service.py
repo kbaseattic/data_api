@@ -100,10 +100,11 @@ def main():
     logger.info("Attempting to read config from " + args.config)
     if config.has_section(global_stanza_name):
         logger.info("Reading global config:'{}', stanza:'{}'".format(args.config, global_stanza_name))
-        ws = config.get(global_stanza_name,'workspace_service_url')
-        shock = config.get(global_stanza_name,'shock_service_url')
-        services = {'workspace_service_url': ws,
-            'shock_service_url': shock}
+        services = {
+            'workspace_service_url': config.get(global_stanza_name,'workspace_service_url'),
+            'shock_service_url': config.get(global_stanza_name,'shock_service_url'),
+            'handle_service_url': config.get(global_stanza_name,'handle_service_url')
+        }
 
         try:
             redis_host = config.get(global_stanza_name, 'redis_host')
