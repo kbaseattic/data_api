@@ -5,7 +5,7 @@
 
 .. toctree::
     :titlesonly:
-    :maxdepth: 1
+    :maxdepth: 2
 
     Python API <python>
     JavaScript API <javascript>

@@ -39,8 +39,9 @@ def server_method(func):
 
     The wrapper depends on the existence of two attributes in the
     class being wrapped:
-        - ttypes (module): Thrift type module, containing exception classes
-        - log (logging.Logger): Logger instance
+        
+    1. ttypes (module): Thrift type module, containing exception classes
+    2. log (logging.Logger): Logger instance
 
     Args:
         func (function): Function being wrapped
@@ -70,7 +71,7 @@ def server_method(func):
             error = e
             raise self.ttypes.AuthorizationException(e.message,
                                                      traceback.format_exc())
-        except exceptions.TypeError, e:
+        except TypeError, e:
             error = e
             raise self.ttypes.TypeException(e.message, traceback.format_exc())
         except Exception, e:

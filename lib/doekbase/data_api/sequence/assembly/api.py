@@ -1,7 +1,7 @@
 """
 Data API for Assembly entities.  This API provides methods for retrieving
-summary information such as GC content, total length, external source information
-as well as methods for retrieving individual contig sequences and gathering contig lengths and contig GC.
+summary information such as details about an Assembly (external source information, total length)
+and the underlying contigs (GC content, length).
 """
 
 # Stdlib
@@ -9,6 +9,7 @@ import abc
 import itertools
 import requests
 import re
+import collections
 import string
 import hashlib
 try:
@@ -21,6 +22,7 @@ from doekbase.data_api.core import ObjectAPI
 from doekbase.data_api.util import get_logger, logged, PerfCollector, collect_performance
 from doekbase.data_api import exceptions
 from doekbase.data_api.taxonomy.taxon.service import ttypes
+from doekbase.handle.Client import AbstractHandle as handleClient
 
 _log = get_logger(__file__)
 
@@ -33,7 +35,7 @@ TYPES = _CONTIGSET_TYPES + _ASSEMBLY_TYPES
 g_stats = PerfCollector('AssemblyAPI')
 
 class AssemblyInterface(object):
-    """API for the assembled sequences associated with a Genome Annotation.
+    """API for a genome Assembly associated with a Genome Annotation.
     """
     
     __metaclass__ = abc.ABCMeta
@@ -49,7 +51,7 @@ class AssemblyInterface(object):
 
     @abc.abstractmethod    
     def get_genome_annotations(self, ref_only=False):
-        """Retrieve the GenomeAnnotations that refer to this Assembly.
+        """Retrieve the GenomeAnnotation(s) that refer to this Assembly.
         
         Returns:
           list<GenomeAnnotationAPI>: List of GenomeAnnotationAPI objects
@@ -83,7 +85,7 @@ class AssemblyInterface(object):
 
     @abc.abstractmethod    
     def get_number_contigs(self):
-        """Retrieve the number of contiguous sequences in this Assembly.
+        """Retrieve the number of contig sequences in this Assembly.
         
         Returns:
           int
@@ -110,35 +112,35 @@ class AssemblyInterface(object):
 
     @abc.abstractmethod    
     def get_contig_lengths(self, contig_id_list=None):
-        """Retrieve the length for every contiguous sequence.
+        """Retrieve the lengths for all contig sequence.
         
         Returns:
-          dict<str,int>: Mapping of sequence identifiers to lengths.
+          dict<str,int>: Mapping of contig identifiers to length.
         """
         pass
 
     @abc.abstractmethod    
     def get_contig_gc_content(self, contig_id_list=None):
-        """Retrieve the total GC content for each contiguous sequence
-        of this Assembly.
+        """Retrieve the total GC content for each contig sequence
+        in this Assembly.
         
         Returns:
-          dict<str,float>: Mapping of sequence identifiers to GC content.
+          dict<str,float>: Mapping of contig identifiers to GC content.
         """
         pass
 
     @abc.abstractmethod    
     def get_contig_ids(self):
-        """Retrieve the ids for every contiguous sequence in this Assembly.
+        """Retrieve the ids for every contig sequence in this Assembly.
         
         Returns:
-          list<str>: Sequence identifiers
+          list<str>: Contig identifiers
         """
         pass
 
     @abc.abstractmethod    
     def get_contigs(self, contig_id_list=None):
-        """Retrieve contiguous sequences from this Assembly by id.
+        """Retrieve contig sequences from this Assembly by id.
         
         Args:
           contig_id_list: list<str>
@@ -220,7 +222,6 @@ class AssemblyAPI(ObjectAPI, AssemblyInterface):
 class _KBaseGenomes_ContigSet(ObjectAPI, AssemblyInterface):
     def __init__(self, services, token, ref):
         super(_KBaseGenomes_ContigSet, self).__init__(services, token, ref)
-        self._gc_pattern = re.compile(r'g|G|c|C')
 
     def get_assembly_id(self):
         return self.get_data_subset(path_list=["id"])["id"]
@@ -231,14 +232,14 @@ class _KBaseGenomes_ContigSet(ObjectAPI, AssemblyInterface):
         referrers = self.get_referrers()
 
         if ref_only:
-            annotation_refs = list()
+            annotation_refs = []
             for x in referrers:
                 if x.split("-")[0] in genome_annotation_types:
                     for ref in referrers[x]:
                         annotation_refs.append(ref)
             return annotation_refs
         else:
-            annotations = list()
+            annotations = []
             for x in referrers:
                 if x.split("-")[0] in genome_annotation_types:
                     for ref in referrers[x]:
@@ -250,7 +251,7 @@ class _KBaseGenomes_ContigSet(ObjectAPI, AssemblyInterface):
     def get_external_source_info(self):
         data = self.get_data_subset(path_list=["source","source_id"])
         
-        output = dict()
+        output = {}
         output["external_source"] = data["source"]
         output["external_source_id"] = data["source_id"]
         output["external_source_origination_date"] = "Unknown"
@@ -272,7 +273,7 @@ class _KBaseGenomes_ContigSet(ObjectAPI, AssemblyInterface):
             else:
                 total_length += len(x["sequence"])
 
-        data = dict()
+        data = {}
         data["gc_content"] = total_gc/(total_length*1.0)
         data["dna_size"] = total_length
         data["num_contigs"] = len(contigs)            
@@ -284,9 +285,7 @@ class _KBaseGenomes_ContigSet(ObjectAPI, AssemblyInterface):
 
     def get_gc_content(self):
         contigs = self.get_data()["contigs"]
-        
-        pattern = re.compile(r'g|G|c|C')
-        
+
         total_gc = 0
         total_length = 0
         for i, c in enumerate(contigs):
@@ -294,7 +293,7 @@ class _KBaseGenomes_ContigSet(ObjectAPI, AssemblyInterface):
                 total_length += c["length"]
             else:
                 total_length += len(c["sequence"])
-            
+
             total_gc += self._sequence_gc(i, c["sequence"])
         
         return total_gc/(total_length*1.0)
@@ -309,7 +308,7 @@ class _KBaseGenomes_ContigSet(ObjectAPI, AssemblyInterface):
         if contig_id_list is None:        
             contig_id_list = [c["id"] for c in contigs]
 
-        contig_lengths = dict()
+        contig_lengths = {}
         for c in contigs:
             if c["id"] in contig_id_list:
                 if "length" in c:
@@ -322,7 +321,7 @@ class _KBaseGenomes_ContigSet(ObjectAPI, AssemblyInterface):
     def get_contig_gc_content(self, contig_id_list=None):
         contigs = self.get_data()["contigs"]
         
-        contigs_gc = dict()
+        contigs_gc = {}
         
         if contig_id_list is None:
             contig_id_list = [c["id"] for c in contigs]
@@ -345,7 +344,7 @@ class _KBaseGenomes_ContigSet(ObjectAPI, AssemblyInterface):
 
     @collect_performance(g_stats, prefix='old.')
     def get_contigs(self, contig_id_list=None):
-        contigs = dict()
+        contigs = {}
 
         raw_contigs = self.get_data()["contigs"]
 
@@ -365,11 +364,11 @@ class _KBaseGenomes_ContigSet(ObjectAPI, AssemblyInterface):
                    }
 
             gc_count = self._sequence_gc(i, c['sequence'])
-            cid['gc_content'] = gc_count / cid['length'] * 1.0
+            cid['gc_content'] = gc_count / (cid['length'] * 1.0)
 
             contigs[c['id']] = cid
 
-        return contigs            
+        return contigs
 
     def _sequence_gc(self, index, sequence):
         """Get GC content for a sequence.
@@ -378,15 +377,14 @@ class _KBaseGenomes_ContigSet(ObjectAPI, AssemblyInterface):
         """
         self._current_sequence = sequence
         name = 'gc-{:d}'.format(index)
-        r =  self._cache.get_derived_data(self._calc_sequence_gc, name)
-        return r
+        return self._cache.get_derived_data(self._calc_sequence_gc, name)
 
     def _calc_sequence_gc(self):
-        """Calculate "G/C Content" by counting G's and C's in the
-           sequence and dividing the total by the sequence length.
+        """Calculate "G+C Content" by counting G's and C's in the
+           sequence.
         """
-        matches = re.finditer(self._gc_pattern, self._current_sequence)
-        return sum(itertools.imap(lambda x: 1, matches))
+        return sum(self._current_sequence.count(x) for x in ['g','G','c','C'])
+
 
 class _Assembly(ObjectAPI, AssemblyInterface):
     def __init__(self, services, token, ref):
@@ -402,14 +400,14 @@ class _Assembly(ObjectAPI, AssemblyInterface):
         referrers = self.get_referrers()
 
         if ref_only:
-            annotation_refs = list()
+            annotation_refs = []
             for object_type in referrers:
                 if object_type.split('-')[0] in GA_TYPES:
                     for x in referrers[object_type]:
                         annotation_refs.append(x)
             return annotation_refs
         else:
-            annotations = list()
+            annotations = []
             for object_type in referrers:
                 if object_type.split('-')[0] in GA_TYPES:
                     for x in referrers[object_type]:
@@ -466,71 +464,85 @@ class _Assembly(ObjectAPI, AssemblyInterface):
         fasta_ref = data["fasta_handle_ref"]
         contigs = data["contigs"]
 
+        shock_node_id = None
+        try:
+            hc = handleClient(url=self.services["handle_service_url"], token=self._token)
+            handle = hc.hids_to_handles([fasta_ref])[0]
+            shock_node_id = handle["id"]
+        except Exception, e:
+            _log.debug("Failed to retrieve handle {} from {}".format(fasta_ref,
+                                                                     self.services["handle_service_url"]))
+            _log.exception(e)
+            shock_node_id = fasta_ref
+
         copy_keys = ["contig_id", "length", "gc_content", "md5", "name", "description", "is_complete", "is_circular"]
 
-        header = dict()
+        header = {}
         header["Authorization"] = "Oauth {0}".format(self._token)
 
-        if num_contigs > total_contigs/3 or num_contigs == 0:
-            Retrieve_url = self.services["shock_service_url"] + "node/" + fasta_ref + "?download_raw"
+        def fetch_data(shock_node_id, start=0, length=0):
+            fetch_url = self.services["shock_service_url"] + "node/" + shock_node_id
 
-            #Retrieve all sequence
-            data = requests.get(Retrieve_url, headers=header, stream=True)                
+            subset = False
+            if start == 0 and length == 0:
+                fetch_url += "?download_raw"
+            else:
+                fetch_url += "?download&seek=" + str(start) + "&length=" + str(length)
+                subset = True
+
+            #Retrieve individual sequences
+            data = requests.get(fetch_url, headers=header, stream=True)
             buffer = StringIO.StringIO()
-            for chunk in data.iter_content(CHUNK_SIZE):
-                if chunk:
-                    buffer.write(chunk)
-            sequence_data = buffer.getvalue()
-            buffer.close()
+            try:
+                for chunk in data.iter_content(CHUNK_SIZE):
+                    if chunk:
+                        buffer.write(chunk)
+
+                data = buffer.getvalue()
+            except:
+                raise
+            finally:
+                buffer.close()
+
+            return data
+
+        if num_contigs > total_contigs/3 or num_contigs == 0:
+            try:
+                sequence_data = fetch_data(shock_node_id)
+            except Exception, e:
+                raise
 
             if num_contigs == 0:
                 contig_id_list = contigs.keys()
                 num_contigs = total_contigs
                 assert num_contigs == len(contig_id_list)
 
-            outContigs = dict()
+            outContigs = {}
             for i in xrange(num_contigs):
                 c = contig_id_list[i]
-                outContigs[c] = dict()
+                outContigs[c] = {}
                 for k in copy_keys:
                     if k in contigs[c]:
                         outContigs[c][k] = contigs[c][k]
 
                 outContigs[c]["sequence"] = sequence_data[contigs[c]["start_position"]:contigs[c]["start_position"] + \
                                             contigs[c]["num_bytes"]].translate(None, string.whitespace)
-        else:                
-            def fetch_contig(start, length):
-                fetch_url = self.services["shock_service_url"] + "node/" + fasta_ref + \
-                            "?download&seek=" + str(start) + \
-                            "&length=" + str(length)
-
-                #Retrieve individual sequences
-                data = requests.get(fetch_url, headers=header, stream=True)                
-                buffer = StringIO.StringIO()
-                try:
-                    for chunk in data.iter_content(CHUNK_SIZE):
-                        if chunk:
-                            buffer.write(chunk)
-
-                    sequence = buffer.getvalue().translate(None, string.whitespace)
-                except:
-                    raise
-                finally:
-                    buffer.close()
-                
-                return sequence
-                            
-            outContigs = dict()
+        else:
+            outContigs = {}
             sorted_contigs = sorted(contig_id_list,
-                             cmp=lambda a,b: cmp(contigs[a]["start_position"], contigs[b]["start_position"]))
+                             cmp=lambda a,b: cmp(contigs[a]["start_position"],
+                                                 contigs[b]["start_position"]))
 
             for c in sorted_contigs:
-                outContigs[c] = dict()
+                outContigs[c] = {}
                 for k in copy_keys:
                     if k in contigs[c]:
                         outContigs[c][k] = contigs[c][k]
 
-                outContigs[c]["sequence"] = fetch_contig(contigs[c]["start_position"],contigs[c]["num_bytes"])
+                outContigs[c]["sequence"] = fetch_data(shock_node_id,
+                                                       contigs[c]["start_position"],
+                                                       contigs[c]["num_bytes"])\
+                                                       .translate(None, string.whitespace)
 
         return outContigs
 
@@ -636,7 +648,7 @@ class AssemblyClientAPI(AssemblyInterface):
     def get_contigs(self, contig_id_list=None):
         contigs = self.client.get_contigs(self._token, self.ref, contig_id_list)
 
-        out_contigs = dict()
+        out_contigs = {}
         for x in contigs:
             out_contigs[x] = {
                 "contig_id": contigs[x].contig_id,
