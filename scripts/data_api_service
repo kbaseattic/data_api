@@ -6,6 +6,13 @@ logfile=$script_dir/log
 
 rm -f $logfile
 
+if [ -z $KB_TOP ]
+then
+    export KB_TOP=/kb/deployment
+fi
+
+source $KB_TOP/user-env.sh
+
 if [ -z $KB_DEPLOYMENT_CONFIG ]
 then
     export KB_DEPLOYMENT_CONFIG=$KB_TOP/deployment.cfg
@@ -40,6 +47,9 @@ fi
 source $script_dir/../venv/bin/activate
 
 export KB_AUTH_TOKEN=$(cat /etc/check_mk/dataapitoken)
+
+date >> $logfile
+echo checking services from $KB_DEPLOYMENT_CONFIG in $deployenv >> $logfile
 
 for api in assembly taxon genome_annotation
 do
