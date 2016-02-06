@@ -11,8 +11,8 @@ fi
 if [ -z $deployenv ]
 then
 
-    deployenv=$(grep basename $KB_DEPLOYMENT_CONFIG |cut -f2 -d '=')
-
+    deployenv=$(perl -MConfig::Simple -e '$cfg=Config::Simple->new();$cfg->read($ENV{KB_DEPLOYMENT_CONFIG});print $cfg->param("global.basename")')
+    
     if [ "$deployenv" == 'proda' ]
     then
         deployenv='prod'
@@ -20,6 +20,11 @@ then
     if [ "$deployenv" == 'prodb' ]
     then
         deployenv='prod'
+    fi
+    # fall back to localhost
+    if [ -z $deployenv ]
+    then
+        deployenv='localhost'
     fi
 fi
 
