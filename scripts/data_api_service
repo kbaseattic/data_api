@@ -6,9 +6,36 @@ logfile=$script_dir/log
 
 rm -f $logfile
 
+if [ -z $KB_TOP ]
+then
+    export KB_TOP=/kb/deployment
+fi
+
+source $KB_TOP/user-env.sh
+
 if [ -z $KB_DEPLOYMENT_CONFIG ]
 then
     export KB_DEPLOYMENT_CONFIG=$KB_TOP/deployment.cfg
+fi
+
+if [ -z $deployenv ]
+then
+
+    deployenv=$(perl -MConfig::Simple -e '$cfg=Config::Simple->new();$cfg->read($ENV{KB_DEPLOYMENT_CONFIG});print $cfg->param("global.basename")')
+    
+    if [ "$deployenv" == 'proda' ]
+    then
+        deployenv='www'
+    fi
+    if [ "$deployenv" == 'prodb' ]
+    then
+        deployenv='www'
+    fi
+    # fall back to localhost
+    if [ -z $deployenv ]
+    then
+        deployenv='localhost'
+    fi
 fi
 
 # something in python import complains when $HOME is not set
@@ -21,7 +48,10 @@ source $script_dir/../venv/bin/activate
 
 export KB_AUTH_TOKEN=$(cat /etc/check_mk/dataapitoken)
 
+date >> $logfile
+echo checking services from $KB_DEPLOYMENT_CONFIG in $deployenv >> $logfile
+
 for api in assembly taxon genome_annotation
 do
-    test_api_service.py $api https://ci.kbase.us/services/data/$api 2>> $logfile
+    test_api_service.py $api https://$deployenv.kbase.us/services/data/$api 2>> $logfile
 done
