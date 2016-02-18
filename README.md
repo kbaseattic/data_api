@@ -244,8 +244,9 @@ Not all, in fact right now not even most, of the messages from the services have
 
    Start each of the API services:
    
-    nohup data_api_start_service.py --config deployment.cfg --service taxon --port 9101 & > taxonAPI.out
-    nohup data_api_start_service.py --config deployment.cfg --service assembly --port 9102 & > assemblyAPI.out        
+    data_api_start_service.py --config deployment.cfg --service taxon --port 9101 &
+    data_api_start_service.py --config deployment.cfg --service assembly --port 9102 &
+    data_api_start_service.py --config deployment.cfg --service genome_annotation --port 9103 &
 
    Run nosetests from the data_api source directory, which will use the test data:
 
