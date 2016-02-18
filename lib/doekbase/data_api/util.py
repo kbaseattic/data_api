@@ -5,7 +5,7 @@ Includes:
 
 - Logging initialization helper: get_logger()
 - Logging decorators: @logged, @collect_performance
-- Logging functions log_start() and log_end()
+- Logging functions log_start(), log_end(), and log_event()
 
 """
 __author__ = 'Dan Gunter <dkgunter@lbl.gov>'
@@ -19,9 +19,23 @@ import os
 import six
 import time
 
-ENTRY_MESSAGE = '{timestamp} {func_name}.begin {kvp}'
-EXIT_MESSAGE = '{timestamp} {func_name}.end {dur} {kvp}'
-EVENT_MESSAGE = '{timestamp} {func_name} {kvp}'
+# Message formats without/with timestamp
+_MESSAGE_FORMATS = [
+    {'entry': '{func_name}.begin | {kvp}',
+     'exit': '{func_name}.end ({dur}) | {kvp}',
+     'event': '{func_name} | {kvp}'},
+    {'entry': '{timestamp} {func_name}.begin | {kvp}',
+     'exit': '{timestamp} {func_name}.end ({dur}) | {kvp}',
+     'event': '{timestamp} {func_name} | {kvp}'},
+]
+
+# This flag controls whether the messages should include
+# their own timestamp. External modules may set it.
+include_timestamp = True
+
+def default_message(mtype):
+    return _MESSAGE_FORMATS[include_timestamp][mtype]
+
 
 DEFAULT_LEVEL = logging.INFO
 logformat = '%(levelname)s %(message)s'
@@ -29,20 +43,37 @@ logformat = '%(levelname)s %(message)s'
 g_running_nosetests = None
 
 def get_logger(name=''):
+    """Create and return a logger with the given name.
+    The string 'doekbase.' is prepended to the name, if it is not
+    already present.
+
+    If we are running in nose, also prepend 'nose.' to the logger name
+    so that `nose -v` options can apply to us. Nose checks are done only
+    once, and cached.
+
+    The created logger will propagate its messages to the parent.
+
+    Args:
+        name: Name of the new logger.
+
+    Returns:
+        same as `logging.getLogger()`
+    """
     global g_running_nosetests
+    # The doekbase namespace
     if not name.startswith('doekbase'):
         if name == '':
             name = 'doekbase'
         else:
             name = 'doekbase.' + name
-    # If we are running in nose, nest under there so nose -v options
-    # can apply to us. Cache the result of checking for nose in a global var.
+    # Nose
     if g_running_nosetests is None:  # haven't checked yet
          g_running_nosetests = 'nose' in logging.root.manager.loggerDict
     if g_running_nosetests:
          name = 'nose.' + name
-    # create logger
+    # Create logger
     logger = logging.getLogger(name)
+    logger.addHandler(logging.NullHandler())
     logger.propagate = 1
     return logger
 
@@ -110,7 +141,7 @@ def log_start(logger, func_name, level=None, fmt=None, kvp=None):
     kvp_str = format_kvp(kvp, ',') if kvp else ''
     d = dict(timestamp=format_timestamp(t0),
              func_name=func_name, kvp=kvp_str)
-    fmt = fmt or ENTRY_MESSAGE
+    fmt = fmt or default_message('entry')
     msg = fmt.format(**d)
     if level is None:
         level = DEFAULT_LEVEL
@@ -122,7 +153,7 @@ def log_event(logger, func_name, level=None, fmt=None, kvp=None):
     kvp_str = format_kvp(kvp, ',') if kvp else ''
     d = dict(timestamp=format_timestamp(t0),
              func_name=func_name, kvp=kvp_str)
-    fmt = fmt or EVENT_MESSAGE
+    fmt = fmt or default_message('event')
     msg = fmt.format(**d)
     if level is None:
         level = DEFAULT_LEVEL
@@ -132,12 +163,13 @@ def log_event(logger, func_name, level=None, fmt=None, kvp=None):
 def log_end(logger, t0, func_name, level=None, fmt=None, status_code=0, kvp=None):
     t1 = time.time()
     kvp_str = format_kvp(kvp, ',') if kvp else ''
+    dur_str = '{:.6f}'.format(t1 - t0)
     d = dict(timestamp=format_timestamp(t1),
              func_name=func_name,
              kvp=kvp_str,
-             dur=(t1 - t0),
+             dur=dur_str,
              status=status_code)
-    fmt = fmt or EXIT_MESSAGE
+    fmt = fmt or default_message('exit')
     if level is None:
         level = DEFAULT_LEVEL
     logger.log(level, fmt.format(**d))
@@ -149,6 +181,8 @@ def format_kvp(d, sep):
         if isinstance(v, six.string_types):
             if sep in v:
                 v = v.replace(',', '\\,')
+            elif len(v) == 0:
+                v = "''"
         pairs.append((k, v))
     s = sep.join(['{}={}'.format(k, v) for k, v in pairs])
     return s
@@ -172,7 +206,7 @@ class PerfCollector(object):
     MAX_SIZE = 1000 # max number events in history
     EVENT_WILDCARD = '*'
 
-    def __init__(self, namespace):
+    def __init__(self, namespace='kbase'):
         self._ns = namespace
         self._history = deque(maxlen=self.MAX_SIZE)
         self._cur = {}
@@ -220,7 +254,10 @@ class PerfCollector(object):
                            .format(ekey))
         t0 = self._cur[ekey]
         del self._cur[ekey]
-        full_event = '{}.{}'.format(self._ns, event)
+        if self._ns:
+            full_event = '{}.{}'.format(self._ns, event)
+        else:
+            full_event = event
         pevent = PerfEvent(full_event, key, t0, timestamp, meta)
         for k in self._meta:
             pevent.add_metadata(k, self._meta[k])
@@ -326,6 +363,26 @@ class PerfEvent(object):
         return d
 
 def collect_performance(perf_collector, prefix='', suffix=''):
+    """Decorator that simplifies the use of the `PerfCollector` class
+    to collect and log performance for a single method.
+
+    Example usage:
+        pc = PerfCollector()
+        @collect_performance(pc)
+        def count_to_10():
+            for i in range(1,11):
+                print("i = {:d}".format(i))
+
+    Args:
+        perf_collector: Instance of PerfCollector class
+        prefix: String prefix placed before the method name in order to
+                make a log event name.
+        suffix: String prefix placed after the method name in order to
+                make a log event name.
+
+    Returns:
+        A method decorator
+    """
     def real_decorator(method):
         event = prefix + method.__name__ + suffix
         key = str(time.time())

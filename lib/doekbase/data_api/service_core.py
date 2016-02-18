@@ -8,6 +8,10 @@ __date__ = '12/24/15'
 # -------
 
 # Stdlib
+import functools
+import logging
+import os
+import signal
 import time
 import traceback
 
@@ -20,16 +24,15 @@ from thrift.protocol import TBinaryProtocol
 from thrift.transport import TTwisted
 
 # Local
-from doekbase.data_api import exceptions, core
+from doekbase.data_api import exceptions, util
 
 # Global constants and variables
 # ------------------------------
-
 DEFAULT_WS_URL = 'https://ci.kbase.us/services/ws/'
 DEFAULT_SHOCK_URL = 'https://ci.kbase.us/services/shock-api/'
 
 SERVICES_DICT = {'workspace_service_url': DEFAULT_WS_URL,
-                 'shock_service_url': DEFAULT_SHOCK_URL}
+                 'shock_service_url'    : DEFAULT_SHOCK_URL}
 
 # Functions and classes
 # ---------------------
@@ -46,16 +49,17 @@ def server_method(func):
     Args:
         func (function): Function being wrapped
     """
+
     def wrapper(self, token, ref, *args, **kwargs):
         assert hasattr(self, 'log'), 'Method in wrapped class must have "log" ' \
                                      'attribute'
         assert hasattr(self, 'ttypes'), 'Method in wrapped class must have ' \
-                                      '"ttypes" attribute'
+                                        '"ttypes" attribute'
         error, result = None, None
         self.log.debug('method={meth} state=begin token={tok} ref={ref} args={'
                        'args} kwargs={kw}'
-                   .format(meth=func.__name__, tok=token, ref=ref,
-                           args=args, kw=kwargs))
+                       .format(meth=func.__name__, tok=token, ref=ref,
+                               args=args, kw=kwargs))
         t0 = time.time()
         try:
             result = func(self, token, ref, *args, **kwargs)
@@ -76,22 +80,23 @@ def server_method(func):
             raise self.ttypes.TypeException(e.message, traceback.format_exc())
         except Exception, e:
             error = e
-            raise self.ttypes.ServiceException(e.message, traceback.format_exc(),
+            raise self.ttypes.ServiceException(e.message,
+                                               traceback.format_exc(),
                                                {"ref": str(ref)})
         finally:
             if error is None:
                 self.log.debug('method={meth} state=end token={tok} ref={ref} '
                                'args={args} kwargs={kw} dur={t:.3f}'
-                           .format(meth=func.__name__, tok=token, ref=ref,
-                                   args=args, kw=kwargs,
-                                   t=time.time() - t0))
+                               .format(meth=func.__name__, tok=token, ref=ref,
+                                       args=args, kw=kwargs,
+                                       t=time.time() - t0))
             else:
                 self.log.error('method={meth} state=error token={tok} '
-                          'ref={ref} args={args} kwargs={kw}'
-                           'error_message="{m}" dur={t:.3f}'
-                          .format(meth=func.__name__, tok=token, ref=ref,
-                                  args=args, kw=kwargs, m=error.message,
-                                  t=time.time() - t0))
+                               'ref={ref} args={args} kwargs={kw}'
+                               'error_message="{m}" dur={t:.3f}'
+                               .format(meth=func.__name__, tok=token, ref=ref,
+                                       args=args, kw=kwargs, m=error.message,
+                                       t=time.time() - t0))
         return result
 
     return wrapper
@@ -103,6 +108,7 @@ class BaseService(object):
     Takes care of some boilerplate logging and error-checking, as well
     as setting up instance variables for the @server_method decorator.
     """
+
     def __init__(self, log, ttypes_module, api_class, services=None):
         """Constructor.
 
@@ -144,6 +150,7 @@ class BaseClientConnection(object):
     """Base class for <ServiceName>ClientConnection objects defined
     in the data_api.<api.path>.service.interface module.
     """
+
     def __init__(self, thrift_client, url):
         if not hasattr(thrift_client, 'Client') or not callable(
                 thrift_client.Client):
@@ -156,20 +163,18 @@ class BaseClientConnection(object):
             self.transport = THttpClient.THttpClient(url)
             self.protocol = TBinaryProtocol.TBinaryProtocol(self.transport)
             self.client = thrift_client.Client(self.protocol)
-        except AssertionError as err:
+        except AssertionError:
             raise ValueError('Invalid Thrift client URL: "{}"'.format(url))
         except TTransport.TTransportException as err:
             raise RuntimeError(
-                'Cannot connect to remote Thrift service at {}: {}'
-                .format(url, err.message))
+                    'Cannot connect to remote Thrift service at {}: {}'
+                        .format(url, err.message))
 
     def get_client(self):
         return self.transport, self.client
 
 # For service drivers
 
-# TODO respond to kill signals
-# TODO on HUP reload of config
 def start_service(api_class, service_class, log,
                   services=None, host='localhost', port=9100):
     """Start a Data API service.
@@ -190,8 +195,9 @@ def start_service(api_class, service_class, log,
     assert hasattr(service_class, 'Processor'), 'Invalid "service_class": ' \
                                                 'missing "Processor" attribute'
     assert isinstance(port, int), 'The "port" must be an integer'
-    log.debug('method=start_service state=begin host={host} port={port:d}'
-               .format(host=host, port=port))
+
+    svc_t0 = util.log_start(log, 'start_service',
+                            kvp=dict(host=host, port=port))
 
     # Create server
     services = services or SERVICES_DICT
@@ -202,21 +208,49 @@ def start_service(api_class, service_class, log,
     site = twisted.web.server.Site(resource=resource)
     twisted.internet.reactor.listenTCP(port, site, interface=host)
 
+    # Kill entire process group on shutdown
+    twisted.internet.reactor.addSystemEventTrigger('before', 'shutdown',
+                                                   functools.partial(
+                                                       kill_process_group,
+                                                       log=log))
+
     # Run server
     sname = api_class.__name__
     shost = host or 'localhost'
-    log.info('msg="Starting {} server at {}:{}"'.format(sname, shost, port))
-    log.debug('method=twisted.internet.reactor.run state=begin')
+    util.log_start(log, 'server', kvp=dict(name=sname, host=shost, port=port))
+    t0 = util.log_start(log, 'twisted.internet.reactor.run',
+                        level=logging.DEBUG)
     try:
         twisted.internet.reactor.run()
     except Exception as err:
         log.error('msg="Abort {} server on error"'.format(sname))
-        log.error('method=twisted.internet.reactor.run state=error '
-                   'error_message={e}'.format(e=err))
+        util.log_end(log, t0, 'twisted.internet.reactor.run',
+                     status_code=1, level=logging.ERROR, kvp=dict(msg=err))
         raise
     finally:
-        log.debug('method=twisted.internet.reactor.run state=end')
+        util.log_end(log, t0, 'twisted.internet.reactor.run')
+
+    util.log_end(log, svc_t0, 'start_service',
+                            kvp=dict(host=host, port=port))
     return 0
 
 def stop_service():
     twisted.internet.reactor.stop()
+
+def kill_process_group(log):
+    """Kill entire process group on Twisted shutdown.
+
+    Args:
+        log (logging.Logger): Logger
+    """
+    pid = os.getpid()  # my pid
+    grpid = -os.getpgid(pid)  # my process group
+    signo = signal.SIGINT  # the signal to send
+    t = util.log_start(log, 'kill_process_group', level=logging.WARN,
+                       kvp=dict(pid=pid, group_pid=grpid, signal=signo))
+    # ignore signal in this process (Twisted is already shutting down)
+    signal.signal(signo, signal.SIG_IGN)
+    # send the signal to my process group
+    os.kill(grpid, signo)
+    util.log_end(log, t, 'kill_process_group', level=logging.WARN,
+                 kvp=dict(pid=pid, group_pid=grpid, signal=signo))
