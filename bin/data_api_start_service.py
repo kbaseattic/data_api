@@ -103,6 +103,60 @@ def configure_logging(main_config, logging_config):
                 cfgfile, err))
     return cfgfile
 
+stop_hosing_you_hoser = False
+
+def start_hose_memory_thread():
+    """Run a thread that waits a few seconds, then
+       allocates memory in an infinite loop.
+    """
+    import threading
+    MB = 1024 * 1024
+    def hose_memory(delay, t0):
+        x = []
+        chunk = 65536
+        time.sleep(delay)
+        count, n, mb = 0, 256, -1
+        while not stop_hosing_you_hoser:
+            time.sleep(0.1)
+            for i in xrange(n):
+                x.append('0' * chunk)
+            count += n * chunk
+            mb = count / MB
+            log_event(_log, 'hose_memory_status', level=logging.DEBUG,
+                      kvp=dict(allocated_mb=mb))
+        log_end(_log, t0, 'hose_memory', kvp=dict(allocated_mb=mb))
+
+    t0 = log_start(_log, 'hose_memory', kvp=dict(delay_seconds=10))
+    hoser = threading.Thread(target=hose_memory, args=(10, t0))
+    hoser.start()
+
+def low_memory_warn(mon_obj, avail, thresh, service_name):
+    """Issue a warning on low memory.
+    This will be called by the MonitorMemory instance created in `main()`.
+    """
+    MB = 1024 * 1024
+    log_event(_log, 'low memory alert', level=logging.CRITICAL,
+              kvp=dict(available_mb=avail / MB, threshold_mb=thresh / MB,
+                       service=service_name))
+
+def low_memory_abort(mon_obj, avail, thresh, driver, service_name, pidfile):
+    """Attempt to abort the service on low memory.
+    This will be called by the MonitorMemory instance created in `main()`.
+    """
+    global stop_hosing_you_hoser
+    mon_obj.stop()
+    stop_hosing_you_hoser = True
+    MB = 1024 * 1024
+    wait_sec = 5
+    log_event(_log, 'low memory abort', level=logging.CRITICAL,
+              kvp=dict(available_mb=avail / MB, threshold_mb=thresh / MB,
+                       service=service_name, wait_seconds=wait_sec))
+    driver.stop_service()
+    time.sleep(wait_sec)
+    pidfile.break_lock()
+    pidlockfile.remove_existing_pidfile(pidfile.path)
+    sys.exit(-1)
+
 def main():
     global pidfile, _log
     parser = argparse.ArgumentParser()
@@ -124,6 +178,15 @@ def main():
     parser.add_argument('--verbose', '-v', dest='vb', action="count", default=1,
                         help="Print more verbose messages to standard error. "
                              "Repeatable. (default=INFO)")
+
+    mem_cond = 'when available memory drops below threshold'
+    parser.add_argument('--memory-warn', help='Issue warning ' + mem_cond,
+                        dest='mem_warn', type=int, metavar='MBytes', default=0)
+    parser.add_argument('--memory-stop', help='Stop service ' + mem_cond,
+                        dest='mem_stop', type=int, metavar='MBytes', default=0)
+
+    parser.add_argument('-X', dest='xcmd', default=None,
+                        help='Administrative actions (memory)')
 
     args = parser.parse_args()
 
@@ -212,6 +275,18 @@ def main():
     except lockfile.Error:
         return 1
 
+    # Handle administrative options
+    if args.xcmd == 'memory':
+        _log.warn('Starting thread to hose memory')
+        start_hose_memory_thread()
+
+    # Low-memory alert and shutdown
+    if args.mem_warn > 0 or args.mem_stop > 0:
+        mem_mon = doekbase.data_api.util.MonitorMemory()
+        if args.mem_warn > 0:
+            mem_mon.add_alert(args.mem_warn, low_memory_warn, service_name)
+        mem_mon.start()
+
     # Start services
     t0, service_info = time.time(), {'port': service_port, 'pid': os.getpid()}
     log_start(_log, service_name, kvp=service_info)
@@ -226,6 +301,9 @@ def main():
         else:
             raise Exception("Service not activated: {}".format(service_name))
 
+        if args.mem_stop > 0:
+            mem_mon.add_alert(args.mem_stop, low_memory_abort, driver,
+                              service_name, pidfile)
         driver.start_service(services=services, port=service_port, host='')
     finally:
         release_pidfile(pidfile)

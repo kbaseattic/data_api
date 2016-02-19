@@ -15,3 +15,5 @@ _log = get_logger(__name__)
 def start_service(services=None, host='localhost', port=9101):
     return service_core.start_service(TaxonService, thrift_service, _log,
                                       services=services, host=host, port=port)
+
+stop_service = service_core.stop_service
