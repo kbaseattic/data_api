@@ -1362,10 +1362,11 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
             else:
                 f["feature_function"] = ""
 
-            if 'publications' in x:
-                f["feature_publications"] = x['publications']
-            else:
-                f["feature_publications"] = []
+            #if 'publications' in x:
+            #    f["feature_publications"] = x['publications']
+            #else:
+            # TODO fix publications in thrift spec and code, problem with existing data
+            f["feature_publications"] = []
 
             if 'aliases' in x:
                 f["feature_aliases"] = x['aliases']
