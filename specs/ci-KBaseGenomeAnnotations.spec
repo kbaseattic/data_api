@@ -120,6 +120,20 @@ typedef structure {
 } contig;
 
 
+/* 
+Reference to a handle to the Reads file on shock
+    @id handle
+*/
+typedef string reads_handle_ref;
+
+/* 
+Reference to a handle to the Assembly Fasta file on shock
+    @id handle
+*/
+typedef string fasta_handle_ref;
+
+
+
 /*
 The Assembly object contains the information about an Assembly of Reads. The sequence data for this would be stored within a shock node.
 The assembly itself is a collection of Contig subobjects.
@@ -142,8 +156,8 @@ typedef structure {
   string external_source_origination_date;
   float gc_content;
   string type;
-  string reads_handle_ref; 
-  string fasta_handle_ref; 
+  reads_handle_ref reads_handle_ref; 
+  fasta_handle_ref fasta_handle_ref; 
   mapping<string contig_id, contig> contigs;
   int dna_size;
   int num_contigs;
@@ -438,6 +452,13 @@ Reference to an Annotation quality object
 */
 typedef string annotation_quality_ref;
 
+/* 
+Reference to a handle to the Genbank file on shock
+    @id handle 
+*/ 
+typedef string genbank_handle_ref;
+
+
 /*
 The key is alias source.
 This is designed for fast count lookup of all the allias sources instead of having to drill down into the containers
@@ -495,7 +516,7 @@ typedef structure {
   counts_map counts_map;
   seed_roles_ref seed_roles_ref;
   string type;
-  string genbank_handle_ref;
+  genbank_handle_ref genbank_handle_ref;
   alias_source_counts_map alias_source_counts_map;  
   interfeature_relationship_counts_map interfeature_relationship_counts_map;
 } GenomeAnnotation; 
