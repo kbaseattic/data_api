@@ -32,6 +32,26 @@ def memory_hog(name):
             time.sleep(0.1)
 
 class MyTestCase(unittest.TestCase):
+    def test_anyalert(self):
+        """test that alerting for memory works at all"""
+        num_mb = 1000000
+        mm = MonitorMemory()
+        # call 'alert' when memory goes below a really high amount
+        mm.add_alert(num_mb, icanhaz_alert, 'key')
+        # run in a thread
+        mm.start()
+        while 1:
+            time.sleep(0.5)
+            if alerted.get('key', False):
+                break
+        # print('stopping..')
+        mm.stop()
+        mm.join()
+        # check that memory is at the right level
+        self.assertLess(alerted['key'], num_mb * MB)
+        # print('stopped. avail: {} MB'.format(alerted['key']/1024/1024))
+        
+    @unittest.skipIf(True, "skip memory test")
     def test_basic(self):
         """one memory alert"""
         num_mb = 10000
@@ -48,6 +68,7 @@ class MyTestCase(unittest.TestCase):
         self.assertLess(alerted['key'], num_mb * MB)
         # print('stopped. avail: {} MB'.format(alerted['key']/1024/1024))
 
+    @unittest.skipIf(True, "skip memory test")
     def test_multi(self):
         """multiple memory alerts"""
         num_mb = [10000, 9000, 8000]
