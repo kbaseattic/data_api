@@ -11,11 +11,14 @@ from doekbase.data_api.taxonomy.taxon.service import ttypes as tax_ttypes
 from doekbase.data_api.taxonomy.taxon.service import thrift_service as \
     taxon_thrift_service
 from  doekbase.data_api.taxonomy.taxon.service.interface import TaxonService
+from doekbase.data_api.tests.shared import in_travis
 
 import logging
 import unittest as ut
 
 _log = logging.getLogger(__name__)
+
+_travis = in_travis()
 
 class Incomplete1(object):
     @sc.server_method
@@ -117,6 +120,7 @@ class TestStartService(ut.TestCase):
         args = (TaxonService, object, logging.getLogger())
         self.assertRaises(AssertionError, sc.start_service, *args)
 
+    @ut.skipIf(_travis, 'Skip start/stop service in Travis; kills Redis')
     def test_start_service(self):
         #start_service() works for semi-reasonable inputs
         args = (TaxonService, taxon_thrift_service, logging.getLogger())
