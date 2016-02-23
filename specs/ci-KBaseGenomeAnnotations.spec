@@ -163,6 +163,7 @@ typedef structure {
   int num_contigs;
   string notes;
   taxon_ref taxon_ref;
+  mapping<string base, int count> base_counts;
 } Assembly;
 
 /*
@@ -492,7 +493,7 @@ genbank_handle_ref are handle service references to shock.
 
 @optional external_source external_source_id external_source_origination_date notes environmental_comments quality_score 
 @optional annotation_quality_ref publications evidence_container_ref methodology seed_roles_ref genbank_handle_ref 
-@optional alias_source_counts_map interfeature_relationship_counts_map
+@optional alias_source_counts_map interfeature_relationship_counts_map release
 */
  
 typedef structure {
@@ -500,6 +501,7 @@ typedef structure {
   string external_source;
   string external_source_id;
   string external_source_origination_date;
+  string release;
   string notes;
   string environmental_comments; 
   taxon_ref taxon_ref;
