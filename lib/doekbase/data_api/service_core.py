@@ -95,7 +95,7 @@ def server_method(func):
                                'ref={ref} args={args} kwargs={kw}'
                                'error_message="{m}" dur={t:.3f}'
                                .format(meth=func.__name__, tok=token, ref=ref,
-                                       args=args, kw=kwargs, m=error.message,
+                                       args=args, kw=kwargs, m=str(error),
                                        t=time.time() - t0))
         return result
 
