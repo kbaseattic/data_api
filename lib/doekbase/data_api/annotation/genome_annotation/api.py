@@ -141,14 +141,11 @@ class GenomeAnnotationInterface(object):
               `FEATURE_DESCRIPTIONS`.
 
             - `region_list`: List of region specs. e.g.,
-              ``[{"contig_id": str, "strand": "+"|"-"|"?", "start": int, "length": int},...]``
+              ``[{"contig_id": str, "strand": "+"|"-", "start": int, "length": int},...]``
 
                 The Feature sequence begin and end are calculated as follows:
                   [start, start + length) for "+" strand
                   (start - length, start] for "-" strand
-
-                  If passing in "?" for strand, meaning either, the above
-                  calculations will apply to the correct strand type of the data.
 
             - `function_list`: List of function strings to match.
 
@@ -607,9 +604,7 @@ class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
 
                 for loc in f["location"]:
                     for r in regions:
-                        if r["contig_id"] == loc[0] and \
-                           (loc[2] == r["strand"] or r["strand"] == "?"):
-
+                        if r["contig_id"] == loc[0] and loc[2] == r["strand"]:
                             if loc[2] == "+" and \
                                max(loc[1], r["start"]) <= min(loc[1]+loc[3], r["start"] + r["length"]):
                                 return True
@@ -1149,9 +1144,7 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
             def is_feature_in_regions(f, regions):
                 for loc in f["locations"]:
                     for r in regions:
-                        if r["contig_id"] == loc[0] and \
-                           (loc[2] == r["strand"] or r["strand"] == "?"):
-
+                        if r["contig_id"] == loc[0] and loc[2] == r["strand"]:
                             if loc[2] == "+" and \
                                max(loc[1], r["start"]) <= min(loc[1] + loc[3], r["start"] + r["length"]):
                                 return True
