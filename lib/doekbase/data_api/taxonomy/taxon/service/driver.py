@@ -12,8 +12,8 @@ from doekbase.data_api.util import get_logger
 
 _log = get_logger(__name__)
 
-def start_service(services=None, host='localhost', port=9101):
+def start_service(**kw):
     return service_core.start_service(TaxonService, thrift_service, _log,
-                                      services=services, host=host, port=port)
+                                      **kw)
 
 stop_service = service_core.stop_service
