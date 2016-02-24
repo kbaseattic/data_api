@@ -1114,6 +1114,10 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
 
         data = self.get_data()
 
+        # XXX: debugging
+        #return {'by_' + group_by: []}
+        # XXX
+
         feature_container_references = data["feature_container_references"]
         features = {}
 

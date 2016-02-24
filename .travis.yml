@@ -33,9 +33,9 @@ env:
 
 after_success:
   - codecov
-  - kill $(cat taxonAPI.pid)
-  - kill $(cat assemblyAPI.pid)
-  - kill $(cat genome_annotationAPI.pid)
+#  - kill $(cat taxonAPI.pid)
+#  - kill $(cat assemblyAPI.pid)
+#  - kill $(cat genome_annotationAPI.pid)
 
 after_failure:
   - cat taxon.out
