@@ -14,6 +14,8 @@ from  doekbase.data_api.taxonomy.taxon.service.interface import TaxonService
 from doekbase.data_api.tests.shared import in_travis
 
 import logging
+import os
+import signal
 import unittest as ut
 
 _log = logging.getLogger(__name__)
@@ -120,7 +122,6 @@ class TestStartService(ut.TestCase):
         args = (TaxonService, object, logging.getLogger())
         self.assertRaises(AssertionError, sc.start_service, *args)
 
-    #@ut.skipIf(_travis, 'Skip start/stop service in Travis; kills Redis')
     def test_start_service(self):
         #start_service() works for semi-reasonable inputs
         args = (TaxonService, taxon_thrift_service, logging.getLogger())
@@ -129,3 +130,47 @@ class TestStartService(ut.TestCase):
         # start the reactor loop
         sc.start_service(*args)
 
+    def test_killpgrp(self):
+        sc.os = MockOSModule(100)
+        sc.kill_process_group(_log)
+        self.assertEqual(sc.os.kill_pid, -sc.os.getpgid(sc.os.getpid()))
+        self.assertEqual(sc.os.kill_signal, signal.SIGINT)
+        sc.os = os # put it back!
+
+    def test_start_service_twisted_exception(self):
+        orig_reactor = sc.twisted.internet.reactor
+        sc.twisted.internet.reactor = MockReactor()
+        args = (TaxonService, taxon_thrift_service, logging.getLogger())
+        self.assertRaises(RuntimeError, sc.start_service, *args)
+        sc.twisted.internet.reactor = orig_reactor # set it back
+
+class MockOSModule(object):
+    """Fake OS module for testing the process group killing, without
+    actually killing the process group.
+    """
+    def __init__(self, pid):
+        self.pid = pid
+        self.kill_pid, self.kill_signal = None, None
+
+    def kill(self, pid, signal):
+        self.kill_pid, self.kill_signal = pid, signal
+
+    def getpid(self):
+        return self.pid
+
+    def getpgid(self, pid):
+        return self.pid + 1
+
+class MockReactor(object):
+    """Fake Twisted reactor.
+    """
+    def __init__(self, fail=True):
+        self._fail = fail
+
+    def run(self):
+        if self._fail:
+            raise RuntimeError("MockReactor Fail")
+    def listenTCP(self, *a, **k):
+        return
+    def addSystemEventTriegger(self, *a):
+        return
