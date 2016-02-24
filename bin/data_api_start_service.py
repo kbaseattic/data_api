@@ -175,6 +175,9 @@ def main():
                         help="prod, next, ci, localhost, dir_cache, dir_nocache",
                         default="dir_nocache")
     parser.add_argument("--pidfile", help="path to pidfile to use")
+    parser.add_argument("--kill-on-exit", action="store_true", default=False,
+                        dest="kill_on_exit",
+                        help="Attempt to kill entire process group on exit")
     parser.add_argument('--verbose', '-v', dest='vb', action="count", default=1,
                         help="Print more verbose messages to standard error. "
                              "Repeatable. (default=INFO)")
@@ -304,7 +307,8 @@ def main():
         if args.mem_stop > 0:
             mem_mon.add_alert(args.mem_stop, low_memory_abort, driver,
                               service_name, pidfile)
-        driver.start_service(services=services, port=service_port, host='')
+        driver.start_service(services=services, port=service_port, host='',
+                             killprocgrp=args.kill_on_exit)
     finally:
         release_pidfile(pidfile)
         log_end(_log, t0, service_name, kvp=service_info)

@@ -120,7 +120,7 @@ class TestStartService(ut.TestCase):
         args = (TaxonService, object, logging.getLogger())
         self.assertRaises(AssertionError, sc.start_service, *args)
 
-    @ut.skipIf(_travis, 'Skip start/stop service in Travis; kills Redis')
+    #@ut.skipIf(_travis, 'Skip start/stop service in Travis; kills Redis')
     def test_start_service(self):
         #start_service() works for semi-reasonable inputs
         args = (TaxonService, taxon_thrift_service, logging.getLogger())

@@ -176,7 +176,7 @@ class BaseClientConnection(object):
 # For service drivers
 
 def start_service(api_class, service_class, log,
-                  services=None, host='localhost', port=9100):
+                  services=None, host='localhost', port=9100, killprocgrp=False):
     """Start a Data API service.
 
     Args:
@@ -188,6 +188,7 @@ def start_service(api_class, service_class, log,
                          constructor of the `api_class`.
         host (str): Service host (will default to 'localhost')
         port (int): Service port, e.g. 9101
+        killprocgrp (bool): if True, kill process group on exit
     """
     assert issubclass(api_class, BaseService), \
         'Invalid "api_class": must be a subclass of ' \
@@ -209,10 +210,11 @@ def start_service(api_class, service_class, log,
     twisted.internet.reactor.listenTCP(port, site, interface=host)
 
     # Kill entire process group on shutdown
-    twisted.internet.reactor.addSystemEventTrigger('before', 'shutdown',
-                                                   functools.partial(
-                                                       kill_process_group,
-                                                       log=log))
+    if killprocgrp:
+        twisted.internet.reactor.addSystemEventTrigger('before', 'shutdown',
+                                                       functools.partial(
+                                                           kill_process_group,
+                                                           log=log))
 
     # Run server
     sname = api_class.__name__
