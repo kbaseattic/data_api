@@ -11,7 +11,8 @@ except ImportError:
 import simplejson
 import time
 import sys
-import biokbase.workspace.client
+#import biokbase.workspace.client
+import doekbase.workspace.client
 import re
 import hashlib
 import traceback
@@ -64,8 +65,8 @@ def make_taxon_lookup(wsname=None,wsurl=None, taxon_names_file = None):
     start  = time.time()
     print ("Start time " + str(start))
 
-    ws_client = biokbase.workspace.client.Workspace(wsurl)
-
+#    ws_client = biokbase.workspace.client.Workspace(wsurl)
+    ws_client = doekbase.workspace.client.Workspace(wsurl)
     workspace_object = ws_client.get_workspace_info({'workspace':wsname})
     
 
