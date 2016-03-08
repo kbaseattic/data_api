@@ -141,14 +141,11 @@ class GenomeAnnotationInterface(object):
               `FEATURE_DESCRIPTIONS`.
 
             - `region_list`: List of region specs. e.g.,
-              ``[{"contig_id": str, "strand": "+"|"-"|"?", "start": int, "length": int},...]``
+              ``[{"contig_id": str, "strand": "+"|"-", "start": int, "length": int},...]``
 
                 The Feature sequence begin and end are calculated as follows:
                   [start, start + length) for "+" strand
                   (start - length, start] for "-" strand
-
-                  If passing in "?" for strand, meaning either, the above
-                  calculations will apply to the correct strand type of the data.
 
             - `function_list`: List of function strings to match.
 
@@ -607,9 +604,7 @@ class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
 
                 for loc in f["location"]:
                     for r in regions:
-                        if r["contig_id"] == loc[0] and \
-                           (loc[2] == r["strand"] or r["strand"] == "?"):
-
+                        if r["contig_id"] == loc[0] and loc[2] == r["strand"]:
                             if loc[2] == "+" and \
                                max(loc[1], r["start"]) <= min(loc[1]+loc[3], r["start"] + r["length"]):
                                 return True
@@ -1119,6 +1114,10 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
 
         data = self.get_data()
 
+        # XXX: debugging
+        #return {'by_' + group_by: []}
+        # XXX
+
         feature_container_references = data["feature_container_references"]
         features = {}
 
@@ -1149,9 +1148,7 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
             def is_feature_in_regions(f, regions):
                 for loc in f["locations"]:
                     for r in regions:
-                        if r["contig_id"] == loc[0] and \
-                           (loc[2] == r["strand"] or r["strand"] == "?"):
-
+                        if r["contig_id"] == loc[0] and loc[2] == r["strand"]:
                             if loc[2] == "+" and \
                                max(loc[1], r["start"]) <= min(loc[1] + loc[3], r["start"] + r["length"]):
                                 return True
@@ -1362,10 +1359,11 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
             else:
                 f["feature_function"] = ""
 
-            if 'publications' in x:
-                f["feature_publications"] = x['publications']
-            else:
-                f["feature_publications"] = []
+            #if 'publications' in x:
+            #    f["feature_publications"] = x['publications']
+            #else:
+            # TODO fix publications in thrift spec and code, problem with existing data
+            f["feature_publications"] = []
 
             if 'aliases' in x:
                 f["feature_aliases"] = x['aliases']
