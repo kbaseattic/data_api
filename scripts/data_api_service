@@ -1,8 +1,14 @@
 #!/bin/bash
 
-script_dir=$(dirname "$(readlink -f "$0")")
+# This script is used to check the status of the various data_api services.
+# It determines which service to check based on the name of the symlink. So do
+# ln -s data_api_service $servicename_api_service
+# to check $servicename.  (The Makefile does this for taxon, assembly, and genome_annotation.)
 
-logfile=$script_dir/log
+script_dir=$(dirname "$(readlink -f "$0")")
+service=$(basename $0 | perl -ne '($service)= $_=~/(.*)_api_service$/;print $service')
+
+logfile=$script_dir/$service.log
 
 rm -f $logfile
 
@@ -49,9 +55,6 @@ source $script_dir/../venv/bin/activate
 export KB_AUTH_TOKEN=$(cat /etc/check_mk/dataapitoken)
 
 date >> $logfile
-echo checking services from $KB_DEPLOYMENT_CONFIG in $deployenv >> $logfile
+echo checking $service from $KB_DEPLOYMENT_CONFIG in $deployenv >> $logfile
 
-for api in assembly taxon genome_annotation
-do
-    test_api_service.py $api https://$deployenv.kbase.us/services/data/$api 2>> $logfile
-done
+test_api_service.py $service https://$deployenv.kbase.us/services/data/$service 2>> $logfile
