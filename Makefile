@@ -22,10 +22,14 @@ deploy-lib:
 	virtualenv $(SERVICE_DIR)/venv
 	. $(SERVICE_DIR)/venv/bin/activate && pip install .
 
+# to do: automate symlink creation
 deploy-service-scripts:
 	cp $(SCRIPTS_DIR)/start_service $(SCRIPTS_DIR)/stop_service $(SERVICE_DIR)/
 	mkdir -p $(SERVICE_DIR)/check_mk
 	cp $(SCRIPTS_DIR)/data_api_service $(SERVICE_DIR)/check_mk/
+	ln -s $(SERVICE_DIR)/check_mk/data_api_service $(SERVICE_DIR)/check_mk/taxon_api_service
+	ln -s $(SERVICE_DIR)/check_mk/data_api_service $(SERVICE_DIR)/check_mk/assembly_api_service
+	ln -s $(SERVICE_DIR)/check_mk/data_api_service $(SERVICE_DIR)/check_mk/genome_annotation_api_service
 
 test: subupdate shutdown startup
 	@echo '+- Run nosetests from the data_api source directory, which will use the test data'
