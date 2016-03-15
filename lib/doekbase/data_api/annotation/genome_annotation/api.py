@@ -931,7 +931,7 @@ class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
             else:
                 f["feature_aliases"] = {}
 
-            f["feature_notes"] = []
+            f["feature_notes"] = ""
             f["feature_inference"] = ""
 
             if "feature_quality_score" in x:
@@ -1373,7 +1373,7 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
             if 'notes' in x:
                 f["feature_notes"] = x['notes']
             else:
-                f["feature_notes"] = []
+                f["feature_notes"] = ""
 
             if 'inference' in x:
                 f["feature_inference"] = x['inference']
