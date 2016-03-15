@@ -75,7 +75,7 @@ struct Feature_data {
     9: list<string> feature_publications;
     10: list<string> feature_quality_warnings;
     11: list<string> feature_quality_score;
-    12: list<string> feature_notes;
+    12: string feature_notes;
     13: string feature_inference;
 }
 
