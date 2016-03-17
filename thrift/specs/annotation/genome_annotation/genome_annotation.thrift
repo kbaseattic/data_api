@@ -57,10 +57,10 @@ struct Feature_id_filters {
 }
 
 struct Feature_id_mapping {
-    1: map<string, list<string>> by_type = empty;
-    2: map<string, map<string, map<string, list<string>>>> by_region = empty;
-    3: map<string, list<string>> by_function = empty;
-    4: map<string, list<string>> by_alias = empty;
+    1: map<string, list<string>> by_type = {};
+    2: map<string, map<string, map<string, list<string>>>> by_region = {};
+    3: map<string, list<string>> by_function ={};
+    4: map<string, list<string>> by_alias = {};
 }
 
 struct Feature_data {
@@ -104,6 +104,7 @@ service thrift_service {
     /**
      * Retrieve the Taxon associated with this GenomeAnnotation.
      *
+     * @return Reference to TaxonAPI object
      */
     ObjectReference get_taxon(1:required string token,
                               2:required ObjectReference ref) throws (
@@ -117,6 +118,7 @@ service thrift_service {
     /**
      * Retrieve the Assembly associated with this GenomeAnnotation.
      *
+     * @return reference to AssemblyAPI object
      */
     ObjectReference get_assembly(1:required string token,
                                  2:required ObjectReference ref) throws (
@@ -130,6 +132,7 @@ service thrift_service {
     /**
      * Retrieve the list of Feature types in this GenomeAnnotation.
      *
+     * @return List of feature type identifiers (strings)
      */
     list<string> get_feature_types(1:required string token,
                                    2:required ObjectReference ref) throws (
@@ -141,8 +144,11 @@ service thrift_service {
         6:TypeException type_exception),
 
     /**
-     * Retrieve the descriptions for each Feature type in this GenomeAnnotation.
+     * Retrieve the descriptions for each Feature type in
+     * this GenomeAnnotation.
      *
+     * @param feature_type_list List of Feature types. If this list is empty or None, then the whole mapping will be returned.
+     * @return Name and description for each requested Feature Type
      */
     map<string,string> get_feature_type_descriptions(1:required string token,
                                                      2:required ObjectReference ref,
@@ -157,6 +163,7 @@ service thrift_service {
     /**
      * Retrieve the count of each Feature type in this GenomeAnnotation.
      *
+     * @param feature_type_list  List of Feature Types. If empty, will retrieve counts for all Feature Types.
      */
     map<string,i64> get_feature_type_counts(1:required string token,
                                             2:required ObjectReference ref,
@@ -169,8 +176,11 @@ service thrift_service {
         6:TypeException type_exception),
 
     /**
-     * Retrieve Feature ids in this GenomeAnnotation, optionally filtered by type, region, function, alias.
+     * Retrieve Feature IDs in this GenomeAnnotation, optionally filtered by type, region, function, alias.
      *
+     * @param filters Dictionary of filters that can be applied to contents. If this is empty or missing, all Feature IDs will be returned.
+     * @param group_type How to group results, which is a single string matching one of the values for the ``filters`` parameter.
+     * @return Result with values for requested `group_type` filled in under a key named for that group_type, which will be 'by_' plus the first token of the filter name, e.g. 'by_alias' for group_type 'alias_list'.
      */
     Feature_id_mapping get_feature_ids(1:required string token,
                                        2:required ObjectReference ref,
