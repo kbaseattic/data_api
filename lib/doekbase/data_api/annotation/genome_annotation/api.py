@@ -921,10 +921,11 @@ class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
             else:
                 f["feature_dna_sequence_length"] = -1
 
-            if 'publications' in x:
-                f["feature_publications"] = x['publications']
-            else:
-                f["feature_publications"] = []
+            #if 'publications' in x:
+            #    f["feature_publications"] = x['publications']
+            #else:
+            #    f["feature_publications"] = []
+            f["feature_publications"] = []
 
             if 'aliases' in x:
                 f["feature_aliases"] = {k: [] for k in x['aliases']}
