@@ -7,8 +7,9 @@
     :titlesonly:
     :maxdepth: 2
 
-    Python API <python>
-    JavaScript API <javascript>
+    Python API<python>
+    JavaScript API<javascript>
+    Perl API<perl>
     Developer Notes <developer>
 
 .. TODO: API Reference <_modules/index.html>

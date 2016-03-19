@@ -1,7 +1,7 @@
 .. JavaScript documentation master file
 
-KBase JavaScript Data API documentation
-========================================
+JavaScript Data API documentation
+==================================
 
 .. toctree::
 

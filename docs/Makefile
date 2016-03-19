@@ -62,8 +62,11 @@ api:
 	$(SPHINXAPI) -f -o $(APIOUTDIR) $(APIMODULEDIR)
 	@echo
 	@echo "Build finished. The API .rst pages are in $(APIOUTDIR)."
-	
-html: api
+
+clients:
+	(cd clients; make)
+
+html: api clients
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)
 	@echo
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)."
@@ -71,7 +74,7 @@ html: api
 kbclean:
 	rm -rf $(KB_BUILDDIR)/*
 	
-kbhtml:
+kbhtml: clients
 	$(SPHINXBUILD) -b html $(KB_ALLSPHINXOPTS) $(KB_BUILDDIR)
 	@echo
 	@echo "Build finished. The HTML pages are in $(KB_BUILDDIR)."

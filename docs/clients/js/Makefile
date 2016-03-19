@@ -7,6 +7,7 @@
 ROOT_DIR=../../..
 SPEC_DIR=${ROOT_DIR}/thrift/specs
 DOCS_DIR=${ROOT_DIR}/docs
+BUILD=../build_from_json
 
 THRIFT=thrift
 
@@ -20,7 +21,7 @@ build:
 		j=$$n.json; r=$$n.rst; \
 		echo "$$n => $$j => $$r"; \
 		${THRIFT} -gen json -out . $$spec; \
-		./build_from_json $$j $$r; \
+		${BUILD} $$j $$r; \
 	done
 
 clean:

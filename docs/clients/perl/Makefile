@@ -1,5 +1,5 @@
 #
-# Build JavaScript documentation from Thrift specs,
+# Build Perl documentation from Thrift specs,
 # using restructured text as the output.
 #
 # Author: Dan Gunter <dkgunter@lbl.gov>
