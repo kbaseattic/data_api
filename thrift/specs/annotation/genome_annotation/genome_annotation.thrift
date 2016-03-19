@@ -97,9 +97,17 @@ struct Feature_id_filters {
 }
 
 struct Feature_id_mapping {
+    /** Mapping of Feature type string to a list of Feature IDs */
     1: map<string, list<string>> by_type = {};
+    /**
+     * Mapping of contig ID, strand "+" or "-", and range "start--end" to
+     * a list of Feature IDs. For example::
+     *    {'contig1': {'+': {'123--456': ['feature1', 'feature2'] }}}
+     */
     2: map<string, map<string, map<string, list<string>>>> by_region = {};
+    /** Mapping of function string to a list of Feature IDs */
     3: map<string, list<string>> by_function ={};
+    /** Mapping of alias string to a list of Feature IDs */
     4: map<string, list<string>> by_alias = {};
 }
 
@@ -127,8 +135,9 @@ struct Feature_data {
      *
      * List of Feature regions, where the Feature bounds are
      * calculated as follows:
-     *   - For "+" strand, [start, start + length)
-     *   - For "-" strand, (start - length, start]
+     *
+     * - For "+" strand, [start, start + length)
+     * - For "-" strand, (start - length, start]
     */
     8: list<Region> feature_locations;
     /**
@@ -167,13 +176,18 @@ struct Protein_data {
 }
 
 struct Exon_data {
+    /** Location of the exon in the contig. */
     1: Region exon_location;
+    /** DNA Sequence string. */
     2: string exon_dna_sequence;
+    /** The position of the exon, ordered 5' to 3'. */
     3: i64 exon_ordinal;
 }
 
 struct UTR_data {
+    /** Locations of this UTR */
     1: list<Region> utr_locations;
+    /** DNA sequence string for this UTR */
     2: string utr_dna_sequence;
 }
 
@@ -208,7 +222,7 @@ service thrift_service {
         6:TypeException type_exception),
 
     /**
-     * Retrieve the list of Feature types in this GenomeAnnotation.
+     * Retrieve the list of Feature types.
      *
      * @return List of feature type identifiers (strings)
      */
@@ -241,8 +255,7 @@ service thrift_service {
         6:TypeException type_exception),
 
     /**
-     * Retrieve the count of each Feature type in this
-     * GenomeAnnotation.
+     * Retrieve the count of each Feature type.
      *
      * @param feature_type_list  List of Feature Types. If empty,
      *   this will retrieve  counts for all Feature Types.
@@ -258,17 +271,13 @@ service thrift_service {
         6:TypeException type_exception),
 
     /**
-     * Retrieve Feature IDs in this GenomeAnnotation, optionally filtered by
-     * type, region, function, alias.
+     * Retrieve Feature IDs, optionally filtered by type, region, function, alias.
      *
      * @param filters Dictionary of filters that can be applied to contents.
      *   If this is empty or missing, all Feature IDs will be returned.
      * @param group_type How to group results, which is a single string matching one
      *   of the values for the ``filters`` parameter.
-     * @return Result with values for requested `group_type` filled in
-     *   under a key named for that group_type, which will be 'by_'
-     *   plus the first token of the filter name, e.g. 'by_alias'
-     *   for group_type 'alias_list'.
+     * @return Grouped mapping of features.
      */
     Feature_id_mapping get_feature_ids(1:required string token,
                                        2:required ObjectReference ref,
@@ -282,7 +291,7 @@ service thrift_service {
         6:TypeException type_exception),
 
     /**
-     * Retrieve Feature data available in this GenomeAnnotation.
+     * Retrieve Feature data.
      *
      * @param feature_id_list List of Features to retrieve.
      *   If None, returns all Feature data.
@@ -299,7 +308,7 @@ service thrift_service {
         6:TypeException type_exception),
 
     /**
-     * Retrieve Protein data available in this GenomeAnnotation.
+     * Retrieve Protein data.
      *
      * @return Mapping from protein ID to data about the protein.
      */
@@ -313,10 +322,10 @@ service thrift_service {
         6:TypeException type_exception),
 
     /**
-     * Retrieve Feature locations in this GenomeAnnotation.
+     * Retrieve Feature locations.
      *
-     * @param feature_id_list List of Features to retrieve.
-     *     If empty, returns all Feature locations.
+     * @param feature_id_list List of Feature IDs for which to retrieve locations.
+     *     If empty, returns data for all features.
      * @return Mapping from Feature IDs to location information for each.
      */
     map<string, list<Region>> get_feature_locations(1:required string token,
@@ -330,8 +339,11 @@ service thrift_service {
         6:TypeException type_exception),
 
     /**
-     * Retrieve Feature publications in this GenomeAnnotation.
+     * Retrieve Feature publications.
      *
+     * @param feature_id_list List of Feature IDs for which to retrieve publications.
+     *     If empty, returns data for all features.
+     * @return Mapping from Feature IDs to publication info for each.
      */
     map<string,list<string>> get_feature_publications(1:required string token,
                                                       2:required ObjectReference ref,
@@ -344,8 +356,11 @@ service thrift_service {
         6:TypeException type_exception),
 
     /**
-     * Retrieve Feature DNA sequences in this GenomeAnnotation.
+     * Retrieve Feature DNA sequences.
      *
+     * @param feature_id_list List of Feature IDs for which to retrieve sequences.
+     *     If empty, returns data for all features.
+     * @return Mapping of Feature IDs to their DNA sequence.
      */
     map<string,string> get_feature_dna(1:required string token,
                                        2:required ObjectReference ref,
@@ -358,8 +373,11 @@ service thrift_service {
         6:TypeException type_exception),
 
     /**
-     * Retrieve Feature functions in this GenomeAnnotation.
+     * Retrieve Feature functions.
      *
+     * @param feature_id_list List of Feature IDs for which to retrieve functions.
+     *     If empty, returns data for all features.
+     * @return Mapping of Feature IDs to their functions.
      */
     map<string,string> get_feature_functions(1:required string token,
                                              2:required ObjectReference ref,
@@ -372,8 +390,11 @@ service thrift_service {
         6:TypeException type_exception),
 
     /**
-     * Retrieve Feature aliases in this GenomeAnnotation.
+     * Retrieve Feature aliases.
      *
+     * @param feature_id_list List of Feature IDS for which to retrieve aliases.
+     *     If empty, returns data for all features.
+     * @return Mapping of Feature IDs to a list of aliases.
      */
     map<string,list<string>> get_feature_aliases(1:required string token,
                                                  2:required ObjectReference ref,
@@ -386,8 +407,11 @@ service thrift_service {
         6:TypeException type_exception),
 
     /**
-     * Retrieve the CDS id for each Gene id in this GenomeAnnotation.
+     * Retrieves coding sequence Features (cds) for given gene Feature IDs.
      *
+     * @param feature_id_list List of gene Feature IDS for which to retrieve CDS.
+     *     If empty, returns data for all features.
+     * @return Mapping of gene Feature IDs to a list of CDS Feature IDs.
      */
     map<string,list<string>> get_cds_by_gene(1:required string token,
                                              2:required ObjectReference ref,
@@ -400,8 +424,11 @@ service thrift_service {
         6:TypeException type_exception),
 
     /**
-     * Retrieve the CDS id for each mRNA id in this GenomeAnnotation.
+     * Retrieves coding sequence (cds) Feature IDs for given mRNA Feature IDs.
      *
+     * @param feature_id_list List of mRNA Feature IDS for which to retrieve CDS.
+     *     If empty, returns data for all features.
+     * @return Mapping of mRNA Feature IDs to a list of CDS Feature IDs.
      */
     map<string,string> get_cds_by_mrna(1:required string token,
                                        2:required ObjectReference ref,
@@ -414,8 +441,11 @@ service thrift_service {
         6:TypeException type_exception),
 
     /**
-     * Retrieve the Gene id for each CDS id in this GenomeAnnotation.
+     * Retrieves gene Feature IDs for given coding sequence (cds) Feature IDs.
      *
+     * @param feature_id_list List of cds Feature IDS for which to retrieve gene IDs.
+     *     If empty, returns all cds/gene mappings.
+     * @return Mapping of cds Feature IDs to gene Feature IDs.
      */
     map<string,string> get_gene_by_cds(1:required string token,
                                        2:required ObjectReference ref,
@@ -428,8 +458,11 @@ service thrift_service {
         6:TypeException type_exception),
 
     /**
-     * Retrieve the Gene id for each mRNA id in this GenomeAnnotation.
+     * Retrieves gene Feature IDs for given mRNA Feature IDs.
      *
+     * @param feature_id_list List of mRNA Feature IDS for which to retrieve gene IDs.
+     *     If empty, returns all mRNA/gene mappings.
+     * @return Mapping of mRNA Feature IDs to gene Feature IDs.
      */
     map<string,string> get_gene_by_mrna(1:required string token,
                                         2:required ObjectReference ref,
@@ -442,8 +475,11 @@ service thrift_service {
         6:TypeException type_exception),
 
     /**
-     * Retrieve the mRNA id for each CDS id in this GenomeAnnotation.
+     * Retrieves mRNA Features for given coding sequences (cds) Feature IDs.
      *
+     * @param feature_id_list List of cds Feature IDS for which to retrieve mRNA IDs.
+     *     If empty, returns all cds/mRNA mappings.
+     * @return Mapping of cds Feature IDs to mRNA Feature IDs.
      */
     map<string,string> get_mrna_by_cds(1:required string token,
                                        2:required ObjectReference ref,
@@ -456,8 +492,11 @@ service thrift_service {
         6:TypeException type_exception),
 
     /**
-     * Retrieve the mRNA id for each Gene id in this GenomeAnnotation.
+     * Retrieve the mRNA IDs for given gene IDs.
      *
+     * @param feature_id_list List of gene Feature IDS for which to retrieve mRNA IDs.
+     *     If empty, returns all gene/mRNA mappings.
+     * @return Mapping of gene Feature IDs to a list of mRNA Feature IDs.
      */
     map<string, list<string>> get_mrna_by_gene(1:required string token,
                                                2:required ObjectReference ref,
@@ -470,8 +509,11 @@ service thrift_service {
         6:TypeException type_exception),
 
     /**
-     * Retrieve Exon information for each mRNA id in this GenomeAnnotation.
+     * Retrieve Exon information for each mRNA ID.
      *
+     * @param feature_id_list List of mRNA Feature IDS for which to retrieve exons.
+     *     If empty, returns data for all exons.
+     * @return Mapping of mRNA Feature IDs to a list of exons (:js:data:`Exon_data`).
      */
     map<string, list<Exon_data>> get_mrna_exons(1:required string token,
                                                 2:required ObjectReference ref,
@@ -484,8 +526,24 @@ service thrift_service {
         6:TypeException type_exception),
 
     /**
-     * Retrieve UTR information for each mRNA id in this GenomeAnnotation.
+     * Retrieve UTR information for each mRNA Feature ID.
      *
+     *  UTRs are calculated between mRNA features and corresponding CDS features.
+     *  The return value for each mRNA can contain either:
+     *     - no UTRs found (empty dict)
+     *     -  5' UTR only
+     *     -  3' UTR only
+     *     -  5' and 3' UTRs
+     *
+     *  Note: The Genome data type does not contain interfeature
+     *  relationship information. Calling this method for Genome objects
+     *  will raise a :js:throws:`TypeException`.
+     *
+     * @param feature_id_list List of mRNA Feature IDS for which to retrieve UTRs.
+     * If empty, returns data for all UTRs.
+     * @return Mapping of mRNA Feature IDs to a mapping that contains
+     * both 5' and 3' UTRs::
+     *     { "5'UTR": :js:data:`UTR_data`, "3'UTR": :js:data:`UTR_data` }
      */
     map<string, map<string, UTR_data>> get_mrna_utrs(1:required string token,
                                                      2:required ObjectReference ref,
