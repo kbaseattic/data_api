@@ -15,6 +15,18 @@ import os
 import re
 import sys
 
+_EXCEPTION_REASONS = {
+    'ServiceException': 'Internal service error',
+    'AuthorizationException': 'Failed to authorize user for operation',
+    'AuthenticationException': 'Could not authenticate user',
+    'ObjectReferenceException': 'Error retrieving object for reference',
+    'AttributeException': 'Error retrieving requested attribute',
+    'TypeException': 'Input is of wrong type'
+}
+
+def get_exception_reason(name):
+    return _EXCEPTION_REASONS.get(name, 'Generic error')
+
 def write_rst(input_json, output_stream, title, classname):
     services = input_json['services']
     module = input_json['name'].capitalize()
@@ -129,7 +141,7 @@ def add_type_links(value):
     vs = value.strip()
     backquoted = vs.startswith('``') and vs.endswith('``')
     quote = '``' if backquoted else ''
-    result = re.sub('([A-Z]\w+)', '{q} :js:class:`\\1` {q}'.format(q=quote), vs)
+    result = re.sub('([A-Z]\w+)', '{q} :js:data:`\\1` {q}'.format(q=quote), vs)
     result = result.replace('````', '')  # remove empty backquoted sections
     return result
 
@@ -144,23 +156,55 @@ class RstDocRootClass(object):
                '* token - The KBase authorization token to be used to access the '
                'service.']
         lines = ['.. js:class:: {}(config)'.format(self.name), '',
+                 '',
                  indent + ':param object config: Configuration object.'
                           ' This object has the following fields:',
                  '\n'.join(['    ' + line for line in cfg]),
-                 indent + ':throws ArgumentError:']
+                 ':throws ArgumentError: Bad input argument'
+                ]
         return '\n'.join(lines)
 
 class RstDocStruct(object):
     def __init__(self, module=None, fields=None, name=None,
-                 isException=None):
+                 isException=None, doc=None):
         assert module is not None
         assert fields is not None
         assert name is not None
         self._exc = isException is not None
         self.info = { 'module': module, 'name': name}
         self.fields = fields
+        self.doc = doc
 
     def __str__(self):
+        return self._make_list()
+
+    def _make_list(self):
+        # Header for 'class'
+        #lines = ['.. js:class:: {name}()'.format(**self.info)]
+        lines = ['.. js:data:: {name}'.format(**self.info)]
+        if self.doc:
+            lines.append('\n' + self.doc.strip() + '\n')
+        else:
+            lines.append('')
+        # List of fields
+        for field in self.fields:
+            reqstr = ('optional', 'required')[field['required'] == 'true']
+            field_str = '- **{name}** ({type}) *{req}*'\
+                .format(req=reqstr, **field)
+            doc = field.get('doc', None)
+            if doc:
+                doc_lines = doc.split('\n')
+                if len(doc_lines) == 1:
+                    lines.append(field_str + ': ' + doc)
+                else:
+                    lines.append(field_str + ': ' + doc_lines[0])
+                    for extended_doc in doc_lines[1:]:
+                        lines.append('  ' + extended_doc)
+            else:
+                lines.append(field_str)
+        return '\n'.join(lines)
+
+    def _make_table(self):
         indent = ' ' * 4
         lines = ['----', '', '.. js:class:: {name}()\n'.format(**self.info)]
         object_name = self.info['name']
@@ -209,6 +253,8 @@ class RstDocFunction(object):
     """Create a JavaScript documented function from the JSON output
     of the command 'thrift -gen json'.
     """
+    _first_throws = None
+
     def __init__(self, name=None, doc="", arguments=None, returnType=None,
                  exceptions=None, module=None, root_class=None):
         assert name is not None
@@ -252,23 +298,48 @@ class RstDocFunction(object):
              - self._params: Dict with key param name, value
                              param description
         """
-        lines = doc.split('\n')
         desc = []
-        for line in lines:
+        section_text = []
+        section_name = None
+        for line in doc.split('\n'):
             line = line.strip()
-            if line.startswith('@return '):
-                self._returns = line[8:].strip()
-            elif line.startswith('@param '):
-                items = line[7:].split()
-                if len(items) == 1:
-                    param_name, param_value = line[7:].strip(), ''
+            if section_name:
+                if line.startswith('@'):
+                    self._finish_current_section(section_name, section_text)
+                    section_name, section_text = self._start_new_section(line)
+                elif len(line) == 0:
+                    self._finish_current_section(section_name, section_text)
+                    section_text, section_name = [], None
                 else:
-                    param_name, param_value = items[0], ' '.join(items[1:])
-                self._params[param_name] = param_value
+                    section_text.append(line)
+            elif line.startswith('@'):
+                section_name, section_text = self._start_new_section(line)
             else:
                 desc.append(line)
         self._desc = ' '.join(desc)
 
+    def _finish_current_section(self, cur_group_type, cur_group):
+        s = ' '.join(cur_group)
+        if cur_group_type == 'return':
+            self._returns = s
+        elif cur_group_type == 'param':
+            first_space = s.find(' ')
+            if first_space == -1:
+                param_name, param_value = s, ''
+            else:
+                param_name = s[:first_space]
+                param_value = s[first_space + 1:].strip()
+            self._params[param_name] = param_value
+
+    def _start_new_section(self, line):
+        cur_group = []
+        first_space = line.find(' ')
+        if first_space == -1:
+            cur_group_type = line
+        else:
+            cur_group_type = line[1:first_space]
+            cur_group.append(line[first_space + 1:].strip())
+        return cur_group_type, cur_group
 
     def __str__(self):
         self.info['arglist'] = ', '.join(
@@ -285,9 +356,15 @@ class RstDocFunction(object):
             param = indent + ':param {type} {name}: {desc}'.format(**a)
             lines.append(param)
         # add exceptions
-        for exc in self.info['throws']:
-            throws = indent + ':throws {}:'.format(exc)
-            lines.append(throws)
+        if self._first_throws is None:
+            for exc in self.info['throws']:
+                throws = indent + ':throws {}: {}'\
+                     .format(exc, get_exception_reason(exc))
+                lines.append(throws)
+            RstDocFunction._first_throws = self.info['name']
+        else:
+            lines.append(indent + ':throws ...: same as :js:func:`{}`'
+                         .format(self._first_throws))
         lines.append(indent + ':returns: {return}')
         return '\n'.join(lines).format(**self.info)
 

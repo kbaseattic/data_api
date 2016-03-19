@@ -5,9 +5,9 @@ KBase JavaScript Data API documentation
 
 .. toctree::
 
-    Assembly API <js/assembly>
-    Genome Annotation API <js/genome_annotation>
-    Taxon API <js/taxon>
+    Assembly API <clients/js/assembly>
+    Genome Annotation API <clients/js/genome_annotation>
+    Taxon API <clients/js/taxon>
 
 The Data API provides a unified entry point to retrieve and, eventually,
 store KBase data objects. This page describes the JavaScript client API.

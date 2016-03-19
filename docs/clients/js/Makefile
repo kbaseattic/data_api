@@ -18,9 +18,8 @@ build:
 	@for spec in $$( find ${SPEC_DIR} -name "*.thrift" ); do \
 	    n=$$(basename $$spec .thrift); \
 		j=$$n.json; r=$$n.rst; \
-		echo "$$n => $$r => ${DEST_DIR}/$$r"; \
+		echo "$$n => $$j => $$r"; \
 		${THRIFT} -gen json -out . $$spec; \
-		echo ./build_from_json $$j $$r; \
 		./build_from_json $$j $$r; \
 	done
 

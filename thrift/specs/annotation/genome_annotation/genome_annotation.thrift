@@ -11,48 +11,88 @@ const string VERSION = "{{version}}"
 typedef string ObjectReference
 
 exception ServiceException {
+    /** Readable message desribing the error condition. */
     1: required string message;
+    /** Program stack trace */
     2: optional string stacktrace;
+    /** Optional mapping */
     3: optional map<string,string> inputs;
 }
 
 exception AuthorizationException {
+    /** Readable message desribing the error condition. */
     1: required string message;
+    /** Program stack trace */
     2: optional string stacktrace;
 }
 
 exception AuthenticationException {
+    /** Readable message desribing the error condition. */
     1: required string message;
+    /** Program stack trace */
     2: optional string stacktrace;
 }
 
 exception ObjectReferenceException {
+    /** Readable message desribing the error condition. */
     1: required string message;
+    /** Program stack trace */
     2: optional string stacktrace;
 }
 
 exception AttributeException {
+    /** Readable message desribing the error condition. */
     1: required string message;
+    /** Program stack trace */
     2: optional string stacktrace;
 }
 
 exception TypeException {
+    /** Readable message desribing the error condition. */
     1: required string message;
+    /** Program stack trace */
     2: optional string stacktrace;
+    /** List of types that would have been acceptable. */
     3: optional list<string> valid_types;
 }
 
 struct Region {
+    /** The identifier for the contig to which this region corresponds. */
     1: string contig_id;
+    /** Either a "+" or a "-", for the strand on which the region is located. */
     2: string strand;
+    /** Starting position for this region. */
     3: i64 start;
+    /** Distance from the start position that bounds the end of the region. */
     4: i64 length;
 }
 
+/**
+ * Filters passed to :meth:`get_feature_ids`
+ */
 struct Feature_id_filters {
+    /**
+     * List of Feature type strings.
+     */
     1: list<string> type_list = [];
+    /**
+     * List of region specs.
+     * For example::
+     *     [{"contig_id": str, "strand": "+"|"-",
+     *       "start": int, "length": int},...]
+     *
+     * The Feature sequence begin and end are calculated as follows:
+     *   - [start, start) for "+" strand
+     *   - (start - length, start] for "-" strand
+     */
     2: list<Region> region_list = [];
+    /**
+     * List of function strings.
+     */
     3: list<string> function_list = [];
+    /**
+     *  List of alias strings.
+     */
     4: list<string> alias_list = [];
 }
 
@@ -64,26 +104,64 @@ struct Feature_id_mapping {
 }
 
 struct Feature_data {
+    /** Identifier for this feature */
     1: string feature_id;
+    /** The Feature type e.g., "mRNA", "CDS", "gene", ... */
     2: string feature_type;
+    /** The functional annotation description */
     3: string feature_function;
+    /** Dictionary of Alias string to List of source string identifiers */
     4: map<string, list<string>> feature_aliases;
+    /** Integer representing the length of the DNA sequence for convenience */
     5: i64 feature_dna_sequence_length;
+    /** String containing the DNA sequence of the Feature */
     6: string feature_dna_sequence;
+    /** String containing the MD5 of the sequence, calculated from the uppercase string */
     7: string feature_md5;
+    /**
+     * List of dictionaries::
+     *     { "contig_id": str,
+     *       "start": int,
+     *       "strand": str,
+     *       "length": int  }
+     *
+     * List of Feature regions, where the Feature bounds are
+     * calculated as follows:
+     *   - For "+" strand, [start, start + length)
+     *   - For "-" strand, (start - length, start]
+    */
     8: list<Region> feature_locations;
+    /**
+     * List of any known publications related to this Feature
+     */
     9: list<string> feature_publications;
+    /**
+     * List of strings indicating known data quality issues.
+     * Note: not used for Genome type, but is used for
+     * GenomeAnnotation
+     */
     10: list<string> feature_quality_warnings;
+    /**
+     * Quality value with unknown algorithm for Genomes,
+     * not calculated yet for GenomeAnnotations.
+     */
     11: list<string> feature_quality_score;
+    /** Notes recorded about this Feature */
     12: string feature_notes;
+    /** Inference information */
     13: string feature_inference;
 }
 
 struct Protein_data {
+    /** Protein identifier, which is feature ID plus ".protein" */
     1: string protein_id;
+    /** Amino acid sequence for this protein */
     2: string protein_amino_acid_sequence;
+    /** Function of protein */
     3: string protein_function;
+    /** List of aliases for the protein */
     4: list<string> protein_aliases;
+    /** MD5 hash of the protein translation (uppercase) */
     5: string protein_md5;
     6: list<string> protein_domain_locations;
 }
@@ -118,7 +196,7 @@ service thrift_service {
     /**
      * Retrieve the Assembly associated with this GenomeAnnotation.
      *
-     * @return reference to AssemblyAPI object
+     * @return Reference to AssemblyAPI object
      */
     ObjectReference get_assembly(1:required string token,
                                  2:required ObjectReference ref) throws (
@@ -147,7 +225,9 @@ service thrift_service {
      * Retrieve the descriptions for each Feature type in
      * this GenomeAnnotation.
      *
-     * @param feature_type_list List of Feature types. If this list is empty or None, then the whole mapping will be returned.
+     * @param feature_type_list List of Feature types. If this list
+     *  is empty or None,
+     *  the whole mapping will be returned.
      * @return Name and description for each requested Feature Type
      */
     map<string,string> get_feature_type_descriptions(1:required string token,
@@ -161,9 +241,11 @@ service thrift_service {
         6:TypeException type_exception),
 
     /**
-     * Retrieve the count of each Feature type in this GenomeAnnotation.
+     * Retrieve the count of each Feature type in this
+     * GenomeAnnotation.
      *
-     * @param feature_type_list  List of Feature Types. If empty, will retrieve counts for all Feature Types.
+     * @param feature_type_list  List of Feature Types. If empty,
+     *   this will retrieve  counts for all Feature Types.
      */
     map<string,i64> get_feature_type_counts(1:required string token,
                                             2:required ObjectReference ref,
@@ -176,11 +258,17 @@ service thrift_service {
         6:TypeException type_exception),
 
     /**
-     * Retrieve Feature IDs in this GenomeAnnotation, optionally filtered by type, region, function, alias.
+     * Retrieve Feature IDs in this GenomeAnnotation, optionally filtered by
+     * type, region, function, alias.
      *
-     * @param filters Dictionary of filters that can be applied to contents. If this is empty or missing, all Feature IDs will be returned.
-     * @param group_type How to group results, which is a single string matching one of the values for the ``filters`` parameter.
-     * @return Result with values for requested `group_type` filled in under a key named for that group_type, which will be 'by_' plus the first token of the filter name, e.g. 'by_alias' for group_type 'alias_list'.
+     * @param filters Dictionary of filters that can be applied to contents.
+     *   If this is empty or missing, all Feature IDs will be returned.
+     * @param group_type How to group results, which is a single string matching one
+     *   of the values for the ``filters`` parameter.
+     * @return Result with values for requested `group_type` filled in
+     *   under a key named for that group_type, which will be 'by_'
+     *   plus the first token of the filter name, e.g. 'by_alias'
+     *   for group_type 'alias_list'.
      */
     Feature_id_mapping get_feature_ids(1:required string token,
                                        2:required ObjectReference ref,
@@ -196,6 +284,9 @@ service thrift_service {
     /**
      * Retrieve Feature data available in this GenomeAnnotation.
      *
+     * @param feature_id_list List of Features to retrieve.
+     *   If None, returns all Feature data.
+     * @return Mapping from Feature IDs to dicts of available data.
      */
     map<string, Feature_data> get_features(1:required string token,
                                            2:required ObjectReference ref,
@@ -210,6 +301,7 @@ service thrift_service {
     /**
      * Retrieve Protein data available in this GenomeAnnotation.
      *
+     * @return Mapping from protein ID to data about the protein.
      */
     map<string, Protein_data> get_proteins(1:required string token,
                                            2:required ObjectReference ref) throws (
@@ -223,6 +315,9 @@ service thrift_service {
     /**
      * Retrieve Feature locations in this GenomeAnnotation.
      *
+     * @param feature_id_list List of Features to retrieve.
+     *     If empty, returns all Feature locations.
+     * @return Mapping from Feature IDs to location information for each.
      */
     map<string, list<Region>> get_feature_locations(1:required string token,
                                                     2:required ObjectReference ref,
