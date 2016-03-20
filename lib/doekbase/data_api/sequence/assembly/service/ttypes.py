@@ -20,9 +20,9 @@ except:
 class ServiceException(TException):
   """
   Attributes:
-   - message
-   - stacktrace
-   - inputs
+   - message: Readable message desribing the error condition.
+   - stacktrace: Program stack trace
+   - inputs: Optional mapping
   """
 
   thrift_spec = (
@@ -126,8 +126,8 @@ class ServiceException(TException):
 class AuthorizationException(TException):
   """
   Attributes:
-   - message
-   - stacktrace
+   - message: Readable message desribing the error condition.
+   - stacktrace: Program stack trace
   """
 
   thrift_spec = (
@@ -209,8 +209,8 @@ class AuthorizationException(TException):
 class AuthenticationException(TException):
   """
   Attributes:
-   - message
-   - stacktrace
+   - message: Readable message desribing the error condition.
+   - stacktrace: Program stack trace
   """
 
   thrift_spec = (
@@ -292,8 +292,8 @@ class AuthenticationException(TException):
 class ObjectReferenceException(TException):
   """
   Attributes:
-   - message
-   - stacktrace
+   - message: Readable message desribing the error condition.
+   - stacktrace: Program stack trace
   """
 
   thrift_spec = (
@@ -375,8 +375,8 @@ class ObjectReferenceException(TException):
 class AttributeException(TException):
   """
   Attributes:
-   - message
-   - stacktrace
+   - message: Readable message desribing the error condition.
+   - stacktrace: Program stack trace
   """
 
   thrift_spec = (
@@ -458,9 +458,9 @@ class AttributeException(TException):
 class TypeException(TException):
   """
   Attributes:
-   - message
-   - stacktrace
-   - valid_types
+   - message: Readable message desribing the error condition.
+   - stacktrace: Program stack trace
+   - valid_types: List of types that would have been acceptable.
   """
 
   thrift_spec = (

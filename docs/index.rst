@@ -4,14 +4,14 @@
    contain the root `toctree` directive.
 
 .. toctree::
-    :titlesonly:
+    :hidden:
     :maxdepth: 2
 
     Python API<python>
     JavaScript API<javascript>
-    Perl API<perl>
-    Developer Notes <developer>
 
+..    Perl API<perl> ; not quite ready
+..    Developer Notes <developer> ; out of date
 .. TODO: API Reference <_modules/index.html>
 
 KBase Data API documentation
@@ -23,7 +23,7 @@ For usage, see the API pages for your selected language.
 Concepts
 --------
 
-The Data API is multi-language, with the library that implements all the behavior written in Python. We are using Thrift to generate consistent language APIs in other languages. For Python, you can import and use the library to connect directly to the data store. For other languages (and Python, too, if you choose), we use an RPC model, implemented as a thin layer of wrapper code around the Thrift-generated client to communicate with the Thrift-generated Data API `services`, which use the Python library to do its work. The diagram below summarizes this design.
+The Data API is multi-language, with the library that implements alql the behavior written in Python. We are using Thrift to generate consistent language APIs in other languages. For Python, you can import and use the library to connect directly to the data store. For other languages (and Python, too, if you choose), we use an RPC model, implemented as a thin layer of wrapper code around the Thrift-generated client to communicate with the Thrift-generated Data API `services`, which use the Python library to do its work. The diagram below summarizes this design.
 
 .. _overview_diagram:
 

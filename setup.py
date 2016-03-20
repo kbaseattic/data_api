@@ -180,8 +180,9 @@ class BuildThriftClients(setuptools.Command):
                     if os.path.exists(settings.generated_dir):
                         shutil.rmtree(settings.generated_dir)
                     # Run Thrift compiler to generate new stubs
-                    cmd = ["thrift", "-r", "--gen", settings.style,
-                               spec_path]
+                    cmd = ["thrift", "-r", "--gen"]
+                    cmd.append(settings.style)
+                    cmd.append(spec_path)
                     _log.debug("{}: Thrift command = {}".format(lang, cmd))
                     errno = call_command(cmd, is_thrift=True)
                     if errno != 0:
@@ -243,7 +244,6 @@ class BuildThriftServers(setuptools.Command):
 
     def _try_run(self):
         start_path = os.path.join(os.path.abspath(os.path.dirname(__file__)),"thrift/specs")
-
         for dirpath, dirnames, filenames in os.walk(start_path):
             for f in filenames:
                 if f.endswith(".thrift"):
@@ -252,8 +252,9 @@ class BuildThriftServers(setuptools.Command):
                     #TODO - modify version string in .thrift before code generation
                     spec_path = os.path.abspath(os.path.join(dirpath, f))
 
-                    command = ["thrift", "-r", "--gen", settings.style,
-                               spec_path]
+                    command = ["thrift", "-r", "--gen"]
+                    command.append(settings.style)
+                    command.append(spec_path)
                     errno = call_command(command, is_thrift=True)
                     if errno != 0:
                         raise Exception("Thrift build for python service failed with : {}".format(errno))
@@ -280,8 +281,9 @@ class BuildThriftServers(setuptools.Command):
 
                     # generate the client code
                     settings = thrift_build['python']
-                    command = ["thrift", "-r", "--gen", settings.style,
-                              spec_path]
+                    command = ["thrift", "-r", "--gen"]
+                    command.append(settings.style)
+                    command.append(spec_path)
                     errno = call_command(command, is_thrift=True)
                     if errno != 0:
                         raise Exception("Thrift build for python client failed "

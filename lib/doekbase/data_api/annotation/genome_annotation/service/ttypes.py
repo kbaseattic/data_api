@@ -20,9 +20,9 @@ except:
 class ServiceException(TException):
   """
   Attributes:
-   - message
-   - stacktrace
-   - inputs
+   - message: Readable message desribing the error condition.
+   - stacktrace: Program stack trace
+   - inputs: Optional mapping
   """
 
   thrift_spec = (
@@ -126,8 +126,8 @@ class ServiceException(TException):
 class AuthorizationException(TException):
   """
   Attributes:
-   - message
-   - stacktrace
+   - message: Readable message desribing the error condition.
+   - stacktrace: Program stack trace
   """
 
   thrift_spec = (
@@ -209,8 +209,8 @@ class AuthorizationException(TException):
 class AuthenticationException(TException):
   """
   Attributes:
-   - message
-   - stacktrace
+   - message: Readable message desribing the error condition.
+   - stacktrace: Program stack trace
   """
 
   thrift_spec = (
@@ -292,8 +292,8 @@ class AuthenticationException(TException):
 class ObjectReferenceException(TException):
   """
   Attributes:
-   - message
-   - stacktrace
+   - message: Readable message desribing the error condition.
+   - stacktrace: Program stack trace
   """
 
   thrift_spec = (
@@ -375,8 +375,8 @@ class ObjectReferenceException(TException):
 class AttributeException(TException):
   """
   Attributes:
-   - message
-   - stacktrace
+   - message: Readable message desribing the error condition.
+   - stacktrace: Program stack trace
   """
 
   thrift_spec = (
@@ -458,9 +458,9 @@ class AttributeException(TException):
 class TypeException(TException):
   """
   Attributes:
-   - message
-   - stacktrace
-   - valid_types
+   - message: Readable message desribing the error condition.
+   - stacktrace: Program stack trace
+   - valid_types: List of types that would have been acceptable.
   """
 
   thrift_spec = (
@@ -562,10 +562,10 @@ class TypeException(TException):
 class Region:
   """
   Attributes:
-   - contig_id
-   - strand
-   - start
-   - length
+   - contig_id: The identifier for the contig to which this region corresponds.
+   - strand: Either a "+" or a "-", for the strand on which the region is located.
+   - start: Starting position for this region.
+   - length: Distance from the start position that bounds the end of the region.
   """
 
   thrift_spec = (
@@ -665,11 +665,20 @@ class Region:
 
 class Feature_id_filters:
   """
+  Filters passed to :meth:`get_feature_ids`
+
   Attributes:
-   - type_list
-   - region_list
-   - function_list
-   - alias_list
+   - type_list: List of Feature type strings.
+   - region_list: List of region specs.
+  For example::
+      [{"contig_id": str, "strand": "+"|"-",
+        "start": int, "length": int},...]
+
+  The Feature sequence begin and end are calculated as follows:
+    - [start, start) for "+" strand
+    - (start - length, start] for "-" strand
+   - function_list: List of function strings.
+   - alias_list: List of alias strings.
   """
 
   thrift_spec = (
@@ -819,10 +828,12 @@ class Feature_id_filters:
 class Feature_id_mapping:
   """
   Attributes:
-   - by_type
-   - by_region
-   - by_function
-   - by_alias
+   - by_type: Mapping of Feature type string to a list of Feature IDs
+   - by_region: Mapping of contig ID, strand "+" or "-", and range "start--end" to
+  a list of Feature IDs. For example::
+     {'contig1': {'+': {'123--456': ['feature1', 'feature2'] }}}
+   - by_function: Mapping of function string to a list of Feature IDs
+   - by_alias: Mapping of alias string to a list of Feature IDs
   """
 
   thrift_spec = (
@@ -1031,19 +1042,32 @@ class Feature_id_mapping:
 class Feature_data:
   """
   Attributes:
-   - feature_id
-   - feature_type
-   - feature_function
-   - feature_aliases
-   - feature_dna_sequence_length
-   - feature_dna_sequence
-   - feature_md5
-   - feature_locations
-   - feature_publications
-   - feature_quality_warnings
-   - feature_quality_score
-   - feature_notes
-   - feature_inference
+   - feature_id: Identifier for this feature
+   - feature_type: The Feature type e.g., "mRNA", "CDS", "gene", ...
+   - feature_function: The functional annotation description
+   - feature_aliases: Dictionary of Alias string to List of source string identifiers
+   - feature_dna_sequence_length: Integer representing the length of the DNA sequence for convenience
+   - feature_dna_sequence: String containing the DNA sequence of the Feature
+   - feature_md5: String containing the MD5 of the sequence, calculated from the uppercase string
+   - feature_locations: List of dictionaries::
+      { "contig_id": str,
+        "start": int,
+        "strand": str,
+        "length": int  }
+
+  List of Feature regions, where the Feature bounds are
+  calculated as follows:
+
+  - For "+" strand, [start, start + length)
+  - For "-" strand, (start - length, start]
+   - feature_publications: List of any known publications related to this Feature
+   - feature_quality_warnings: List of strings indicating known data quality issues.
+  Note: not used for Genome type, but is used for
+  GenomeAnnotation
+   - feature_quality_score: Quality value with unknown algorithm for Genomes,
+  not calculated yet for GenomeAnnotations.
+   - feature_notes: Notes recorded about this Feature
+   - feature_inference: Inference information
   """
 
   thrift_spec = (
@@ -1303,11 +1327,11 @@ class Feature_data:
 class Protein_data:
   """
   Attributes:
-   - protein_id
-   - protein_amino_acid_sequence
-   - protein_function
-   - protein_aliases
-   - protein_md5
+   - protein_id: Protein identifier, which is feature ID plus ".protein"
+   - protein_amino_acid_sequence: Amino acid sequence for this protein
+   - protein_function: Function of protein
+   - protein_aliases: List of aliases for the protein
+   - protein_md5: MD5 hash of the protein translation (uppercase)
    - protein_domain_locations
   """
 
@@ -1449,9 +1473,9 @@ class Protein_data:
 class Exon_data:
   """
   Attributes:
-   - exon_location
-   - exon_dna_sequence
-   - exon_ordinal
+   - exon_location: Location of the exon in the contig.
+   - exon_dna_sequence: DNA Sequence string.
+   - exon_ordinal: The position of the exon, ordered 5' to 3'.
   """
 
   thrift_spec = (
@@ -1541,8 +1565,8 @@ class Exon_data:
 class UTR_data:
   """
   Attributes:
-   - utr_locations
-   - utr_dna_sequence
+   - utr_locations: Locations of this UTR
+   - utr_dna_sequence: DNA sequence string for this UTR
   """
 
   thrift_spec = (

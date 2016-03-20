@@ -537,7 +537,7 @@ service thrift_service {
      *
      *  Note: The Genome data type does not contain interfeature
      *  relationship information. Calling this method for Genome objects
-     *  will raise a :js:throws:`TypeException`.
+     *  will raise a :js:throws:`exc.TypeException`.
      *
      * @param feature_id_list List of mRNA Feature IDS for which to retrieve UTRs.
      * If empty, returns data for all UTRs.

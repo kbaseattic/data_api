@@ -27,21 +27,35 @@ _EXCEPTION_REASONS = {
 def get_exception_reason(name):
     return _EXCEPTION_REASONS.get(name, 'Generic error')
 
-def write_rst(input_json, output_stream, title, classname):
+def write_rst(input_json, output_stream, title, classname, language=None):
+    """Write Restructed Text from input JSON.
+
+    Args:
+        input_json: Parsed JSON document from Thrift spec.
+        output_stream: Output file.
+        title: Title of the output document.
+        classname: Name of the API class.
+        language: API language: js=JavaScript, perl=PERL
+
+    Returns: None
+    """
     services = input_json['services']
     module = input_json['name'].capitalize()
 
-    output_stream.write(get_title_text(title, classname))
+    header_obj = LanguageHeader.get_header_class(language)()
+    output_stream.write(header_obj.get_title_text(title, classname))
     method, varname = choose_example_method(services)
-    output_stream.write(get_preamble_text(title, classname, method, varname))
+    output_stream.write(header_obj.get_preamble_text(title, classname, method, varname))
 
-    doc = RstDocRootClass(classname)
+    doc = RstDocBase(classname)
     output_stream.write(str(doc))
     output_stream.write('\n\n')
 
     main_service = services[0]
     functions = main_service['functions']
     for fn_count, fn_dict in enumerate(functions):
+        if '@skip' in fn_dict.get('doc',''): # docstring says to skip
+            continue
         doc = RstDocFunction(module=module, **fn_dict)
         if fn_count:
             output_stream.write('\n\n')
@@ -49,6 +63,8 @@ def write_rst(input_json, output_stream, title, classname):
 
     typedefs = input_json['typedefs']
     for td_count, td_dict in enumerate(typedefs):
+        if '@skip' in td_dict.get('doc','') : # docstring says to skip
+            continue
         td_dict['module'] = module
         td_dict['type_'] = td_dict['type']
         del td_dict['type']
@@ -58,12 +74,19 @@ def write_rst(input_json, output_stream, title, classname):
         
     structs = input_json['structs']
     for struct_count, struct_dict in enumerate(structs):
+        if '@skip' in struct_dict.get('doc',''): # docstring says to skip
+            continue
         struct_dict['module'] = module
         doc = RstDocStruct(**struct_dict)
         output_stream.write('\n\n')
         output_stream.write(str(doc))
 
 def choose_example_method(service_json):
+    """Find an appropriately simple example method from the service API.
+
+    Returns:
+        (method name, return variable name)
+    """
     method_name, result_var_name = 'foo', 'bar'
     functions = service_json[0]['functions']
     for fn in functions:
@@ -73,49 +96,75 @@ def choose_example_method(service_json):
             result_var_name = method_name[4:]
             break
     return method_name, result_var_name
-    
-def get_title_text(title, classname):
-    title = 'JavaScript ' + title + ' Data API'
-    underline = '=' * len(title)
-    link = '.. _js_' + title.lower().replace(' ','_') + ':'
-    return '.. include:: ../wsref.txt\n\n{}\n\n{}\n{}\n'.format(link, title, underline)
 
-def get_preamble_text(title, classname, example_method, example_varname):
-    init = ('{i}// access reference data (no token required)\n'
-              '{i}var api_obj = {c}({{\n'
-              '{i}{i}ref: \'{r}\',\n'
-              '{i}{i}url: \'{u}\',\n'
-              '{i}{i}token: \'\',\n'
-              '{i}{i}timeout: 6000\n'
-              '{i}}});').format(c=classname,
-                              u='http://narrative.kbases.us',
-                              r='1013/92/2',
-                              i='    ')
-                              
-    usage = ('{i}// call function using Promise interface\n'
-              '{i}api_obj.{method}().then(\n'
-              '{i}{i}function({var}) {{\n'
-              '{i}{i}{i}do_something_with({var});\n'
-              '{i}}});').format(method=example_method,
-                                var=example_varname, i='    ')
+class LanguageHeader(object):
 
-    fmt_args = {
-        'title': title,
-        'class': classname,
-        'a_n': 'n' if title.lower()[0] in 'aeiou' else '',
-        'example_init': '.. code-block:: javascript\n\n{}'.format(init),
-        'example_usage': '.. code-block:: javascript\n\n{}'.format(usage)
-    }
-    fmt_args.update({
-        'underdash1': '-' * (len(fmt_args['class']) + 17 + len(fmt_args['a_n'])),
-        'underdash2': '-' * (len(fmt_args['title']) + 10),
-    })
-    s =\
-'''The {title} API can be used as a client of the Python server.
+    @staticmethod
+    def get_header_class(lang):
+        """Factory method.
+        Args:
+            lang: Current language
 
-.. contents::
+        Returns:
+            Language subclass of LanguageHeader
+        """
+        if lang == 'js':
+            return JSHeader
+        elif lang == 'perl':
+            return PerlHeader
+        else:
+            raise ValueError('Unrecognized language {}'.format(lang))
 
-Creating and using a{a_n} {class} object
+    def _get_wsref_include(self):
+        return '.. include:: ../../wsref.txt'
+
+    def get_title_text(self, title, classname):
+        pass
+    def get_preamble_text(self, title, classname, example_method, example_varname):
+        pass
+
+class JSHeader(LanguageHeader):
+    """Header methods for JavaScript.
+    """
+    def get_title_text(self, title, classname):
+        title = 'JavaScript ' + title + ' Data API'
+        underline = '=' * len(title)
+        link = '.. _js_' + title.lower().replace(' ','_') + ':'
+        return '{}\n\n{}\n\n{}\n{}\n'.format(self._get_wsref_include(), link, title, underline)
+
+    def get_preamble_text(self, title, classname, example_method, example_varname):
+        init = ('{i}// access reference data (no token required)\n'
+                  '{i}var api_obj = {c}({{\n'
+                  '{i}{i}ref: \'{r}\',\n'
+                  '{i}{i}url: \'{u}\',\n'
+                  '{i}{i}token: \'\',\n'
+                  '{i}{i}timeout: 6000\n'
+                  '{i}}});').format(c=classname,
+                                  u='http://narrative.kbase.us',
+                                  r='1013/92/2',
+                                  i='    ')
+
+        usage = ('{i}// call function using Promise interface\n'
+                  '{i}api_obj.{method}().then(\n'
+                  '{i}{i}function({var}) {{\n'
+                  '{i}{i}{i}do_something_with({var});\n'
+                  '{i}}});').format(method=example_method,
+                                    var=example_varname, i='    ')
+
+        fmt_args = {
+            'title': title,
+            'class': classname,
+            'a_n': 'n' if title.lower()[0] in 'aeiou' else '',
+            'example_init': '.. code-block:: javascript\n\n{}'.format(init),
+            'example_usage': '.. code-block:: javascript\n\n{}'.format(usage)
+        }
+        fmt_args.update({
+            'underdash1': '-' * (len(fmt_args['class']) + 10 + len(fmt_args['a_n']))
+        })
+        s =\
+    '''The {title} API can be used as a client of the {title} Data API service.
+
+Creating a{a_n} {class} object
 {underdash1}
 To create a new object, instantiate :js:class:`{class}`
 using a configuration object as the input argument.
@@ -127,10 +176,69 @@ and process the results accordingly.
 
 {example_usage}
 
+API Reference
+-------------
+'''
+        return s.format(**fmt_args)
+
+class PerlHeader(LanguageHeader):
+    """Header methods for PERL
+    """
+    def get_title_text(self, title, classname):
+        title = 'Perl ' + title + ' Data API'
+        underline = '=' * len(title)
+        link = '.. _perl_' + title.lower().replace(' ','_') + ':'
+        return '{}\n\n{}\n\n{}\n{}\n'.format(self._get_wsref_include(), link, title, underline)
+
+    def get_preamble_text(self, title, classname, example_method, example_varname):
+        init = ('{i}// access reference data (no token required)\n'
+                  '{i}var api_obj = {c}({{\n'
+                  '{i}{i}ref: \'{r}\',\n'
+                  '{i}{i}url: \'{u}\',\n'
+                  '{i}{i}token: \'\',\n'
+                  '{i}{i}timeout: 6000\n'
+                  '{i}}});').format(c=classname,
+                                  u='http://narrative.kbase.us',
+                                  r='1013/92/2',
+                                  i='    ')
+
+        usage = ('{i}// call function using Promise interface\n'
+                  '{i}api_obj.{method}().then(\n'
+                  '{i}{i}function({var}) {{\n'
+                  '{i}{i}{i}do_something_with({var});\n'
+                  '{i}}});').format(method=example_method,
+                                    var=example_varname, i='    ')
+
+        fmt_args = {
+            'title': title,
+            'class': classname,
+            'a_n': 'n' if title.lower()[0] in 'aeiou' else '',
+            'example_init': '.. code-block:: perl\n\n{}'.format(init),
+            'example_usage': '.. code-block:: perl\n\n{}'.format(usage)
+        }
+        fmt_args.update({
+            'underdash1': '-' * (len(fmt_args['class']) + 17 + len(fmt_args['a_n'])),
+            'underdash2': '-' * (len(fmt_args['title']) + 10),
+        })
+        s =\
+    '''The {title} API can be used as a client of the {title} Data API service.
+
+Creating and using a{a_n} {class} object
+{underdash1}
+To create a new object, instantiate ``{class}``
+using a configuration object as the input argument.
+
+{example_init}
+
+To use the object, call the functions
+and process the results accordingly.
+
+{example_usage}
+
 {title} interface
 {underdash2}
 '''
-    return s.format(**fmt_args)
+        return s.format(**fmt_args)
 
 def add_type_links(value):
     """Replace type names with a link to the definition.
@@ -145,7 +253,7 @@ def add_type_links(value):
     result = result.replace('````', '')  # remove empty backquoted sections
     return result
 
-class RstDocRootClass(object):
+class RstDocBase(object):
     def __init__(self, class_name):
         self.name = class_name
 
@@ -180,7 +288,6 @@ class RstDocStruct(object):
 
     def _make_list(self):
         # Header for 'class'
-        #lines = ['.. js:class:: {name}()'.format(**self.info)]
         lines = ['.. js:data:: {name}'.format(**self.info)]
         if self.doc:
             lines.append('\n' + self.doc.strip() + '\n')
@@ -203,33 +310,6 @@ class RstDocStruct(object):
             else:
                 lines.append(field_str)
         return '\n'.join(lines)
-
-    def _make_table(self):
-        indent = ' ' * 4
-        lines = ['----', '', '.. js:class:: {name}()\n'.format(**self.info)]
-        object_name = self.info['name']
-        lengths = {'tlen': max([len(f['type']) for f in self.fields]),
-                   'nlen': max([len(f['name']) for f in self.fields]),
-                   'ftlen': 10}
-        header = '{{:{tlen}s}} {{:{nlen}s}} optional'.format(**lengths)\
-            .format('type', 'attr')
-        border = '{} {} {}'.format('=' * lengths['tlen'],
-                                   '=' * lengths['nlen'],
-                                   '=' * lengths['ftlen'])
-        lines.extend([border,
-                     #'Members',
-                     #'-' * (sum(lengths.values()) + len(lengths) - 1),
-                     header,
-                     border])
-
-        for f in self.fields:
-            f['ftype'] = 'Required' if f['required'] == 'true' else 'Optional'
-            s = '{{type:{tlen}s}} {{name:{nlen}s}} {{ftype}}'.format(
-                    **lengths).format(**f)
-            lines.append(s)
-        lines.append(border)
-        lines.append('')
-        return '\n'.join(lines).format(**self.info)
 
 class RstDocTypedef(object):
     def __init__(self, module=None, name=None, type_=None):
@@ -377,6 +457,7 @@ def cmdline():
                    default=None)
     p.add_argument('-c', '--class', dest='classname', help='API class name',
                    default=None)
+    p.add_argument('-l', '--language', help='API language (js*,perl)', default='js')
     args = p.parse_args()
     if args.title is None:
         ofname = os.path.basename(args.output_file)
@@ -387,14 +468,14 @@ def cmdline():
         args.classname = ''.join([tok.capitalize()
                                   for tok in ofname.split('_')])
     return dict(jsfile=args.json_file, outfile=args.output_file,
-                title=args.title, classname=args.classname)
+                title=args.title, classname=args.classname, lang=args.language)
     
 def main():
     args = cmdline()
     with open(args['jsfile']) as infile:
         json_data = json.load(infile)
     with open(args['outfile'], 'w') as outfile:
-        write_rst(json_data, outfile, args['title'], args['classname'])
+        write_rst(json_data, outfile, args['title'], args['classname'], language=args['lang'])
     return 0
     
 if __name__ == '__main__':

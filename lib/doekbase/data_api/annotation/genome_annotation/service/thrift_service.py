@@ -25,6 +25,7 @@ class Iface(Interface):
     """
     Retrieve the Taxon associated with this GenomeAnnotation.
 
+    @return Reference to TaxonAPI object
 
     Parameters:
      - token
@@ -36,6 +37,7 @@ class Iface(Interface):
     """
     Retrieve the Assembly associated with this GenomeAnnotation.
 
+    @return Reference to AssemblyAPI object
 
     Parameters:
      - token
@@ -45,8 +47,9 @@ class Iface(Interface):
 
   def get_feature_types(token, ref):
     """
-    Retrieve the list of Feature types in this GenomeAnnotation.
+    Retrieve the list of Feature types.
 
+    @return List of feature type identifiers (strings)
 
     Parameters:
      - token
@@ -56,8 +59,13 @@ class Iface(Interface):
 
   def get_feature_type_descriptions(token, ref, feature_type_list):
     """
-    Retrieve the descriptions for each Feature type in this GenomeAnnotation.
+    Retrieve the descriptions for each Feature type in
+    this GenomeAnnotation.
 
+    @param feature_type_list List of Feature types. If this list
+     is empty or None,
+     the whole mapping will be returned.
+    @return Name and description for each requested Feature Type
 
     Parameters:
      - token
@@ -68,8 +76,10 @@ class Iface(Interface):
 
   def get_feature_type_counts(token, ref, feature_type_list):
     """
-    Retrieve the count of each Feature type in this GenomeAnnotation.
+    Retrieve the count of each Feature type.
 
+    @param feature_type_list  List of Feature Types. If empty,
+      this will retrieve  counts for all Feature Types.
 
     Parameters:
      - token
@@ -80,8 +90,13 @@ class Iface(Interface):
 
   def get_feature_ids(token, ref, filters, group_type):
     """
-    Retrieve Feature ids in this GenomeAnnotation, optionally filtered by type, region, function, alias.
+    Retrieve Feature IDs, optionally filtered by type, region, function, alias.
 
+    @param filters Dictionary of filters that can be applied to contents.
+      If this is empty or missing, all Feature IDs will be returned.
+    @param group_type How to group results, which is a single string matching one
+      of the values for the ``filters`` parameter.
+    @return Grouped mapping of features.
 
     Parameters:
      - token
@@ -93,8 +108,11 @@ class Iface(Interface):
 
   def get_features(token, ref, feature_id_list):
     """
-    Retrieve Feature data available in this GenomeAnnotation.
+    Retrieve Feature data.
 
+    @param feature_id_list List of Features to retrieve.
+      If None, returns all Feature data.
+    @return Mapping from Feature IDs to dicts of available data.
 
     Parameters:
      - token
@@ -105,8 +123,9 @@ class Iface(Interface):
 
   def get_proteins(token, ref):
     """
-    Retrieve Protein data available in this GenomeAnnotation.
+    Retrieve Protein data.
 
+    @return Mapping from protein ID to data about the protein.
 
     Parameters:
      - token
@@ -116,8 +135,11 @@ class Iface(Interface):
 
   def get_feature_locations(token, ref, feature_id_list):
     """
-    Retrieve Feature locations in this GenomeAnnotation.
+    Retrieve Feature locations.
 
+    @param feature_id_list List of Feature IDs for which to retrieve locations.
+        If empty, returns data for all features.
+    @return Mapping from Feature IDs to location information for each.
 
     Parameters:
      - token
@@ -128,8 +150,11 @@ class Iface(Interface):
 
   def get_feature_publications(token, ref, feature_id_list):
     """
-    Retrieve Feature publications in this GenomeAnnotation.
+    Retrieve Feature publications.
 
+    @param feature_id_list List of Feature IDs for which to retrieve publications.
+        If empty, returns data for all features.
+    @return Mapping from Feature IDs to publication info for each.
 
     Parameters:
      - token
@@ -140,8 +165,11 @@ class Iface(Interface):
 
   def get_feature_dna(token, ref, feature_id_list):
     """
-    Retrieve Feature DNA sequences in this GenomeAnnotation.
+    Retrieve Feature DNA sequences.
 
+    @param feature_id_list List of Feature IDs for which to retrieve sequences.
+        If empty, returns data for all features.
+    @return Mapping of Feature IDs to their DNA sequence.
 
     Parameters:
      - token
@@ -152,8 +180,11 @@ class Iface(Interface):
 
   def get_feature_functions(token, ref, feature_id_list):
     """
-    Retrieve Feature functions in this GenomeAnnotation.
+    Retrieve Feature functions.
 
+    @param feature_id_list List of Feature IDs for which to retrieve functions.
+        If empty, returns data for all features.
+    @return Mapping of Feature IDs to their functions.
 
     Parameters:
      - token
@@ -164,8 +195,11 @@ class Iface(Interface):
 
   def get_feature_aliases(token, ref, feature_id_list):
     """
-    Retrieve Feature aliases in this GenomeAnnotation.
+    Retrieve Feature aliases.
 
+    @param feature_id_list List of Feature IDS for which to retrieve aliases.
+        If empty, returns data for all features.
+    @return Mapping of Feature IDs to a list of aliases.
 
     Parameters:
      - token
@@ -176,8 +210,11 @@ class Iface(Interface):
 
   def get_cds_by_gene(token, ref, gene_id_list):
     """
-    Retrieve the CDS id for each Gene id in this GenomeAnnotation.
+    Retrieves coding sequence Features (cds) for given gene Feature IDs.
 
+    @param feature_id_list List of gene Feature IDS for which to retrieve CDS.
+        If empty, returns data for all features.
+    @return Mapping of gene Feature IDs to a list of CDS Feature IDs.
 
     Parameters:
      - token
@@ -188,8 +225,11 @@ class Iface(Interface):
 
   def get_cds_by_mrna(token, ref, mrna_id_list):
     """
-    Retrieve the CDS id for each mRNA id in this GenomeAnnotation.
+    Retrieves coding sequence (cds) Feature IDs for given mRNA Feature IDs.
 
+    @param feature_id_list List of mRNA Feature IDS for which to retrieve CDS.
+        If empty, returns data for all features.
+    @return Mapping of mRNA Feature IDs to a list of CDS Feature IDs.
 
     Parameters:
      - token
@@ -200,8 +240,11 @@ class Iface(Interface):
 
   def get_gene_by_cds(token, ref, cds_id_list):
     """
-    Retrieve the Gene id for each CDS id in this GenomeAnnotation.
+    Retrieves gene Feature IDs for given coding sequence (cds) Feature IDs.
 
+    @param feature_id_list List of cds Feature IDS for which to retrieve gene IDs.
+        If empty, returns all cds/gene mappings.
+    @return Mapping of cds Feature IDs to gene Feature IDs.
 
     Parameters:
      - token
@@ -212,8 +255,11 @@ class Iface(Interface):
 
   def get_gene_by_mrna(token, ref, mrna_id_list):
     """
-    Retrieve the Gene id for each mRNA id in this GenomeAnnotation.
+    Retrieves gene Feature IDs for given mRNA Feature IDs.
 
+    @param feature_id_list List of mRNA Feature IDS for which to retrieve gene IDs.
+        If empty, returns all mRNA/gene mappings.
+    @return Mapping of mRNA Feature IDs to gene Feature IDs.
 
     Parameters:
      - token
@@ -224,8 +270,11 @@ class Iface(Interface):
 
   def get_mrna_by_cds(token, ref, cds_id_list):
     """
-    Retrieve the mRNA id for each CDS id in this GenomeAnnotation.
+    Retrieves mRNA Features for given coding sequences (cds) Feature IDs.
 
+    @param feature_id_list List of cds Feature IDS for which to retrieve mRNA IDs.
+        If empty, returns all cds/mRNA mappings.
+    @return Mapping of cds Feature IDs to mRNA Feature IDs.
 
     Parameters:
      - token
@@ -236,8 +285,11 @@ class Iface(Interface):
 
   def get_mrna_by_gene(token, ref, gene_id_list):
     """
-    Retrieve the mRNA id for each Gene id in this GenomeAnnotation.
+    Retrieve the mRNA IDs for given gene IDs.
 
+    @param feature_id_list List of gene Feature IDS for which to retrieve mRNA IDs.
+        If empty, returns all gene/mRNA mappings.
+    @return Mapping of gene Feature IDs to a list of mRNA Feature IDs.
 
     Parameters:
      - token
@@ -248,8 +300,11 @@ class Iface(Interface):
 
   def get_mrna_exons(token, ref, mrna_id_list):
     """
-    Retrieve Exon information for each mRNA id in this GenomeAnnotation.
+    Retrieve Exon information for each mRNA ID.
 
+    @param feature_id_list List of mRNA Feature IDS for which to retrieve exons.
+        If empty, returns data for all exons.
+    @return Mapping of mRNA Feature IDs to a list of exons (:js:data:`Exon_data`).
 
     Parameters:
      - token
@@ -260,8 +315,24 @@ class Iface(Interface):
 
   def get_mrna_utrs(token, ref, mrna_id_list):
     """
-    Retrieve UTR information for each mRNA id in this GenomeAnnotation.
+    Retrieve UTR information for each mRNA Feature ID.
 
+     UTRs are calculated between mRNA features and corresponding CDS features.
+     The return value for each mRNA can contain either:
+        - no UTRs found (empty dict)
+        -  5' UTR only
+        -  3' UTR only
+        -  5' and 3' UTRs
+
+     Note: The Genome data type does not contain interfeature
+     relationship information. Calling this method for Genome objects
+     will raise a :js:throws:`exc.TypeException`.
+
+    @param feature_id_list List of mRNA Feature IDS for which to retrieve UTRs.
+    If empty, returns data for all UTRs.
+    @return Mapping of mRNA Feature IDs to a mapping that contains
+    both 5' and 3' UTRs::
+        { "5'UTR": :js:data:`UTR_data`, "3'UTR": :js:data:`UTR_data` }
 
     Parameters:
      - token
@@ -284,6 +355,7 @@ class Client:
     """
     Retrieve the Taxon associated with this GenomeAnnotation.
 
+    @return Reference to TaxonAPI object
 
     Parameters:
      - token
@@ -348,6 +420,7 @@ class Client:
     """
     Retrieve the Assembly associated with this GenomeAnnotation.
 
+    @return Reference to AssemblyAPI object
 
     Parameters:
      - token
@@ -410,8 +483,9 @@ class Client:
 
   def get_feature_types(self, token, ref):
     """
-    Retrieve the list of Feature types in this GenomeAnnotation.
+    Retrieve the list of Feature types.
 
+    @return List of feature type identifiers (strings)
 
     Parameters:
      - token
@@ -474,8 +548,13 @@ class Client:
 
   def get_feature_type_descriptions(self, token, ref, feature_type_list):
     """
-    Retrieve the descriptions for each Feature type in this GenomeAnnotation.
+    Retrieve the descriptions for each Feature type in
+    this GenomeAnnotation.
 
+    @param feature_type_list List of Feature types. If this list
+     is empty or None,
+     the whole mapping will be returned.
+    @return Name and description for each requested Feature Type
 
     Parameters:
      - token
@@ -540,8 +619,10 @@ class Client:
 
   def get_feature_type_counts(self, token, ref, feature_type_list):
     """
-    Retrieve the count of each Feature type in this GenomeAnnotation.
+    Retrieve the count of each Feature type.
 
+    @param feature_type_list  List of Feature Types. If empty,
+      this will retrieve  counts for all Feature Types.
 
     Parameters:
      - token
@@ -606,8 +687,13 @@ class Client:
 
   def get_feature_ids(self, token, ref, filters, group_type):
     """
-    Retrieve Feature ids in this GenomeAnnotation, optionally filtered by type, region, function, alias.
+    Retrieve Feature IDs, optionally filtered by type, region, function, alias.
 
+    @param filters Dictionary of filters that can be applied to contents.
+      If this is empty or missing, all Feature IDs will be returned.
+    @param group_type How to group results, which is a single string matching one
+      of the values for the ``filters`` parameter.
+    @return Grouped mapping of features.
 
     Parameters:
      - token
@@ -674,8 +760,11 @@ class Client:
 
   def get_features(self, token, ref, feature_id_list):
     """
-    Retrieve Feature data available in this GenomeAnnotation.
+    Retrieve Feature data.
 
+    @param feature_id_list List of Features to retrieve.
+      If None, returns all Feature data.
+    @return Mapping from Feature IDs to dicts of available data.
 
     Parameters:
      - token
@@ -740,8 +829,9 @@ class Client:
 
   def get_proteins(self, token, ref):
     """
-    Retrieve Protein data available in this GenomeAnnotation.
+    Retrieve Protein data.
 
+    @return Mapping from protein ID to data about the protein.
 
     Parameters:
      - token
@@ -804,8 +894,11 @@ class Client:
 
   def get_feature_locations(self, token, ref, feature_id_list):
     """
-    Retrieve Feature locations in this GenomeAnnotation.
+    Retrieve Feature locations.
 
+    @param feature_id_list List of Feature IDs for which to retrieve locations.
+        If empty, returns data for all features.
+    @return Mapping from Feature IDs to location information for each.
 
     Parameters:
      - token
@@ -870,8 +963,11 @@ class Client:
 
   def get_feature_publications(self, token, ref, feature_id_list):
     """
-    Retrieve Feature publications in this GenomeAnnotation.
+    Retrieve Feature publications.
 
+    @param feature_id_list List of Feature IDs for which to retrieve publications.
+        If empty, returns data for all features.
+    @return Mapping from Feature IDs to publication info for each.
 
     Parameters:
      - token
@@ -936,8 +1032,11 @@ class Client:
 
   def get_feature_dna(self, token, ref, feature_id_list):
     """
-    Retrieve Feature DNA sequences in this GenomeAnnotation.
+    Retrieve Feature DNA sequences.
 
+    @param feature_id_list List of Feature IDs for which to retrieve sequences.
+        If empty, returns data for all features.
+    @return Mapping of Feature IDs to their DNA sequence.
 
     Parameters:
      - token
@@ -1002,8 +1101,11 @@ class Client:
 
   def get_feature_functions(self, token, ref, feature_id_list):
     """
-    Retrieve Feature functions in this GenomeAnnotation.
+    Retrieve Feature functions.
 
+    @param feature_id_list List of Feature IDs for which to retrieve functions.
+        If empty, returns data for all features.
+    @return Mapping of Feature IDs to their functions.
 
     Parameters:
      - token
@@ -1068,8 +1170,11 @@ class Client:
 
   def get_feature_aliases(self, token, ref, feature_id_list):
     """
-    Retrieve Feature aliases in this GenomeAnnotation.
+    Retrieve Feature aliases.
 
+    @param feature_id_list List of Feature IDS for which to retrieve aliases.
+        If empty, returns data for all features.
+    @return Mapping of Feature IDs to a list of aliases.
 
     Parameters:
      - token
@@ -1134,8 +1239,11 @@ class Client:
 
   def get_cds_by_gene(self, token, ref, gene_id_list):
     """
-    Retrieve the CDS id for each Gene id in this GenomeAnnotation.
+    Retrieves coding sequence Features (cds) for given gene Feature IDs.
 
+    @param feature_id_list List of gene Feature IDS for which to retrieve CDS.
+        If empty, returns data for all features.
+    @return Mapping of gene Feature IDs to a list of CDS Feature IDs.
 
     Parameters:
      - token
@@ -1200,8 +1308,11 @@ class Client:
 
   def get_cds_by_mrna(self, token, ref, mrna_id_list):
     """
-    Retrieve the CDS id for each mRNA id in this GenomeAnnotation.
+    Retrieves coding sequence (cds) Feature IDs for given mRNA Feature IDs.
 
+    @param feature_id_list List of mRNA Feature IDS for which to retrieve CDS.
+        If empty, returns data for all features.
+    @return Mapping of mRNA Feature IDs to a list of CDS Feature IDs.
 
     Parameters:
      - token
@@ -1266,8 +1377,11 @@ class Client:
 
   def get_gene_by_cds(self, token, ref, cds_id_list):
     """
-    Retrieve the Gene id for each CDS id in this GenomeAnnotation.
+    Retrieves gene Feature IDs for given coding sequence (cds) Feature IDs.
 
+    @param feature_id_list List of cds Feature IDS for which to retrieve gene IDs.
+        If empty, returns all cds/gene mappings.
+    @return Mapping of cds Feature IDs to gene Feature IDs.
 
     Parameters:
      - token
@@ -1332,8 +1446,11 @@ class Client:
 
   def get_gene_by_mrna(self, token, ref, mrna_id_list):
     """
-    Retrieve the Gene id for each mRNA id in this GenomeAnnotation.
+    Retrieves gene Feature IDs for given mRNA Feature IDs.
 
+    @param feature_id_list List of mRNA Feature IDS for which to retrieve gene IDs.
+        If empty, returns all mRNA/gene mappings.
+    @return Mapping of mRNA Feature IDs to gene Feature IDs.
 
     Parameters:
      - token
@@ -1398,8 +1515,11 @@ class Client:
 
   def get_mrna_by_cds(self, token, ref, cds_id_list):
     """
-    Retrieve the mRNA id for each CDS id in this GenomeAnnotation.
+    Retrieves mRNA Features for given coding sequences (cds) Feature IDs.
 
+    @param feature_id_list List of cds Feature IDS for which to retrieve mRNA IDs.
+        If empty, returns all cds/mRNA mappings.
+    @return Mapping of cds Feature IDs to mRNA Feature IDs.
 
     Parameters:
      - token
@@ -1464,8 +1584,11 @@ class Client:
 
   def get_mrna_by_gene(self, token, ref, gene_id_list):
     """
-    Retrieve the mRNA id for each Gene id in this GenomeAnnotation.
+    Retrieve the mRNA IDs for given gene IDs.
 
+    @param feature_id_list List of gene Feature IDS for which to retrieve mRNA IDs.
+        If empty, returns all gene/mRNA mappings.
+    @return Mapping of gene Feature IDs to a list of mRNA Feature IDs.
 
     Parameters:
      - token
@@ -1530,8 +1653,11 @@ class Client:
 
   def get_mrna_exons(self, token, ref, mrna_id_list):
     """
-    Retrieve Exon information for each mRNA id in this GenomeAnnotation.
+    Retrieve Exon information for each mRNA ID.
 
+    @param feature_id_list List of mRNA Feature IDS for which to retrieve exons.
+        If empty, returns data for all exons.
+    @return Mapping of mRNA Feature IDs to a list of exons (:js:data:`Exon_data`).
 
     Parameters:
      - token
@@ -1596,8 +1722,24 @@ class Client:
 
   def get_mrna_utrs(self, token, ref, mrna_id_list):
     """
-    Retrieve UTR information for each mRNA id in this GenomeAnnotation.
+    Retrieve UTR information for each mRNA Feature ID.
 
+     UTRs are calculated between mRNA features and corresponding CDS features.
+     The return value for each mRNA can contain either:
+        - no UTRs found (empty dict)
+        -  5' UTR only
+        -  3' UTR only
+        -  5' and 3' UTRs
+
+     Note: The Genome data type does not contain interfeature
+     relationship information. Calling this method for Genome objects
+     will raise a :js:throws:`exc.TypeException`.
+
+    @param feature_id_list List of mRNA Feature IDS for which to retrieve UTRs.
+    If empty, returns data for all UTRs.
+    @return Mapping of mRNA Feature IDs to a mapping that contains
+    both 5' and 3' UTRs::
+        { "5'UTR": :js:data:`UTR_data`, "3'UTR": :js:data:`UTR_data` }
 
     Parameters:
      - token

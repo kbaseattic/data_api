@@ -6,6 +6,7 @@ Python Data API
 
 .. toctree::
     :maxdepth: 1
+    :hidden:
 
     Assembly API <py/assembly_api>
     Genome Annotation API <py/annotation_api>
