@@ -7,7 +7,7 @@ SPHINXBUILD   = sphinx-build
 SPHINXAPI	  = sphinx-apidoc
 PAPER         =
 BUILDDIR      = _build
-KB_BUILDDIR   = ../../../docs-ghpages/docs/data_api
+KB_BUILDDIR   = ../../docs-ghpages/docs/data_api
 APIOUTDIR	  = _source
 APIMODULEDIR  = ../lib/doekbase
 
@@ -74,7 +74,7 @@ html: clients api
 kbclean:
 	rm -rf $(KB_BUILDDIR)/*
 
-kbhtml: clients
+kbhtml: clients api
 	$(SPHINXBUILD) -b html $(KB_ALLSPHINXOPTS) $(KB_BUILDDIR)
 	@echo
 	@echo "Build finished. The HTML pages are in $(KB_BUILDDIR)."
