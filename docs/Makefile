@@ -7,7 +7,7 @@ SPHINXBUILD   = sphinx-build
 SPHINXAPI	  = sphinx-apidoc
 PAPER         =
 BUILDDIR      = _build
-KB_BUILDDIR   = ../../../docs-ghpages/docs/data_api
+KB_BUILDDIR   = ../../docs-ghpages/docs/data_api
 APIOUTDIR	  = _source
 APIMODULEDIR  = ../lib/doekbase
 
@@ -24,7 +24,7 @@ KB_ALLSPHINXOPTS   = -d $(KB_BUILDDIR)/doctrees $(PAPEROPT_$(PAPER)) $(SPHINXOPT
 # the i18n builder cannot share the environment and doctrees with the others
 I18NSPHINXOPTS  = $(PAPEROPT_$(PAPER)) $(SPHINXOPTS) .
 
-.PHONY: help clean html dirhtml singlehtml pickle json htmlhelp qthelp devhelp epub latex latexpdf text man changes linkcheck doctest coverage gettext
+.PHONY: help clean html dirhtml singlehtml pickle json htmlhelp qthelp devhelp epub latex latexpdf text man changes linkcheck doctest coverage gettext clients
 
 help:
 	@echo "Please use \`make <target>' where <target> is one of"
@@ -62,16 +62,19 @@ api:
 	$(SPHINXAPI) -f -o $(APIOUTDIR) $(APIMODULEDIR)
 	@echo
 	@echo "Build finished. The API .rst pages are in $(APIOUTDIR)."
-	
-html: api
+
+clients:
+	cd clients && make
+
+html: clients api
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)
 	@echo
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)."
 
 kbclean:
 	rm -rf $(KB_BUILDDIR)/*
-	
-kbhtml:
+
+kbhtml: clients api
 	$(SPHINXBUILD) -b html $(KB_ALLSPHINXOPTS) $(KB_BUILDDIR)
 	@echo
 	@echo "Build finished. The HTML pages are in $(KB_BUILDDIR)."
