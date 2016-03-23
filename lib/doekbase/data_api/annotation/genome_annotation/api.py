@@ -895,7 +895,7 @@ class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
             f = {}
             f["feature_id"] = x['id']
             f["feature_type"] = x['type']
-            f["feature_function"] = x['function']
+            f["feature_function"] = x.get('function', '')
 
             if "location" in x:
                 f["feature_locations"] = [{"contig_id": loc[0],
