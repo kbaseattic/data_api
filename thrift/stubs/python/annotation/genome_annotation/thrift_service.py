@@ -22,6 +22,7 @@ class Iface(object):
     """
     Retrieve the Taxon associated with this GenomeAnnotation.
 
+    @return Reference to TaxonAPI object
 
     Parameters:
      - token
@@ -33,6 +34,7 @@ class Iface(object):
     """
     Retrieve the Assembly associated with this GenomeAnnotation.
 
+    @return Reference to AssemblyAPI object
 
     Parameters:
      - token
@@ -42,8 +44,9 @@ class Iface(object):
 
   def get_feature_types(self, token, ref):
     """
-    Retrieve the list of Feature types in this GenomeAnnotation.
+    Retrieve the list of Feature types.
 
+    @return List of feature type identifiers (strings)
 
     Parameters:
      - token
@@ -53,8 +56,13 @@ class Iface(object):
 
   def get_feature_type_descriptions(self, token, ref, feature_type_list):
     """
-    Retrieve the descriptions for each Feature type in this GenomeAnnotation.
+    Retrieve the descriptions for each Feature type in
+    this GenomeAnnotation.
 
+    @param feature_type_list List of Feature types. If this list
+     is empty or None,
+     the whole mapping will be returned.
+    @return Name and description for each requested Feature Type
 
     Parameters:
      - token
@@ -65,8 +73,10 @@ class Iface(object):
 
   def get_feature_type_counts(self, token, ref, feature_type_list):
     """
-    Retrieve the count of each Feature type in this GenomeAnnotation.
+    Retrieve the count of each Feature type.
 
+    @param feature_type_list  List of Feature Types. If empty,
+      this will retrieve  counts for all Feature Types.
 
     Parameters:
      - token
@@ -77,8 +87,13 @@ class Iface(object):
 
   def get_feature_ids(self, token, ref, filters, group_type):
     """
-    Retrieve Feature ids in this GenomeAnnotation, optionally filtered by type, region, function, alias.
+    Retrieve Feature IDs, optionally filtered by type, region, function, alias.
 
+    @param filters Dictionary of filters that can be applied to contents.
+      If this is empty or missing, all Feature IDs will be returned.
+    @param group_type How to group results, which is a single string matching one
+      of the values for the ``filters`` parameter.
+    @return Grouped mapping of features.
 
     Parameters:
      - token
@@ -90,8 +105,11 @@ class Iface(object):
 
   def get_features(self, token, ref, feature_id_list):
     """
-    Retrieve Feature data available in this GenomeAnnotation.
+    Retrieve Feature data.
 
+    @param feature_id_list List of Features to retrieve.
+      If None, returns all Feature data.
+    @return Mapping from Feature IDs to dicts of available data.
 
     Parameters:
      - token
@@ -102,8 +120,9 @@ class Iface(object):
 
   def get_proteins(self, token, ref):
     """
-    Retrieve Protein data available in this GenomeAnnotation.
+    Retrieve Protein data.
 
+    @return Mapping from protein ID to data about the protein.
 
     Parameters:
      - token
@@ -113,8 +132,11 @@ class Iface(object):
 
   def get_feature_locations(self, token, ref, feature_id_list):
     """
-    Retrieve Feature locations in this GenomeAnnotation.
+    Retrieve Feature locations.
 
+    @param feature_id_list List of Feature IDs for which to retrieve locations.
+        If empty, returns data for all features.
+    @return Mapping from Feature IDs to location information for each.
 
     Parameters:
      - token
@@ -125,8 +147,11 @@ class Iface(object):
 
   def get_feature_publications(self, token, ref, feature_id_list):
     """
-    Retrieve Feature publications in this GenomeAnnotation.
+    Retrieve Feature publications.
 
+    @param feature_id_list List of Feature IDs for which to retrieve publications.
+        If empty, returns data for all features.
+    @return Mapping from Feature IDs to publication info for each.
 
     Parameters:
      - token
@@ -137,8 +162,11 @@ class Iface(object):
 
   def get_feature_dna(self, token, ref, feature_id_list):
     """
-    Retrieve Feature DNA sequences in this GenomeAnnotation.
+    Retrieve Feature DNA sequences.
 
+    @param feature_id_list List of Feature IDs for which to retrieve sequences.
+        If empty, returns data for all features.
+    @return Mapping of Feature IDs to their DNA sequence.
 
     Parameters:
      - token
@@ -149,8 +177,11 @@ class Iface(object):
 
   def get_feature_functions(self, token, ref, feature_id_list):
     """
-    Retrieve Feature functions in this GenomeAnnotation.
+    Retrieve Feature functions.
 
+    @param feature_id_list List of Feature IDs for which to retrieve functions.
+        If empty, returns data for all features.
+    @return Mapping of Feature IDs to their functions.
 
     Parameters:
      - token
@@ -161,8 +192,11 @@ class Iface(object):
 
   def get_feature_aliases(self, token, ref, feature_id_list):
     """
-    Retrieve Feature aliases in this GenomeAnnotation.
+    Retrieve Feature aliases.
 
+    @param feature_id_list List of Feature IDS for which to retrieve aliases.
+        If empty, returns data for all features.
+    @return Mapping of Feature IDs to a list of aliases.
 
     Parameters:
      - token
@@ -173,8 +207,11 @@ class Iface(object):
 
   def get_cds_by_gene(self, token, ref, gene_id_list):
     """
-    Retrieve the CDS id for each Gene id in this GenomeAnnotation.
+    Retrieves coding sequence Features (cds) for given gene Feature IDs.
 
+    @param feature_id_list List of gene Feature IDS for which to retrieve CDS.
+        If empty, returns data for all features.
+    @return Mapping of gene Feature IDs to a list of CDS Feature IDs.
 
     Parameters:
      - token
@@ -185,8 +222,11 @@ class Iface(object):
 
   def get_cds_by_mrna(self, token, ref, mrna_id_list):
     """
-    Retrieve the CDS id for each mRNA id in this GenomeAnnotation.
+    Retrieves coding sequence (cds) Feature IDs for given mRNA Feature IDs.
 
+    @param feature_id_list List of mRNA Feature IDS for which to retrieve CDS.
+        If empty, returns data for all features.
+    @return Mapping of mRNA Feature IDs to a list of CDS Feature IDs.
 
     Parameters:
      - token
@@ -197,8 +237,11 @@ class Iface(object):
 
   def get_gene_by_cds(self, token, ref, cds_id_list):
     """
-    Retrieve the Gene id for each CDS id in this GenomeAnnotation.
+    Retrieves gene Feature IDs for given coding sequence (cds) Feature IDs.
 
+    @param feature_id_list List of cds Feature IDS for which to retrieve gene IDs.
+        If empty, returns all cds/gene mappings.
+    @return Mapping of cds Feature IDs to gene Feature IDs.
 
     Parameters:
      - token
@@ -209,8 +252,11 @@ class Iface(object):
 
   def get_gene_by_mrna(self, token, ref, mrna_id_list):
     """
-    Retrieve the Gene id for each mRNA id in this GenomeAnnotation.
+    Retrieves gene Feature IDs for given mRNA Feature IDs.
 
+    @param feature_id_list List of mRNA Feature IDS for which to retrieve gene IDs.
+        If empty, returns all mRNA/gene mappings.
+    @return Mapping of mRNA Feature IDs to gene Feature IDs.
 
     Parameters:
      - token
@@ -221,8 +267,11 @@ class Iface(object):
 
   def get_mrna_by_cds(self, token, ref, cds_id_list):
     """
-    Retrieve the mRNA id for each CDS id in this GenomeAnnotation.
+    Retrieves mRNA Features for given coding sequences (cds) Feature IDs.
 
+    @param feature_id_list List of cds Feature IDS for which to retrieve mRNA IDs.
+        If empty, returns all cds/mRNA mappings.
+    @return Mapping of cds Feature IDs to mRNA Feature IDs.
 
     Parameters:
      - token
@@ -233,8 +282,11 @@ class Iface(object):
 
   def get_mrna_by_gene(self, token, ref, gene_id_list):
     """
-    Retrieve the mRNA id for each Gene id in this GenomeAnnotation.
+    Retrieve the mRNA IDs for given gene IDs.
 
+    @param feature_id_list List of gene Feature IDS for which to retrieve mRNA IDs.
+        If empty, returns all gene/mRNA mappings.
+    @return Mapping of gene Feature IDs to a list of mRNA Feature IDs.
 
     Parameters:
      - token
@@ -245,8 +297,11 @@ class Iface(object):
 
   def get_mrna_exons(self, token, ref, mrna_id_list):
     """
-    Retrieve Exon information for each mRNA id in this GenomeAnnotation.
+    Retrieve Exon information for each mRNA ID.
 
+    @param feature_id_list List of mRNA Feature IDS for which to retrieve exons.
+        If empty, returns data for all exons.
+    @return Mapping of mRNA Feature IDs to a list of exons (:js:data:`Exon_data`).
 
     Parameters:
      - token
@@ -257,8 +312,24 @@ class Iface(object):
 
   def get_mrna_utrs(self, token, ref, mrna_id_list):
     """
-    Retrieve UTR information for each mRNA id in this GenomeAnnotation.
+    Retrieve UTR information for each mRNA Feature ID.
 
+     UTRs are calculated between mRNA features and corresponding CDS features.
+     The return value for each mRNA can contain either:
+        - no UTRs found (empty dict)
+        -  5' UTR only
+        -  3' UTR only
+        -  5' and 3' UTRs
+
+     Note: The Genome data type does not contain interfeature
+     relationship information. Calling this method for Genome objects
+     will raise a :js:throws:`exc.TypeException`.
+
+    @param feature_id_list List of mRNA Feature IDS for which to retrieve UTRs.
+    If empty, returns data for all UTRs.
+    @return Mapping of mRNA Feature IDs to a mapping that contains
+    both 5' and 3' UTRs::
+        { "5'UTR": :js:data:`UTR_data`, "3'UTR": :js:data:`UTR_data` }
 
     Parameters:
      - token
@@ -279,6 +350,7 @@ class Client(Iface):
     """
     Retrieve the Taxon associated with this GenomeAnnotation.
 
+    @return Reference to TaxonAPI object
 
     Parameters:
      - token
@@ -327,6 +399,7 @@ class Client(Iface):
     """
     Retrieve the Assembly associated with this GenomeAnnotation.
 
+    @return Reference to AssemblyAPI object
 
     Parameters:
      - token
@@ -373,8 +446,9 @@ class Client(Iface):
 
   def get_feature_types(self, token, ref):
     """
-    Retrieve the list of Feature types in this GenomeAnnotation.
+    Retrieve the list of Feature types.
 
+    @return List of feature type identifiers (strings)
 
     Parameters:
      - token
@@ -421,8 +495,13 @@ class Client(Iface):
 
   def get_feature_type_descriptions(self, token, ref, feature_type_list):
     """
-    Retrieve the descriptions for each Feature type in this GenomeAnnotation.
+    Retrieve the descriptions for each Feature type in
+    this GenomeAnnotation.
 
+    @param feature_type_list List of Feature types. If this list
+     is empty or None,
+     the whole mapping will be returned.
+    @return Name and description for each requested Feature Type
 
     Parameters:
      - token
@@ -471,8 +550,10 @@ class Client(Iface):
 
   def get_feature_type_counts(self, token, ref, feature_type_list):
     """
-    Retrieve the count of each Feature type in this GenomeAnnotation.
+    Retrieve the count of each Feature type.
 
+    @param feature_type_list  List of Feature Types. If empty,
+      this will retrieve  counts for all Feature Types.
 
     Parameters:
      - token
@@ -521,8 +602,13 @@ class Client(Iface):
 
   def get_feature_ids(self, token, ref, filters, group_type):
     """
-    Retrieve Feature ids in this GenomeAnnotation, optionally filtered by type, region, function, alias.
+    Retrieve Feature IDs, optionally filtered by type, region, function, alias.
 
+    @param filters Dictionary of filters that can be applied to contents.
+      If this is empty or missing, all Feature IDs will be returned.
+    @param group_type How to group results, which is a single string matching one
+      of the values for the ``filters`` parameter.
+    @return Grouped mapping of features.
 
     Parameters:
      - token
@@ -573,8 +659,11 @@ class Client(Iface):
 
   def get_features(self, token, ref, feature_id_list):
     """
-    Retrieve Feature data available in this GenomeAnnotation.
+    Retrieve Feature data.
 
+    @param feature_id_list List of Features to retrieve.
+      If None, returns all Feature data.
+    @return Mapping from Feature IDs to dicts of available data.
 
     Parameters:
      - token
@@ -623,8 +712,9 @@ class Client(Iface):
 
   def get_proteins(self, token, ref):
     """
-    Retrieve Protein data available in this GenomeAnnotation.
+    Retrieve Protein data.
 
+    @return Mapping from protein ID to data about the protein.
 
     Parameters:
      - token
@@ -671,8 +761,11 @@ class Client(Iface):
 
   def get_feature_locations(self, token, ref, feature_id_list):
     """
-    Retrieve Feature locations in this GenomeAnnotation.
+    Retrieve Feature locations.
 
+    @param feature_id_list List of Feature IDs for which to retrieve locations.
+        If empty, returns data for all features.
+    @return Mapping from Feature IDs to location information for each.
 
     Parameters:
      - token
@@ -721,8 +814,11 @@ class Client(Iface):
 
   def get_feature_publications(self, token, ref, feature_id_list):
     """
-    Retrieve Feature publications in this GenomeAnnotation.
+    Retrieve Feature publications.
 
+    @param feature_id_list List of Feature IDs for which to retrieve publications.
+        If empty, returns data for all features.
+    @return Mapping from Feature IDs to publication info for each.
 
     Parameters:
      - token
@@ -771,8 +867,11 @@ class Client(Iface):
 
   def get_feature_dna(self, token, ref, feature_id_list):
     """
-    Retrieve Feature DNA sequences in this GenomeAnnotation.
+    Retrieve Feature DNA sequences.
 
+    @param feature_id_list List of Feature IDs for which to retrieve sequences.
+        If empty, returns data for all features.
+    @return Mapping of Feature IDs to their DNA sequence.
 
     Parameters:
      - token
@@ -821,8 +920,11 @@ class Client(Iface):
 
   def get_feature_functions(self, token, ref, feature_id_list):
     """
-    Retrieve Feature functions in this GenomeAnnotation.
+    Retrieve Feature functions.
 
+    @param feature_id_list List of Feature IDs for which to retrieve functions.
+        If empty, returns data for all features.
+    @return Mapping of Feature IDs to their functions.
 
     Parameters:
      - token
@@ -871,8 +973,11 @@ class Client(Iface):
 
   def get_feature_aliases(self, token, ref, feature_id_list):
     """
-    Retrieve Feature aliases in this GenomeAnnotation.
+    Retrieve Feature aliases.
 
+    @param feature_id_list List of Feature IDS for which to retrieve aliases.
+        If empty, returns data for all features.
+    @return Mapping of Feature IDs to a list of aliases.
 
     Parameters:
      - token
@@ -921,8 +1026,11 @@ class Client(Iface):
 
   def get_cds_by_gene(self, token, ref, gene_id_list):
     """
-    Retrieve the CDS id for each Gene id in this GenomeAnnotation.
+    Retrieves coding sequence Features (cds) for given gene Feature IDs.
 
+    @param feature_id_list List of gene Feature IDS for which to retrieve CDS.
+        If empty, returns data for all features.
+    @return Mapping of gene Feature IDs to a list of CDS Feature IDs.
 
     Parameters:
      - token
@@ -971,8 +1079,11 @@ class Client(Iface):
 
   def get_cds_by_mrna(self, token, ref, mrna_id_list):
     """
-    Retrieve the CDS id for each mRNA id in this GenomeAnnotation.
+    Retrieves coding sequence (cds) Feature IDs for given mRNA Feature IDs.
 
+    @param feature_id_list List of mRNA Feature IDS for which to retrieve CDS.
+        If empty, returns data for all features.
+    @return Mapping of mRNA Feature IDs to a list of CDS Feature IDs.
 
     Parameters:
      - token
@@ -1021,8 +1132,11 @@ class Client(Iface):
 
   def get_gene_by_cds(self, token, ref, cds_id_list):
     """
-    Retrieve the Gene id for each CDS id in this GenomeAnnotation.
+    Retrieves gene Feature IDs for given coding sequence (cds) Feature IDs.
 
+    @param feature_id_list List of cds Feature IDS for which to retrieve gene IDs.
+        If empty, returns all cds/gene mappings.
+    @return Mapping of cds Feature IDs to gene Feature IDs.
 
     Parameters:
      - token
@@ -1071,8 +1185,11 @@ class Client(Iface):
 
   def get_gene_by_mrna(self, token, ref, mrna_id_list):
     """
-    Retrieve the Gene id for each mRNA id in this GenomeAnnotation.
+    Retrieves gene Feature IDs for given mRNA Feature IDs.
 
+    @param feature_id_list List of mRNA Feature IDS for which to retrieve gene IDs.
+        If empty, returns all mRNA/gene mappings.
+    @return Mapping of mRNA Feature IDs to gene Feature IDs.
 
     Parameters:
      - token
@@ -1121,8 +1238,11 @@ class Client(Iface):
 
   def get_mrna_by_cds(self, token, ref, cds_id_list):
     """
-    Retrieve the mRNA id for each CDS id in this GenomeAnnotation.
+    Retrieves mRNA Features for given coding sequences (cds) Feature IDs.
 
+    @param feature_id_list List of cds Feature IDS for which to retrieve mRNA IDs.
+        If empty, returns all cds/mRNA mappings.
+    @return Mapping of cds Feature IDs to mRNA Feature IDs.
 
     Parameters:
      - token
@@ -1171,8 +1291,11 @@ class Client(Iface):
 
   def get_mrna_by_gene(self, token, ref, gene_id_list):
     """
-    Retrieve the mRNA id for each Gene id in this GenomeAnnotation.
+    Retrieve the mRNA IDs for given gene IDs.
 
+    @param feature_id_list List of gene Feature IDS for which to retrieve mRNA IDs.
+        If empty, returns all gene/mRNA mappings.
+    @return Mapping of gene Feature IDs to a list of mRNA Feature IDs.
 
     Parameters:
      - token
@@ -1221,8 +1344,11 @@ class Client(Iface):
 
   def get_mrna_exons(self, token, ref, mrna_id_list):
     """
-    Retrieve Exon information for each mRNA id in this GenomeAnnotation.
+    Retrieve Exon information for each mRNA ID.
 
+    @param feature_id_list List of mRNA Feature IDS for which to retrieve exons.
+        If empty, returns data for all exons.
+    @return Mapping of mRNA Feature IDs to a list of exons (:js:data:`Exon_data`).
 
     Parameters:
      - token
@@ -1271,8 +1397,24 @@ class Client(Iface):
 
   def get_mrna_utrs(self, token, ref, mrna_id_list):
     """
-    Retrieve UTR information for each mRNA id in this GenomeAnnotation.
+    Retrieve UTR information for each mRNA Feature ID.
 
+     UTRs are calculated between mRNA features and corresponding CDS features.
+     The return value for each mRNA can contain either:
+        - no UTRs found (empty dict)
+        -  5' UTR only
+        -  3' UTR only
+        -  5' and 3' UTRs
+
+     Note: The Genome data type does not contain interfeature
+     relationship information. Calling this method for Genome objects
+     will raise a :js:throws:`exc.TypeException`.
+
+    @param feature_id_list List of mRNA Feature IDS for which to retrieve UTRs.
+    If empty, returns data for all UTRs.
+    @return Mapping of mRNA Feature IDs to a mapping that contains
+    both 5' and 3' UTRs::
+        { "5'UTR": :js:data:`UTR_data`, "3'UTR": :js:data:`UTR_data` }
 
     Parameters:
      - token
@@ -2453,10 +2595,10 @@ class get_feature_types_result(object):
       if fid == 0:
         if ftype == TType.LIST:
           self.success = []
-          (_etype201, _size198) = iprot.readListBegin()
-          for _i202 in xrange(_size198):
-            _elem203 = iprot.readString();
-            self.success.append(_elem203)
+          (_etype194, _size191) = iprot.readListBegin()
+          for _i195 in xrange(_size191):
+            _elem196 = iprot.readString();
+            self.success.append(_elem196)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
@@ -2509,8 +2651,8 @@ class get_feature_types_result(object):
     if self.success is not None:
       oprot.writeFieldBegin('success', TType.LIST, 0)
       oprot.writeListBegin(TType.STRING, len(self.success))
-      for iter204 in self.success:
-        oprot.writeString(iter204)
+      for iter197 in self.success:
+        oprot.writeString(iter197)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     if self.generic_exception is not None:
@@ -2608,10 +2750,10 @@ class get_feature_type_descriptions_args(object):
       elif fid == 3:
         if ftype == TType.LIST:
           self.feature_type_list = []
-          (_etype208, _size205) = iprot.readListBegin()
-          for _i209 in xrange(_size205):
-            _elem210 = iprot.readString();
-            self.feature_type_list.append(_elem210)
+          (_etype201, _size198) = iprot.readListBegin()
+          for _i202 in xrange(_size198):
+            _elem203 = iprot.readString();
+            self.feature_type_list.append(_elem203)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
@@ -2636,8 +2778,8 @@ class get_feature_type_descriptions_args(object):
     if self.feature_type_list is not None:
       oprot.writeFieldBegin('feature_type_list', TType.LIST, 3)
       oprot.writeListBegin(TType.STRING, len(self.feature_type_list))
-      for iter211 in self.feature_type_list:
-        oprot.writeString(iter211)
+      for iter204 in self.feature_type_list:
+        oprot.writeString(iter204)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
@@ -2712,11 +2854,11 @@ class get_feature_type_descriptions_result(object):
       if fid == 0:
         if ftype == TType.MAP:
           self.success = {}
-          (_ktype213, _vtype214, _size212 ) = iprot.readMapBegin()
-          for _i216 in xrange(_size212):
-            _key217 = iprot.readString();
-            _val218 = iprot.readString();
-            self.success[_key217] = _val218
+          (_ktype206, _vtype207, _size205 ) = iprot.readMapBegin()
+          for _i209 in xrange(_size205):
+            _key210 = iprot.readString();
+            _val211 = iprot.readString();
+            self.success[_key210] = _val211
           iprot.readMapEnd()
         else:
           iprot.skip(ftype)
@@ -2769,9 +2911,9 @@ class get_feature_type_descriptions_result(object):
     if self.success is not None:
       oprot.writeFieldBegin('success', TType.MAP, 0)
       oprot.writeMapBegin(TType.STRING, TType.STRING, len(self.success))
-      for kiter219,viter220 in self.success.items():
-        oprot.writeString(kiter219)
-        oprot.writeString(viter220)
+      for kiter212,viter213 in self.success.items():
+        oprot.writeString(kiter212)
+        oprot.writeString(viter213)
       oprot.writeMapEnd()
       oprot.writeFieldEnd()
     if self.generic_exception is not None:
@@ -2869,10 +3011,10 @@ class get_feature_type_counts_args(object):
       elif fid == 3:
         if ftype == TType.LIST:
           self.feature_type_list = []
-          (_etype224, _size221) = iprot.readListBegin()
-          for _i225 in xrange(_size221):
-            _elem226 = iprot.readString();
-            self.feature_type_list.append(_elem226)
+          (_etype217, _size214) = iprot.readListBegin()
+          for _i218 in xrange(_size214):
+            _elem219 = iprot.readString();
+            self.feature_type_list.append(_elem219)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
@@ -2897,8 +3039,8 @@ class get_feature_type_counts_args(object):
     if self.feature_type_list is not None:
       oprot.writeFieldBegin('feature_type_list', TType.LIST, 3)
       oprot.writeListBegin(TType.STRING, len(self.feature_type_list))
-      for iter227 in self.feature_type_list:
-        oprot.writeString(iter227)
+      for iter220 in self.feature_type_list:
+        oprot.writeString(iter220)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
@@ -2973,11 +3115,11 @@ class get_feature_type_counts_result(object):
       if fid == 0:
         if ftype == TType.MAP:
           self.success = {}
-          (_ktype229, _vtype230, _size228 ) = iprot.readMapBegin()
-          for _i232 in xrange(_size228):
-            _key233 = iprot.readString();
-            _val234 = iprot.readI64();
-            self.success[_key233] = _val234
+          (_ktype222, _vtype223, _size221 ) = iprot.readMapBegin()
+          for _i225 in xrange(_size221):
+            _key226 = iprot.readString();
+            _val227 = iprot.readI64();
+            self.success[_key226] = _val227
           iprot.readMapEnd()
         else:
           iprot.skip(ftype)
@@ -3030,9 +3172,9 @@ class get_feature_type_counts_result(object):
     if self.success is not None:
       oprot.writeFieldBegin('success', TType.MAP, 0)
       oprot.writeMapBegin(TType.STRING, TType.I64, len(self.success))
-      for kiter235,viter236 in self.success.items():
-        oprot.writeString(kiter235)
-        oprot.writeI64(viter236)
+      for kiter228,viter229 in self.success.items():
+        oprot.writeString(kiter228)
+        oprot.writeI64(viter229)
       oprot.writeMapEnd()
       oprot.writeFieldEnd()
     if self.generic_exception is not None:
@@ -3388,10 +3530,10 @@ class get_features_args(object):
       elif fid == 3:
         if ftype == TType.LIST:
           self.feature_id_list = []
-          (_etype240, _size237) = iprot.readListBegin()
-          for _i241 in xrange(_size237):
-            _elem242 = iprot.readString();
-            self.feature_id_list.append(_elem242)
+          (_etype233, _size230) = iprot.readListBegin()
+          for _i234 in xrange(_size230):
+            _elem235 = iprot.readString();
+            self.feature_id_list.append(_elem235)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
@@ -3416,8 +3558,8 @@ class get_features_args(object):
     if self.feature_id_list is not None:
       oprot.writeFieldBegin('feature_id_list', TType.LIST, 3)
       oprot.writeListBegin(TType.STRING, len(self.feature_id_list))
-      for iter243 in self.feature_id_list:
-        oprot.writeString(iter243)
+      for iter236 in self.feature_id_list:
+        oprot.writeString(iter236)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
@@ -3492,12 +3634,12 @@ class get_features_result(object):
       if fid == 0:
         if ftype == TType.MAP:
           self.success = {}
-          (_ktype245, _vtype246, _size244 ) = iprot.readMapBegin()
-          for _i248 in xrange(_size244):
-            _key249 = iprot.readString();
-            _val250 = Feature_data()
-            _val250.read(iprot)
-            self.success[_key249] = _val250
+          (_ktype238, _vtype239, _size237 ) = iprot.readMapBegin()
+          for _i241 in xrange(_size237):
+            _key242 = iprot.readString();
+            _val243 = Feature_data()
+            _val243.read(iprot)
+            self.success[_key242] = _val243
           iprot.readMapEnd()
         else:
           iprot.skip(ftype)
@@ -3550,9 +3692,9 @@ class get_features_result(object):
     if self.success is not None:
       oprot.writeFieldBegin('success', TType.MAP, 0)
       oprot.writeMapBegin(TType.STRING, TType.STRUCT, len(self.success))
-      for kiter251,viter252 in self.success.items():
-        oprot.writeString(kiter251)
-        viter252.write(oprot)
+      for kiter244,viter245 in self.success.items():
+        oprot.writeString(kiter244)
+        viter245.write(oprot)
       oprot.writeMapEnd()
       oprot.writeFieldEnd()
     if self.generic_exception is not None:
@@ -3733,12 +3875,12 @@ class get_proteins_result(object):
       if fid == 0:
         if ftype == TType.MAP:
           self.success = {}
-          (_ktype254, _vtype255, _size253 ) = iprot.readMapBegin()
-          for _i257 in xrange(_size253):
-            _key258 = iprot.readString();
-            _val259 = Protein_data()
-            _val259.read(iprot)
-            self.success[_key258] = _val259
+          (_ktype247, _vtype248, _size246 ) = iprot.readMapBegin()
+          for _i250 in xrange(_size246):
+            _key251 = iprot.readString();
+            _val252 = Protein_data()
+            _val252.read(iprot)
+            self.success[_key251] = _val252
           iprot.readMapEnd()
         else:
           iprot.skip(ftype)
@@ -3791,9 +3933,9 @@ class get_proteins_result(object):
     if self.success is not None:
       oprot.writeFieldBegin('success', TType.MAP, 0)
       oprot.writeMapBegin(TType.STRING, TType.STRUCT, len(self.success))
-      for kiter260,viter261 in self.success.items():
-        oprot.writeString(kiter260)
-        viter261.write(oprot)
+      for kiter253,viter254 in self.success.items():
+        oprot.writeString(kiter253)
+        viter254.write(oprot)
       oprot.writeMapEnd()
       oprot.writeFieldEnd()
     if self.generic_exception is not None:
@@ -3891,10 +4033,10 @@ class get_feature_locations_args(object):
       elif fid == 3:
         if ftype == TType.LIST:
           self.feature_id_list = []
-          (_etype265, _size262) = iprot.readListBegin()
-          for _i266 in xrange(_size262):
-            _elem267 = iprot.readString();
-            self.feature_id_list.append(_elem267)
+          (_etype258, _size255) = iprot.readListBegin()
+          for _i259 in xrange(_size255):
+            _elem260 = iprot.readString();
+            self.feature_id_list.append(_elem260)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
@@ -3919,8 +4061,8 @@ class get_feature_locations_args(object):
     if self.feature_id_list is not None:
       oprot.writeFieldBegin('feature_id_list', TType.LIST, 3)
       oprot.writeListBegin(TType.STRING, len(self.feature_id_list))
-      for iter268 in self.feature_id_list:
-        oprot.writeString(iter268)
+      for iter261 in self.feature_id_list:
+        oprot.writeString(iter261)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
@@ -3995,17 +4137,17 @@ class get_feature_locations_result(object):
       if fid == 0:
         if ftype == TType.MAP:
           self.success = {}
-          (_ktype270, _vtype271, _size269 ) = iprot.readMapBegin()
-          for _i273 in xrange(_size269):
-            _key274 = iprot.readString();
-            _val275 = []
-            (_etype279, _size276) = iprot.readListBegin()
-            for _i280 in xrange(_size276):
-              _elem281 = Region()
-              _elem281.read(iprot)
-              _val275.append(_elem281)
+          (_ktype263, _vtype264, _size262 ) = iprot.readMapBegin()
+          for _i266 in xrange(_size262):
+            _key267 = iprot.readString();
+            _val268 = []
+            (_etype272, _size269) = iprot.readListBegin()
+            for _i273 in xrange(_size269):
+              _elem274 = Region()
+              _elem274.read(iprot)
+              _val268.append(_elem274)
             iprot.readListEnd()
-            self.success[_key274] = _val275
+            self.success[_key267] = _val268
           iprot.readMapEnd()
         else:
           iprot.skip(ftype)
@@ -4058,11 +4200,11 @@ class get_feature_locations_result(object):
     if self.success is not None:
       oprot.writeFieldBegin('success', TType.MAP, 0)
       oprot.writeMapBegin(TType.STRING, TType.LIST, len(self.success))
-      for kiter282,viter283 in self.success.items():
-        oprot.writeString(kiter282)
-        oprot.writeListBegin(TType.STRUCT, len(viter283))
-        for iter284 in viter283:
-          iter284.write(oprot)
+      for kiter275,viter276 in self.success.items():
+        oprot.writeString(kiter275)
+        oprot.writeListBegin(TType.STRUCT, len(viter276))
+        for iter277 in viter276:
+          iter277.write(oprot)
         oprot.writeListEnd()
       oprot.writeMapEnd()
       oprot.writeFieldEnd()
@@ -4161,10 +4303,10 @@ class get_feature_publications_args(object):
       elif fid == 3:
         if ftype == TType.LIST:
           self.feature_id_list = []
-          (_etype288, _size285) = iprot.readListBegin()
-          for _i289 in xrange(_size285):
-            _elem290 = iprot.readString();
-            self.feature_id_list.append(_elem290)
+          (_etype281, _size278) = iprot.readListBegin()
+          for _i282 in xrange(_size278):
+            _elem283 = iprot.readString();
+            self.feature_id_list.append(_elem283)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
@@ -4189,8 +4331,8 @@ class get_feature_publications_args(object):
     if self.feature_id_list is not None:
       oprot.writeFieldBegin('feature_id_list', TType.LIST, 3)
       oprot.writeListBegin(TType.STRING, len(self.feature_id_list))
-      for iter291 in self.feature_id_list:
-        oprot.writeString(iter291)
+      for iter284 in self.feature_id_list:
+        oprot.writeString(iter284)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
@@ -4265,16 +4407,16 @@ class get_feature_publications_result(object):
       if fid == 0:
         if ftype == TType.MAP:
           self.success = {}
-          (_ktype293, _vtype294, _size292 ) = iprot.readMapBegin()
-          for _i296 in xrange(_size292):
-            _key297 = iprot.readString();
-            _val298 = []
-            (_etype302, _size299) = iprot.readListBegin()
-            for _i303 in xrange(_size299):
-              _elem304 = iprot.readString();
-              _val298.append(_elem304)
+          (_ktype286, _vtype287, _size285 ) = iprot.readMapBegin()
+          for _i289 in xrange(_size285):
+            _key290 = iprot.readString();
+            _val291 = []
+            (_etype295, _size292) = iprot.readListBegin()
+            for _i296 in xrange(_size292):
+              _elem297 = iprot.readString();
+              _val291.append(_elem297)
             iprot.readListEnd()
-            self.success[_key297] = _val298
+            self.success[_key290] = _val291
           iprot.readMapEnd()
         else:
           iprot.skip(ftype)
@@ -4327,11 +4469,11 @@ class get_feature_publications_result(object):
     if self.success is not None:
       oprot.writeFieldBegin('success', TType.MAP, 0)
       oprot.writeMapBegin(TType.STRING, TType.LIST, len(self.success))
-      for kiter305,viter306 in self.success.items():
-        oprot.writeString(kiter305)
-        oprot.writeListBegin(TType.STRING, len(viter306))
-        for iter307 in viter306:
-          oprot.writeString(iter307)
+      for kiter298,viter299 in self.success.items():
+        oprot.writeString(kiter298)
+        oprot.writeListBegin(TType.STRING, len(viter299))
+        for iter300 in viter299:
+          oprot.writeString(iter300)
         oprot.writeListEnd()
       oprot.writeMapEnd()
       oprot.writeFieldEnd()
@@ -4430,10 +4572,10 @@ class get_feature_dna_args(object):
       elif fid == 3:
         if ftype == TType.LIST:
           self.feature_id_list = []
-          (_etype311, _size308) = iprot.readListBegin()
-          for _i312 in xrange(_size308):
-            _elem313 = iprot.readString();
-            self.feature_id_list.append(_elem313)
+          (_etype304, _size301) = iprot.readListBegin()
+          for _i305 in xrange(_size301):
+            _elem306 = iprot.readString();
+            self.feature_id_list.append(_elem306)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
@@ -4458,8 +4600,8 @@ class get_feature_dna_args(object):
     if self.feature_id_list is not None:
       oprot.writeFieldBegin('feature_id_list', TType.LIST, 3)
       oprot.writeListBegin(TType.STRING, len(self.feature_id_list))
-      for iter314 in self.feature_id_list:
-        oprot.writeString(iter314)
+      for iter307 in self.feature_id_list:
+        oprot.writeString(iter307)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
@@ -4534,11 +4676,11 @@ class get_feature_dna_result(object):
       if fid == 0:
         if ftype == TType.MAP:
           self.success = {}
-          (_ktype316, _vtype317, _size315 ) = iprot.readMapBegin()
-          for _i319 in xrange(_size315):
-            _key320 = iprot.readString();
-            _val321 = iprot.readString();
-            self.success[_key320] = _val321
+          (_ktype309, _vtype310, _size308 ) = iprot.readMapBegin()
+          for _i312 in xrange(_size308):
+            _key313 = iprot.readString();
+            _val314 = iprot.readString();
+            self.success[_key313] = _val314
           iprot.readMapEnd()
         else:
           iprot.skip(ftype)
@@ -4591,9 +4733,9 @@ class get_feature_dna_result(object):
     if self.success is not None:
       oprot.writeFieldBegin('success', TType.MAP, 0)
       oprot.writeMapBegin(TType.STRING, TType.STRING, len(self.success))
-      for kiter322,viter323 in self.success.items():
-        oprot.writeString(kiter322)
-        oprot.writeString(viter323)
+      for kiter315,viter316 in self.success.items():
+        oprot.writeString(kiter315)
+        oprot.writeString(viter316)
       oprot.writeMapEnd()
       oprot.writeFieldEnd()
     if self.generic_exception is not None:
@@ -4691,10 +4833,10 @@ class get_feature_functions_args(object):
       elif fid == 3:
         if ftype == TType.LIST:
           self.feature_id_list = []
-          (_etype327, _size324) = iprot.readListBegin()
-          for _i328 in xrange(_size324):
-            _elem329 = iprot.readString();
-            self.feature_id_list.append(_elem329)
+          (_etype320, _size317) = iprot.readListBegin()
+          for _i321 in xrange(_size317):
+            _elem322 = iprot.readString();
+            self.feature_id_list.append(_elem322)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
@@ -4719,8 +4861,8 @@ class get_feature_functions_args(object):
     if self.feature_id_list is not None:
       oprot.writeFieldBegin('feature_id_list', TType.LIST, 3)
       oprot.writeListBegin(TType.STRING, len(self.feature_id_list))
-      for iter330 in self.feature_id_list:
-        oprot.writeString(iter330)
+      for iter323 in self.feature_id_list:
+        oprot.writeString(iter323)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
@@ -4795,11 +4937,11 @@ class get_feature_functions_result(object):
       if fid == 0:
         if ftype == TType.MAP:
           self.success = {}
-          (_ktype332, _vtype333, _size331 ) = iprot.readMapBegin()
-          for _i335 in xrange(_size331):
-            _key336 = iprot.readString();
-            _val337 = iprot.readString();
-            self.success[_key336] = _val337
+          (_ktype325, _vtype326, _size324 ) = iprot.readMapBegin()
+          for _i328 in xrange(_size324):
+            _key329 = iprot.readString();
+            _val330 = iprot.readString();
+            self.success[_key329] = _val330
           iprot.readMapEnd()
         else:
           iprot.skip(ftype)
@@ -4852,9 +4994,9 @@ class get_feature_functions_result(object):
     if self.success is not None:
       oprot.writeFieldBegin('success', TType.MAP, 0)
       oprot.writeMapBegin(TType.STRING, TType.STRING, len(self.success))
-      for kiter338,viter339 in self.success.items():
-        oprot.writeString(kiter338)
-        oprot.writeString(viter339)
+      for kiter331,viter332 in self.success.items():
+        oprot.writeString(kiter331)
+        oprot.writeString(viter332)
       oprot.writeMapEnd()
       oprot.writeFieldEnd()
     if self.generic_exception is not None:
@@ -4952,10 +5094,10 @@ class get_feature_aliases_args(object):
       elif fid == 3:
         if ftype == TType.LIST:
           self.feature_id_list = []
-          (_etype343, _size340) = iprot.readListBegin()
-          for _i344 in xrange(_size340):
-            _elem345 = iprot.readString();
-            self.feature_id_list.append(_elem345)
+          (_etype336, _size333) = iprot.readListBegin()
+          for _i337 in xrange(_size333):
+            _elem338 = iprot.readString();
+            self.feature_id_list.append(_elem338)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
@@ -4980,8 +5122,8 @@ class get_feature_aliases_args(object):
     if self.feature_id_list is not None:
       oprot.writeFieldBegin('feature_id_list', TType.LIST, 3)
       oprot.writeListBegin(TType.STRING, len(self.feature_id_list))
-      for iter346 in self.feature_id_list:
-        oprot.writeString(iter346)
+      for iter339 in self.feature_id_list:
+        oprot.writeString(iter339)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
@@ -5056,16 +5198,16 @@ class get_feature_aliases_result(object):
       if fid == 0:
         if ftype == TType.MAP:
           self.success = {}
-          (_ktype348, _vtype349, _size347 ) = iprot.readMapBegin()
-          for _i351 in xrange(_size347):
-            _key352 = iprot.readString();
-            _val353 = []
-            (_etype357, _size354) = iprot.readListBegin()
-            for _i358 in xrange(_size354):
-              _elem359 = iprot.readString();
-              _val353.append(_elem359)
+          (_ktype341, _vtype342, _size340 ) = iprot.readMapBegin()
+          for _i344 in xrange(_size340):
+            _key345 = iprot.readString();
+            _val346 = []
+            (_etype350, _size347) = iprot.readListBegin()
+            for _i351 in xrange(_size347):
+              _elem352 = iprot.readString();
+              _val346.append(_elem352)
             iprot.readListEnd()
-            self.success[_key352] = _val353
+            self.success[_key345] = _val346
           iprot.readMapEnd()
         else:
           iprot.skip(ftype)
@@ -5118,11 +5260,11 @@ class get_feature_aliases_result(object):
     if self.success is not None:
       oprot.writeFieldBegin('success', TType.MAP, 0)
       oprot.writeMapBegin(TType.STRING, TType.LIST, len(self.success))
-      for kiter360,viter361 in self.success.items():
-        oprot.writeString(kiter360)
-        oprot.writeListBegin(TType.STRING, len(viter361))
-        for iter362 in viter361:
-          oprot.writeString(iter362)
+      for kiter353,viter354 in self.success.items():
+        oprot.writeString(kiter353)
+        oprot.writeListBegin(TType.STRING, len(viter354))
+        for iter355 in viter354:
+          oprot.writeString(iter355)
         oprot.writeListEnd()
       oprot.writeMapEnd()
       oprot.writeFieldEnd()
@@ -5221,10 +5363,10 @@ class get_cds_by_gene_args(object):
       elif fid == 3:
         if ftype == TType.LIST:
           self.gene_id_list = []
-          (_etype366, _size363) = iprot.readListBegin()
-          for _i367 in xrange(_size363):
-            _elem368 = iprot.readString();
-            self.gene_id_list.append(_elem368)
+          (_etype359, _size356) = iprot.readListBegin()
+          for _i360 in xrange(_size356):
+            _elem361 = iprot.readString();
+            self.gene_id_list.append(_elem361)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
@@ -5249,8 +5391,8 @@ class get_cds_by_gene_args(object):
     if self.gene_id_list is not None:
       oprot.writeFieldBegin('gene_id_list', TType.LIST, 3)
       oprot.writeListBegin(TType.STRING, len(self.gene_id_list))
-      for iter369 in self.gene_id_list:
-        oprot.writeString(iter369)
+      for iter362 in self.gene_id_list:
+        oprot.writeString(iter362)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
@@ -5325,16 +5467,16 @@ class get_cds_by_gene_result(object):
       if fid == 0:
         if ftype == TType.MAP:
           self.success = {}
-          (_ktype371, _vtype372, _size370 ) = iprot.readMapBegin()
-          for _i374 in xrange(_size370):
-            _key375 = iprot.readString();
-            _val376 = []
-            (_etype380, _size377) = iprot.readListBegin()
-            for _i381 in xrange(_size377):
-              _elem382 = iprot.readString();
-              _val376.append(_elem382)
+          (_ktype364, _vtype365, _size363 ) = iprot.readMapBegin()
+          for _i367 in xrange(_size363):
+            _key368 = iprot.readString();
+            _val369 = []
+            (_etype373, _size370) = iprot.readListBegin()
+            for _i374 in xrange(_size370):
+              _elem375 = iprot.readString();
+              _val369.append(_elem375)
             iprot.readListEnd()
-            self.success[_key375] = _val376
+            self.success[_key368] = _val369
           iprot.readMapEnd()
         else:
           iprot.skip(ftype)
@@ -5387,11 +5529,11 @@ class get_cds_by_gene_result(object):
     if self.success is not None:
       oprot.writeFieldBegin('success', TType.MAP, 0)
       oprot.writeMapBegin(TType.STRING, TType.LIST, len(self.success))
-      for kiter383,viter384 in self.success.items():
-        oprot.writeString(kiter383)
-        oprot.writeListBegin(TType.STRING, len(viter384))
-        for iter385 in viter384:
-          oprot.writeString(iter385)
+      for kiter376,viter377 in self.success.items():
+        oprot.writeString(kiter376)
+        oprot.writeListBegin(TType.STRING, len(viter377))
+        for iter378 in viter377:
+          oprot.writeString(iter378)
         oprot.writeListEnd()
       oprot.writeMapEnd()
       oprot.writeFieldEnd()
@@ -5490,10 +5632,10 @@ class get_cds_by_mrna_args(object):
       elif fid == 3:
         if ftype == TType.LIST:
           self.mrna_id_list = []
-          (_etype389, _size386) = iprot.readListBegin()
-          for _i390 in xrange(_size386):
-            _elem391 = iprot.readString();
-            self.mrna_id_list.append(_elem391)
+          (_etype382, _size379) = iprot.readListBegin()
+          for _i383 in xrange(_size379):
+            _elem384 = iprot.readString();
+            self.mrna_id_list.append(_elem384)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
@@ -5518,8 +5660,8 @@ class get_cds_by_mrna_args(object):
     if self.mrna_id_list is not None:
       oprot.writeFieldBegin('mrna_id_list', TType.LIST, 3)
       oprot.writeListBegin(TType.STRING, len(self.mrna_id_list))
-      for iter392 in self.mrna_id_list:
-        oprot.writeString(iter392)
+      for iter385 in self.mrna_id_list:
+        oprot.writeString(iter385)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
@@ -5594,11 +5736,11 @@ class get_cds_by_mrna_result(object):
       if fid == 0:
         if ftype == TType.MAP:
           self.success = {}
-          (_ktype394, _vtype395, _size393 ) = iprot.readMapBegin()
-          for _i397 in xrange(_size393):
-            _key398 = iprot.readString();
-            _val399 = iprot.readString();
-            self.success[_key398] = _val399
+          (_ktype387, _vtype388, _size386 ) = iprot.readMapBegin()
+          for _i390 in xrange(_size386):
+            _key391 = iprot.readString();
+            _val392 = iprot.readString();
+            self.success[_key391] = _val392
           iprot.readMapEnd()
         else:
           iprot.skip(ftype)
@@ -5651,9 +5793,9 @@ class get_cds_by_mrna_result(object):
     if self.success is not None:
       oprot.writeFieldBegin('success', TType.MAP, 0)
       oprot.writeMapBegin(TType.STRING, TType.STRING, len(self.success))
-      for kiter400,viter401 in self.success.items():
-        oprot.writeString(kiter400)
-        oprot.writeString(viter401)
+      for kiter393,viter394 in self.success.items():
+        oprot.writeString(kiter393)
+        oprot.writeString(viter394)
       oprot.writeMapEnd()
       oprot.writeFieldEnd()
     if self.generic_exception is not None:
@@ -5751,10 +5893,10 @@ class get_gene_by_cds_args(object):
       elif fid == 3:
         if ftype == TType.LIST:
           self.cds_id_list = []
-          (_etype405, _size402) = iprot.readListBegin()
-          for _i406 in xrange(_size402):
-            _elem407 = iprot.readString();
-            self.cds_id_list.append(_elem407)
+          (_etype398, _size395) = iprot.readListBegin()
+          for _i399 in xrange(_size395):
+            _elem400 = iprot.readString();
+            self.cds_id_list.append(_elem400)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
@@ -5779,8 +5921,8 @@ class get_gene_by_cds_args(object):
     if self.cds_id_list is not None:
       oprot.writeFieldBegin('cds_id_list', TType.LIST, 3)
       oprot.writeListBegin(TType.STRING, len(self.cds_id_list))
-      for iter408 in self.cds_id_list:
-        oprot.writeString(iter408)
+      for iter401 in self.cds_id_list:
+        oprot.writeString(iter401)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
@@ -5855,11 +5997,11 @@ class get_gene_by_cds_result(object):
       if fid == 0:
         if ftype == TType.MAP:
           self.success = {}
-          (_ktype410, _vtype411, _size409 ) = iprot.readMapBegin()
-          for _i413 in xrange(_size409):
-            _key414 = iprot.readString();
-            _val415 = iprot.readString();
-            self.success[_key414] = _val415
+          (_ktype403, _vtype404, _size402 ) = iprot.readMapBegin()
+          for _i406 in xrange(_size402):
+            _key407 = iprot.readString();
+            _val408 = iprot.readString();
+            self.success[_key407] = _val408
           iprot.readMapEnd()
         else:
           iprot.skip(ftype)
@@ -5912,9 +6054,9 @@ class get_gene_by_cds_result(object):
     if self.success is not None:
       oprot.writeFieldBegin('success', TType.MAP, 0)
       oprot.writeMapBegin(TType.STRING, TType.STRING, len(self.success))
-      for kiter416,viter417 in self.success.items():
-        oprot.writeString(kiter416)
-        oprot.writeString(viter417)
+      for kiter409,viter410 in self.success.items():
+        oprot.writeString(kiter409)
+        oprot.writeString(viter410)
       oprot.writeMapEnd()
       oprot.writeFieldEnd()
     if self.generic_exception is not None:
@@ -6012,10 +6154,10 @@ class get_gene_by_mrna_args(object):
       elif fid == 3:
         if ftype == TType.LIST:
           self.mrna_id_list = []
-          (_etype421, _size418) = iprot.readListBegin()
-          for _i422 in xrange(_size418):
-            _elem423 = iprot.readString();
-            self.mrna_id_list.append(_elem423)
+          (_etype414, _size411) = iprot.readListBegin()
+          for _i415 in xrange(_size411):
+            _elem416 = iprot.readString();
+            self.mrna_id_list.append(_elem416)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
@@ -6040,8 +6182,8 @@ class get_gene_by_mrna_args(object):
     if self.mrna_id_list is not None:
       oprot.writeFieldBegin('mrna_id_list', TType.LIST, 3)
       oprot.writeListBegin(TType.STRING, len(self.mrna_id_list))
-      for iter424 in self.mrna_id_list:
-        oprot.writeString(iter424)
+      for iter417 in self.mrna_id_list:
+        oprot.writeString(iter417)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
@@ -6116,11 +6258,11 @@ class get_gene_by_mrna_result(object):
       if fid == 0:
         if ftype == TType.MAP:
           self.success = {}
-          (_ktype426, _vtype427, _size425 ) = iprot.readMapBegin()
-          for _i429 in xrange(_size425):
-            _key430 = iprot.readString();
-            _val431 = iprot.readString();
-            self.success[_key430] = _val431
+          (_ktype419, _vtype420, _size418 ) = iprot.readMapBegin()
+          for _i422 in xrange(_size418):
+            _key423 = iprot.readString();
+            _val424 = iprot.readString();
+            self.success[_key423] = _val424
           iprot.readMapEnd()
         else:
           iprot.skip(ftype)
@@ -6173,9 +6315,9 @@ class get_gene_by_mrna_result(object):
     if self.success is not None:
       oprot.writeFieldBegin('success', TType.MAP, 0)
       oprot.writeMapBegin(TType.STRING, TType.STRING, len(self.success))
-      for kiter432,viter433 in self.success.items():
-        oprot.writeString(kiter432)
-        oprot.writeString(viter433)
+      for kiter425,viter426 in self.success.items():
+        oprot.writeString(kiter425)
+        oprot.writeString(viter426)
       oprot.writeMapEnd()
       oprot.writeFieldEnd()
     if self.generic_exception is not None:
@@ -6273,10 +6415,10 @@ class get_mrna_by_cds_args(object):
       elif fid == 3:
         if ftype == TType.LIST:
           self.cds_id_list = []
-          (_etype437, _size434) = iprot.readListBegin()
-          for _i438 in xrange(_size434):
-            _elem439 = iprot.readString();
-            self.cds_id_list.append(_elem439)
+          (_etype430, _size427) = iprot.readListBegin()
+          for _i431 in xrange(_size427):
+            _elem432 = iprot.readString();
+            self.cds_id_list.append(_elem432)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
@@ -6301,8 +6443,8 @@ class get_mrna_by_cds_args(object):
     if self.cds_id_list is not None:
       oprot.writeFieldBegin('cds_id_list', TType.LIST, 3)
       oprot.writeListBegin(TType.STRING, len(self.cds_id_list))
-      for iter440 in self.cds_id_list:
-        oprot.writeString(iter440)
+      for iter433 in self.cds_id_list:
+        oprot.writeString(iter433)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
@@ -6377,11 +6519,11 @@ class get_mrna_by_cds_result(object):
       if fid == 0:
         if ftype == TType.MAP:
           self.success = {}
-          (_ktype442, _vtype443, _size441 ) = iprot.readMapBegin()
-          for _i445 in xrange(_size441):
-            _key446 = iprot.readString();
-            _val447 = iprot.readString();
-            self.success[_key446] = _val447
+          (_ktype435, _vtype436, _size434 ) = iprot.readMapBegin()
+          for _i438 in xrange(_size434):
+            _key439 = iprot.readString();
+            _val440 = iprot.readString();
+            self.success[_key439] = _val440
           iprot.readMapEnd()
         else:
           iprot.skip(ftype)
@@ -6434,9 +6576,9 @@ class get_mrna_by_cds_result(object):
     if self.success is not None:
       oprot.writeFieldBegin('success', TType.MAP, 0)
       oprot.writeMapBegin(TType.STRING, TType.STRING, len(self.success))
-      for kiter448,viter449 in self.success.items():
-        oprot.writeString(kiter448)
-        oprot.writeString(viter449)
+      for kiter441,viter442 in self.success.items():
+        oprot.writeString(kiter441)
+        oprot.writeString(viter442)
       oprot.writeMapEnd()
       oprot.writeFieldEnd()
     if self.generic_exception is not None:
@@ -6534,10 +6676,10 @@ class get_mrna_by_gene_args(object):
       elif fid == 3:
         if ftype == TType.LIST:
           self.gene_id_list = []
-          (_etype453, _size450) = iprot.readListBegin()
-          for _i454 in xrange(_size450):
-            _elem455 = iprot.readString();
-            self.gene_id_list.append(_elem455)
+          (_etype446, _size443) = iprot.readListBegin()
+          for _i447 in xrange(_size443):
+            _elem448 = iprot.readString();
+            self.gene_id_list.append(_elem448)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
@@ -6562,8 +6704,8 @@ class get_mrna_by_gene_args(object):
     if self.gene_id_list is not None:
       oprot.writeFieldBegin('gene_id_list', TType.LIST, 3)
       oprot.writeListBegin(TType.STRING, len(self.gene_id_list))
-      for iter456 in self.gene_id_list:
-        oprot.writeString(iter456)
+      for iter449 in self.gene_id_list:
+        oprot.writeString(iter449)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
@@ -6638,16 +6780,16 @@ class get_mrna_by_gene_result(object):
       if fid == 0:
         if ftype == TType.MAP:
           self.success = {}
-          (_ktype458, _vtype459, _size457 ) = iprot.readMapBegin()
-          for _i461 in xrange(_size457):
-            _key462 = iprot.readString();
-            _val463 = []
-            (_etype467, _size464) = iprot.readListBegin()
-            for _i468 in xrange(_size464):
-              _elem469 = iprot.readString();
-              _val463.append(_elem469)
+          (_ktype451, _vtype452, _size450 ) = iprot.readMapBegin()
+          for _i454 in xrange(_size450):
+            _key455 = iprot.readString();
+            _val456 = []
+            (_etype460, _size457) = iprot.readListBegin()
+            for _i461 in xrange(_size457):
+              _elem462 = iprot.readString();
+              _val456.append(_elem462)
             iprot.readListEnd()
-            self.success[_key462] = _val463
+            self.success[_key455] = _val456
           iprot.readMapEnd()
         else:
           iprot.skip(ftype)
@@ -6700,11 +6842,11 @@ class get_mrna_by_gene_result(object):
     if self.success is not None:
       oprot.writeFieldBegin('success', TType.MAP, 0)
       oprot.writeMapBegin(TType.STRING, TType.LIST, len(self.success))
-      for kiter470,viter471 in self.success.items():
-        oprot.writeString(kiter470)
-        oprot.writeListBegin(TType.STRING, len(viter471))
-        for iter472 in viter471:
-          oprot.writeString(iter472)
+      for kiter463,viter464 in self.success.items():
+        oprot.writeString(kiter463)
+        oprot.writeListBegin(TType.STRING, len(viter464))
+        for iter465 in viter464:
+          oprot.writeString(iter465)
         oprot.writeListEnd()
       oprot.writeMapEnd()
       oprot.writeFieldEnd()
@@ -6803,10 +6945,10 @@ class get_mrna_exons_args(object):
       elif fid == 3:
         if ftype == TType.LIST:
           self.mrna_id_list = []
-          (_etype476, _size473) = iprot.readListBegin()
-          for _i477 in xrange(_size473):
-            _elem478 = iprot.readString();
-            self.mrna_id_list.append(_elem478)
+          (_etype469, _size466) = iprot.readListBegin()
+          for _i470 in xrange(_size466):
+            _elem471 = iprot.readString();
+            self.mrna_id_list.append(_elem471)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
@@ -6831,8 +6973,8 @@ class get_mrna_exons_args(object):
     if self.mrna_id_list is not None:
       oprot.writeFieldBegin('mrna_id_list', TType.LIST, 3)
       oprot.writeListBegin(TType.STRING, len(self.mrna_id_list))
-      for iter479 in self.mrna_id_list:
-        oprot.writeString(iter479)
+      for iter472 in self.mrna_id_list:
+        oprot.writeString(iter472)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
@@ -6907,17 +7049,17 @@ class get_mrna_exons_result(object):
       if fid == 0:
         if ftype == TType.MAP:
           self.success = {}
-          (_ktype481, _vtype482, _size480 ) = iprot.readMapBegin()
-          for _i484 in xrange(_size480):
-            _key485 = iprot.readString();
-            _val486 = []
-            (_etype490, _size487) = iprot.readListBegin()
-            for _i491 in xrange(_size487):
-              _elem492 = Exon_data()
-              _elem492.read(iprot)
-              _val486.append(_elem492)
+          (_ktype474, _vtype475, _size473 ) = iprot.readMapBegin()
+          for _i477 in xrange(_size473):
+            _key478 = iprot.readString();
+            _val479 = []
+            (_etype483, _size480) = iprot.readListBegin()
+            for _i484 in xrange(_size480):
+              _elem485 = Exon_data()
+              _elem485.read(iprot)
+              _val479.append(_elem485)
             iprot.readListEnd()
-            self.success[_key485] = _val486
+            self.success[_key478] = _val479
           iprot.readMapEnd()
         else:
           iprot.skip(ftype)
@@ -6970,11 +7112,11 @@ class get_mrna_exons_result(object):
     if self.success is not None:
       oprot.writeFieldBegin('success', TType.MAP, 0)
       oprot.writeMapBegin(TType.STRING, TType.LIST, len(self.success))
-      for kiter493,viter494 in self.success.items():
-        oprot.writeString(kiter493)
-        oprot.writeListBegin(TType.STRUCT, len(viter494))
-        for iter495 in viter494:
-          iter495.write(oprot)
+      for kiter486,viter487 in self.success.items():
+        oprot.writeString(kiter486)
+        oprot.writeListBegin(TType.STRUCT, len(viter487))
+        for iter488 in viter487:
+          iter488.write(oprot)
         oprot.writeListEnd()
       oprot.writeMapEnd()
       oprot.writeFieldEnd()
@@ -7073,10 +7215,10 @@ class get_mrna_utrs_args(object):
       elif fid == 3:
         if ftype == TType.LIST:
           self.mrna_id_list = []
-          (_etype499, _size496) = iprot.readListBegin()
-          for _i500 in xrange(_size496):
-            _elem501 = iprot.readString();
-            self.mrna_id_list.append(_elem501)
+          (_etype492, _size489) = iprot.readListBegin()
+          for _i493 in xrange(_size489):
+            _elem494 = iprot.readString();
+            self.mrna_id_list.append(_elem494)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
@@ -7101,8 +7243,8 @@ class get_mrna_utrs_args(object):
     if self.mrna_id_list is not None:
       oprot.writeFieldBegin('mrna_id_list', TType.LIST, 3)
       oprot.writeListBegin(TType.STRING, len(self.mrna_id_list))
-      for iter502 in self.mrna_id_list:
-        oprot.writeString(iter502)
+      for iter495 in self.mrna_id_list:
+        oprot.writeString(iter495)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
@@ -7177,18 +7319,18 @@ class get_mrna_utrs_result(object):
       if fid == 0:
         if ftype == TType.MAP:
           self.success = {}
-          (_ktype504, _vtype505, _size503 ) = iprot.readMapBegin()
-          for _i507 in xrange(_size503):
-            _key508 = iprot.readString();
-            _val509 = {}
-            (_ktype511, _vtype512, _size510 ) = iprot.readMapBegin()
-            for _i514 in xrange(_size510):
-              _key515 = iprot.readString();
-              _val516 = UTR_data()
-              _val516.read(iprot)
-              _val509[_key515] = _val516
+          (_ktype497, _vtype498, _size496 ) = iprot.readMapBegin()
+          for _i500 in xrange(_size496):
+            _key501 = iprot.readString();
+            _val502 = {}
+            (_ktype504, _vtype505, _size503 ) = iprot.readMapBegin()
+            for _i507 in xrange(_size503):
+              _key508 = iprot.readString();
+              _val509 = UTR_data()
+              _val509.read(iprot)
+              _val502[_key508] = _val509
             iprot.readMapEnd()
-            self.success[_key508] = _val509
+            self.success[_key501] = _val502
           iprot.readMapEnd()
         else:
           iprot.skip(ftype)
@@ -7241,12 +7383,12 @@ class get_mrna_utrs_result(object):
     if self.success is not None:
       oprot.writeFieldBegin('success', TType.MAP, 0)
       oprot.writeMapBegin(TType.STRING, TType.MAP, len(self.success))
-      for kiter517,viter518 in self.success.items():
-        oprot.writeString(kiter517)
-        oprot.writeMapBegin(TType.STRING, TType.STRUCT, len(viter518))
-        for kiter519,viter520 in viter518.items():
-          oprot.writeString(kiter519)
-          viter520.write(oprot)
+      for kiter510,viter511 in self.success.items():
+        oprot.writeString(kiter510)
+        oprot.writeMapBegin(TType.STRING, TType.STRUCT, len(viter511))
+        for kiter512,viter513 in viter511.items():
+          oprot.writeString(kiter512)
+          viter513.write(oprot)
         oprot.writeMapEnd()
       oprot.writeMapEnd()
       oprot.writeFieldEnd()

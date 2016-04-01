@@ -158,24 +158,6 @@ def test_get_feature_ids_new_filter_plus_strand_by_region():
 
 
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
-def test_get_feature_ids_new_filter_either_strand_by_region():
-    _log.debug("Input {}".format(genome_new))
-    for t_o in [t_new, t_new_e, t_client_new]:
-        feature_ids_t_o = t_o.get_feature_ids(filters={
-            "region_list": [{
-                "contig_id": "kb|g.166819.c.0",
-                "start": 5000,
-                "strand": "?",
-                "length": 5000}]},
-        group_by="region")
-        assert isinstance(feature_ids_t_o, dict)
-        _log.debug(feature_ids_t_o)
-        assert len(feature_ids_t_o["by_region"]["kb|g.166819.c.0"]["+"]) > 0
-        assert len(feature_ids_t_o["by_region"]["kb|g.166819.c.0"]["-"]) > 0
-        _log.debug("Output {}".format(len(feature_ids_t_o)))
-
-
-@skipUnless(shared.can_connect, 'Cannot connect to workspace')
 def test_get_feature_ids_subset_new():
     _log.debug("Input {}".format(genome_new))
     for t_o in [t_new, t_new_e, t_client_new]:
@@ -336,7 +318,19 @@ def test_get_mrna_utrs_new():
         cds_locations = t_o.get_feature_locations(cds_ids.values())
 
         for mrna_id in mrna_ids:
-            if len(mrna_locations[mrna_id]) != len(cds_locations[cds_ids[mrna_id]]):
+            num_mrna = len(mrna_locations[mrna_id])
+            num_cds = len(cds_locations[cds_ids[mrna_id]])
+
+            first_mrna = mrna_locations[mrna_id][0]
+            first_cds = cds_locations[cds_ids[mrna_id]][0]
+            last_mrna = mrna_locations[mrna_id][-1]
+            last_cds = cds_locations[cds_ids[mrna_id]][-1]
+
+            if num_mrna != num_cds:
+                assert len(utrs_t_o[mrna_id]) > 0
+                validate_utrs(utrs_t_o[mrna_id])
+            elif (first_mrna["start"] < first_cds["start"]) or \
+                 (last_mrna["start"] + last_mrna["length"] > last_cds["start"] + last_cds["length"]):
                 assert len(utrs_t_o[mrna_id]) > 0
                 validate_utrs(utrs_t_o[mrna_id])
             elif len(utrs_t_o[mrna_id]) > 0:

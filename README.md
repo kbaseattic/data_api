@@ -207,7 +207,30 @@ The sub-repository will be cloned in the directory `test_resources`.
    - **localhost**   : A local instance of KBase (docker or vm), assume local Redis caching
    - **dir_cache**   : Use local test files, assume local Redis caching
    - **dir_nocache** : Use local test files, do not attempt to cache using Redis
-   
+
+### Service logging
+
+The Data API service logging is controlled by a file named, by default, "logging.conf", in the same directory as the configuration file from the `--config` option. You can choose another file with the `--log-config` option. If no explicit configuration is given, and the default file is not present, some basic default logging configuration will be used. Failure to open or parse a file provided with the `--log-config` option will cause the program to stop and exit.
+
+For example:
+
+* `data_api_start_service.py --service genome_annotation --config deployment.cfg` will look for a file `logging.conf` in the current directory.
+* `data_api_start_service.py --service genome_annotation --config deployment.cfg --log-config ./logging.conf` is equivalent to the previous command.
+* `data_api_start_service.py --service genome_annotation --config deployment.cfg --log-config /tmp/logging-test/logging.yaml` will configure logging from the named file in "/tmp/logging-test" instead of looking for "logging.conf" in the current directory. If that file does not exist, the program will stop with an error.
+
+The configuration file is formatted using either the (older) ConfigParser format used by `logging.config.fileConfig` or the (newer) YAML format that is parsed and fed to `logging.config.dictConfig`; the format is auto-detected via trial and error. See the [logging.config module](https://docs.python.org/2.7/library/logging.config.html) documentation for details on the formats of these files. The `logging.conf` example in the root of the repository demonstrates how to configure output to a file and console, and control the level of logging for each service.
+
+The output log format is largely controlled by the configuration file. Some of the messages have additional standardized formatting applied to the part in the `%(message)s` format code, i.e. the free-form string part of the log message. This standardized formatting is encoded the `doekbase.util.log_{event,start,end}` functions. (Note: This formatting can be altered, too, by changing the global `_MESSAGE_FORMAT` dict of the module; but this is not recommended). The basic idea is to reduce the free-form part to a simple name for the event, and put everything else in key/value pairs with a standard format. Also, messages at the beginning and the end of something (in cases where that makes sense) should be named so that they are easily matched. For example, the pair of log messages for the service starting and stopping look like this:
+
+        2016-02-18 05:34:39,260 [INFO] doekbase.data_api.annotation.genome_annotation.service.driver: start_service.begin | host='',port=9103
+        # ...
+        2016-02-18 05:35:01,910 [INFO] doekbase.data_api.annotation.genome_annotation.service.driver: start_service.end (22.649431) | host='',port=9103
+
+Note the '.begin' and '.end' event suffixes, as well as the "|" separating the message into name from the key/value pairs of the values. The number in parentheses on the '.end' event is the duration in seconds since the corresponding '.start'. For a message that is not part of a begin/end pair, the format is the same:
+
+        2016-02-18 05:34:39,137 [INFO] doekbase.data_api_start_service: activating REDIS | host=localhost,port=6379
+
+Not all, in fact right now not even most, of the messages from the services have this standard format extension. But the goal is to slowly convert them. (We'll see how that goes!)
 
 ## Testing 
 
@@ -221,8 +244,9 @@ The sub-repository will be cloned in the directory `test_resources`.
 
    Start each of the API services:
    
-    nohup data_api_start_service.py --config deployment.cfg --service taxon --port 9101 & > taxonAPI.out
-    nohup data_api_start_service.py --config deployment.cfg --service assembly --port 9102 & > assemblyAPI.out        
+    data_api_start_service.py --config deployment.cfg --service taxon --port 9101 &
+    data_api_start_service.py --config deployment.cfg --service assembly --port 9102 &
+    data_api_start_service.py --config deployment.cfg --service genome_annotation --port 9103 &
 
    Run nosetests from the data_api source directory, which will use the test data:
 

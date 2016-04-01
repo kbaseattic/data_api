@@ -20,9 +20,9 @@ except:
 class ServiceException(TException):
   """
   Attributes:
-   - message
-   - stacktrace
-   - inputs
+   - message: Readable message desribing the error condition.
+   - stacktrace: Program stack trace
+   - inputs: Optional mapping
   """
 
   thrift_spec = (
@@ -126,8 +126,8 @@ class ServiceException(TException):
 class AuthorizationException(TException):
   """
   Attributes:
-   - message
-   - stacktrace
+   - message: Readable message desribing the error condition.
+   - stacktrace: Program stack trace
   """
 
   thrift_spec = (
@@ -209,8 +209,8 @@ class AuthorizationException(TException):
 class AuthenticationException(TException):
   """
   Attributes:
-   - message
-   - stacktrace
+   - message: Readable message desribing the error condition.
+   - stacktrace: Program stack trace
   """
 
   thrift_spec = (
@@ -292,8 +292,8 @@ class AuthenticationException(TException):
 class ObjectReferenceException(TException):
   """
   Attributes:
-   - message
-   - stacktrace
+   - message: Readable message desribing the error condition.
+   - stacktrace: Program stack trace
   """
 
   thrift_spec = (
@@ -375,8 +375,8 @@ class ObjectReferenceException(TException):
 class AttributeException(TException):
   """
   Attributes:
-   - message
-   - stacktrace
+   - message: Readable message desribing the error condition.
+   - stacktrace: Program stack trace
   """
 
   thrift_spec = (
@@ -458,9 +458,9 @@ class AttributeException(TException):
 class TypeException(TException):
   """
   Attributes:
-   - message
-   - stacktrace
-   - valid_types
+   - message: Readable message desribing the error condition.
+   - stacktrace: Program stack trace
+   - valid_types: List of types that would have been acceptable.
   """
 
   thrift_spec = (
@@ -562,10 +562,10 @@ class TypeException(TException):
 class Region(object):
   """
   Attributes:
-   - contig_id
-   - strand
-   - start
-   - length
+   - contig_id: The identifier for the contig to which this region corresponds.
+   - strand: Either a "+" or a "-", for the strand on which the region is located.
+   - start: Starting position for this region.
+   - length: Distance from the start position that bounds the end of the region.
   """
 
   thrift_spec = (
@@ -665,11 +665,20 @@ class Region(object):
 
 class Feature_id_filters(object):
   """
+  Filters passed to :meth:`get_feature_ids`
+
   Attributes:
-   - type_list
-   - region_list
-   - function_list
-   - alias_list
+   - type_list: List of Feature type strings.
+   - region_list: List of region specs.
+  For example::
+      [{"contig_id": str, "strand": "+"|"-",
+        "start": int, "length": int},...]
+
+  The Feature sequence begin and end are calculated as follows:
+    - [start, start) for "+" strand
+    - (start - length, start] for "-" strand
+   - function_list: List of function strings.
+   - alias_list: List of alias strings.
   """
 
   thrift_spec = (
@@ -819,10 +828,12 @@ class Feature_id_filters(object):
 class Feature_id_mapping(object):
   """
   Attributes:
-   - by_type
-   - by_region
-   - by_function
-   - by_alias
+   - by_type: Mapping of Feature type string to a list of Feature IDs
+   - by_region: Mapping of contig ID, strand "+" or "-", and range "start--end" to
+  a list of Feature IDs. For example::
+     {'contig1': {'+': {'123--456': ['feature1', 'feature2'] }}}
+   - by_function: Mapping of function string to a list of Feature IDs
+   - by_alias: Mapping of alias string to a list of Feature IDs
   """
 
   thrift_spec = (
@@ -1031,19 +1042,32 @@ class Feature_id_mapping(object):
 class Feature_data(object):
   """
   Attributes:
-   - feature_id
-   - feature_type
-   - feature_function
-   - feature_aliases
-   - feature_dna_sequence_length
-   - feature_dna_sequence
-   - feature_md5
-   - feature_locations
-   - feature_publications
-   - feature_quality_warnings
-   - feature_quality_score
-   - feature_notes
-   - feature_inference
+   - feature_id: Identifier for this feature
+   - feature_type: The Feature type e.g., "mRNA", "CDS", "gene", ...
+   - feature_function: The functional annotation description
+   - feature_aliases: Dictionary of Alias string to List of source string identifiers
+   - feature_dna_sequence_length: Integer representing the length of the DNA sequence for convenience
+   - feature_dna_sequence: String containing the DNA sequence of the Feature
+   - feature_md5: String containing the MD5 of the sequence, calculated from the uppercase string
+   - feature_locations: List of dictionaries::
+      { "contig_id": str,
+        "start": int,
+        "strand": str,
+        "length": int  }
+
+  List of Feature regions, where the Feature bounds are
+  calculated as follows:
+
+  - For "+" strand, [start, start + length)
+  - For "-" strand, (start - length, start]
+   - feature_publications: List of any known publications related to this Feature
+   - feature_quality_warnings: List of strings indicating known data quality issues.
+  Note: not used for Genome type, but is used for
+  GenomeAnnotation
+   - feature_quality_score: Quality value with unknown algorithm for Genomes,
+  not calculated yet for GenomeAnnotations.
+   - feature_notes: Notes recorded about this Feature
+   - feature_inference: Inference information
   """
 
   thrift_spec = (
@@ -1059,7 +1083,7 @@ class Feature_data(object):
     (9, TType.LIST, 'feature_publications', (TType.STRING,None), None, ), # 9
     (10, TType.LIST, 'feature_quality_warnings', (TType.STRING,None), None, ), # 10
     (11, TType.LIST, 'feature_quality_score', (TType.STRING,None), None, ), # 11
-    (12, TType.LIST, 'feature_notes', (TType.STRING,None), None, ), # 12
+    (12, TType.STRING, 'feature_notes', None, None, ), # 12
     (13, TType.STRING, 'feature_inference', None, None, ), # 13
   )
 
@@ -1175,13 +1199,8 @@ class Feature_data(object):
         else:
           iprot.skip(ftype)
       elif fid == 12:
-        if ftype == TType.LIST:
-          self.feature_notes = []
-          (_etype166, _size163) = iprot.readListBegin()
-          for _i167 in xrange(_size163):
-            _elem168 = iprot.readString();
-            self.feature_notes.append(_elem168)
-          iprot.readListEnd()
+        if ftype == TType.STRING:
+          self.feature_notes = iprot.readString();
         else:
           iprot.skip(ftype)
       elif fid == 13:
@@ -1214,11 +1233,11 @@ class Feature_data(object):
     if self.feature_aliases is not None:
       oprot.writeFieldBegin('feature_aliases', TType.MAP, 4)
       oprot.writeMapBegin(TType.STRING, TType.LIST, len(self.feature_aliases))
-      for kiter169,viter170 in self.feature_aliases.items():
-        oprot.writeString(kiter169)
-        oprot.writeListBegin(TType.STRING, len(viter170))
-        for iter171 in viter170:
-          oprot.writeString(iter171)
+      for kiter163,viter164 in self.feature_aliases.items():
+        oprot.writeString(kiter163)
+        oprot.writeListBegin(TType.STRING, len(viter164))
+        for iter165 in viter164:
+          oprot.writeString(iter165)
         oprot.writeListEnd()
       oprot.writeMapEnd()
       oprot.writeFieldEnd()
@@ -1237,37 +1256,34 @@ class Feature_data(object):
     if self.feature_locations is not None:
       oprot.writeFieldBegin('feature_locations', TType.LIST, 8)
       oprot.writeListBegin(TType.STRUCT, len(self.feature_locations))
-      for iter172 in self.feature_locations:
-        iter172.write(oprot)
+      for iter166 in self.feature_locations:
+        iter166.write(oprot)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     if self.feature_publications is not None:
       oprot.writeFieldBegin('feature_publications', TType.LIST, 9)
       oprot.writeListBegin(TType.STRING, len(self.feature_publications))
-      for iter173 in self.feature_publications:
-        oprot.writeString(iter173)
+      for iter167 in self.feature_publications:
+        oprot.writeString(iter167)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     if self.feature_quality_warnings is not None:
       oprot.writeFieldBegin('feature_quality_warnings', TType.LIST, 10)
       oprot.writeListBegin(TType.STRING, len(self.feature_quality_warnings))
-      for iter174 in self.feature_quality_warnings:
-        oprot.writeString(iter174)
+      for iter168 in self.feature_quality_warnings:
+        oprot.writeString(iter168)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     if self.feature_quality_score is not None:
       oprot.writeFieldBegin('feature_quality_score', TType.LIST, 11)
       oprot.writeListBegin(TType.STRING, len(self.feature_quality_score))
-      for iter175 in self.feature_quality_score:
-        oprot.writeString(iter175)
+      for iter169 in self.feature_quality_score:
+        oprot.writeString(iter169)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     if self.feature_notes is not None:
-      oprot.writeFieldBegin('feature_notes', TType.LIST, 12)
-      oprot.writeListBegin(TType.STRING, len(self.feature_notes))
-      for iter176 in self.feature_notes:
-        oprot.writeString(iter176)
-      oprot.writeListEnd()
+      oprot.writeFieldBegin('feature_notes', TType.STRING, 12)
+      oprot.writeString(self.feature_notes)
       oprot.writeFieldEnd()
     if self.feature_inference is not None:
       oprot.writeFieldBegin('feature_inference', TType.STRING, 13)
@@ -1311,11 +1327,11 @@ class Feature_data(object):
 class Protein_data(object):
   """
   Attributes:
-   - protein_id
-   - protein_amino_acid_sequence
-   - protein_function
-   - protein_aliases
-   - protein_md5
+   - protein_id: Protein identifier, which is feature ID plus ".protein"
+   - protein_amino_acid_sequence: Amino acid sequence for this protein
+   - protein_function: Function of protein
+   - protein_aliases: List of aliases for the protein
+   - protein_md5: MD5 hash of the protein translation (uppercase)
    - protein_domain_locations
   """
 
@@ -1364,10 +1380,10 @@ class Protein_data(object):
       elif fid == 4:
         if ftype == TType.LIST:
           self.protein_aliases = []
-          (_etype180, _size177) = iprot.readListBegin()
-          for _i181 in xrange(_size177):
-            _elem182 = iprot.readString();
-            self.protein_aliases.append(_elem182)
+          (_etype173, _size170) = iprot.readListBegin()
+          for _i174 in xrange(_size170):
+            _elem175 = iprot.readString();
+            self.protein_aliases.append(_elem175)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
@@ -1379,10 +1395,10 @@ class Protein_data(object):
       elif fid == 6:
         if ftype == TType.LIST:
           self.protein_domain_locations = []
-          (_etype186, _size183) = iprot.readListBegin()
-          for _i187 in xrange(_size183):
-            _elem188 = iprot.readString();
-            self.protein_domain_locations.append(_elem188)
+          (_etype179, _size176) = iprot.readListBegin()
+          for _i180 in xrange(_size176):
+            _elem181 = iprot.readString();
+            self.protein_domain_locations.append(_elem181)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
@@ -1411,8 +1427,8 @@ class Protein_data(object):
     if self.protein_aliases is not None:
       oprot.writeFieldBegin('protein_aliases', TType.LIST, 4)
       oprot.writeListBegin(TType.STRING, len(self.protein_aliases))
-      for iter189 in self.protein_aliases:
-        oprot.writeString(iter189)
+      for iter182 in self.protein_aliases:
+        oprot.writeString(iter182)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     if self.protein_md5 is not None:
@@ -1422,8 +1438,8 @@ class Protein_data(object):
     if self.protein_domain_locations is not None:
       oprot.writeFieldBegin('protein_domain_locations', TType.LIST, 6)
       oprot.writeListBegin(TType.STRING, len(self.protein_domain_locations))
-      for iter190 in self.protein_domain_locations:
-        oprot.writeString(iter190)
+      for iter183 in self.protein_domain_locations:
+        oprot.writeString(iter183)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
@@ -1457,9 +1473,9 @@ class Protein_data(object):
 class Exon_data(object):
   """
   Attributes:
-   - exon_location
-   - exon_dna_sequence
-   - exon_ordinal
+   - exon_location: Location of the exon in the contig.
+   - exon_dna_sequence: DNA Sequence string.
+   - exon_ordinal: The position of the exon, ordered 5' to 3'.
   """
 
   thrift_spec = (
@@ -1549,8 +1565,8 @@ class Exon_data(object):
 class UTR_data(object):
   """
   Attributes:
-   - utr_locations
-   - utr_dna_sequence
+   - utr_locations: Locations of this UTR
+   - utr_dna_sequence: DNA sequence string for this UTR
   """
 
   thrift_spec = (
@@ -1575,11 +1591,11 @@ class UTR_data(object):
       if fid == 1:
         if ftype == TType.LIST:
           self.utr_locations = []
-          (_etype194, _size191) = iprot.readListBegin()
-          for _i195 in xrange(_size191):
-            _elem196 = Region()
-            _elem196.read(iprot)
-            self.utr_locations.append(_elem196)
+          (_etype187, _size184) = iprot.readListBegin()
+          for _i188 in xrange(_size184):
+            _elem189 = Region()
+            _elem189.read(iprot)
+            self.utr_locations.append(_elem189)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
@@ -1601,8 +1617,8 @@ class UTR_data(object):
     if self.utr_locations is not None:
       oprot.writeFieldBegin('utr_locations', TType.LIST, 1)
       oprot.writeListBegin(TType.STRUCT, len(self.utr_locations))
-      for iter197 in self.utr_locations:
-        iter197.write(oprot)
+      for iter190 in self.utr_locations:
+        iter190.write(oprot)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     if self.utr_dna_sequence is not None:
