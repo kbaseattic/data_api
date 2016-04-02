@@ -1,6 +1,7 @@
 import simplejson
 import time
 import sys
+#import biokbase.workspace.client
 import doekbase.workspace.client
 import re
 import hashlib
@@ -42,12 +43,13 @@ def make_lineage(taxon_id=None,taxon_dict=None):
 
 
 
-def make_taxons(wsname=None,wsurl=None, taxon_files_dir = None): 
+def make_taxons(wsname=None,wsurl=None, taxon_files_dir = None, level_start = None): 
 
     start  = time.time()
     print "Start time " + str(start)
 
     ws_client = doekbase.workspace.client.Workspace(wsurl)
+#    ws_client = biokbase.workspace.client.Workspace(wsurl)
 
     workspace_object = ws_client.get_workspace_info({'workspace':wsname})
     
@@ -57,6 +59,28 @@ def make_taxons(wsname=None,wsurl=None, taxon_files_dir = None):
 
     nodes_file =  "%s/nodes.dmp" % (taxon_files_dir[0])
     names_file =  "%s/names.dmp" % (taxon_files_dir[0]) 
+
+    #MAKE THE UNKNOWN TAXON 
+    unknown_taxon_dict = {"scientific_name":"Unknown","domain":"Unknown","scientific_lineage":"Unknown","genetic_code":0,"taxonomy_id":-1}
+    unknown_not_saved = True
+    unknown_provenance =  [{"script": __file__, "script_ver": "0.1", 
+                            "description": "Unknown taxon created to seed catch all taxonomy for when a taxon can not be determined."}] 
+
+    if level_start is None:
+        level_start = 0
+    else:
+        level_start = level_start[0]
+
+    while unknown_not_saved:
+        try:
+            taxon_info =  ws_client.save_objects({"workspace": workspace_name,"objects":[ {"type":"KBaseGenomeAnnotations.Taxon",
+                                                                                           "data":unknown_taxon_dict,
+                                                                                           "name": "unknown_taxon",
+                                                                                           "provenance":unknown_provenance}] })
+            unknown_not_saved = False
+        except Exception, e:
+            print "SAVE FAILED ON UNKNOWN TAXON - GENERAL_EXCEPTION: " + str(sys.exc_info()[0]) + " Exception: " + str(e)
+            sys.exit(1)
 
     taxon_dict = dict()
     #key is the taxonomy_id, values is an inner dict (parent_id, children_ids (list), 
@@ -216,6 +240,7 @@ def make_taxons(wsname=None,wsurl=None, taxon_files_dir = None):
 
     for level_list_key in sorted(tax_level_dict.iterkeys()):
         level_list = tax_level_dict[level_list_key]
+        print "Level Key Counter : " + str(level_list_key) + " Length : " + str(len(tax_level_dict[level_list_key]))
         print "Level Counter : " + str(level_counter) + " Length : " + str(len(tax_level_dict[level_list_key]))
         level_counter = level_counter + 1
 
@@ -246,11 +271,23 @@ def make_taxons(wsname=None,wsurl=None, taxon_files_dir = None):
     level_counter = 0
 #    if 38 in tax_level_dict:
 #        level_list = tax_level_dict[38]
+    level_list_keys = sorted(tax_level_dict.iterkeys())
+    temp_level_list_keys = list()
     for level_list_key in sorted(tax_level_dict.iterkeys()):
+        print "Key : " + str(level_list_key) + "  Level Start: " + str(level_start)
+#        print "Evaluation: " + str(level_list_key >= level_start)
+#        print "Evaluation2: " + str(int(level_list_key) >= int(level_start))
+        if int(level_list_key) >= int(level_start):
+            temp_level_list_keys.append(level_list_key)
+
+    print "TEMP_LIST " + str(temp_level_list_keys)
+#    for level_list_key in sorted(tax_level_dict.iterkeys()):
+    for level_list_key in temp_level_list_keys:
         level_list = tax_level_dict[level_list_key]
 
         save_counter = 0
-        print "Level Counter : " + str(level_counter) + " has a length of " + str(len(level_list))
+#        print "Level Counter : " + str(level_counter) + " has a length of " + str(len(level_list))
+        print "Level Counter : " + str(level_list) + " has a length of " + str(len(level_list))
         sys.stdout.flush()
         for taxon_id in level_list:
 #            print "PROCESSING TAX ID : " + str(taxon_id)
@@ -325,12 +362,13 @@ def make_taxons(wsname=None,wsurl=None, taxon_files_dir = None):
             save_start  = time.time()
             while taxons_not_saved:
                 try:
-                    taxon_info =  ws_client.save_objects({"workspace": workspace_name,"objects":[ {"type":"KBaseGenomesCondensedPrototypeV2.Taxon",
+                    taxon_info =  ws_client.save_objects({"workspace": workspace_name,"objects":[ {"type":"KBaseGenomeAnnotations.Taxon",
                                                                                                    "data":taxon_object, 
                                                                                                    "name": taxon_object_name, 
                                                                                                    "provenance":taxon_provenance}] }) 
                     taxons_not_saved = False 
                 except doekbase.workspace.client.ServerError as err:
+#                except biokbase.workspace.client.ServerError as err:
                     print "SAVE FAILED ON SAVE COUNTER " + str(save_counter) + " Taxon ID: " + str(taxon_id) + " ERROR: " + str(err)
                     #                        raise
                 except KeyboardInterrupt:
@@ -355,16 +393,18 @@ if __name__ == "__main__":
     import argparse
     import os.path
 
-    parser = argparse.ArgumentParser(description='Create CondensedGenome from OriginalGenome')
+    parser = argparse.ArgumentParser(description='Create TaxonObjects')
     parser.add_argument('--wsname', nargs='?', help='workspace name to populate', required=True)
     parser.add_argument('--wsurl', action='store', type=str, nargs='?', required=True)
     parser.add_argument('--taxon_files_dir', nargs=1, help='directory that holds names.dump and nodes.dump files.', required=True)
+    parser.add_argument('--level_start', nargs=1, help='the taxonomy tree level to start at,defaults to 1.',default=0,required=False)
     args, unknown = parser.parse_known_args()
 
     try: 
         make_taxons(wsname = args.wsname, 
                     wsurl = args.wsurl,
-                    taxon_files_dir = args.taxon_files_dir)
+                    taxon_files_dir = args.taxon_files_dir,
+                    level_start = args.level_start )
     except Exception, e: 
         raise
         #sys.exit(1) 

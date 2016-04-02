@@ -1,0 +1,60 @@
+#!/bin/bash
+
+# This script is used to check the status of the various data_api services.
+# It determines which service to check based on the name of the symlink. So do
+# ln -s data_api_service $servicename_api_service
+# to check $servicename.  (The Makefile does this for taxon, assembly, and genome_annotation.)
+
+script_dir=$(dirname "$(readlink -f "$0")")
+service=$(basename $0 | perl -ne '($service)= $_=~/(.*)_api_service$/;print $service')
+
+logfile=$script_dir/$service.log
+
+rm -f $logfile
+
+if [ -z $KB_TOP ]
+then
+    export KB_TOP=/kb/deployment
+fi
+
+source $KB_TOP/user-env.sh
+
+if [ -z $KB_DEPLOYMENT_CONFIG ]
+then
+    export KB_DEPLOYMENT_CONFIG=$KB_TOP/deployment.cfg
+fi
+
+if [ -z $deployenv ]
+then
+
+    deployenv=$(perl -MConfig::Simple -e '$cfg=Config::Simple->new();$cfg->read($ENV{KB_DEPLOYMENT_CONFIG});print $cfg->param("global.basename")')
+    
+    if [ "$deployenv" == 'proda' ]
+    then
+        deployenv='www'
+    fi
+    if [ "$deployenv" == 'prodb' ]
+    then
+        deployenv='www'
+    fi
+    # fall back to localhost
+    if [ -z $deployenv ]
+    then
+        deployenv='localhost'
+    fi
+fi
+
+# something in python import complains when $HOME is not set
+if [ -z $HOME ]
+then
+    export HOME=/dev/null
+fi
+
+source $script_dir/../venv/bin/activate
+
+export KB_AUTH_TOKEN=$(cat /etc/check_mk/dataapitoken)
+
+date >> $logfile
+echo checking $service from $KB_DEPLOYMENT_CONFIG in $deployenv >> $logfile
+
+test_api_service.py $service https://$deployenv.kbase.us/services/data/$service 2>> $logfile

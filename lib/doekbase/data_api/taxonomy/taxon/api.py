@@ -11,68 +11,74 @@ import abc
 
 # Local
 from doekbase.data_api.core import ObjectAPI
+from doekbase.data_api.util import get_logger, logged
+from doekbase.data_api import exceptions
+import doekbase.data_api.taxonomy.taxon.service.ttypes as ttypes
+
+_log = get_logger(__file__)
 
 _GENOME_TYPES = ['KBaseGenomes.Genome']
-_TAXON_TYPES = ['KBaseGenomesCondensedPrototypeV2.Taxon']
+_TAXON_TYPES = ['KBaseGenomeAnnotations.Taxon']
 TYPES = _GENOME_TYPES + _TAXON_TYPES
 
 
 class TaxonInterface(object):
-    """
-    Represents a Taxonomic Unit, e.g., species.
-    Built to support KBaseGenomesCondensedPrototypeV2.Taxon and KBaseGenomes.Genome.
-    """
+    """Represents a taxonomic unit, e.g., species.
 
+    Built to support KBaseGenomeAnnotations.Taxon and
+    KBaseGenomes.Genome.
+    """
     __metaclass__ = abc.ABCMeta
 
     @abc.abstractmethod
     def get_parent(self, ref_only=False):
-        """
-        Retrieve parent Taxon of this Taxon as a TaxonAPI object.
-        If this is accessing a Genome object, returns None.
+        """Retrieve the parent Taxon.
 
         Args:
-          ref_only (bool): Return the reference instead of the full TaxonAPI object.
+          ref_only (bool): Return a reference instead of the full
+                           TaxonAPI object.
         Returns:
-          TaxonAPI
+          TaxonAPI, or str: parent Taxon, either as an object or a
+                    reference.
+
+        Raises:
+          AttributeError: If no parent Taxon exists for this Taxon.
          """
         pass
 
     @abc.abstractmethod
     def get_children(self, ref_only=False):
-        """
-        Retrieve the children Taxon of this Taxon as TaxonAPI objects.
-        If this is accessing a Genome object, returns None.
+        """Retrieve the children Taxon of this Taxon as TaxonAPI objects.
+        If this is accessing a KBaseGenomes.Genome object, returns None.
 
         Returns:
-          list<TaxonAPI>"""
+          list<TaxonAPI>
+        """
         pass
 
     @abc.abstractmethod
     def get_genome_annotations(self, ref_only=False):
-        """
-        Retrieve the GenomeAnnotations that refer to this Taxon.
-        If this is accessing a Genome object, returns None.
+        """Retrieve the GenomeAnnotation(s) that refer to this Taxon.
+        If this is accessing a KBaseGenomes.Genome object, returns None.
 
         Returns:
-          list<GenomeAnnotationAPI>"""
+          list<GenomeAnnotationAPI>
+        """
         pass
 
     @abc.abstractmethod
     def get_scientific_lineage(self):
-        """
-        Retrieve the scientific lineage of this Taxon.
+        """Retrieve the scientific lineage of this Taxon.
 
         Returns:
           str
 
-          e.g., "Top unit;Middle unit;Lowest unit" """
+          e.g., "{Domain unit;Kingdom unit;Phylum unit" """
         pass
 
     @abc.abstractmethod
     def get_scientific_name(self):
-        """
-        Retrieve the scientific name of this Taxon.
+        """Retrieve the scientific name of this Taxon.
 
         Returns:
           str
@@ -82,20 +88,19 @@ class TaxonInterface(object):
 
     @abc.abstractmethod
     def get_taxonomic_id(self):
-        """
-        Retrieve the NCBI taxonomic id of this Taxon.
-        The KBaseGenomes.Genome type's closest representative is source_id.
-
-        Unknown == -1
+        """Retrieve the NCBI taxonomic id of this Taxon.
+        The KBaseGenomes.Genome types' closest representative is source_id.
 
         Returns:
-          int"""
+          int
+
+        Raises:
+          AttributeError: If the NCBI taxonomic id for this Taxon is not present."""
         pass
 
     @abc.abstractmethod
     def get_kingdom(self):
-        """
-        Retrieve the kingdom associated with this Taxonomic Unit.
+        """Retrieve the kingdom associated with this Taxon.
 
         Returns:
           str"""
@@ -103,8 +108,7 @@ class TaxonInterface(object):
 
     @abc.abstractmethod
     def get_domain(self):
-        """
-        Retrieve the domain associated with this Taxonomic Unit.
+        """Retrieve the domain associated with this Taxon.
 
         Returns:
           str"""
@@ -112,8 +116,7 @@ class TaxonInterface(object):
 
     @abc.abstractmethod
     def get_aliases(self):
-        """
-        Retrieve the aliases for this Taxonomic Unit.
+        """Retrieve the taxonomic aliases for this Taxon.
 
         Returns:
           list<str>"""
@@ -121,8 +124,7 @@ class TaxonInterface(object):
 
     @abc.abstractmethod
     def get_genetic_code(self):
-        """
-        Retrieve the genetic code for this Taxonomic Unit.
+        """Retrieve the genetic code for this Taxon.
 
         Returns:
           int"""
@@ -136,16 +138,24 @@ class _KBaseGenomes_Genome(ObjectAPI, TaxonInterface):
         self.data = self.get_data_subset(["taxonomy", "scientific_name", "source_id", "domain", "genetic_code"])
 
     def get_parent(self, ref_only=False):
-        return None
+        raise AttributeError
 
     def get_children(self, ref_only=False):
         return list()
 
     def get_genome_annotations(self, ref_only=False):
-        return list()
+        from doekbase.data_api.annotation.genome_annotation.api import GenomeAnnotationAPI
+
+        referrers = self.get_referrers()
+        annotations = list()
+
+        if ref_only:
+            return [self.ref]
+        else:
+            return [GenomeAnnotationAPI(self.services, self._token, self.ref)]
 
     def get_scientific_lineage(self):
-        return self.data["taxonomy"]
+        return [x.strip() for x in self.data["taxonomy"].split(";")]
 
     def get_scientific_name(self):
         return self.data["scientific_name"]
@@ -153,11 +163,11 @@ class _KBaseGenomes_Genome(ObjectAPI, TaxonInterface):
     def get_taxonomic_id(self):
         try:
             return int(self.data["source_id"])
-        except:
-            return -1
+        except (KeyError, ValueError):
+            raise AttributeError
 
     def get_kingdom(self):
-        return None
+        raise AttributeError
 
     def get_domain(self):
         return self.data["domain"]
@@ -169,9 +179,9 @@ class _KBaseGenomes_Genome(ObjectAPI, TaxonInterface):
         return self.data["genetic_code"]
 
 
-class _Prototype(ObjectAPI, TaxonInterface):
+class _Taxon(ObjectAPI, TaxonInterface):
     def __init__(self, services, token, ref):
-        super(_Prototype, self).__init__(services, token, ref)
+        super(_Taxon, self).__init__(services, token, ref)
 
         self.data = self.get_data()
 
@@ -179,7 +189,7 @@ class _Prototype(ObjectAPI, TaxonInterface):
         try:
             parent_ref = self.data["parent_taxon_ref"]
         except KeyError:
-            return None
+            raise AttributeError
 
         if ref_only:
             return parent_ref
@@ -202,26 +212,26 @@ class _Prototype(ObjectAPI, TaxonInterface):
         return children
 
     def get_genome_annotations(self, ref_only=False):
-        import doekbase.data_api.annotation.genome_annotation
+        from doekbase.data_api.annotation.genome_annotation.api import GenomeAnnotationAPI
+        from doekbase.data_api.annotation.genome_annotation.api import TYPES as GA_TYPES
 
         referrers = self.get_referrers()
         annotations = list()
 
         if ref_only:
             for object_type in referrers:
-                if object_type.split('-')[0] in doekbase.data_api.annotation.genome_annotation.TYPES:
+                if object_type.split('-')[0] in GA_TYPES:
                     annotations.extend(referrers[object_type])
         else:
             for object_type in referrers:
-                if object_type.split('-')[0] in doekbase.data_api.annotation.genome_annotation.TYPES:
+                if object_type.split('-')[0] in GA_TYPES:
                     for x in referrers[object_type]:
-                        annotations.append(doekbase.data_api.annotation.genome_annotation.GenomeAnnotationAPI(
-                            self.services, self._token, ref=x))
+                        annotations.append(GenomeAnnotationAPI(self.services, self._token, ref=x))
 
         return annotations
 
     def get_scientific_lineage(self):
-        return self.data["scientific_lineage"]
+        return [x.strip() for x in self.data["scientific_lineage"].split(";")]
 
     def get_scientific_name(self):
         return self.data["scientific_name"]
@@ -233,7 +243,16 @@ class _Prototype(ObjectAPI, TaxonInterface):
         if "kingdom" in self.data:
             return self.data["kingdom"]
         else:
-            return None
+            raise AttributeError
+
+    def __str__(self):
+        """Simple string representation, for debugging.
+        """
+        return 'Id: {}, Name: {}, Lineage: {}'.format(
+            self.get_taxonomic_id(),
+            self.get_scientific_name(),
+            self.get_scientific_lineage()
+        )
 
     def get_domain(self):
         return self.data["domain"]
@@ -263,7 +282,7 @@ class TaxonAPI(ObjectAPI, TaxonInterface):
             raise TypeError("Invalid type! Expected one of {0}, received {1}".format(TYPES, self._typestring))
 
         if is_taxon_type:
-            self.proxy = _Prototype(services, token, ref)
+            self.proxy = _Taxon(services, token, ref)
         else:
             self.proxy = _KBaseGenomes_Genome(services, token, ref)
 
@@ -297,140 +316,151 @@ class TaxonAPI(ObjectAPI, TaxonInterface):
     def get_genetic_code(self):
         return self.proxy.get_genetic_code()
 
+    def __str__(self):
+        """Simple string representation, for debugging.
+        """
+
+        try:
+            tax_id = self.get_taxonomic_id()
+        except AttributeError:
+            tax_id = None
+
+        return '[{}] Id: {}, Name: {}, Lineage: {}'.format(
+            type(self.proxy),
+            tax_id,
+            self.get_scientific_name(),
+            self.get_scientific_lineage()
+        )
+
+_tc_log = get_logger('TaxonClientAPI')
 
 class TaxonClientAPI(TaxonInterface):
-    def __init__(self, host='localhost', port=9090, token=None, ref=None):
+
+    def client_method(func):
+        def wrapper(self, *args, **kwargs):
+            if not self.transport.isOpen():
+                self.transport.open()
+
+            try:
+                return func(self, *args, **kwargs)
+            except ttypes.AttributeException, e:
+                raise AttributeError(e.message)
+            except ttypes.AuthenticationException, e:
+                raise exceptions.AuthenticationError(e.message)
+            except ttypes.AuthorizationException, e:
+                raise exceptions.AuthorizationError(e.message)
+            except ttypes.TypeException, e:
+                raise exceptions.TypeError(e.message)
+            except ttypes.ServiceException, e:
+                raise exceptions.ServiceError(e.message)
+            except Exception, e:
+                raise
+            finally:
+                self.transport.close()
+        return wrapper
+
+    @logged(_tc_log, log_name='init')
+    def __init__(self, url=None, token=None, ref=None):
         from doekbase.data_api.taxonomy.taxon.service.interface import TaxonClientConnection
 
-        self.host = host
-        self.port = port
-        self.transport, self.client = TaxonClientConnection(host, port).get_client()
+        #TODO add exception handling and better error messages here
+        self.url = url
+        self.transport, self.client = TaxonClientConnection(url).get_client()
         self.ref = ref
         self._token = token
 
-    def get_parent(self, ref_only=False):
-        if not self.transport.isOpen():
-            self.transport.open()
+    @logged(_tc_log)
+    @client_method
+    def get_info(self):
+        return self.client.get_info(self._token, self.ref)
 
-        try:
-            parent_ref = self.client.get_parent(self._token, self.ref)
-        except Exception, e:
-            raise
-        finally:
-            self.transport.close()
+    @logged(_tc_log)
+    @client_method
+    def get_history(self):
+        return self.client.get_history(self._token, self.ref)
+
+    @logged(_tc_log)
+    @client_method
+    def get_provenance(self):
+        return self.client.get_provenance(self._token, self.ref)
+
+    @logged(_tc_log)
+    @client_method
+    def get_id(self):
+        return self.client.get_id(self._token, self.ref)
+
+    @logged(_tc_log)
+    @client_method
+    def get_name(self):
+        return self.client.get_name(self._token, self.ref)
+
+    @logged(_tc_log)
+    @client_method
+    def get_version(self):
+        return self.client.get_version(self._token, self.ref)
+
+    @logged(_tc_log)
+    @client_method
+    def get_parent(self, ref_only=False):
+        parent_ref = self.client.get_parent(self._token, self.ref)
 
         if ref_only:
             return parent_ref
         else:
-            if parent_ref != None:
-                return TaxonClientAPI(self.host, self.port, self._token, parent_ref)
-            else:
-                return None
+            return TaxonClientAPI(self.url, self._token, parent_ref)
 
+    @logged(_tc_log)
+    @client_method
     def get_children(self, ref_only=False):
-        if not self.transport.isOpen():
-            self.transport.open()
-
-        try:
-            children_refs = self.client.get_children(self._token, self.ref)
-        except Exception, e:
-            raise
-        finally:
-            self.transport.close()
+        children_refs = self.client.get_children(self._token, self.ref)
 
         if ref_only:
             return children_refs
         else:
             children = list()
             for x in children_refs:
-                children.append(TaxonClientAPI(self.host, self.port, self._token, x))
+                children.append(TaxonClientAPI(self.url, self._token, x))
+
             return children
 
+    @logged(_tc_log)
+    @client_method
     def get_genome_annotations(self, ref_only=False):
-        if not self.transport.isOpen():
-            self.transport.open()
+        # TODO need to return GenomeAnnotationClientAPI if ref_only == False
+        # which means here we need to know where to find GenomeAnnotation service
+        return self.client.get_genome_annotations(self._token, self.ref)
 
-        try:
-            annotation_refs = self.client.get_genome_annotations(self._token, self.ref)
-            return annotation_refs
-        except Exception, e:
-            raise
-        finally:
-            self.transport.close()
-
+    @logged(_tc_log)
+    @client_method
     def get_scientific_lineage(self):
-        if not self.transport.isOpen():
-            self.transport.open()
+        return self.client.get_scientific_lineage(self._token, self.ref)
 
-        try:
-            return self.client.get_scientific_lineage(self._token, self.ref)
-        except Exception, e:
-            raise
-        finally:
-            self.transport.close()
-
+    @logged(_tc_log)
+    @client_method
     def get_scientific_name(self):
-        if not self.transport.isOpen():
-            self.transport.open()
+        return self.client.get_scientific_name(self._token, self.ref)
 
-        try:
-            return self.client.get_scientific_name(self._token, self.ref)
-        except Exception, e:
-            raise
-        finally:
-            self.transport.close()
-
+    @logged(_tc_log)
+    @client_method
     def get_taxonomic_id(self):
-        if not self.transport.isOpen():
-            self.transport.open()
+        return self.client.get_taxonomic_id(self._token, self.ref)
 
-        try:
-            return self.client.get_taxonomic_id(self._token, self.ref)
-        except Exception, e:
-            raise
-        finally:
-            self.transport.close()
-
+    @logged(_tc_log)
+    @client_method
     def get_kingdom(self):
-        if not self.transport.isOpen():
-            self.transport.open()
+        return self.client.get_kingdom(self._token, self.ref)
 
-        try:
-            return self.client.get_kingdom(self._token, self.ref)
-        except Exception, e:
-            raise
-        finally:
-            self.transport.close()
-
+    @logged(_tc_log)
+    @client_method
     def get_domain(self):
-        if not self.transport.isOpen():
-            self.transport.open()
+        return self.client.get_domain(self._token, self.ref)
 
-        try:
-            return self.client.get_domain(self._token, self.ref)
-        except Exception, e:
-            raise
-        finally:
-            self.transport.close()
-
+    @logged(_tc_log)
+    @client_method
     def get_aliases(self):
-        if not self.transport.isOpen():
-            self.transport.open()
+        return self.client.get_aliases(self._token, self.ref)
 
-        try:
-            return self.client.get_aliases(self._token, self.ref)
-        except Exception, e:
-            raise
-        finally:
-            self.transport.close()
-
+    @logged(_tc_log)
+    @client_method
     def get_genetic_code(self):
-        if not self.transport.isOpen():
-            self.transport.open()
-
-        try:
-            return self.client.get_genetic_code(self._token, self.ref)
-        except Exception, e:
-            raise
-        finally:
-            self.transport.close()
+        return self.client.get_genetic_code(self._token, self.ref)

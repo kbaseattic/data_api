@@ -1,0 +1,78 @@
+#!/usr/bin/env python
+"""
+Print object references from messagepack file or directory of messagepack files.
+"""
+__author__ = 'Dan Gunter <dkgunter@lbl.gov>'
+__date__ = '10/28/15'
+
+import argparse
+import logging
+import os
+import sys
+#
+from doekbase.data_api import util
+
+g_log = logging.getLogger()
+_hnd = logging.StreamHandler()
+_hnd.setFormatter(logging.Formatter("%(asctime)s [%(levelname)s] %(message)s"))
+g_log.addHandler(_hnd)
+
+def main(cmdline):
+    """Program entry point.
+    """
+    # Process command-line arguments
+    cwd = os.path.dirname(os.path.abspath(__file__))
+    desc = __doc__.strip()
+    parser = argparse.ArgumentParser(description=desc)
+    parser.add_argument('paths', help='Paths to file or directory. If path is'
+                                     'a directory, files will be matched'
+                                     'based on the extension.', nargs='+')
+    parser.add_argument('--ext', help='File extension for files to process '
+                                      '(default=%(default)s)',
+                        default='msgpack')
+    parser.add_argument('--verbose', '-v', dest='vb', action="count", default=0,
+                        help="Print more verbose messages to standard error. "
+                             "Repeatable. (default=ERROR)")
+    args = parser.parse_args(cmdline)
+
+    # Set logging verbosity
+    verbosity = (logging.ERROR, logging.INFO, logging.DEBUG)[min(args.vb, 2)]
+    g_log.setLevel(verbosity)
+
+    # Get list of objects to process
+    paths = []
+    for path in args.paths:
+        if os.path.isdir(path):
+            if args.ext[0] == '.':
+                ext = args.ext
+            else:
+                ext = '.' + args.ext
+            for p in os.listdir(path):
+                if p.endswith(ext):
+                    paths.append(os.path.join(path, p))
+        else:
+            paths.append(path)
+
+    # Extract references from each object
+    numpaths = len(paths)
+    g_log.info('Processing {:d} object{}'.format(numpaths,
+                                                 's' if numpaths > 1 else ''))
+    result, maxpathlen = {}, 0
+    for p in paths:
+        maxpathlen = max(maxpathlen, len(p))
+        try:
+            ref = util.get_msgpack_object_ref(p)
+        except Exception as err:
+            g_log.error('Error: {}'.format(err))
+            return 1
+        result[p] = ref
+
+    # Print results
+    fmt = '{{name:{:d}s}} {{ref}}'.format(maxpathlen)
+    for p in sorted(result.keys()):
+        print(fmt.format(name=p, ref=result[p]))
+
+    return 0
+
+if __name__ == '__main__':
+    sys.exit(main(sys.argv[1:]))

@@ -2,23 +2,42 @@ language: python
 python:
   - "2.7"
 
-git:
-  submodules: false
+sudo: false
+
+cache:
+  directories:
+    - $HOME/.cache/pip
 
 before_install:
-  - git submodule update --init --recursive
+  - redis-server redis.conf &
 
 install:
-  - mv requirements.txt requirements.txt-
-  - cp requirements-travis.txt requirements.txt
-  - python setup.py install
+  - pip install -r requirements.txt
+  - python setup.py install -vv
+
+before_script:
+  - printf "Build dir = $TRAVIS_BUILD_DIR\n"
+  - data_api_start_service.py --config deployment.cfg --service taxon --port 9101  >taxon.out 2>&1 &
+  - data_api_start_service.py --config deployment.cfg --service assembly --port 9102 >assembly.out 2>&1 &
+  - data_api_start_service.py --config deployment.cfg --service genome_annotation --port 9103 >ga.out 2>&1 &
 
 script:
-#   cd lib
-#   touch .coverage
-#   cd ..
-  - coverage run /home/travis/virtualenv/python2.7.9/bin/nosetests --with-timer --ws-url=test_resources/data --wsfile-msgpack
-  - coverage report
+  - coverage run `which nosetests` -c nose.cfg -c nose-local.cfg
+  - coverage report --skip-covered
+
+env:
+  - KB_DEPLOY_URL="dir_cache"
+  - KB_DEPLOY_URL="dir_nocache"
+#  - KB_REDIS_HOST=localhost; KB_NOSE_CFG=nose-ci.cfg
+#  - KB_REDIS_HOST="";        KB_NOSE_CFG=nose-ci.cfg
 
 after_success:
   - codecov
+#  - kill $(cat taxonAPI.pid)
+#  - kill $(cat assemblyAPI.pid)
+#  - kill $(cat genome_annotationAPI.pid)
+
+after_failure:
+  - cat taxon.out
+  - cat assembly.out
+  - cat ga.out

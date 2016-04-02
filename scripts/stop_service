@@ -1,0 +1,26 @@
+#!/bin/bash
+
+script_dir=$(dirname "$(readlink -f "$0")")
+if [ -z $KB_DEPLOYMENT_CONFIG ]
+then
+    export KB_DEPLOYMENT_CONFIG=$KB_TOP/deployment.cfg
+fi
+
+echo $script_dir
+
+source $script_dir/venv/bin/activate
+
+for pidfile in $script_dir/*.pid
+do
+    echo killing PID from pid file $pidfile
+    kill $(cat $pidfile)
+done
+
+# get aggressive: kill services that didn't respond to regular kill signal
+for pidfile in $script_dir/*.pid
+do
+    echo killing PID from pid file $pidfile
+    kill -9 $(cat $pidfile)
+    rm $pidfile
+done
+

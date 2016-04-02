@@ -1,0 +1,44 @@
+{
+  "name": "JsLibrary",
+  "version": "0.0.1",
+  "ignore": [
+     ".*",
+     "/bin",
+     "/build",
+     "/CHANGELOG",
+     "/config",
+     "/data_loading",
+     "/docs",
+     "/examples",
+     "/experiments",
+     "/GolgiVolvox.png",
+     "/jslib",
+     "/lib",
+     "/README.md",
+     "/redis.conf",
+     "/requirements*",
+     "/run_tests.sh",
+     "/setup.py",
+     "/specs",
+     "/temp",
+     "/thrift/",
+     "/version.py",
+     "/test_resources"
+  ],
+  "dependencies": {
+    "bluebird": "3.0.5",
+    "requirejs": "2.1.20",
+    "kbase-common-js": "eapearson/kbase-common-js#master",
+    "thrift-binary-protocol": "eapearson/thrift-js-binary-protocol#master"
+  },
+  "devDependencies": {
+    "text": "requirejs-text#2.0.14",
+    "requirejs-text": "2.0.14",
+    "require-yaml": "0.1.2",
+    "thrift": "eapearson/thrift#master",
+    "jquery": "2.1.4",
+    "bootstrap": "3.3.5",
+    "require-css": "0.1.8",
+    "font-awesome": "4.4.0"
+  }
+}

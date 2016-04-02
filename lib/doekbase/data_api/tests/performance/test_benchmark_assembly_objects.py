@@ -5,7 +5,7 @@ import datetime
 import json
 
 import doekbase.data_api.annotation.genome_annotation
-import doekbase.data_api.sequence.assembly
+import doekbase.data_api.sequence.assembly.api
 
 MB = 2**20 * 1.0
 
@@ -90,7 +90,7 @@ class TestBenchmarkAssemblyObjects(unittest.TestCase):
                                             "kb|g.140106.c.400000","kb|g.140106.c.500000",
                                             "kb|g.140106.c.600000","kb|g.140106.c.700000"]}
 
-        print "Prototype Condensed Version Objects"
+        print "Updated Object Types"
 
         for x in assemblies:
             print "\tBasic stats about {0}".format(x)

@@ -1,0 +1,154 @@
+<!DOCTYPE  html>
+<html>
+  <head>
+    <meta charset="utf-8">
+
+    <title>doc</title>
+    <style>
+      /*github.com style (c) Vasily Polovnyov <vast@whiteants.net>*/
+      pre code {
+        display: block; padding: 0.5em;
+        color: #333;
+        background: #f8f8ff
+      }
+      pre .comment,
+      pre .template_comment,
+      pre .diff .header,
+      pre .javadoc {
+        color: #998;
+        font-style: italic
+      }
+      pre .keyword,
+      pre .css .rule .keyword,
+      pre .winutils,
+      pre .javascript .title,
+      pre .nginx .title,
+      pre .subst,
+      pre .request,
+      pre .status {
+        color: #333;
+        font-weight: bold
+      }
+      pre .number,
+      pre .hexcolor,
+      pre .ruby .constant {
+        color: #099;
+      }
+      pre .string,
+      pre .tag .value,
+      pre .phpdoc,
+      pre .tex .formula {
+        color: #d14
+      }
+      pre .title,
+      pre .id {
+        color: #900;
+        font-weight: bold
+      }
+      pre .javascript .title,
+      pre .lisp .title,
+      pre .clojure .title,
+      pre .subst {
+        font-weight: normal
+      }
+      pre .class .title,
+      pre .haskell .type,
+      pre .vhdl .literal,
+      pre .tex .command {
+        color: #458;
+        font-weight: bold
+      }
+      pre .tag,
+      pre .tag .title,
+      pre .rules .property,
+      pre .django .tag .keyword {
+        color: #000080;
+        font-weight: normal
+      }
+      pre .attribute,
+      pre .variable,
+      pre .lisp .body {
+        color: #008080
+      }
+      pre .regexp {
+        color: #009926
+      }
+      pre .class {
+        color: #458;
+        font-weight: bold
+      }
+      pre .symbol,
+      pre .ruby .symbol .string,
+      pre .lisp .keyword,
+      pre .tex .special,
+      pre .prompt {
+        color: #990073
+      }
+      pre .built_in,
+      pre .lisp .title,
+      pre .clojure .built_in {
+        color: #0086b3
+      }
+      pre .preprocessor,
+      pre .pi,
+      pre .doctype,
+      pre .shebang,
+      pre .cdata {
+        color: #999;
+        font-weight: bold
+      }
+      pre .deletion {
+        background: #fdd
+      }
+      pre .addition {
+        background: #dfd
+      }
+      pre .diff .change {
+        background: #0086b3
+      }
+      pre .chunk {
+        color: #aaa
+      }
+    </style>
+  </head>
+  <body>
+    <h1 id="taxon-api">Taxon API</h1>
+<h2 id="overview">Overview</h2>
+<h2 id="module">Module</h2>
+<h2 id="usage">Usage</h2>
+<pre><code>var objectRef = &#39;993/329/2&#39;;
+var taxonUrl = &#39;http://test.kbase.us/taxon&#39;;
+var token = myFunctionToGetAToken();
+var timeout = 10000;
+var taxon = Taxon({
+    ref: objectRef,
+    url: taxonUrl,
+    token: token,
+    timeout: timeout
+});
+var name = taxon.getScientificName();
+</code></pre><h2 id="factory">Factory</h2>
+<h2 id="methods">Methods</h2>
+<h3 id="getparent">getParent</h3>
+<p>Returns a reference string to the parent object, if any.</p>
+<p>arguments
+: none</p>
+<p>returns
+: string (object ref)</p>
+<h3 id="getchildren">getChildren</h3>
+<p>Returns a list of references strings for any child objects.</p>
+<p>arguments
+:none</p>
+<p>returns
+: List of String</p>
+<h3 id="getgenomeannotations">getGenomeAnnotations</h3>
+<h3 id="getscientificlineage">getScientificLineage</h3>
+<h3 id="getscientificname">getScientificName</h3>
+<h3 id="gettaxonomicid">getTaxonomicId</h3>
+<h3 id="getkingdom">getKingdom</h3>
+<h3 id="getdomain">getDomain</h3>
+<h3 id="getgeneticcode">getGeneticCode</h3>
+<h3 id="getaliases">getAliases</h3>
+
+  </body>
+</html>
