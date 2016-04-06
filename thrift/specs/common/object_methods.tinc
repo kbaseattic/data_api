@@ -1,0 +1,72 @@
+
+    /**
+     * Retrieve object info.
+     * @skip documentation
+     */
+    ObjectInfo get_info(1:string token, 2:ObjectReference ref) throws (
+        1:ServiceException generic_exception,
+        2:AuthorizationException authorization_exception,
+        3:AuthenticationException authentication_exception,
+        4:ObjectReferenceException reference_exception,
+        5:AttributeException attribute_exception,
+        6:TypeException type_exception),
+
+    /**
+     * Retrieve object history.
+     * @skip documentation
+     */
+    ObjectHistory get_history(1:string token, 2:ObjectReference ref) throws (
+        1:ServiceException generic_exception,
+        2:AuthorizationException authorization_exception,
+        3:AuthenticationException authentication_exception,
+        4:ObjectReferenceException reference_exception,
+        5:AttributeException attribute_exception,
+        6:TypeException type_exception),
+
+    /**
+     * Retrieve object provenance.
+     * @skip documentation
+     */
+    ObjectProvenance get_provenance(1:string token, 2:ObjectReference ref) throws (
+        1:ServiceException generic_exception,
+        2:AuthorizationException authorization_exception,
+        3:AuthenticationException authentication_exception,
+        4:ObjectReferenceException reference_exception,
+        5:AttributeException attribute_exception,
+        6:TypeException type_exception),
+
+    /**
+     * Retrieve object identifier.
+     * @skip documentation
+     */
+    i64 get_id(1:string token, 2:ObjectReference ref) throws (
+        1:ServiceException generic_exception,
+        2:AuthorizationException authorization_exception,
+        3:AuthenticationException authentication_exception,
+        4:ObjectReferenceException reference_exception,
+        5:AttributeException attribute_exception,
+        6:TypeException type_exception),
+
+    /**
+     * Retrieve object name.
+     * @skip documentation
+     */
+    string get_name(1:string token, 2:ObjectReference ref) throws (
+        1:ServiceException generic_exception,
+        2:AuthorizationException authorization_exception,
+        3:AuthenticationException authentication_exception,
+        4:ObjectReferenceException reference_exception,
+        5:AttributeException attribute_exception,
+        6:TypeException type_exception),
+
+    /**
+     * Retrieve object version.
+     * @skip documentation
+     */
+    string get_version(1:string token, 2:ObjectReference ref) throws (
+        1:ServiceException generic_exception,
+        2:AuthorizationException authorization_exception,
+        3:AuthenticationException authentication_exception,
+        4:ObjectReferenceException reference_exception,
+        5:AttributeException attribute_exception,
+        6:TypeException type_exception)

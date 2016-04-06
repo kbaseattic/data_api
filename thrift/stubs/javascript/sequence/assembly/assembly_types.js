@@ -850,4 +850,4 @@ assembly.AssemblyContig.prototype.write = function(output) {
   return;
 };
 
-assembly.VERSION = '{{version}}';
+assembly.VERSION = '0.1.1';

@@ -20,8 +20,7 @@ except:
 class Iface(object):
   def get_assembly_id(self, token, ref):
     """
-    Retrieve Assembly identifier string.
-
+    Retrieve Assembly ID.
 
     Parameters:
      - token
@@ -32,6 +31,8 @@ class Iface(object):
   def get_genome_annotations(self, token, ref):
     """
     Retrieve associated GenomeAnnotation objects.
+
+    @return List of GenomeAnnotation object references
 
 
     Parameters:
@@ -44,6 +45,7 @@ class Iface(object):
     """
     Retrieve the external source information for this Assembly.
 
+    @return Metadata about the external source
 
     Parameters:
      - token
@@ -53,7 +55,7 @@ class Iface(object):
 
   def get_stats(self, token, ref):
     """
-    Retrieve the Assembly stats.
+    Retrieve the derived statistical information about this Assembly.
 
 
     Parameters:
@@ -66,6 +68,7 @@ class Iface(object):
     """
     Retrieve the number of contigs for this Assembly.
 
+    @return Total number of contiguous sequences.
 
     Parameters:
      - token
@@ -77,6 +80,7 @@ class Iface(object):
     """
     Retrieve the total GC content for this Assembly.
 
+    @return Proportion of GC content, between 0 and 1.
 
     Parameters:
      - token
@@ -88,6 +92,7 @@ class Iface(object):
     """
     Retrieve the total DNA size for this Assembly.
 
+    @return Total DNA size
 
     Parameters:
      - token
@@ -99,6 +104,7 @@ class Iface(object):
     """
     Retrieve the contig identifiers for this Assembly.
 
+    @return List of contig IDs.
 
     Parameters:
      - token
@@ -110,6 +116,7 @@ class Iface(object):
     """
     Retrieve the lengths of the contigs in this Assembly.
 
+    @return Mapping of contig ID to contig length.
 
     Parameters:
      - token
@@ -122,6 +129,7 @@ class Iface(object):
     """
     Retrieve the gc content for contigs in this Assembly.
 
+    @return Mapping of contig IDs to GC content proportion.
 
     Parameters:
      - token
@@ -134,6 +142,7 @@ class Iface(object):
     """
     Retrieve all the data for the contigs in this Assembly.
 
+    @return Mapping of contig ID to details for that contig.
 
     Parameters:
      - token
@@ -152,8 +161,7 @@ class Client(Iface):
 
   def get_assembly_id(self, token, ref):
     """
-    Retrieve Assembly identifier string.
-
+    Retrieve Assembly ID.
 
     Parameters:
      - token
@@ -201,6 +209,8 @@ class Client(Iface):
   def get_genome_annotations(self, token, ref):
     """
     Retrieve associated GenomeAnnotation objects.
+
+    @return List of GenomeAnnotation object references
 
 
     Parameters:
@@ -250,6 +260,7 @@ class Client(Iface):
     """
     Retrieve the external source information for this Assembly.
 
+    @return Metadata about the external source
 
     Parameters:
      - token
@@ -296,7 +307,7 @@ class Client(Iface):
 
   def get_stats(self, token, ref):
     """
-    Retrieve the Assembly stats.
+    Retrieve the derived statistical information about this Assembly.
 
 
     Parameters:
@@ -346,6 +357,7 @@ class Client(Iface):
     """
     Retrieve the number of contigs for this Assembly.
 
+    @return Total number of contiguous sequences.
 
     Parameters:
      - token
@@ -394,6 +406,7 @@ class Client(Iface):
     """
     Retrieve the total GC content for this Assembly.
 
+    @return Proportion of GC content, between 0 and 1.
 
     Parameters:
      - token
@@ -442,6 +455,7 @@ class Client(Iface):
     """
     Retrieve the total DNA size for this Assembly.
 
+    @return Total DNA size
 
     Parameters:
      - token
@@ -490,6 +504,7 @@ class Client(Iface):
     """
     Retrieve the contig identifiers for this Assembly.
 
+    @return List of contig IDs.
 
     Parameters:
      - token
@@ -538,6 +553,7 @@ class Client(Iface):
     """
     Retrieve the lengths of the contigs in this Assembly.
 
+    @return Mapping of contig ID to contig length.
 
     Parameters:
      - token
@@ -588,6 +604,7 @@ class Client(Iface):
     """
     Retrieve the gc content for contigs in this Assembly.
 
+    @return Mapping of contig IDs to GC content proportion.
 
     Parameters:
      - token
@@ -638,6 +655,7 @@ class Client(Iface):
     """
     Retrieve all the data for the contigs in this Assembly.
 
+    @return Mapping of contig ID to details for that contig.
 
     Parameters:
      - token

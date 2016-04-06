@@ -1,0 +1,5 @@
+/**
+ * Shared typedefs, etc.
+ */
+
+typedef string ObjectReference

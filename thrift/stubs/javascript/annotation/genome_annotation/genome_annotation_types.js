@@ -1906,4 +1906,4 @@ genome_annotation.UTR_data.prototype.write = function(output) {
   return;
 };
 
-genome_annotation.VERSION = '{{version}}';
+genome_annotation.VERSION = '0.1.1';

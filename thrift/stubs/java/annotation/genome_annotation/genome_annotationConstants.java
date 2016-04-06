@@ -36,6 +36,6 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings({"cast", "rawtypes", "serial", "unchecked"})
 public class genome_annotationConstants {
 
-  public static final String VERSION = "{{version}}";
+  public static final String VERSION = "0.1.1";
 
 }

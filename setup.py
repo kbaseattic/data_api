@@ -148,6 +148,30 @@ def call_command(command, is_thrift=False):
                                                                   e=err))
     return errno
 
+def set_thrift_version(filename, version):
+    """Set current version string to be the contents of a special Thrift spec file.
+    """
+    fp = file(filename, 'w')
+    fp.write('const string VERSION = "{}"\n'.format(version))
+    fp.close()
+    print("Set Thrift spec version: {}".format(version))
+
+def preprocess_thrift(target_file, include_dir):
+    """Pre-process a Thrift spec file to handle custom include statements.
+    """
+    print("Preprocessing file: {}".format(target_file))
+    script = os.path.join('bin', 'data_api_preprocess_thrift')
+    command = [script, '-I', include_dir, target_file]
+    try:
+        output = subprocess.check_output(command)
+    except subprocess.CalledProcessError as err:
+        raise RuntimeError('Preprocessing failed. Command {c} returned: {o}'
+                           .format(c=' '.join(command), o=err.output))
+    except Exception as err:
+        raise RuntimeError('Preprocessing failed. Command: {c}'
+                           .format(c=' '.join(command)))
+    print("Preprocessing OK: {}".format(output.strip()))
+
 class BuildThriftClients(setuptools.Command):
     """Build command for generating Thrift client code"""
 
@@ -170,9 +194,13 @@ class BuildThriftClients(setuptools.Command):
             raise
 
     def _try_run(self):
-        for dirpath, dirnames, filenames in os.walk("thrift/specs"):
+        spec_base_path = "thrift/specs"
+        spec_common_path = os.path.join(spec_base_path, 'common')
+        set_thrift_version(os.path.join(spec_common_path, 'version.tinc'), version)
+        for dirpath, dirnames, filenames in os.walk(spec_base_path):
             for f in filter(lambda _: _.endswith('.thrift'), filenames):
                 spec_path = os.path.abspath(os.path.join(dirpath, f))
+                preprocess_thrift(spec_path, spec_common_path)
                 # Process each language
                 for lang in client_languages:
                     settings = thrift_build[lang]  # settings for current lang.
@@ -243,14 +271,17 @@ class BuildThriftServers(setuptools.Command):
             raise
 
     def _try_run(self):
-        start_path = os.path.join(os.path.abspath(os.path.dirname(__file__)),"thrift/specs")
+        spec_base_path = "thrift/specs"
+        spec_common_path = os.path.join(spec_base_path, 'common')
+        set_thrift_version(os.path.join(spec_common_path, 'version.tinc'), version)
+        start_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), spec_base_path)
         for dirpath, dirnames, filenames in os.walk(start_path):
             for f in filenames:
                 if f.endswith(".thrift"):
+                    spec_path = os.path.abspath(os.path.join(dirpath, f))
+                    preprocess_thrift(spec_path, spec_common_path)
                     # first generate all the twisted server code
                     settings = thrift_build['python_server']
-                    #TODO - modify version string in .thrift before code generation
-                    spec_path = os.path.abspath(os.path.join(dirpath, f))
 
                     command = ["thrift", "-r", "--gen"]
                     command.append(settings.style)
@@ -332,7 +363,8 @@ config = {
                 "bin/genome_annotation_client_driver.py",
                 "bin/taxon_client_driver.py",
                 "bin/test_api_service.py",
-                "bin/extract_thrift_docs"],
+                "bin/extract_thrift_docs",
+                "bin/data_api_preprocess_thrift"],
     "name": "doekbase_data_api",
     "entry_points": {
         'nose.plugins.0.10': [
