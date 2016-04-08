@@ -167,6 +167,20 @@ class AssemblyInterface(object):
         """
         pass
 
+    @abc.abstractmethod
+    def to_fasta_file(self, output_file):
+        """Create and write a FASTA representation of this assembly.
+
+        Args:
+            output_file (file): Write the FASTA content to this file.
+
+        Returns:
+            Number of bytes written
+        Raises:
+            IOError if `output_file` is not writable.
+        """
+        pass
+
 
 class AssemblyAPI(ObjectAPI, AssemblyInterface):
     def __init__(self, services, token, ref):
@@ -218,6 +232,8 @@ class AssemblyAPI(ObjectAPI, AssemblyInterface):
     def get_contigs(self, contig_id_list=None):
         return self.proxy.get_contigs(contig_id_list)
 
+    def to_fasta_file(self, output_file):
+        return self.proxy.to_fasta_file(output_file)
 
 class _KBaseGenomes_ContigSet(ObjectAPI, AssemblyInterface):
     def __init__(self, services, token, ref):
@@ -385,6 +401,45 @@ class _KBaseGenomes_ContigSet(ObjectAPI, AssemblyInterface):
         """
         return sum(self._current_sequence.count(x) for x in ['g','G','c','C'])
 
+
+    FASTA_LINE_LENGTH = 80
+    def to_fasta_file(self, output_file):
+        return self._create_fasta(FileByteStream(output_file))
+
+    def _create_fasta(self, stream):
+        raw_contigs = self.get_data()["contigs"]
+        num_bases = 0
+        last_line = ''
+        for c in raw_contigs:
+            seq = c['sequence']
+            num_bases += len(seq)
+            offs = 0
+            while True:
+                i = self.FASTA_LINE_LENGTH - len(last_line)
+                if len(seq) >= i:
+                    new_offs = offs + i
+                    stream.writeln(last_line + seq[offs:new_offs])
+                    offs, last_line = new_offs, ''
+                else:
+                    last_line += seq
+                    break
+
+
+
+# -- Helper classes for .to_fasta() methods --
+class ByteStream(object):
+    __metaclass__ = abc.ABCMeta
+    @abc.abstractmethod
+    def writeln(self, bytes):
+        pass
+
+class FileByteStream(ByteStream):
+    def __init__(self, fileobj):
+        self._f = fileobj
+
+    def writeln(self, bytes):
+        self._f.write(bytes + '\n')
+# -- end of helper classes --
 
 class _Assembly(ObjectAPI, AssemblyInterface):
     def __init__(self, services, token, ref):
