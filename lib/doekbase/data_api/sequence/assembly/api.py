@@ -23,6 +23,7 @@ from doekbase.data_api.util import get_logger, logged, PerfCollector, collect_pe
 from doekbase.data_api import exceptions
 from doekbase.data_api.taxonomy.taxon.service import ttypes
 from doekbase.handle.Client import AbstractHandle as handleClient
+from doekbase.data_api.blob import blob
 
 _log = get_logger(__file__)
 
@@ -34,11 +35,16 @@ TYPES = _CONTIGSET_TYPES + _ASSEMBLY_TYPES
 
 g_stats = PerfCollector('AssemblyAPI')
 
+# ============================================================================
+
 class AssemblyInterface(object):
     """API for a genome Assembly associated with a Genome Annotation.
     """
     
     __metaclass__ = abc.ABCMeta
+
+    #: Maximum length of lines of FASTA output
+    FASTA_LINE_LENGTH = 80
 
     @abc.abstractmethod    
     def get_assembly_id(self):
@@ -168,16 +174,11 @@ class AssemblyInterface(object):
         pass
 
     @abc.abstractmethod
-    def to_fasta_file(self, output_file):
-        """Create and write a FASTA representation of this assembly.
-
-        Args:
-            output_file (file): Write the FASTA content to this file.
+    def get_fasta(self, ref_only=False):
+        """Create a FASTA representation of this assembly.
 
         Returns:
-            Number of bytes written
-        Raises:
-            IOError if `output_file` is not writable.
+            (TemporaryBlob) Temporary blob object
         """
         pass
 
@@ -232,8 +233,11 @@ class AssemblyAPI(ObjectAPI, AssemblyInterface):
     def get_contigs(self, contig_id_list=None):
         return self.proxy.get_contigs(contig_id_list)
 
-    def to_fasta_file(self, output_file):
-        return self.proxy.to_fasta_file(output_file)
+    def get_fasta(self, ref_only=False):
+        return self.proxy.get_fasta(ref_only=ref_only)
+
+# ============================================================================
+
 
 class _KBaseGenomes_ContigSet(ObjectAPI, AssemblyInterface):
     def __init__(self, services, token, ref):
@@ -401,45 +405,22 @@ class _KBaseGenomes_ContigSet(ObjectAPI, AssemblyInterface):
         """
         return sum(self._current_sequence.count(x) for x in ['g','G','c','C'])
 
-
-    FASTA_LINE_LENGTH = 80
-    def to_fasta_file(self, output_file):
-        return self._create_fasta(FileByteStream(output_file))
+    def get_fasta(self, ref_only=False):
+        temp_blob = blob.TemporaryBlobBuffer() # XXX: change this to TemporaryBlobShockNode
+        self._create_fasta(temp_blob)
+        return (str(temp_blob) if ref_only else temp_blob)
 
     def _create_fasta(self, stream):
+        _create_fasta_header(self.get_info(), stream)
         raw_contigs = self.get_data()["contigs"]
         num_bases = 0
-        last_line = ''
+        # write out all contigs
         for c in raw_contigs:
-            seq = c['sequence']
-            num_bases += len(seq)
-            offs = 0
-            while True:
-                i = self.FASTA_LINE_LENGTH - len(last_line)
-                if len(seq) >= i:
-                    new_offs = offs + i
-                    stream.writeln(last_line + seq[offs:new_offs])
-                    offs, last_line = new_offs, ''
-                else:
-                    last_line += seq
-                    break
+            num_bases += _write_sequence_lines(c['sequence'], stream, self.FASTA_LINE_LENGTH)
+        return num_bases
 
+# ============================================================================
 
-
-# -- Helper classes for .to_fasta() methods --
-class ByteStream(object):
-    __metaclass__ = abc.ABCMeta
-    @abc.abstractmethod
-    def writeln(self, bytes):
-        pass
-
-class FileByteStream(ByteStream):
-    def __init__(self, fileobj):
-        self._f = fileobj
-
-    def writeln(self, bytes):
-        self._f.write(bytes + '\n')
-# -- end of helper classes --
 
 class _Assembly(ObjectAPI, AssemblyInterface):
     def __init__(self, services, token, ref):
@@ -601,6 +582,69 @@ class _Assembly(ObjectAPI, AssemblyInterface):
 
         return outContigs
 
+    def get_fasta(self, ref_only=False):
+        temp_blob = blob.TemporaryBlobBuffer() # XXX: change this to TemporaryBlobShockNode
+        self._create_fasta(temp_blob)
+        # return a blob object to the library, otherwise the object ID (as a string)
+        return (str(temp_blob) if ref_only else temp_blob)
+
+    def _create_fasta(self, stream):
+        _create_fasta_header(self.get_info(), stream)
+        # init variables
+        data = self.get_data()
+        contigs, fasta_ref = data['contigs'], data['fasta_handle_ref']
+        # get shock node ID
+        shock_node_id = None
+        try:
+            hc = handleClient(url=self.services['handle_service_url'], token=self._token)
+            handle = hc.hids_to_handles([fasta_ref])[0]
+            shock_node_id = handle['id']
+        except Exception, e:
+            _log.debug('Failed to retrieve handle {} from {}'
+                       .format(fasta_ref, self.services["handle_service_url"]))
+            _log.exception(e)
+            shock_node_id = fasta_ref
+        # fetch shock data
+        header ={'Authorization':  'Oauth {0}'.format(self._token)}
+        fetch_url = '{base}node/{id}?download_raw'.format(
+            base=self.services['shock_service_url'], id=shock_node_id)
+        shock_data = requests.get(fetch_url, headers=header, stream=True)
+        # write shock data to output stream
+        num_bases = 0
+        for chunk in shock_data.iter_content(CHUNK_SIZE):
+            if chunk:
+                num_bases += _write_sequence_lines(chunk, stream, self.FASTA_LINE_LENGTH)
+        return num_bases
+
+# ------------------------------------------
+# FASTA helper functions
+
+def _create_fasta_header(info, stream):
+    hdr_lines = ['>Object: {type_string}',
+                 '>Reference: {object_reference_versioned}',
+                 '>User: {saved_by}',
+                 '>Date: {save_date}']
+    for line in hdr_lines:
+        stream.writeln(line.format(**info))
+
+def _write_sequence_lines(seq, stream, line_length):
+    """Write a sequence of bases as a number of lines
+    of length no more than `line_length`.
+    """
+    seq_len, offs = len(seq), 0
+    # write out `line_length` chars at a time
+    while offs < seq_len:
+        next_offs = offs + line_length
+        stream.writeln(seq[offs:next_offs])
+        offs = next_offs
+    return seq_len
+
+# End: FASTA helper functions
+# --------------------------------------------
+
+
+
+# ============================================================================
 
 _as_log = get_logger('AssemblyClientAPI')
 
@@ -718,3 +762,10 @@ class AssemblyClientAPI(AssemblyInterface):
             }
 
         return out_contigs
+
+    @logged(_as_log)
+    @client_method
+    def get_fasta(self):
+        blob_ref = self.client.to_fasta(self._token, self.ref)
+        return blob.TemporaryBlobShockNode(blob_ref)
+
