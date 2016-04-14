@@ -412,9 +412,12 @@ class _KBaseGenomes_ContigSet(ObjectAPI, AssemblyInterface):
         raw_contigs = self.get_data()["contigs"]
         num_bases = 0
         # write out all contigs
+        i = 1
         for c in raw_contigs:
-            _create_fasta_contig_header(c['id'], c['description'], stream)
+            desc = c.get('description', 'contig_{:d}'.format(i))
+            _create_fasta_contig_header(c['id'], desc, stream)
             num_bases += _write_sequence_lines(c['sequence'], stream, self.FASTA_LINE_LENGTH)
+            i += 1
         return num_bases
 
 # ============================================================================
