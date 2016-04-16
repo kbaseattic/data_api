@@ -6,7 +6,6 @@ __date__ = '4/8/16'
 
 # Stdlib
 import abc
-import re
 import requests
 import time
 # Local
@@ -75,6 +74,8 @@ class BlobShockNode(Blob):
             # XXX: create new node, call .set_ref() for full URL
             raise NotImplementedError('Sorry! Creation of new Shock nodes not implemented')
         else:
+            if not self._url:
+                raise ValueError('"url" parameter cannot be empty if "create" flag is False')
             # use existing node
             self._ro = True
             self._node_id = node_id
