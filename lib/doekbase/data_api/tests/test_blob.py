@@ -1,8 +1,6 @@
 """
-Unit tests for assembly
+Unit tests for blob module
 """
-import logging
-
 from . import shared
 from doekbase.data_api.blob import blob
 import unittest
@@ -24,7 +22,7 @@ def test_blob_shock_noargs():
         pass
 
 def test_blob_shock_read():
-    b = blob.BlobShockNode(url="")
+    b = blob.BlobShockNode(url="hello")
 
 if __name__ == '__main__':
     unittest.main()
