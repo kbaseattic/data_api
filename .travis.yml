@@ -9,8 +9,9 @@ cache:
     - $HOME/.cache/pip
 
 before_install:
-  - redis-server redis.conf &
+  - sudo apt-get -qq update
   - sudo apt-get install genometools
+  - redis-server redis.conf &
 
 install:
   - pip install -r requirements.txt
