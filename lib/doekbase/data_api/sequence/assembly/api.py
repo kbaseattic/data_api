@@ -509,7 +509,7 @@ class _Assembly(ObjectAPI, AssemblyInterface):
         except Exception, e:
             _log.debug("Failed to retrieve handle {} from {}".format(fasta_ref,
                                                                      self.services["handle_service_url"]))
-            _log.exception(e)
+            #_log.exception(e)
             shock_node_id = fasta_ref
 
         copy_keys = ["contig_id", "length", "gc_content", "md5", "name", "description", "is_complete", "is_circular"]
@@ -758,7 +758,7 @@ class AssemblyClientAPI(AssemblyInterface):
 
     @logged(_as_log)
     @client_method
-    def get_fasta(self):
-        blob_ref = self.client.to_fasta(self._token, self.ref)
+    def get_fasta(self, ref_only=False):
+        blob_ref = self.client.get_fasta(self._token, self.ref)
         return blob.BlobShockNode(blob_ref)
 
