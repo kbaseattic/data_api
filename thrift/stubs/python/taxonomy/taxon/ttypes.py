@@ -561,6 +561,8 @@ class TypeException(TException):
 
 class ObjectInfo(object):
   """
+  @skip documentation
+
   Attributes:
    - object_id
    - object_name
@@ -792,6 +794,8 @@ class ObjectInfo(object):
 
 class ExternalDataUnit(object):
   """
+  @skip documentation
+
   Attributes:
    - resource_name
    - resource_url
@@ -935,6 +939,8 @@ class ExternalDataUnit(object):
 
 class ObjectProvenanceAction(object):
   """
+  @skip documentation
+
   Attributes:
    - time
    - service_name

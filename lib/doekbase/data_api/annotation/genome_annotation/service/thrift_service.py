@@ -341,6 +341,21 @@ class Iface(Interface):
     """
     pass
 
+  def get_gff(token, ref, gene_id_list):
+    """
+    Retrieve a GFF representation of this GenomeAnnotation.
+
+    @param gene_id_list List of gene Feature IDs for which to retrieve GFF.
+    If empty, returns GFF data for all genes in this GenomeAnnotation.
+    @return GFF data
+
+    Parameters:
+     - token
+     - ref
+     - gene_id_list
+    """
+    pass
+
 
 class Client:
   implements(Iface)
@@ -1802,6 +1817,75 @@ class Client:
       return d.errback(result.type_exception)
     return d.errback(TApplicationException(TApplicationException.MISSING_RESULT, "get_mrna_utrs failed: unknown result"))
 
+  def get_gff(self, token, ref, gene_id_list):
+    """
+    Retrieve a GFF representation of this GenomeAnnotation.
+
+    @param gene_id_list List of gene Feature IDs for which to retrieve GFF.
+    If empty, returns GFF data for all genes in this GenomeAnnotation.
+    @return GFF data
+
+    Parameters:
+     - token
+     - ref
+     - gene_id_list
+    """
+    seqid = self._seqid = self._seqid + 1
+    self._reqs[seqid] = defer.Deferred()
+
+    d = defer.maybeDeferred(self.send_get_gff, token, ref, gene_id_list)
+    d.addCallbacks(
+      callback=self.cb_send_get_gff,
+      callbackArgs=(seqid,),
+      errback=self.eb_send_get_gff,
+      errbackArgs=(seqid,))
+    return d
+
+  def cb_send_get_gff(self, _, seqid):
+    return self._reqs[seqid]
+
+  def eb_send_get_gff(self, f, seqid):
+    d = self._reqs.pop(seqid)
+    d.errback(f)
+    return d
+
+  def send_get_gff(self, token, ref, gene_id_list):
+    oprot = self._oprot_factory.getProtocol(self._transport)
+    oprot.writeMessageBegin('get_gff', TMessageType.CALL, self._seqid)
+    args = get_gff_args()
+    args.token = token
+    args.ref = ref
+    args.gene_id_list = gene_id_list
+    args.write(oprot)
+    oprot.writeMessageEnd()
+    oprot.trans.flush()
+
+  def recv_get_gff(self, iprot, mtype, rseqid):
+    d = self._reqs.pop(rseqid)
+    if mtype == TMessageType.EXCEPTION:
+      x = TApplicationException()
+      x.read(iprot)
+      iprot.readMessageEnd()
+      return d.errback(x)
+    result = get_gff_result()
+    result.read(iprot)
+    iprot.readMessageEnd()
+    if result.success is not None:
+      return d.callback(result.success)
+    if result.generic_exception is not None:
+      return d.errback(result.generic_exception)
+    if result.authorization_exception is not None:
+      return d.errback(result.authorization_exception)
+    if result.authentication_exception is not None:
+      return d.errback(result.authentication_exception)
+    if result.reference_exception is not None:
+      return d.errback(result.reference_exception)
+    if result.attribute_exception is not None:
+      return d.errback(result.attribute_exception)
+    if result.type_exception is not None:
+      return d.errback(result.type_exception)
+    return d.errback(TApplicationException(TApplicationException.MISSING_RESULT, "get_gff failed: unknown result"))
+
 
 class Processor(TProcessor):
   implements(Iface)
@@ -1830,6 +1914,7 @@ class Processor(TProcessor):
     self._processMap["get_mrna_by_gene"] = Processor.process_get_mrna_by_gene
     self._processMap["get_mrna_exons"] = Processor.process_get_mrna_exons
     self._processMap["get_mrna_utrs"] = Processor.process_get_mrna_utrs
+    self._processMap["get_gff"] = Processor.process_get_gff
 
   def process(self, iprot, oprot):
     (name, type, seqid) = iprot.readMessageBegin()
@@ -2618,6 +2703,43 @@ class Processor(TProcessor):
     except TypeException, type_exception:
       result.type_exception = type_exception
     oprot.writeMessageBegin("get_mrna_utrs", TMessageType.REPLY, seqid)
+    result.write(oprot)
+    oprot.writeMessageEnd()
+    oprot.trans.flush()
+
+  def process_get_gff(self, seqid, iprot, oprot):
+    args = get_gff_args()
+    args.read(iprot)
+    iprot.readMessageEnd()
+    result = get_gff_result()
+    d = defer.maybeDeferred(self._handler.get_gff, args.token, args.ref, args.gene_id_list)
+    d.addCallback(self.write_results_success_get_gff, result, seqid, oprot)
+    d.addErrback(self.write_results_exception_get_gff, result, seqid, oprot)
+    return d
+
+  def write_results_success_get_gff(self, success, result, seqid, oprot):
+    result.success = success
+    oprot.writeMessageBegin("get_gff", TMessageType.REPLY, seqid)
+    result.write(oprot)
+    oprot.writeMessageEnd()
+    oprot.trans.flush()
+
+  def write_results_exception_get_gff(self, error, result, seqid, oprot):
+    try:
+      error.raiseException()
+    except ServiceException, generic_exception:
+      result.generic_exception = generic_exception
+    except AuthorizationException, authorization_exception:
+      result.authorization_exception = authorization_exception
+    except AuthenticationException, authentication_exception:
+      result.authentication_exception = authentication_exception
+    except ObjectReferenceException, reference_exception:
+      result.reference_exception = reference_exception
+    except AttributeException, attribute_exception:
+      result.attribute_exception = attribute_exception
+    except TypeException, type_exception:
+      result.type_exception = type_exception
+    oprot.writeMessageBegin("get_gff", TMessageType.REPLY, seqid)
     result.write(oprot)
     oprot.writeMessageEnd()
     oprot.trans.flush()
@@ -8006,6 +8128,257 @@ class get_mrna_utrs_result:
           viter513.write(oprot)
         oprot.writeMapEnd()
       oprot.writeMapEnd()
+      oprot.writeFieldEnd()
+    if self.generic_exception is not None:
+      oprot.writeFieldBegin('generic_exception', TType.STRUCT, 1)
+      self.generic_exception.write(oprot)
+      oprot.writeFieldEnd()
+    if self.authorization_exception is not None:
+      oprot.writeFieldBegin('authorization_exception', TType.STRUCT, 2)
+      self.authorization_exception.write(oprot)
+      oprot.writeFieldEnd()
+    if self.authentication_exception is not None:
+      oprot.writeFieldBegin('authentication_exception', TType.STRUCT, 3)
+      self.authentication_exception.write(oprot)
+      oprot.writeFieldEnd()
+    if self.reference_exception is not None:
+      oprot.writeFieldBegin('reference_exception', TType.STRUCT, 4)
+      self.reference_exception.write(oprot)
+      oprot.writeFieldEnd()
+    if self.attribute_exception is not None:
+      oprot.writeFieldBegin('attribute_exception', TType.STRUCT, 5)
+      self.attribute_exception.write(oprot)
+      oprot.writeFieldEnd()
+    if self.type_exception is not None:
+      oprot.writeFieldBegin('type_exception', TType.STRUCT, 6)
+      self.type_exception.write(oprot)
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def validate(self):
+    return
+
+
+  def __hash__(self):
+    value = 17
+    value = (value * 31) ^ hash(self.success)
+    value = (value * 31) ^ hash(self.generic_exception)
+    value = (value * 31) ^ hash(self.authorization_exception)
+    value = (value * 31) ^ hash(self.authentication_exception)
+    value = (value * 31) ^ hash(self.reference_exception)
+    value = (value * 31) ^ hash(self.attribute_exception)
+    value = (value * 31) ^ hash(self.type_exception)
+    return value
+
+  def __repr__(self):
+    L = ['%s=%r' % (key, value)
+      for key, value in self.__dict__.iteritems()]
+    return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+  def __eq__(self, other):
+    return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+  def __ne__(self, other):
+    return not (self == other)
+
+class get_gff_args:
+  """
+  Attributes:
+   - token
+   - ref
+   - gene_id_list
+  """
+
+  thrift_spec = (
+    None, # 0
+    (1, TType.STRING, 'token', None, None, ), # 1
+    (2, TType.STRING, 'ref', None, None, ), # 2
+    (3, TType.LIST, 'gene_id_list', (TType.STRING,None), None, ), # 3
+  )
+
+  def __init__(self, token=None, ref=None, gene_id_list=None,):
+    self.token = token
+    self.ref = ref
+    self.gene_id_list = gene_id_list
+
+  def read(self, iprot):
+    if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
+      fastbinary.decode_binary(self, iprot.trans, (self.__class__, self.thrift_spec))
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 1:
+        if ftype == TType.STRING:
+          self.token = iprot.readString();
+        else:
+          iprot.skip(ftype)
+      elif fid == 2:
+        if ftype == TType.STRING:
+          self.ref = iprot.readString();
+        else:
+          iprot.skip(ftype)
+      elif fid == 3:
+        if ftype == TType.LIST:
+          self.gene_id_list = []
+          (_etype517, _size514) = iprot.readListBegin()
+          for _i518 in xrange(_size514):
+            _elem519 = iprot.readString();
+            self.gene_id_list.append(_elem519)
+          iprot.readListEnd()
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
+      oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
+      return
+    oprot.writeStructBegin('get_gff_args')
+    if self.token is not None:
+      oprot.writeFieldBegin('token', TType.STRING, 1)
+      oprot.writeString(self.token)
+      oprot.writeFieldEnd()
+    if self.ref is not None:
+      oprot.writeFieldBegin('ref', TType.STRING, 2)
+      oprot.writeString(self.ref)
+      oprot.writeFieldEnd()
+    if self.gene_id_list is not None:
+      oprot.writeFieldBegin('gene_id_list', TType.LIST, 3)
+      oprot.writeListBegin(TType.STRING, len(self.gene_id_list))
+      for iter520 in self.gene_id_list:
+        oprot.writeString(iter520)
+      oprot.writeListEnd()
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def validate(self):
+    if self.token is None:
+      raise TProtocol.TProtocolException(message='Required field token is unset!')
+    if self.ref is None:
+      raise TProtocol.TProtocolException(message='Required field ref is unset!')
+    return
+
+
+  def __hash__(self):
+    value = 17
+    value = (value * 31) ^ hash(self.token)
+    value = (value * 31) ^ hash(self.ref)
+    value = (value * 31) ^ hash(self.gene_id_list)
+    return value
+
+  def __repr__(self):
+    L = ['%s=%r' % (key, value)
+      for key, value in self.__dict__.iteritems()]
+    return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+  def __eq__(self, other):
+    return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+  def __ne__(self, other):
+    return not (self == other)
+
+class get_gff_result:
+  """
+  Attributes:
+   - success
+   - generic_exception
+   - authorization_exception
+   - authentication_exception
+   - reference_exception
+   - attribute_exception
+   - type_exception
+  """
+
+  thrift_spec = (
+    (0, TType.STRING, 'success', None, None, ), # 0
+    (1, TType.STRUCT, 'generic_exception', (ServiceException, ServiceException.thrift_spec), None, ), # 1
+    (2, TType.STRUCT, 'authorization_exception', (AuthorizationException, AuthorizationException.thrift_spec), None, ), # 2
+    (3, TType.STRUCT, 'authentication_exception', (AuthenticationException, AuthenticationException.thrift_spec), None, ), # 3
+    (4, TType.STRUCT, 'reference_exception', (ObjectReferenceException, ObjectReferenceException.thrift_spec), None, ), # 4
+    (5, TType.STRUCT, 'attribute_exception', (AttributeException, AttributeException.thrift_spec), None, ), # 5
+    (6, TType.STRUCT, 'type_exception', (TypeException, TypeException.thrift_spec), None, ), # 6
+  )
+
+  def __init__(self, success=None, generic_exception=None, authorization_exception=None, authentication_exception=None, reference_exception=None, attribute_exception=None, type_exception=None,):
+    self.success = success
+    self.generic_exception = generic_exception
+    self.authorization_exception = authorization_exception
+    self.authentication_exception = authentication_exception
+    self.reference_exception = reference_exception
+    self.attribute_exception = attribute_exception
+    self.type_exception = type_exception
+
+  def read(self, iprot):
+    if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
+      fastbinary.decode_binary(self, iprot.trans, (self.__class__, self.thrift_spec))
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 0:
+        if ftype == TType.STRING:
+          self.success = iprot.readString();
+        else:
+          iprot.skip(ftype)
+      elif fid == 1:
+        if ftype == TType.STRUCT:
+          self.generic_exception = ServiceException()
+          self.generic_exception.read(iprot)
+        else:
+          iprot.skip(ftype)
+      elif fid == 2:
+        if ftype == TType.STRUCT:
+          self.authorization_exception = AuthorizationException()
+          self.authorization_exception.read(iprot)
+        else:
+          iprot.skip(ftype)
+      elif fid == 3:
+        if ftype == TType.STRUCT:
+          self.authentication_exception = AuthenticationException()
+          self.authentication_exception.read(iprot)
+        else:
+          iprot.skip(ftype)
+      elif fid == 4:
+        if ftype == TType.STRUCT:
+          self.reference_exception = ObjectReferenceException()
+          self.reference_exception.read(iprot)
+        else:
+          iprot.skip(ftype)
+      elif fid == 5:
+        if ftype == TType.STRUCT:
+          self.attribute_exception = AttributeException()
+          self.attribute_exception.read(iprot)
+        else:
+          iprot.skip(ftype)
+      elif fid == 6:
+        if ftype == TType.STRUCT:
+          self.type_exception = TypeException()
+          self.type_exception.read(iprot)
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
+      oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
+      return
+    oprot.writeStructBegin('get_gff_result')
+    if self.success is not None:
+      oprot.writeFieldBegin('success', TType.STRING, 0)
+      oprot.writeString(self.success)
       oprot.writeFieldEnd()
     if self.generic_exception is not None:
       oprot.writeFieldBegin('generic_exception', TType.STRUCT, 1)

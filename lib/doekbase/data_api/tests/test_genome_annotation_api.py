@@ -4,6 +4,11 @@ Unit tests for genome_annotation
 import logging
 from unittest import skipUnless
 
+try:
+    import cStringIO as StringIO
+except ImportError:
+    import StringIO
+
 from . import shared
 
 from doekbase.data_api.annotation.genome_annotation.api import GenomeAnnotationAPI
@@ -507,6 +512,31 @@ def test_get_gene_by_cds_invalid_new():
         _log.debug("Output {}".format(genes_t_o))
 
 
+def validate_gff(s):
+    lines = s.split('\n')
+
+    for i in xrange(len(lines)):
+        if lines[i].startswith("#"):
+            continue
+
+        tokens = lines[i].split('\t')
+
+        assert len(tokens) == 9
+
+
+@skipUnless(shared.can_connect, 'Cannot connect to workspace')
+def test_get_gff_valid_new():
+    _log.debug("Input {}".format(genome_new))
+    for t_o in [t_new, t_new_e, t_client_new]:
+        gff_t_o = t_o.get_gff()
+        buf = StringIO.StringIO()
+        gff_t_o.to_file(buf)
+        gff = buf.getvalue()
+        assert len(gff) > 0
+        validate_gff(gff)
+        _log.debug("Output {}".format(gff))
+
+
 ######## Old Genome Annotation Type tests
 
 
@@ -868,3 +898,16 @@ def test_get_gene_by_cds_old():
 
         assert error_caught
         _log.debug("Output {}".format(error_caught))
+
+
+@skipUnless(shared.can_connect, 'Cannot connect to workspace')
+def test_get_gff_valid_old():
+    _log.debug("Input {}".format(genome_old))
+    for t_o in [t_old, t_old_e, t_client_old]:
+        gff_t_o = t_o.get_gff()
+        buf = StringIO.StringIO()
+        gff_t_o.to_file(buf)
+        gff = buf.getvalue()
+        assert len(gff) > 0
+        validate_gff(gff)
+        _log.debug("Output {}".format(gff))
