@@ -1928,6 +1928,7 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
         mrna_list = []
         map(mrna_list.extend, mrna_by_gene_list.values())
         cds_by_mrna_list = self.get_cds_by_mrna(mrna_list)
+        cds_by_gene_list = self.get_cds_by_gene(gene_list)
         exons_by_mrna = self.get_mrna_exons(mrna_list)
         # TODO fetch UTR info
         #self.get_mrna_utrs(mrna_by_gene_list.values())
@@ -1936,7 +1937,23 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
         map(feature_id_list.extend, [feature_ids[x] for x in feature_ids])
         feature_data = self.get_features(feature_id_list=feature_id_list)
 
+        def parse_aliases(feature_id):
+            aliases = feature_data[feature_id]["feature_aliases"]
+
+            alias_values = []
+            dbxref_values = []
+
+            for x in aliases:
+                for k in aliases[x]:
+                    if k.startswith("Genbank"):
+                        alias_values.append("Alias={};".format(x))
+                    else:
+                        dbxref_values.append("Dbxref={}:{};".format(k,x))
+
+            return alias_values, dbxref_values
+
         def get_gene_line(gene_id):
+            function_description = feature_data[gene_id]["feature_function"]
             aliases = feature_data[gene_id]["feature_aliases"]
             location = feature_data[gene_id]["feature_locations"][0]
 
@@ -1948,11 +1965,13 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
                 start = location["start"] - location["length"] + 1
                 stop = location["start"]
 
-            db_xref = "".join(["Dbxref={};".format(x) for x in aliases])
+            db_xref, alias = parse_aliases(gene_id)
+            db_xref = "".join(db_xref)
+            alias = "".join(alias)
 
             # gff fields;
             # NC_003070.9	RefSeq	gene	3631	5899	.	+	.	ID=gene0;Dbxref=GeneID:839580,TAIR:AT1G01010;Name=NAC001;gbkey=Gene;gene=NAC001;gene_biotype=protein_coding;gene_synonym=ANAC001,NAC domain containing protein 1,NAC001,T25K16.1,T25K16_1;locus_tag=AT1G01010
-            gene_line = "{}\t{}\tgene\t{}\t{}\t.\t{}\t.\tID={};Name={};{}\n".format(
+            gene_line = "{}\t{}\tgene\t{}\t{}\t.\t{}\t.\tID={};Name={};{}{}{}\n".format(
                 contig_id,
                 source_info['external_source'],
                 str(start),
@@ -1960,11 +1979,14 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
                 location['strand'],
                 gene_id,
                 gene_id,
-                db_xref)
+                alias,
+                db_xref,
+                function_description)
 
             return gene_line
 
         def get_mrna_line(gene_id, mrna_id):
+            function_description = feature_data[mrna_id]["feature_function"]
             locations = feature_data[mrna_id]["feature_locations"]
             lower_bound = None
             upper_bound = None
@@ -1985,12 +2007,14 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
                 if upper_bound is None or stop > upper_bound:
                     upper_bound = stop
 
-            db_xref = "".join(["Dbxref={};".format(x) for x in feature_data[mrna_id]["feature_aliases"]])
+            db_xref, alias = parse_aliases(mrna_id)
+            db_xref = "".join(db_xref)
+            alias = "".join(alias)
 
             # TODO what do we do about trans-spliced genes with locations on both strands?
             # gff fields;
             # NC_003070.9	RefSeq	gene	3631	5899	.	+	.	ID=gene0;Dbxref=GeneID:839580,TAIR:AT1G01010;Name=NAC001;gbkey=Gene;gene=NAC001;gene_biotype=protein_coding;gene_synonym=ANAC001,NAC domain containing protein 1,NAC001,T25K16.1,T25K16_1;locus_tag=AT1G01010
-            mrna_line = "{}\t{}\tmRNA\t{}\t{}\t.\t{}\t.\tID={};Parent={};Name={};{}\n".format(
+            mrna_line = "{}\t{}\tmRNA\t{}\t{}\t.\t{}\t.\tID={};Parent={};Name={};{}{}{}\n".format(
                 contig_id,
                 source_info['external_source'],
                 str(lower_bound),
@@ -1999,17 +2023,27 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
                 mrna_id,
                 gene_id,
                 mrna_id,
-                db_xref)
+                alias,
+                db_xref,
+                function_description)
 
             return mrna_line
 
-        def get_cds_lines(mrna_id):
+        def get_cds_lines(mrna_id, gene_id):
             cds_id = cds_by_mrna_list[mrna_id]
 
-            if cds_id is None:
-                _log.warn("mRNA {} has no associated CDS".format(mrna_id))
-                return ""
+            parent = ""
 
+            if cds_id is None:
+                cds_id = cds_by_gene_list[gene_id]
+
+                if cds_id is None:
+                    _log.warn("mRNA {} and gene {} do not have an associated CDS".format(mrna_id, gene_id))
+                    return ""
+            else:
+                parent = "Parent={};".format(mrna_id)
+
+            function_description = feature_data[cds_id]["feature_function"]
             locations = feature_data[cds_id]["feature_locations"]
 
             phase = 0
@@ -2026,9 +2060,11 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
 
                 phase = (3 - running_length % 3) % 3
 
-                db_xref = "".join(["Dbxref={};".format(x) for x in feature_data[cds_id]["feature_aliases"]])
+                db_xref, alias = parse_aliases(mrna_id)
+                db_xref = "".join(db_xref)
+                alias = "".join(alias)
 
-                cds_lines.append("{}\t{}\tCDS\t{}\t{}\t.\t{}\t{}\tID={};Parent={};Name={};{}\n".format(
+                cds_lines.append("{}\t{}\tCDS\t{}\t{}\t.\t{}\t{}\tID={};{}Name={};Derives_from={};{}{}{}\n".format(
                     contig_id,
                     source_info['external_source'],
                     str(start),
@@ -2036,9 +2072,12 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
                     locations[0]['strand'],
                     str(phase),
                     cds_id,
-                    mrna_id,
+                    parent,
                     cds_id,
-                    db_xref))
+                    gene_id,
+                    alias,
+                    db_xref,
+                    function_description))
 
                 running_length += location["length"]
 
@@ -2104,6 +2143,15 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
             else:
                 gffdata.write("##species unknown\n")
 
+            # NC_003070.9	RefSeq	region	1	30427671	.	+	.	ID=id0;Dbxref=taxon:3702;Name=1;chromosome=1;ecotype=Columbia;gbkey=Src;genome=chromosome;mol_type=genomic DNA
+            gffdata.write("{}\t{}\texon\t{}\t{}\t.\t+\t.\tID={};gbkey=Src;mol_type=genomic DNA\n".format(
+                contig_id,
+                source_info['external_source'],
+                1,
+                str(contig_lengths[contig_id]),
+                contig_id
+            ))
+
             for boundary in sorted(genes_by_contig[contig_id]):
                 # maybe sort the genes?
                 for gene_id in genes_by_contig[contig_id][boundary]:
@@ -2114,7 +2162,7 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
                         exons = exons_by_mrna[mrna_id]
                         gffdata.write(get_exon_lines(mrna_id, exons, last_exon_id))
                         last_exon_id += len(exons)
-                        gffdata.write(get_cds_lines(mrna_id))
+                        gffdata.write(get_cds_lines(mrna_id, gene_id))
 
         gffdata.write("###")
 
