@@ -555,4 +555,21 @@ service thrift_service {
         5:AttributeException attribute_exception,
         6:TypeException type_exception)
 
+    /**
+     * Retrieve a GFF representation of this GenomeAnnotation.
+     *
+     * @param gene_id_list List of gene Feature IDs for which to retrieve GFF.
+     * If empty, returns GFF data for all genes in this GenomeAnnotation.
+     * @return GFF data
+     */
+    binary get_gff(1:required string token,
+                   2:required ObjectReference ref,
+                   3:list<string> gene_id_list) throws (
+        1:ServiceException generic_exception,
+        2:AuthorizationException authorization_exception,
+        3:AuthenticationException authentication_exception,
+        4:ObjectReferenceException reference_exception,
+        5:AttributeException attribute_exception,
+        6:TypeException type_exception)
+
 }

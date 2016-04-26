@@ -256,5 +256,18 @@ service thrift_service {
         3:AuthenticationException authentication_exception,
         4:ObjectReferenceException reference_exception,
         5:AttributeException attribute_exception,
+        6:TypeException type_exception),
+
+    /**
+     * Get reference to FASTA data
+     */
+    ObjectReference to_fasta(1:required string token,
+                             2:required ObjectReference ref) throws (
+        1:ServiceException generic_exception,
+        2:AuthorizationException authorization_exception,
+        3:AuthenticationException authentication_exception,
+        4:ObjectReferenceException reference_exception,
+        5:AttributeException attribute_exception,
         6:TypeException type_exception)
+
 }

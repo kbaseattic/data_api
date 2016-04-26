@@ -6,6 +6,12 @@ Assembly and Taxon associated with an annotation, as well as retrieving individu
 # stdlib imports
 import abc
 import hashlib
+import time
+
+try:
+    import cStringIO as StringIO
+except ImportError:
+    import StringIO
 
 # 3rd party imports
 #import blist
@@ -15,6 +21,7 @@ from doekbase.data_api.core import ObjectAPI, fix_docs
 from doekbase.data_api.util import get_logger, logged
 from doekbase.data_api import exceptions
 import doekbase.data_api.annotation.genome_annotation.service.ttypes as ttypes
+from doekbase.data_api.blob import blob
 
 _GENOME_TYPES = ['KBaseGenomes.Genome']
 _GENOME_ANNOTATION_TYPES = ['KBaseGenomeAnnotations.GenomeAnnotation']
@@ -445,6 +452,20 @@ class GenomeAnnotationInterface(object):
         """
         pass
 
+    @abc.abstractmethod
+    def get_gff(self, gene_feature_id_list=None):
+        """Create a GFF representation of this GenomeAnnotation.
+
+        Args:
+           gene_feature_id_list (list<str>): List of gene Feature ids to include in the GFF output.
+             If None, returns GFF output for all gene Feature ids and related mRNA and CDS Features.
+        Returns:
+            (doekbase.data_api.blob.Blob) Temporary "blob" object
+        See Also:
+            :doc:`blob_api`
+        """
+        pass
+
 
 @fix_docs
 class GenomeAnnotationAPI(ObjectAPI, GenomeAnnotationInterface):
@@ -530,7 +551,10 @@ class GenomeAnnotationAPI(ObjectAPI, GenomeAnnotationInterface):
     
     def get_mrna_by_gene(self, gene_feature_id_list=None):
         return self.proxy.get_mrna_by_gene(gene_feature_id_list)
-    
+
+    def get_gff(self, gene_feature_id_list=None):
+        return self.proxy.get_gff(gene_feature_id_list)
+
 
 @fix_docs
 class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
@@ -1049,6 +1073,119 @@ class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
 
         raise TypeError("The Genome type does not contain relationships between Features." +
                         "  This method cannot return valid results for this data type.")
+
+    def get_gff(self, gene_feature_id_list=None, ref_only=False):
+        taxon_id = self.get_taxon().get_scientific_name()
+
+        assembly = self.get_assembly()
+        source_info = assembly.get_external_source_info()
+        contig_lengths = assembly.get_contig_lengths()
+        contig_ids = contig_lengths.keys()
+
+        gffdata = StringIO.StringIO()
+        gffdata.write("##gff-version 3\n")
+        gffdata.write("#!gff-spec-version 1.21\n")
+        gffdata.write("#!processor KBase GFF3 downloader\n")
+        #!genome-build TAIR10
+        #!genome-build-accession NCBI_Assembly:GCF_000001735.3
+
+        feature_types = self.get_feature_types()
+        include_types = []
+
+        if "gene" in feature_types:
+            include_types.append("gene")
+
+        if "locus" in feature_types:
+            include_types.append("locus")
+
+        feature_ids = self.get_feature_ids(filters={"type_list": include_types})["by_type"]
+
+        genes_missing = False
+        if not feature_ids.has_key("gene") and not feature_ids.has_key("locus"):
+            genes_missing = True
+        elif feature_ids.has_key("gene") and len(feature_ids["gene"]) == 0:
+            genes_missing = True
+        elif feature_ids.has_key("locus") and len(feature_ids["locus"]) == 0:
+            genes_missing = True
+
+        if genes_missing:
+            # unable to proceed without gene information
+            raise Exception("No genes present to generate the GFF format. {} {}".format(feature_types, feature_ids))
+
+        gene_list = []
+        if feature_ids.has_key("gene"):
+            gene_list.extend(feature_ids["gene"])
+
+        if feature_ids.has_key("locus"):
+            gene_list.extend(feature_ids["locus"])
+
+        feature_id_list = []
+        map(feature_id_list.extend, [feature_ids[x] for x in feature_ids])
+        feature_data = self.get_features(feature_id_list=feature_id_list)
+
+        def get_gene_line(gene_id):
+            aliases = feature_data[gene_id]["feature_aliases"]
+            location = feature_data[gene_id]["feature_locations"][0]
+
+            if location["strand"] == "+":
+                start = location["start"]
+                stop = location["start"] + location["length"]
+
+            if location["strand"] == "-":
+                start = location["start"] - location["length"] + 1
+                stop = location["start"]
+
+            db_xref = "".join(["Dbxref={};".format(x) for x in aliases])
+
+            # gff fields;
+            # NC_003070.9	RefSeq	gene	3631	5899	.	+	.	ID=gene0;Dbxref=GeneID:839580,TAIR:AT1G01010;Name=NAC001;gbkey=Gene;gene=NAC001;gene_biotype=protein_coding;gene_synonym=ANAC001,NAC domain containing protein 1,NAC001,T25K16.1,T25K16_1;locus_tag=AT1G01010
+            gene_line = "{}\t{}\tgene\t{}\t{}\t.\t{}\t.\tID={};Name={};{}\n".format(
+                contig_id,
+                source_info['external_source'],
+                str(start),
+                str(stop),
+                location['strand'],
+                gene_id,
+                gene_id,
+                db_xref)
+
+            return gene_line
+
+        genes_by_contig = {}
+
+        for c in contig_ids:
+            genes_by_contig[c] = {}
+
+        for gene_id in gene_list:
+            location = feature_data[gene_id]["feature_locations"][0]
+            boundary = location["start"]
+
+            if location["strand"] == "-":
+                boundary = location["start"] - location["length"] + 1
+
+            if not genes_by_contig[location["contig_id"]].has_key(boundary):
+                genes_by_contig[location["contig_id"]][boundary] = []
+
+            genes_by_contig[location["contig_id"]][boundary].append(gene_id)
+
+        for contig_id in sorted(genes_by_contig):
+            ##NC_003070.9 1 30427671
+            gffdata.write("##sequence-region {}\t1\t{}\n".format(contig_id,
+                          str(contig_lengths[contig_id])))
+
+            gffdata.write("##species {}\n".format(taxon_id))
+
+            for boundary in sorted(genes_by_contig[contig_id]):
+                # maybe sort the genes?
+                for gene_id in genes_by_contig[contig_id][boundary]:
+                    gffdata.write(get_gene_line(gene_id))
+
+        gffdata.write("###")
+
+        out = blob.BlobBuffer()
+        out.write(gffdata.getvalue())
+
+        return out
 
 
 @fix_docs
@@ -1733,6 +1870,261 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
     def get_mrna_by_gene(self, gene_feature_id_list=None):
         return self._get_by_gene("mrna", gene_feature_id_list)
 
+    def get_gff(self, gene_feature_id_list=None):
+        taxon = self.get_taxon()
+        taxon_id = taxon.get_taxonomic_id()
+
+        if taxon_id == -1:
+            taxon_id = "unknown"
+
+        assembly = self.get_assembly()
+        source_info = assembly.get_external_source_info()
+        contig_lengths = assembly.get_contig_lengths()
+        contig_ids = contig_lengths.keys()
+
+        gffdata = StringIO.StringIO()
+        gffdata.write("##gff-version 3\n")
+        gffdata.write("#!gff-spec-version 1.21\n")
+        gffdata.write("#!processor KBase GFF3 downloader\n")
+        #!genome-build TAIR10
+        #!genome-build-accession NCBI_Assembly:GCF_000001735.3
+
+        feature_types = self.get_feature_types()
+        include_types = []
+
+        if "gene" in feature_types:
+            include_types.append("gene")
+
+        if "locus" in feature_types:
+            include_types.append("locus")
+
+        if "mRNA" in feature_types:
+            include_types.append("mRNA")
+
+        if "CDS" in feature_types:
+            include_types.append("CDS")
+
+        feature_ids = self.get_feature_ids(filters={"type_list": include_types})["by_type"]
+
+        genes_missing = False
+        if not feature_ids.has_key("gene") and not feature_ids.has_key("locus"):
+            genes_missing = True
+        elif feature_ids.has_key("gene") and len(feature_ids["gene"]) == 0:
+            genes_missing = True
+        elif feature_ids.has_key("locus") and len(feature_ids["locus"]) == 0:
+            genes_missing = True
+
+        if genes_missing:
+            # unable to proceed without gene information
+            raise Exception("No genes present to generate the GFF format. {} {}".format(feature_types, feature_ids))
+
+        gene_list = []
+        if feature_ids.has_key("gene"):
+            gene_list.extend(feature_ids["gene"])
+
+        if feature_ids.has_key("locus"):
+            gene_list.extend(feature_ids["locus"])
+
+        # retrieve pairwise inter-feature relationships between genes, mRNAs, CDSs
+        mrna_by_gene_list = self.get_mrna_by_gene(gene_list)
+        mrna_list = []
+        map(mrna_list.extend, mrna_by_gene_list.values())
+        cds_by_mrna_list = self.get_cds_by_mrna(mrna_list)
+        exons_by_mrna = self.get_mrna_exons(mrna_list)
+        # TODO fetch UTR info
+        #self.get_mrna_utrs(mrna_by_gene_list.values())
+
+        feature_id_list = []
+        map(feature_id_list.extend, [feature_ids[x] for x in feature_ids])
+        feature_data = self.get_features(feature_id_list=feature_id_list)
+
+        def get_gene_line(gene_id):
+            aliases = feature_data[gene_id]["feature_aliases"]
+            location = feature_data[gene_id]["feature_locations"][0]
+
+            if location["strand"] == "+":
+                start = location["start"]
+                stop = location["start"] + location["length"]
+
+            if location["strand"] == "-":
+                start = location["start"] - location["length"] + 1
+                stop = location["start"]
+
+            db_xref = "".join(["Dbxref={};".format(x) for x in aliases])
+
+            # gff fields;
+            # NC_003070.9	RefSeq	gene	3631	5899	.	+	.	ID=gene0;Dbxref=GeneID:839580,TAIR:AT1G01010;Name=NAC001;gbkey=Gene;gene=NAC001;gene_biotype=protein_coding;gene_synonym=ANAC001,NAC domain containing protein 1,NAC001,T25K16.1,T25K16_1;locus_tag=AT1G01010
+            gene_line = "{}\t{}\tgene\t{}\t{}\t.\t{}\t.\tID={};Name={};{}\n".format(
+                contig_id,
+                source_info['external_source'],
+                str(start),
+                str(stop),
+                location['strand'],
+                gene_id,
+                gene_id,
+                db_xref)
+
+            return gene_line
+
+        def get_mrna_line(gene_id, mrna_id):
+            locations = feature_data[mrna_id]["feature_locations"]
+            lower_bound = None
+            upper_bound = None
+
+            # find min/max locations for this mrna
+            for location in locations:
+                if location["strand"] == "+":
+                    start = location["start"]
+                    stop = location["start"] + location["length"]
+
+                if location["strand"] == "-":
+                    start = location["start"] - location["length"] + 1
+                    stop = location["start"]
+
+                if lower_bound is None or start < lower_bound:
+                    lower_bound = start
+
+                if upper_bound is None or stop > upper_bound:
+                    upper_bound = stop
+
+            db_xref = "".join(["Dbxref={};".format(x) for x in feature_data[mrna_id]["feature_aliases"]])
+
+            # TODO what do we do about trans-spliced genes with locations on both strands?
+            # gff fields;
+            # NC_003070.9	RefSeq	gene	3631	5899	.	+	.	ID=gene0;Dbxref=GeneID:839580,TAIR:AT1G01010;Name=NAC001;gbkey=Gene;gene=NAC001;gene_biotype=protein_coding;gene_synonym=ANAC001,NAC domain containing protein 1,NAC001,T25K16.1,T25K16_1;locus_tag=AT1G01010
+            mrna_line = "{}\t{}\tmRNA\t{}\t{}\t.\t{}\t.\tID={};Parent={};Name={};{}\n".format(
+                contig_id,
+                source_info['external_source'],
+                str(lower_bound),
+                str(upper_bound),
+                locations[0]['strand'],
+                mrna_id,
+                gene_id,
+                mrna_id,
+                db_xref)
+
+            return mrna_line
+
+        def get_cds_lines(mrna_id):
+            cds_id = cds_by_mrna_list[mrna_id]
+
+            if cds_id is None:
+                _log.warn("mRNA {} has no associated CDS".format(mrna_id))
+                return ""
+
+            locations = feature_data[cds_id]["feature_locations"]
+
+            phase = 0
+            running_length = 0
+            cds_lines = []
+            for location in locations:
+                if location["strand"] == "+":
+                    start = location["start"]
+                    stop = location["start"] + location["length"]
+
+                if location["strand"] == "-":
+                    start = location["start"] - location["length"] + 1
+                    stop = location["start"]
+
+                phase = (3 - running_length % 3) % 3
+
+                db_xref = "".join(["Dbxref={};".format(x) for x in feature_data[cds_id]["feature_aliases"]])
+
+                cds_lines.append("{}\t{}\tCDS\t{}\t{}\t.\t{}\t{}\tID={};Parent={};Name={};{}\n".format(
+                    contig_id,
+                    source_info['external_source'],
+                    str(start),
+                    str(stop),
+                    locations[0]['strand'],
+                    str(phase),
+                    cds_id,
+                    mrna_id,
+                    cds_id,
+                    db_xref))
+
+                running_length += location["length"]
+
+            return "".join(cds_lines)
+
+        # need a global counter for tracking exon order
+        last_exon_id = 1
+        def get_exon_lines(mrna_id, exons, start_exon_id):
+            exon_count = 0
+            exon_lines = []
+            for x in exons:
+                exon_id = "exon_{}".format(str(start_exon_id + exon_count))
+                exon_count += 1
+
+                location = x["exon_location"]
+
+                if location["strand"] == "+":
+                    start = location["start"]
+                    stop = location["start"] + location["length"]
+
+                if location["strand"] == "-":
+                    start = location["start"] - location["length"] + 1
+                    stop = location["start"]
+
+                exon_lines.append("{}\t{}\texon\t{}\t{}\t.\t{}\t.\tID={};Parent={};Name={};\n".format(
+                    contig_id,
+                    source_info['external_source'],
+                    str(start),
+                    str(stop),
+                    location['strand'],
+                    exon_id,
+                    mrna_id,
+                    exon_id))
+
+            return "".join(exon_lines)
+
+        genes_by_contig = {}
+
+        for c in contig_ids:
+            genes_by_contig[c] = {}
+
+        for gene_id in gene_list:
+            location = feature_data[gene_id]["feature_locations"][0]
+            boundary = location["start"]
+
+            if location["strand"] == "-":
+                boundary = location["start"] - location["length"] + 1
+
+            if not genes_by_contig[location["contig_id"]].has_key(boundary):
+                genes_by_contig[location["contig_id"]][boundary] = []
+
+            genes_by_contig[location["contig_id"]][boundary].append(gene_id)
+
+        for contig_id in sorted(genes_by_contig):
+            ##NC_003070.9 1 30427671
+            gffdata.write("##sequence-region {}\t1\t{}\n".format(contig_id,
+                          str(contig_lengths[contig_id])))
+
+            if taxon_id != -1:
+                #http://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id=3702
+                gffdata.write("##species http://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id={}\n".format(
+                              str(taxon_id)))
+            else:
+                gffdata.write("##species unknown\n")
+
+            for boundary in sorted(genes_by_contig[contig_id]):
+                # maybe sort the genes?
+                for gene_id in genes_by_contig[contig_id][boundary]:
+                    gffdata.write(get_gene_line(gene_id))
+
+                    for mrna_id in mrna_by_gene_list[gene_id]:
+                        gffdata.write(get_mrna_line(gene_id, mrna_id))
+                        exons = exons_by_mrna[mrna_id]
+                        gffdata.write(get_exon_lines(mrna_id, exons, last_exon_id))
+                        last_exon_id += len(exons)
+                        gffdata.write(get_cds_lines(mrna_id))
+
+        gffdata.write("###")
+
+        out = blob.BlobBuffer()
+        out.write(gffdata.getvalue())
+
+        return out
+
 
 _ga_log = get_logger('GenomeAnnotationClientAPI')
 @fix_docs
@@ -1980,3 +2372,11 @@ class GenomeAnnotationClientAPI(GenomeAnnotationInterface):
     @client_method
     def get_mrna_by_gene(self, gene_feature_id_list=None):
         return self.client.get_mrna_by_gene(self._token, self.ref, gene_feature_id_list)
+
+    @logged(_ga_log)
+    @client_method
+    def get_gff(self, gene_feature_id_list=None):
+        result = self.client.get_gff(self._token, self.ref, gene_feature_id_list)
+        out = blob.BlobBuffer()
+        out.write(result)
+        return out
