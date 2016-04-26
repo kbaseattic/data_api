@@ -9,10 +9,12 @@ from doekbase.data_api.tests import shared
 from doekbase.data_api import exceptions
 from doekbase.data_api import thrift_include
 
-_log = logging.getLogger(__name__)
+_log = None
 
 def setup():
+    global _log
     shared.setup()
+    _log = logging.getLogger('nose.test_thrift_include')
 
 input_files = {
     'A':"""File A
@@ -62,7 +64,7 @@ class TemporaryDirectory(object):
 
 def _test_include(in_place=None):
     with TemporaryDirectory() as tmpdirname:
-        print("Temporary directory: {}".format(tmpdirname))
+        _log.info("Temporary directory: {}".format(tmpdirname))
         # create input files
         for filename, contents in input_files.items():
             f = open(os.path.join(tmpdirname, filename), 'w')
@@ -70,16 +72,21 @@ def _test_include(in_place=None):
             f.close()
 
         # preprocess the root input file
-        a = open(os.path.join(tmpdirname, 'A'), 'r+')
-        if not in_place:
-
-        pp = thrift_include.ThriftPP(read_file=a, write_file=a, include_paths=[tmpdirname])
+        if in_place:
+            a = open(os.path.join(tmpdirname, 'A'), 'r+')
+            a_write = a
+        else:
+            a = open(os.path.join(tmpdirname, 'A'), 'r')
+            a_write = open(os.path.join(tmpdirname, 'Aw'), 'w')
+        pp = thrift_include.ThriftPP(read_file=a, write_file=a_write, include_paths=[tmpdirname])
         changed = pp.process()
         assert changed
         a.close()
+        if a is not a_write:
+            a_write.close()
 
         # check the content
-        a = open(os.path.join(tmpdirname, 'A'), 'r')
+        a = open(os.path.join(tmpdirname, a_write.name), 'r')
         got_lines = a.readlines()
         _log.debug("Got {:d}:\n{}".format(len(got_lines), ''.join(got_lines)))
 
