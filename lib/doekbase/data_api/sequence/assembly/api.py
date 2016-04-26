@@ -176,7 +176,7 @@ class AssemblyInterface(object):
         """Create a FASTA representation of this assembly.
 
         Returns:
-            (`doekbase.data_api.blob.Blob`) Temporary "blob" object
+            (doekbase.data_api.blob.Blob) Temporary "blob" object
         See Also:
             :doc:`blob_api`
         """
