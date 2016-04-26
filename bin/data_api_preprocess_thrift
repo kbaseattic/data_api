@@ -1,0 +1,97 @@
+#!/usr/bin/env python
+"""
+Pre-process Thrift scripts
+"""
+__author__ = 'Dan Gunter <dkgunter@lbl.gov>'
+__date__ = '4/5/16'
+
+import argparse
+import glob
+import logging
+import os
+import sys
+#
+from doekbase.data_api import thrift_include
+
+_log = logging.getLogger('kbase.preprocess')
+_hnd = logging.StreamHandler()
+_hnd.setFormatter(logging.Formatter("%(asctime)s [%(levelname)s] %(message)s"))
+_log.addHandler(_hnd)
+
+def main(cmdline):
+    cwd = os.path.dirname(os.path.abspath(__file__))
+    parser = argparse.ArgumentParser(
+        description='Update Thrift specs in all'
+                    'specified files and directories with includes')
+    parser.add_argument('--include', '-I', dest='includes', action='append', default=[],
+                        help='Directory with .thrift files to include ("." if none given)')
+    parser.add_argument('--verbose', '-v', dest='vb', action="count", default=0,
+                        help="Print more verbose messages to standard error. "
+                             "Repeatable. (default=ERROR)")
+    parser.add_argument('path', action='append', default=[])
+    args = parser.parse_args(cmdline)
+    verbosity = (logging.ERROR, logging.INFO, logging.DEBUG)[min(args.vb, 2)]
+    _log.setLevel(verbosity)
+
+    changed, unchanged = preprocess(get_file_list(args.path), args.includes)
+
+    if len(changed) == 0:
+        print('No files changed')
+    else:
+        n = len(changed)
+        print('{num:d} file{plural} changed: {f}'.format(
+            num=n, f=make_comma_list(changed), plural='s' if n > 1 else ''))
+    if len(unchanged) > 0:
+        n = len(unchanged)
+        print('{num:d} file{plural} unchanged: {f}'.format(
+            num=n, f=make_comma_list(unchanged), plural='s' if n > 1 else ''))
+    return 0
+
+def make_comma_list(items):
+    sorted_items = sorted(list(items))
+    return ', '.join(sorted_items)
+
+def preprocess(file_list, includes):
+    if len(file_list) == 0:
+        _log.warn('No files to process')
+        return
+    _log.info('process-file-list.begin count={:d}'.format(len(file_list)))
+    changed_files, unchanged_files = set(), set()
+    for filename in file_list:
+        fp = open(filename, 'r+')
+        preprocessor = thrift_include.ThriftPP(include_paths=includes, read_file=fp,
+                                               write_file=fp)
+        _log.debug('process-file.begin file={}'.format(fp.name))
+        changed = False
+        try:
+            changed = preprocessor.process()
+        except IOError as err:
+            print('Error opening file: {}'.format(err))
+            break
+        except thrift_include.IncludedFileNotFound as err:
+            print('Error with include: {}'.format(err))
+            break
+        _log.debug('process-file.end file={} was-changed={}'.format(fp.name, changed))
+        if not changed:
+            unchanged_files.add(filename)
+        changed_files = changed_files.union(set(preprocessor.get_changed_files()))
+    _log.info('process-file-list.end count={:d} changed={}'.format(len(file_list),
+                                                                   changed))
+    return changed_files, unchanged_files
+
+def get_file_list(path_args):
+    files = []
+    for path in path_args:
+        if os.path.isdir(path):
+            path_had_files = False
+            for filename in glob.glob(os.path.join(path, '*.thrift')):
+                files.append(filename)
+                path_had_files = True
+            if not path_had_files:
+                _log.warn('No files found in path={}'.format(path))
+        else:
+            files.append(path)
+    return files
+
+if __name__ == '__main__':
+    sys.exit(main(sys.argv[1:]))
