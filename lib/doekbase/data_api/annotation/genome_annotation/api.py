@@ -460,7 +460,9 @@ class GenomeAnnotationInterface(object):
            gene_feature_id_list (list<str>): List of gene Feature ids to include in the GFF output.
              If None, returns GFF output for all gene Feature ids and related mRNA and CDS Features.
         Returns:
-            (TemporaryBlob) Temporary blob object
+            (doekbase.data_api.blob.Blob) Temporary "blob" object
+        See Also:
+            :doc:`blob_api`
         """
         pass
 
