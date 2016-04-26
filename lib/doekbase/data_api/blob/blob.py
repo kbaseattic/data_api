@@ -12,16 +12,28 @@ import time
 from doekbase.data_api import exceptions
 
 class Blob(object):
+    """Abstract base class for Blobs.
+    """
     __metaclass__ = abc.ABCMeta
 
-    LINE_SEP = '\n' # for .writeln()
+    #: Line separator used for .writeln()
+    LINE_SEP = '\n'
 
     def __init__(self, expire_hours=24):
+        """Create a new blob, with optional expiration.
+
+        Args:
+            expire_hours (int): Time, in hours, before blob will expire and
+                may be deleted by the system. Any non-positive value will
+                be interpreted as infinite.
+        """
         self._exp_hours = expire_hours
         self._created = time.time()
         self.set_ref('')
 
     def set_ref(self, value):
+        """Set the (workspace) reference associated with this blob.
+        """
         self._ref = value
 
     def get_expiration_time(self):
@@ -30,27 +42,53 @@ class Blob(object):
         Returns:
             (int) Timestamp, in #seconds since epoch. May be negative
         """
+        if self._exp_hours <= 0:
+            return 0
         now = time.time()
         expire = self._created + self._exp_hours * 60 * 60
-        return expire - now
+        return expire
 
     @abc.abstractmethod
     def write(self, bytes):
+        """Write `bytes` to the blob.
+
+        Args:
+            bytes (str): Bytes to write
+        """
         pass
 
     @abc.abstractmethod
     def writeln(self, bytes):
+        """Write `bytes` followed by a newline.
+
+        The ``LINE_SEP`` class variable will be used to produce the newline.
+
+        Args:
+            bytes (str): Bytes to write.
+        """
         pass
 
     @abc.abstractmethod
     def to_file(self, f):
+        """Write the *contents* of this blob to the provided file-like object.
+
+        Args:
+            f (file): File-like object, with a ``write`` method
+        """
         pass
 
     def __str__(self):
+        """String representation of self
+
+        Returns:
+            (str) The reference value (see :meth:`set_ref`)
+        """
         return self._ref
 
 
 class BlobShockNode(Blob):
+    """A blobby interface to a KBase Shock node.
+    """
     BLOCKSZ = 2**20
 
     def __init__(self, url=None, node_id=None, auth_token=None, create=False,
@@ -102,7 +140,7 @@ class BlobShockNode(Blob):
 
 
 class BlobBuffer(Blob):
-    """For internal use, create a 'blob' that is really just a buffer.
+    """For internal use: create a 'blob' that is really just a buffer.
     """
     def __init__(self, expire_hours=0):
         Blob.__init__(self, expire_hours=expire_hours)

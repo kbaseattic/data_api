@@ -172,11 +172,13 @@ class AssemblyInterface(object):
         pass
 
     @abc.abstractmethod
-    def get_fasta(self, ref_only=False):
+    def get_fasta(self):
         """Create a FASTA representation of this assembly.
 
         Returns:
-            (TemporaryBlob) Temporary blob object
+            (`doekbase.data_api.blob.Blob`) Temporary "blob" object
+        See Also:
+            :doc:`blob_api`
         """
         pass
 
@@ -231,8 +233,8 @@ class AssemblyAPI(ObjectAPI, AssemblyInterface):
     def get_contigs(self, contig_id_list=None):
         return self.proxy.get_contigs(contig_id_list)
 
-    def get_fasta(self, ref_only=False):
-        return self.proxy.get_fasta(ref_only=ref_only)
+    def get_fasta(self):
+        return self.proxy.get_fasta()
 
 # ============================================================================
 
@@ -403,10 +405,10 @@ class _KBaseGenomes_ContigSet(ObjectAPI, AssemblyInterface):
         """
         return sum(self._current_sequence.count(x) for x in ['g','G','c','C'])
 
-    def get_fasta(self, ref_only=False):
+    def get_fasta(self):
         temp_blob = blob.BlobBuffer() # XXX: change this to TemporaryBlobShockNode
         self._create_fasta(temp_blob)
-        return (str(temp_blob) if ref_only else temp_blob)
+        return temp_blob
 
     def _create_fasta(self, stream):
         raw_contigs = self.get_data()["contigs"]
@@ -506,7 +508,7 @@ class _Assembly(ObjectAPI, AssemblyInterface):
             hc = handleClient(url=self.services["handle_service_url"], token=self._token)
             handle = hc.hids_to_handles([fasta_ref])[0]
             shock_node_id = handle["id"]
-        except Exception, e:
+        except Exception as e:
             _log.debug("Failed to retrieve handle {} from {}".format(fasta_ref,
                                                                      self.services["handle_service_url"]))
             #_log.exception(e)
@@ -546,7 +548,7 @@ class _Assembly(ObjectAPI, AssemblyInterface):
         if num_contigs > total_contigs/3 or num_contigs == 0:
             try:
                 sequence_data = fetch_data(shock_node_id)
-            except Exception, e:
+            except Exception as e:
                 raise
 
             if num_contigs == 0:
@@ -583,12 +585,11 @@ class _Assembly(ObjectAPI, AssemblyInterface):
 
         return outContigs
 
-    def get_fasta(self, ref_only=False):
+    def get_fasta(self):
         b = blob.BlobShockNode(url=self._get_shock_url(),
                                node_id=self._get_shock_node_id(),
                                auth_token=self._get_shock_auth_token())
-        # return a blob object to the library, otherwise the object ID (as a string)
-        return (str(b) if ref_only else b)
+        return b
 
     def _get_shock_url(self):
         try:
@@ -607,7 +608,7 @@ class _Assembly(ObjectAPI, AssemblyInterface):
             hc = handleClient(url=self.services['handle_service_url'], token=self._token)
             handle = hc.hids_to_handles([fasta_ref])[0]
             shock_node_id = handle['id']
-        except Exception, e:
+        except Exception as e:
             _log.debug("Failed to retrieve handle {} from {}"
                        .format(fasta_ref, self.services["handle_service_url"]))
             _log.exception(e)
@@ -758,7 +759,7 @@ class AssemblyClientAPI(AssemblyInterface):
 
     @logged(_as_log)
     @client_method
-    def get_fasta(self, ref_only=False):
+    def get_fasta(self):
         blob_ref = self.client.get_fasta(self._token, self.ref)
         return blob.BlobShockNode(blob_ref)
 
