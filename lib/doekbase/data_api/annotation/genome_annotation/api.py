@@ -1607,19 +1607,25 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
             mrna_feature_id_list = mrna_feature_container.get_data()["features"].keys()
 
         # fetch the cds info we need
-        cds_ids = self.get_cds_by_mrna(mrna_feature_id_list)
-        cds_locations = self._get_feature_data("locations", cds_ids.values())
-
+        cds_ids_by_mrna = self.get_cds_by_mrna(mrna_feature_id_list)
+        # filter out any mRNA ids that do not map to a CDS, since passing None (no CDS) will throw an Exception below
+        cds_ids = [cds_ids_by_mrna[mrna_id] for mrna_id in cds_ids_by_mrna if cds_ids_by_mrna[mrna_id] is not None]
+        cds_locations = self._get_feature_data("locations", cds_ids)
         # fetch the mrna Feature data
         mrna_data = self.get_features(mrna_feature_id_list)
 
         utrs = {}
 
         for mrna_id in mrna_data:
+            if cds_ids_by_mrna[mrna_id] is None:
+                # without CDS, UTRs cannot be calculated
+                utrs[mrna_id] = {}
+                continue
+
             mrna_locations = mrna_data[mrna_id]["feature_locations"]
             mrna_sequence = mrna_data[mrna_id]["feature_dna_sequence"]
 
-            direction = cds_locations[cds_ids[mrna_id]][0]["strand"]
+            direction = cds_locations[cds_ids_by_mrna[mrna_id]][0]["strand"]
 
             utr5_locations = []
             utr3_locations = []
@@ -1629,9 +1635,9 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
 
             # if minus strand, 5' starts at the largest value, and we subtract length from start
             if direction == "-":
-                cds_max = cds_locations[cds_ids[mrna_id]][0]["start"]
-                cds_min = cds_locations[cds_ids[mrna_id]][-1]["start"] - \
-                          cds_locations[cds_ids[mrna_id]][-1]["length"]
+                cds_max = cds_locations[cds_ids_by_mrna[mrna_id]][0]["start"]
+                cds_min = cds_locations[cds_ids_by_mrna[mrna_id]][-1]["start"] - \
+                          cds_locations[cds_ids_by_mrna[mrna_id]][-1]["length"]
 
                 for x in mrna_locations:
                     exon_max = x["start"]
@@ -1658,6 +1664,7 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
                         # the cds ends inside this exon
                         utr_boundary = cds_min - 1
                         utr_length = utr_boundary - exon_min + 1
+                        non_utr_remainder = exon_max - utr_boundary - 1
 
                         utr3_locations.append({
                             "contig_id": x["contig_id"],
@@ -1665,7 +1672,7 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
                             "strand": x["strand"],
                             "length": utr_length
                         })
-                        utr3_sequence.append(mrna_sequence[offset:offset + utr_length])
+                        utr3_sequence.append(mrna_sequence[offset + non_utr_remainder:offset + x["length"]])
                     elif exon_max < cds_min:
                         # the exon begins after the cds ends
                         utr3_locations.append(x)
@@ -1673,9 +1680,9 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
 
                     offset += x["length"]
             elif direction == "+":
-                cds_max = cds_locations[cds_ids[mrna_id]][-1]["start"] + \
-                          cds_locations[cds_ids[mrna_id]][-1]["length"]
-                cds_min = cds_locations[cds_ids[mrna_id]][0]["start"]
+                cds_max = cds_locations[cds_ids_by_mrna[mrna_id]][-1]["start"] + \
+                          cds_locations[cds_ids_by_mrna[mrna_id]][-1]["length"]
+                cds_min = cds_locations[cds_ids_by_mrna[mrna_id]][0]["start"]
 
                 for x in mrna_locations:
                     exon_min = x["start"]
