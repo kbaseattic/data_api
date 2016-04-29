@@ -1606,6 +1606,7 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
 
         # fetch the cds info we need
         cds_ids_by_mrna = self.get_cds_by_mrna(mrna_feature_id_list)
+        # filter out any mRNA ids that do not map to a CDS, since passing None (no CDS) will throw an Exception below
         cds_ids = [cds_ids_by_mrna[mrna_id] for mrna_id in cds_ids_by_mrna if cds_ids_by_mrna[mrna_id] is not None]
         cds_locations = self._get_feature_data("locations", cds_ids)
         # fetch the mrna Feature data
