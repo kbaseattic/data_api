@@ -232,11 +232,27 @@ class GenomeAnnotationInterface(object):
         pass
 
     @abc.abstractmethod
-    def get_proteins(self):
+    def get_proteins(self, cds_feature_id_list=None):
         """Retrieves all the available proteins for a genome.
 
+        Args:
+
+          cds_feature_id_list (list<str>): List of CDS features to retrieve proteins.
+              If None, returns all proteins.
+
         Returns:
-          list<dict>"""
+
+          dict: Mapping from CDS IDs to protein information with the following key/value pairs:
+
+          - protein_id : str
+              The identifier for the protein
+          - protein_amino_acid_sequence : str
+              The AA sequence for the protein
+          - protein_md5 : str
+              The MD5 of the protein sequence
+          - protein_aliases : dict<list<str>>
+              For each protein alias, there is a list of sources as key
+        """
         pass
 
     @abc.abstractmethod
@@ -525,8 +541,8 @@ class GenomeAnnotationAPI(ObjectAPI, GenomeAnnotationInterface):
     def get_features(self, feature_id_list=None):
         return self.proxy.get_features(feature_id_list)
 
-    def get_proteins(self):
-        return self.proxy.get_proteins()
+    def get_proteins(self, cds_feature_id_list=None):
+        return self.proxy.get_proteins(cds_feature_id_list)
 
     def get_mrna_utrs(self, mrna_feature_id_list=None):
         return self.proxy.get_mrna_utrs(mrna_feature_id_list)
@@ -986,22 +1002,22 @@ class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
 
         return out_features
 
-    def get_proteins(self):
+    def get_proteins(self, cds_feature_id_list=None):
         proteins = {}
         features = self.get_data()['features']
         
         for f in features:
             if "protein_translation" in f and len(f["protein_translation"]) > 0:
                 protein_id = f['id'] + ".protein"
-                proteins[protein_id] = {}
-                proteins[protein_id]["protein_id"] = protein_id
-                proteins[protein_id]["protein_amino_acid_sequence"] = f["protein_translation"]
-                proteins[protein_id]["protein_function"] = None
-                proteins[protein_id]["protein_aliases"] = None
-                proteins[protein_id]["protein_md5"] = hashlib.md5(f["protein_translation"].upper()).hexdigest()
+                proteins[f['id']] = {}
+                proteins[f['id']]["protein_id"] = protein_id
+                proteins[f['id']]["protein_amino_acid_sequence"] = f["protein_translation"]
+                proteins[f['id']]["protein_function"] = None
+                proteins[f['id']]["protein_aliases"] = None
+                proteins[f['id']]["protein_md5"] = hashlib.md5(f["protein_translation"].upper()).hexdigest()
 
                 # may need to revisit this                
-                proteins[protein_id]["protein_domain_locations"] = None
+                proteins[f['id']]["protein_domain_locations"] = None
         
         return proteins                
 
@@ -1543,18 +1559,53 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
 
         return out_features
 
-    def get_proteins(self):
+    def get_proteins(self, cds_feature_id_list=None):
+        feature_container_references = self.get_data_subset(
+            path_list=["feature_container_references"])["feature_container_references"]
+
+        if "CDS" in feature_container_references:
+            cds_feature_container_ref = feature_container_references["CDS"]
+            cds_feature_container = ObjectAPI(self.services,
+                                              self._token,
+                                              cds_feature_container_ref)
+        else:
+            raise TypeError("No CDS features are present!")
+
+        if cds_feature_id_list is None:
+            cds_feature_id_list = cds_feature_container.get_data()["features"].keys()
+
+        try:
+            cds_refs = ["features/" + x for x in cds_feature_id_list]
+            assert len(cds_refs) > 0
+        except TypeError:
+            raise TypeError("A list of strings indicating Feature " +
+                            "identifiers is required.")
+        except AssertionError:
+            raise TypeError("A list of strings indicating Feature " +
+                            "identifiers is required, " +
+                            "received an empty list.")
+
+        # fetch the CDS feature data
+        cds_features = cds_feature_container.get_data_subset(path_list=cds_refs)["features"]
+        # map the protein id to the CDS id, if the CDS maps to a protein
+        protein_cds_map = {cds_features[x]["codes_for_protein_ref"][1]: x for x in cds_features
+                           if cds_features[x].has_key("codes_for_protein_ref")}
+        cds_features = None
+
+        # grab the protein container and fetch the protein data
         protein_container = ObjectAPI(self.services, self._token, self.get_data()["protein_container_ref"])
         result = protein_container.get_data()["proteins"]
+        # filter out any proteins that do not map to a CDS in our list
+        proteins = [x for x in result if x in protein_cds_map]
 
         output = {}
-        for x in result:
-            output[x] = {}
-            for k in result[x]:
+        for x in proteins:
+            output[protein_cds_map[x]] = {}
+            for k in proteins[x]:
                 if k.startswith("protein_"):
-                    output[x][k] = result[x][k]
+                    output[x][k] = proteins[x][k]
                 else:
-                    output[x]["protein_" + k] = result[x][k]
+                    output[x]["protein_" + k] = proteins[x][k]
         return output
 
     def _get_by_mrna(self, feature_type=None, mrna_feature_id_list=None):
@@ -2316,8 +2367,8 @@ class GenomeAnnotationClientAPI(GenomeAnnotationInterface):
 
     @logged(_ga_log)
     @client_method
-    def get_proteins(self):
-        result = self.client.get_proteins(self._token, self.ref)
+    def get_proteins(self, cds_feature_id_list=None):
+        result = self.client.get_proteins(self._token, self.ref, cds_feature_id_list)
 
         output = {}
         for x in result:
