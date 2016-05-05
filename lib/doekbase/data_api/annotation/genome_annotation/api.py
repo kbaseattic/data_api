@@ -541,8 +541,8 @@ class GenomeAnnotationAPI(ObjectAPI, GenomeAnnotationInterface):
     def get_features(self, feature_id_list=None):
         return self.proxy.get_features(feature_id_list)
 
-    def get_proteins(self):
-        return self.proxy.get_proteins()
+    def get_proteins(self, cds_feature_id_list=None):
+        return self.proxy.get_proteins(cds_feature_id_list)
 
     def get_mrna_utrs(self, mrna_feature_id_list=None):
         return self.proxy.get_mrna_utrs(mrna_feature_id_list)
