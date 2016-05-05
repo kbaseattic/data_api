@@ -3,7 +3,7 @@ Pre-process Thrift scripts
 
 This processes include statements of the form:
 
-#%include foobar foo/bar.thrift
+#%include foo/bar.thrift
 
 """
 __author__ = 'Dan Gunter <dkgunter@lbl.gov>'
@@ -29,9 +29,9 @@ class IncludedFileNotFound(ThriftPPException):
 class ThriftPP(object):
     """Thrift pre-processor.
     """
-    INC_START = re.compile('#\s*%include\s+(\S+)')
+    INC_START = re.compile('\s*#\s*%include\s+(\S+)')
     INC_END_PREFIX = '#%endinclude'
-    INC_END = re.compile(INC_END_PREFIX)
+    INC_END = re.compile('\s*' + INC_END_PREFIX)
     INC_END_MARKER = INC_END_PREFIX + ' {label}'
 
     def __init__(self, include_paths=None, read_file=None, write_file=None, included=None):
@@ -85,7 +85,7 @@ class ThriftPP(object):
         return list(self._files_changed)
 
     def _scan(self):
-        return [s.strip() for s in self._rfile.readlines()]
+        return [s.rstrip() for s in self._rfile.readlines()]
 
     def _update(self, lines):
         """Update the contents.
@@ -146,17 +146,24 @@ class ThriftPP(object):
         lines = []
         for line in file(path).readlines():
             if not (self.INC_START.match(line) or self.INC_END.match(line)):
-                lines.append(line.strip())
+                lines.append(line.rstrip())
         return lines
 
     def _find_included_file(self, filename):
         if os.path.exists(filename):
             return filename
         if not os.path.isabs(filename):
+            # look for exact match
             for include_path in self._paths:
                 inc_filename = os.path.join(include_path, filename)
                 if os.path.exists(inc_filename):
                     return inc_filename
+            # look for match with appended ".thrift"
+            if not filename.endswith(".thrift"):
+                for include_path in self._paths:
+                    inc_filename = os.path.join(include_path, filename) + ".thrift"
+                    if os.path.exists(inc_filename):
+                        return inc_filename
         return None
 
     def _find_end(self, label, lines, pos):
