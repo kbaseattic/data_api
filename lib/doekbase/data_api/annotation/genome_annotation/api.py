@@ -1588,15 +1588,15 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
         # fetch the CDS feature data
         cds_features = cds_feature_container.get_data_subset(path_list=cds_refs)["features"]
         # map the protein id to the CDS id, if the CDS maps to a protein
-        protein_cds_map = {cds_features[x]["codes_for_protein_ref"][1]: x for x in cds_features
-                           if cds_features[x].has_key("codes_for_protein_ref")}
+        protein_cds_map = {cds_features[x]["CDS_properties"]["codes_for_protein_ref"][1]: x for x in cds_features
+                           if cds_features[x]["CDS_properties"].has_key("codes_for_protein_ref")}
         cds_features = None
 
         # grab the protein container and fetch the protein data
         protein_container = ObjectAPI(self.services, self._token, self.get_data()["protein_container_ref"])
         result = protein_container.get_data()["proteins"]
         # filter out any proteins that do not map to a CDS in our list
-        proteins = [x for x in result if x in protein_cds_map]
+        proteins = {x: result[x] for x in result if x in protein_cds_map}
 
         output = {}
         for x in proteins:

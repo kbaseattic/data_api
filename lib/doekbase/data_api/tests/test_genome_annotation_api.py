@@ -294,6 +294,7 @@ def test_get_proteins_new():
     for t_o in [t_new, t_new_e, t_client_new]:
         proteins_t_o = t_o.get_proteins()
         assert isinstance(proteins_t_o, dict)
+        assert len(proteins_t_o) > 0
         _log.debug("Output {}".format(len(proteins_t_o)))
 
 
@@ -764,6 +765,7 @@ def test_get_proteins_old():
     for t_o in [t_old, t_old_e, t_client_old]:
         proteins_t_o = t_o.get_proteins()
         assert isinstance(proteins_t_o, dict)
+        assert len(proteins_t_o) > 0
         _log.debug("Output {}".format(len(proteins_t_o)))
 
 
