@@ -528,7 +528,7 @@ def validate_gff(s):
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
 def test_get_gff_valid_new():
     _log.debug("Input {}".format(genome_new))
-    for t_o in [t_new, t_new_e, t_client_new]:
+    for t_o in [t_new, t_new_e]:
         gff_t_o = t_o.get_gff()
         buf = StringIO.StringIO()
         gff_t_o.to_file(buf)
@@ -536,6 +536,14 @@ def test_get_gff_valid_new():
         assert len(gff) > 0
         validate_gff(gff)
         _log.debug("Output {}".format(gff))
+
+    error_caught = False
+    try:
+        gff_t_o = t_client_new.get_gff()
+    except NotImplementedError:
+        error_caught = True
+
+    assert error_caught
 
 
 ######## Old Genome Annotation Type tests
@@ -905,7 +913,7 @@ def test_get_gene_by_cds_old():
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
 def test_get_gff_valid_old():
     _log.debug("Input {}".format(genome_old))
-    for t_o in [t_old, t_old_e, t_client_old]:
+    for t_o in [t_old, t_old_e]:
         gff_t_o = t_o.get_gff()
         buf = StringIO.StringIO()
         gff_t_o.to_file(buf)
@@ -913,3 +921,11 @@ def test_get_gff_valid_old():
         assert len(gff) > 0
         validate_gff(gff)
         _log.debug("Output {}".format(gff))
+
+    error_caught = False
+    try:
+        gff_t_o = t_client_old.get_gff()
+    except NotImplementedError:
+        error_caught = True
+
+    assert error_caught
