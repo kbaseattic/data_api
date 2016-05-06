@@ -1117,11 +1117,11 @@ class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
         feature_ids = self.get_feature_ids(filters={"type_list": include_types})["by_type"]
 
         genes_missing = False
-        if not feature_ids.has_key("gene") and not feature_ids.has_key("locus"):
+        if "gene" not in feature_ids and "locus" not in feature_ids:
             genes_missing = True
-        elif feature_ids.has_key("gene") and len(feature_ids["gene"]) == 0:
+        elif "gene" in feature_ids and len(feature_ids["gene"]) == 0:
             genes_missing = True
-        elif feature_ids.has_key("locus") and len(feature_ids["locus"]) == 0:
+        elif "locus" in feature_ids and len(feature_ids["locus"]) == 0:
             genes_missing = True
 
         if genes_missing:
@@ -1129,10 +1129,10 @@ class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
             raise Exception("No genes present to generate the GFF format. {} {}".format(feature_types, feature_ids))
 
         gene_list = []
-        if feature_ids.has_key("gene"):
+        if "gene" in feature_ids:
             gene_list.extend(feature_ids["gene"])
 
-        if feature_ids.has_key("locus"):
+        if "locus" in feature_ids:
             gene_list.extend(feature_ids["locus"])
 
         feature_id_list = []
@@ -1179,7 +1179,7 @@ class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
             if location["strand"] == "-":
                 boundary = location["start"] - location["length"] + 1
 
-            if not genes_by_contig[location["contig_id"]].has_key(boundary):
+            if boundary not in genes_by_contig[location["contig_id"]]:
                 genes_by_contig[location["contig_id"]][boundary] = []
 
             genes_by_contig[location["contig_id"]][boundary].append(gene_id)
@@ -1589,7 +1589,7 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
         cds_features = cds_feature_container.get_data_subset(path_list=cds_refs)["features"]
         # map the protein id to the CDS id, if the CDS maps to a protein
         protein_cds_map = {cds_features[x]["CDS_properties"]["codes_for_protein_ref"][1]: x for x in cds_features
-                           if cds_features[x]["CDS_properties"].has_key("codes_for_protein_ref")}
+                           if "codes_for_protein_ref" in cds_features[x]["CDS_properties"]}
         cds_features = None
 
         # grab the protein container and fetch the protein data
@@ -1974,11 +1974,11 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
         feature_ids = self.get_feature_ids(filters={"type_list": include_types})["by_type"]
 
         genes_missing = False
-        if not feature_ids.has_key("gene") and not feature_ids.has_key("locus"):
+        if "gene" not in feature_ids and "locus" not in feature_ids:
             genes_missing = True
-        elif feature_ids.has_key("gene") and len(feature_ids["gene"]) == 0:
+        elif "gene" in feature_ids and len(feature_ids["gene"]) == 0:
             genes_missing = True
-        elif feature_ids.has_key("locus") and len(feature_ids["locus"]) == 0:
+        elif "locus" in feature_ids and len(feature_ids["locus"]) == 0:
             genes_missing = True
 
         if genes_missing:
@@ -1986,10 +1986,10 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
             raise Exception("No genes present to generate the GFF format. {} {}".format(feature_types, feature_ids))
 
         gene_list = []
-        if feature_ids.has_key("gene"):
+        if "gene" in feature_ids:
             gene_list.extend(feature_ids["gene"])
 
-        if feature_ids.has_key("locus"):
+        if "locus" in feature_ids:
             gene_list.extend(feature_ids["locus"])
 
         if mrna_missing:
@@ -2013,7 +2013,7 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
         feature_data = self.get_features(feature_id_list=feature_id_list)
 
         def parse_aliases(feature_id):
-            if not feature_data[feature_id].has_key("feature_aliases"):
+            if not "feature_aliases" in feature_data[feature_id]:
                 return [], []
 
             aliases = feature_data[feature_id]["feature_aliases"]
@@ -2031,8 +2031,9 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
             return alias_values, dbxref_values
 
         def get_gene_line(gene_id):
-            function_description = feature_data[gene_id]["feature_function"]
-            aliases = feature_data[gene_id]["feature_aliases"]
+            function_description = ""
+            if "feature_function" in feature_data[gene_id]:
+                function_description = feature_data[gene_id]["feature_function"]
             location = feature_data[gene_id]["feature_locations"][0]
 
             if location["strand"] == "+":
@@ -2064,7 +2065,9 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
             return gene_line
 
         def get_mrna_line(gene_id, mrna_id):
-            function_description = feature_data[mrna_id]["feature_function"]
+            function_description = ""
+            if "feature_function" in feature_data[mrna_id]:
+                function_description = feature_data[mrna_id]["feature_function"]
             locations = feature_data[mrna_id]["feature_locations"]
             lower_bound = None
             upper_bound = None
@@ -2127,7 +2130,7 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
                 parent = "Parent={};".format(mrna_id)
 
             function_description = ""
-            if feature_data[cds_id].has_key("feature_function"):
+            if "feature_function" in feature_data[cds_id]:
                 function_description = feature_data[cds_id]["feature_function"]
 
             locations = feature_data[cds_id]["feature_locations"]
@@ -2212,7 +2215,7 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
             if location["strand"] == "-":
                 boundary = location["start"] - location["length"] + 1
 
-            if not genes_by_contig[location["contig_id"]].has_key(boundary):
+            if boundary not in genes_by_contig[location["contig_id"]]:
                 genes_by_contig[location["contig_id"]][boundary] = []
 
             genes_by_contig[location["contig_id"]][boundary].append(gene_id)
