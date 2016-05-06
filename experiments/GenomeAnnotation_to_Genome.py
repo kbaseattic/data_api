@@ -71,10 +71,10 @@ def main():
     #genome_ref = '6838/146'#ReferenceGenomeAnnotations/kb|g.166819
 
 
-    ga_api = GenomeAnnotationAPI(services, token=token, ref=args.gaobj)
+    ga_api = GenomeAnnotationAPI(services['ci'], token=token, ref=args.gaobj)
 
-    ga_object = ObjectAPI(services, token=token, ref=args.gaobj)
-    asm_object = ObjectAPI(services, token=token, ref=(gaobj+"_assembly"))
+    ga_object = ObjectAPI(services['ci'], token=token, ref=args.gaobj)
+    asm_object = ObjectAPI(services['ci'], token=token, ref=(args.gaobj+"_assembly"))
     hey('external source: {}'.format(asm_object.get_data_subset(["external_source"])))
 
     tax_api = ga_api.get_taxon()
