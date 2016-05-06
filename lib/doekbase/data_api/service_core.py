@@ -56,7 +56,8 @@ def server_method(func):
         assert hasattr(self, 'ttypes'), 'Method in wrapped class must have ' \
                                         '"ttypes" attribute'
         error, result = None, None
-        self.log.debug('method={meth} state=begin token={tok} ref={ref} args={'
+        #self.log.debug('method={meth} state=begin token={tok} ref={ref} args={'
+        self.log.debug('method={meth} state=begin ref={ref} args={'
                        'args} kwargs={kw}'
                        .format(meth=func.__name__, tok=token, ref=ref,
                                args=args, kw=kwargs))
@@ -65,33 +66,35 @@ def server_method(func):
             result = func(self, token, ref, *args, **kwargs)
         except AttributeError, e:
             error = e
-            raise self.ttypes.AttributeException(e.message,
+            raise self.ttypes.AttributeException(str(e.message),
                                                  traceback.format_exc())
         except exceptions.AuthenticationError, e:
             error = e
-            raise self.ttypes.AuthenticationException(e.message,
+            raise self.ttypes.AuthenticationException(str(e.message),
                                                       traceback.format_exc())
         except exceptions.AuthorizationError, e:
             error = e
-            raise self.ttypes.AuthorizationException(e.message,
+            raise self.ttypes.AuthorizationException(str(e.message),
                                                      traceback.format_exc())
         except TypeError, e:
             error = e
-            raise self.ttypes.TypeException(e.message, traceback.format_exc())
+            raise self.ttypes.TypeException(str(e.message), traceback.format_exc())
         except Exception, e:
             error = e
-            raise self.ttypes.ServiceException(e.message,
+            raise self.ttypes.ServiceException(str(e.message),
                                                traceback.format_exc(),
                                                {"ref": str(ref)})
         finally:
             if error is None:
-                self.log.debug('method={meth} state=end token={tok} ref={ref} '
+                #self.log.debug('method={meth} state=end token={tok} ref={ref} '
+                self.log.debug('method={meth} state=end ref={ref} '
                                'args={args} kwargs={kw} dur={t:.3f}'
                                .format(meth=func.__name__, tok=token, ref=ref,
                                        args=args, kw=kwargs,
                                        t=time.time() - t0))
             else:
-                self.log.error('method={meth} state=error token={tok} '
+                #self.log.error('method={meth} state=error token={tok} '
+                self.log.error('method={meth} state=error '
                                'ref={ref} args={args} kwargs={kw}'
                                'error_message="{m}" dur={t:.3f}'
                                .format(meth=func.__name__, tok=token, ref=ref,

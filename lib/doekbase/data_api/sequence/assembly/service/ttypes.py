@@ -20,9 +20,9 @@ except:
 class ServiceException(TException):
   """
   Attributes:
-   - message
-   - stacktrace
-   - inputs
+   - message: Readable message desribing the error condition.
+   - stacktrace: Program stack trace
+   - inputs: Optional mapping
   """
 
   thrift_spec = (
@@ -126,8 +126,8 @@ class ServiceException(TException):
 class AuthorizationException(TException):
   """
   Attributes:
-   - message
-   - stacktrace
+   - message: Readable message desribing the error condition.
+   - stacktrace: Program stack trace
   """
 
   thrift_spec = (
@@ -209,8 +209,8 @@ class AuthorizationException(TException):
 class AuthenticationException(TException):
   """
   Attributes:
-   - message
-   - stacktrace
+   - message: Readable message desribing the error condition.
+   - stacktrace: Program stack trace
   """
 
   thrift_spec = (
@@ -292,8 +292,8 @@ class AuthenticationException(TException):
 class ObjectReferenceException(TException):
   """
   Attributes:
-   - message
-   - stacktrace
+   - message: Readable message desribing the error condition.
+   - stacktrace: Program stack trace
   """
 
   thrift_spec = (
@@ -375,8 +375,8 @@ class ObjectReferenceException(TException):
 class AttributeException(TException):
   """
   Attributes:
-   - message
-   - stacktrace
+   - message: Readable message desribing the error condition.
+   - stacktrace: Program stack trace
   """
 
   thrift_spec = (
@@ -458,9 +458,9 @@ class AttributeException(TException):
 class TypeException(TException):
   """
   Attributes:
-   - message
-   - stacktrace
-   - valid_types
+   - message: Readable message desribing the error condition.
+   - stacktrace: Program stack trace
+   - valid_types: List of types that would have been acceptable.
   """
 
   thrift_spec = (
@@ -561,10 +561,12 @@ class TypeException(TException):
 
 class AssemblyStats:
   """
+  Derived statistical information about an assembly.
+
   Attributes:
-   - num_contigs
-   - dna_size
-   - gc_content
+   - num_contigs: Total number of contiguous sequences.
+   - dna_size: Total length of all dna sequences.
+   - gc_content: Proportion of guanine (G) and cytosine (C) content.
   """
 
   thrift_spec = (
@@ -652,10 +654,12 @@ class AssemblyStats:
 
 class AssemblyExternalSourceInfo:
   """
+  Metadata about the external source of this Assembly.
+
   Attributes:
-   - external_source
-   - external_source_id
-   - external_source_origination_date
+   - external_source: Name of the external source
+   - external_source_id: Identifier of external source
+   - external_source_origination_date: Origination date of external source
   """
 
   thrift_spec = (
@@ -744,15 +748,15 @@ class AssemblyExternalSourceInfo:
 class AssemblyContig:
   """
   Attributes:
-   - contig_id
-   - sequence
-   - length
-   - gc_content
-   - md5
-   - name
-   - description
-   - is_complete
-   - is_circular
+   - contig_id: Contig ID
+   - sequence: Actual contents of the sequence for this contig
+   - length: Length of the contig
+   - gc_content: GC proportion for the contig
+   - md5: Hex-digest of MD5 hash of the contig's contents
+   - name: Name of the contig
+   - description: Description of the contig
+   - is_complete: True if this contig is complete, False otherwise
+   - is_circular: True if this contig is circular, False otherwise
   """
 
   thrift_spec = (

@@ -172,8 +172,8 @@ def main():
                         required=True)
     parser.add_argument("--port", help="port to listen on", type=int)
     parser.add_argument("--kbase_url",
-                        help="prod, next, ci, localhost, dir_cache, dir_nocache",
-                        default="dir_nocache")
+                        help="prod, next, ci, localhost, dir_cache, dir_nocache "
+                        "default=(dir_nocache)", default="dir_nocache")
     parser.add_argument("--pidfile", help="path to pidfile to use")
     parser.add_argument("--kill-on-exit", action="store_true", default=False,
                         dest="kill_on_exit",

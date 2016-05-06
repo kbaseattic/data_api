@@ -1411,21 +1411,8 @@ genome_annotation.Feature_data.prototype.read = function(input) {
       }
       break;
       case 12:
-      if (ftype == Thrift.Type.LIST) {
-        var _size185 = 0;
-        var _rtmp3189;
-        this.feature_notes = [];
-        var _etype188 = 0;
-        _rtmp3189 = input.readListBegin();
-        _etype188 = _rtmp3189.etype;
-        _size185 = _rtmp3189.size;
-        for (var _i190 = 0; _i190 < _size185; ++_i190)
-        {
-          var elem191 = null;
-          elem191 = input.readString().value;
-          this.feature_notes.push(elem191);
-        }
-        input.readListEnd();
+      if (ftype == Thrift.Type.STRING) {
+        this.feature_notes = input.readString().value;
       } else {
         input.skip(ftype);
       }
@@ -1466,19 +1453,19 @@ genome_annotation.Feature_data.prototype.write = function(output) {
   if (this.feature_aliases !== null && this.feature_aliases !== undefined) {
     output.writeFieldBegin('feature_aliases', Thrift.Type.MAP, 4);
     output.writeMapBegin(Thrift.Type.STRING, Thrift.Type.LIST, Thrift.objectLength(this.feature_aliases));
-    for (var kiter192 in this.feature_aliases)
+    for (var kiter185 in this.feature_aliases)
     {
-      if (this.feature_aliases.hasOwnProperty(kiter192))
+      if (this.feature_aliases.hasOwnProperty(kiter185))
       {
-        var viter193 = this.feature_aliases[kiter192];
-        output.writeString(kiter192);
-        output.writeListBegin(Thrift.Type.STRING, viter193.length);
-        for (var iter194 in viter193)
+        var viter186 = this.feature_aliases[kiter185];
+        output.writeString(kiter185);
+        output.writeListBegin(Thrift.Type.STRING, viter186.length);
+        for (var iter187 in viter186)
         {
-          if (viter193.hasOwnProperty(iter194))
+          if (viter186.hasOwnProperty(iter187))
           {
-            iter194 = viter193[iter194];
-            output.writeString(iter194);
+            iter187 = viter186[iter187];
+            output.writeString(iter187);
           }
         }
         output.writeListEnd();
@@ -1505,12 +1492,12 @@ genome_annotation.Feature_data.prototype.write = function(output) {
   if (this.feature_locations !== null && this.feature_locations !== undefined) {
     output.writeFieldBegin('feature_locations', Thrift.Type.LIST, 8);
     output.writeListBegin(Thrift.Type.STRUCT, this.feature_locations.length);
-    for (var iter195 in this.feature_locations)
+    for (var iter188 in this.feature_locations)
     {
-      if (this.feature_locations.hasOwnProperty(iter195))
+      if (this.feature_locations.hasOwnProperty(iter188))
       {
-        iter195 = this.feature_locations[iter195];
-        iter195.write(output);
+        iter188 = this.feature_locations[iter188];
+        iter188.write(output);
       }
     }
     output.writeListEnd();
@@ -1519,12 +1506,12 @@ genome_annotation.Feature_data.prototype.write = function(output) {
   if (this.feature_publications !== null && this.feature_publications !== undefined) {
     output.writeFieldBegin('feature_publications', Thrift.Type.LIST, 9);
     output.writeListBegin(Thrift.Type.STRING, this.feature_publications.length);
-    for (var iter196 in this.feature_publications)
+    for (var iter189 in this.feature_publications)
     {
-      if (this.feature_publications.hasOwnProperty(iter196))
+      if (this.feature_publications.hasOwnProperty(iter189))
       {
-        iter196 = this.feature_publications[iter196];
-        output.writeString(iter196);
+        iter189 = this.feature_publications[iter189];
+        output.writeString(iter189);
       }
     }
     output.writeListEnd();
@@ -1533,12 +1520,12 @@ genome_annotation.Feature_data.prototype.write = function(output) {
   if (this.feature_quality_warnings !== null && this.feature_quality_warnings !== undefined) {
     output.writeFieldBegin('feature_quality_warnings', Thrift.Type.LIST, 10);
     output.writeListBegin(Thrift.Type.STRING, this.feature_quality_warnings.length);
-    for (var iter197 in this.feature_quality_warnings)
+    for (var iter190 in this.feature_quality_warnings)
     {
-      if (this.feature_quality_warnings.hasOwnProperty(iter197))
+      if (this.feature_quality_warnings.hasOwnProperty(iter190))
       {
-        iter197 = this.feature_quality_warnings[iter197];
-        output.writeString(iter197);
+        iter190 = this.feature_quality_warnings[iter190];
+        output.writeString(iter190);
       }
     }
     output.writeListEnd();
@@ -1547,29 +1534,20 @@ genome_annotation.Feature_data.prototype.write = function(output) {
   if (this.feature_quality_score !== null && this.feature_quality_score !== undefined) {
     output.writeFieldBegin('feature_quality_score', Thrift.Type.LIST, 11);
     output.writeListBegin(Thrift.Type.STRING, this.feature_quality_score.length);
-    for (var iter198 in this.feature_quality_score)
+    for (var iter191 in this.feature_quality_score)
     {
-      if (this.feature_quality_score.hasOwnProperty(iter198))
+      if (this.feature_quality_score.hasOwnProperty(iter191))
       {
-        iter198 = this.feature_quality_score[iter198];
-        output.writeString(iter198);
+        iter191 = this.feature_quality_score[iter191];
+        output.writeString(iter191);
       }
     }
     output.writeListEnd();
     output.writeFieldEnd();
   }
   if (this.feature_notes !== null && this.feature_notes !== undefined) {
-    output.writeFieldBegin('feature_notes', Thrift.Type.LIST, 12);
-    output.writeListBegin(Thrift.Type.STRING, this.feature_notes.length);
-    for (var iter199 in this.feature_notes)
-    {
-      if (this.feature_notes.hasOwnProperty(iter199))
-      {
-        iter199 = this.feature_notes[iter199];
-        output.writeString(iter199);
-      }
-    }
-    output.writeListEnd();
+    output.writeFieldBegin('feature_notes', Thrift.Type.STRING, 12);
+    output.writeString(this.feature_notes);
     output.writeFieldEnd();
   }
   if (this.feature_inference !== null && this.feature_inference !== undefined) {
@@ -1647,18 +1625,18 @@ genome_annotation.Protein_data.prototype.read = function(input) {
       break;
       case 4:
       if (ftype == Thrift.Type.LIST) {
-        var _size200 = 0;
-        var _rtmp3204;
+        var _size192 = 0;
+        var _rtmp3196;
         this.protein_aliases = [];
-        var _etype203 = 0;
-        _rtmp3204 = input.readListBegin();
-        _etype203 = _rtmp3204.etype;
-        _size200 = _rtmp3204.size;
-        for (var _i205 = 0; _i205 < _size200; ++_i205)
+        var _etype195 = 0;
+        _rtmp3196 = input.readListBegin();
+        _etype195 = _rtmp3196.etype;
+        _size192 = _rtmp3196.size;
+        for (var _i197 = 0; _i197 < _size192; ++_i197)
         {
-          var elem206 = null;
-          elem206 = input.readString().value;
-          this.protein_aliases.push(elem206);
+          var elem198 = null;
+          elem198 = input.readString().value;
+          this.protein_aliases.push(elem198);
         }
         input.readListEnd();
       } else {
@@ -1674,18 +1652,18 @@ genome_annotation.Protein_data.prototype.read = function(input) {
       break;
       case 6:
       if (ftype == Thrift.Type.LIST) {
-        var _size207 = 0;
-        var _rtmp3211;
+        var _size199 = 0;
+        var _rtmp3203;
         this.protein_domain_locations = [];
-        var _etype210 = 0;
-        _rtmp3211 = input.readListBegin();
-        _etype210 = _rtmp3211.etype;
-        _size207 = _rtmp3211.size;
-        for (var _i212 = 0; _i212 < _size207; ++_i212)
+        var _etype202 = 0;
+        _rtmp3203 = input.readListBegin();
+        _etype202 = _rtmp3203.etype;
+        _size199 = _rtmp3203.size;
+        for (var _i204 = 0; _i204 < _size199; ++_i204)
         {
-          var elem213 = null;
-          elem213 = input.readString().value;
-          this.protein_domain_locations.push(elem213);
+          var elem205 = null;
+          elem205 = input.readString().value;
+          this.protein_domain_locations.push(elem205);
         }
         input.readListEnd();
       } else {
@@ -1721,12 +1699,12 @@ genome_annotation.Protein_data.prototype.write = function(output) {
   if (this.protein_aliases !== null && this.protein_aliases !== undefined) {
     output.writeFieldBegin('protein_aliases', Thrift.Type.LIST, 4);
     output.writeListBegin(Thrift.Type.STRING, this.protein_aliases.length);
-    for (var iter214 in this.protein_aliases)
+    for (var iter206 in this.protein_aliases)
     {
-      if (this.protein_aliases.hasOwnProperty(iter214))
+      if (this.protein_aliases.hasOwnProperty(iter206))
       {
-        iter214 = this.protein_aliases[iter214];
-        output.writeString(iter214);
+        iter206 = this.protein_aliases[iter206];
+        output.writeString(iter206);
       }
     }
     output.writeListEnd();
@@ -1740,12 +1718,12 @@ genome_annotation.Protein_data.prototype.write = function(output) {
   if (this.protein_domain_locations !== null && this.protein_domain_locations !== undefined) {
     output.writeFieldBegin('protein_domain_locations', Thrift.Type.LIST, 6);
     output.writeListBegin(Thrift.Type.STRING, this.protein_domain_locations.length);
-    for (var iter215 in this.protein_domain_locations)
+    for (var iter207 in this.protein_domain_locations)
     {
-      if (this.protein_domain_locations.hasOwnProperty(iter215))
+      if (this.protein_domain_locations.hasOwnProperty(iter207))
       {
-        iter215 = this.protein_domain_locations[iter215];
-        output.writeString(iter215);
+        iter207 = this.protein_domain_locations[iter207];
+        output.writeString(iter207);
       }
     }
     output.writeListEnd();
@@ -1867,19 +1845,19 @@ genome_annotation.UTR_data.prototype.read = function(input) {
     {
       case 1:
       if (ftype == Thrift.Type.LIST) {
-        var _size216 = 0;
-        var _rtmp3220;
+        var _size208 = 0;
+        var _rtmp3212;
         this.utr_locations = [];
-        var _etype219 = 0;
-        _rtmp3220 = input.readListBegin();
-        _etype219 = _rtmp3220.etype;
-        _size216 = _rtmp3220.size;
-        for (var _i221 = 0; _i221 < _size216; ++_i221)
+        var _etype211 = 0;
+        _rtmp3212 = input.readListBegin();
+        _etype211 = _rtmp3212.etype;
+        _size208 = _rtmp3212.size;
+        for (var _i213 = 0; _i213 < _size208; ++_i213)
         {
-          var elem222 = null;
-          elem222 = new genome_annotation.Region();
-          elem222.read(input);
-          this.utr_locations.push(elem222);
+          var elem214 = null;
+          elem214 = new genome_annotation.Region();
+          elem214.read(input);
+          this.utr_locations.push(elem214);
         }
         input.readListEnd();
       } else {
@@ -1907,12 +1885,12 @@ genome_annotation.UTR_data.prototype.write = function(output) {
   if (this.utr_locations !== null && this.utr_locations !== undefined) {
     output.writeFieldBegin('utr_locations', Thrift.Type.LIST, 1);
     output.writeListBegin(Thrift.Type.STRUCT, this.utr_locations.length);
-    for (var iter223 in this.utr_locations)
+    for (var iter215 in this.utr_locations)
     {
-      if (this.utr_locations.hasOwnProperty(iter223))
+      if (this.utr_locations.hasOwnProperty(iter215))
       {
-        iter223 = this.utr_locations[iter223];
-        iter223.write(output);
+        iter215 = this.utr_locations[iter215];
+        iter215.write(output);
       }
     }
     output.writeListEnd();

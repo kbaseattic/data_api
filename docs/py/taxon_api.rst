@@ -5,16 +5,14 @@
 Taxon Data API
 ==============
 
-The Taxon API can be used as a library or in client/server mode.
-
-.. contents::
+The Python Taxon API can be used as a library or in client/server mode.
 
 .. py:currentmodule:: doekbase.data_api.taxonomy.taxon.api
 
-Creating a Taxonomic object
+Creating a TaxonAPI object
 ---------------------------
 
-To create a new Taxon object, you will create an object that implements the interface defined in :class:`doekbase.data_api.taxonomy.taxon.api.TaxonInterface`. This class can implement a library or a Thrift client. In either case you will instantiate the class with an object reference. The interfaces used by both classes are shown below.
+To create a new TaxonAPI object, you will create an object that implements the interface defined in :class:`doekbase.data_api.taxonomy.taxon.api.TaxonInterface`. This class can implement a library or a Thrift client. In either case you will instantiate the class with an object reference. The interfaces used by both classes are shown below.
 
 Python Library: TaxonAPI
 ^^^^^^^^^^^^^^^^^^^^^^^^
@@ -35,6 +33,16 @@ If you are using the Python library, then you can instantiate the :class:`doekba
     :param str ref: KBase object reference, in the format expected by the
         KBase workspace: |wsref|.
 
+For example::
+
+    import os
+    from doekbase.data_api.taxonomy.taxon import api
+    
+    obj = api.TaxonAPI(
+        token=os.environ.get('KB_AUTH_TOKEN'),
+        services={'workspace_service_url': 'https://kbase.us/services/ws/'},
+        ref=ref)
+    
 
 Thrift Service: TaxonClientAPI
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -55,31 +63,22 @@ If instead you are using Python or another language as a client, and running the
     :param str ref: KBase object reference, in the format expected by the
         KBase workspace: |wsref|.
 
-Common API methods
-^^^^^^^^^^^^^^^^^^
+For example::
 
-Both the `TaxonAPI` and `TaxonAPIClient` implement all the following methods.
+    import os
+    from doekbase.data_api.taxonomy.taxon import api
+    
+    obj = api.TaxonClientAPI(
+        token=os.environ.get('KB_AUTH_TOKEN'),
+        url='https://kbase.us/services/data/taxon/',
+        ref=ref)
+
+API Reference
+-------------
+
+Both the ``TaxonAPI`` and ``TaxonAPIClient`` implement all the following methods.
+
+.. note:: The client methods will return object references as strings, whereas the Python library methods will instantiate the object references.
 
 .. autoclass:: TaxonInterface
     :members:
-
-Examples
---------
-
-For the following examples, assume the file has the following imports
-at the top of your file, Jupyter notebook, or KBase Narrative (in a code cell)::
-
-    import os
-    from doekbase.data_api.taxonomy.taxon.api import TaxonAPI
-
-The code for all the examples is contained in the
-``doekbase.data_api.tests.examples.taxon_api`` module.
-
-.. include:: ../kbauth.txt
-
-.. x Example: Fetch and Print Taxon
-.. x ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. x .. literalinclude:: ../lib/doekbase/data_api/tests/examples/taxon_api.py
-.. x    :linenos:
-.. x    :pyobject: fetch_and_print_taxon
-

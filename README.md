@@ -1,5 +1,5 @@
 **Version**: 0.1.0
- 
+
 [![Join the chat at https://gitter.im/kbase/data_api](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/kbase/data_api?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 <img src="GolgiVolvox.png" alt="Volvox" style="width: 100px;"/>
@@ -252,6 +252,13 @@ Not all, in fact right now not even most, of the messages from the services have
 
     nosetests -c nose.cfg -c nose-local.cfg -s doekbase.data_api
 
+### TR;DL testing
+
+An easier way to run the tests is to run the script `run-tests-local.sh` at the top level of the directory.
+
+In addition to performing steps listed above, this does some sanity checks and also regenerates the Thrift
+server and client stubs (in case you changed these). It also runs the Thrift preprocessor (see below).
+
 ### JavaScript tests
 
 For the JavaScript API, all the code and tests live under `jslib`. See the README in that directory for more details.
@@ -263,3 +270,26 @@ For the JavaScript API, all the code and tests live under `jslib`. See the READM
 	Retrieving and counting genomic features with direct data API access for a [GenomeAnnotation object] (https://narrative-ci.kbase.us/narrative/ws.3292.obj.1)
 	A [table] of genome properties for all genomes belonging to a taxon (https://narrative-ci.kbase.us/narrative/ws.3524.obj.1)
 	Panel of data quality plots for [GenomeAnnotation and Assembly objects] (https://narrative-ci.kbase.us/narrative/ws.3413.obj.1)
+
+## Thrift preprocessor
+
+For convenience, we have added a simple Thrift preprocessor. There is a driver program in the `bin` directory called `data_api_preprocess_thrift`.
+This calls functions in the `doekbase.data_api.thrift_include` module to do the work.
+"Why? Dear God, why?" you ask, since Thrift already has an include mechanism. Yes, it does, but this ends up complicating the namespace and adding files. And we just didn't feel
+like dealing with that today. We wanted a dead-simple literal include mechanism.
+So, what you do is add this line to your spec:
+    
+       #%include api_shared
+
+in your API's Thrift spec, and this special comment will get replaced with:
+
+        #%include api_shared
+        <contents of api_shared.thrift>
+        #%endinclude api_shared
+        
+In the driver script, you can specify include directories in which to look for the .thrift files to include. This is invoked automatically as part of rebuilding the
+clients and servers, with the include directories being the current directory and the `thrift/specs/common` directory.
+
+Note that includes can include other things (this is in fact what `api_shared.thrift` does), etc.
+
+# FIN

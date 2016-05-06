@@ -2,14 +2,63 @@ namespace py taxon
 namespace js taxon
 namespace perl DOEKBase.DataAPI.taxonomy.taxon
 
-/*
-TODO - Automatically populate version from setup.py.
-*/
+#%include api_shared.thriftinc
+/* Include all shared files for API */
+const string VERSION = "0.1.0"
 
-const string VERSION = "{{version}}"
+
+
+
+
+exception ServiceException {
+    /** Readable message desribing the error condition. */
+    1: required string message;
+    /** Program stack trace */
+    2: optional string stacktrace;
+    /** Optional mapping */
+    3: optional map<string,string> inputs;
+}
+
+exception AuthorizationException {
+    /** Readable message desribing the error condition. */
+    1: required string message;
+    /** Program stack trace */
+    2: optional string stacktrace;
+}
+
+exception AuthenticationException {
+    /** Readable message desribing the error condition. */
+    1: required string message;
+    /** Program stack trace */
+    2: optional string stacktrace;
+}
+
+exception ObjectReferenceException {
+    /** Readable message desribing the error condition. */
+    1: required string message;
+    /** Program stack trace */
+    2: optional string stacktrace;
+}
+
+exception AttributeException {
+    /** Readable message desribing the error condition. */
+    1: required string message;
+    /** Program stack trace */
+    2: optional string stacktrace;
+}
+
+exception TypeException {
+    /** Readable message desribing the error condition. */
+    1: required string message;
+    /** Program stack trace */
+    2: optional string stacktrace;
+    /** List of types that would have been acceptable. */
+    3: optional list<string> valid_types;
+}
 
 typedef string ObjectReference
 
+/** @skip documentation */
 struct ObjectInfo {
     1: i64 object_id;
     2: string object_name;
@@ -26,8 +75,10 @@ struct ObjectInfo {
     13: map<string,string> object_metadata;
 }
 
+/** @skip documentation */
 typedef list<ObjectInfo> ObjectHistory
 
+/** @skip documentation */
 struct ExternalDataUnit {
     1: string resource_name;
     2: string resource_url;
@@ -38,6 +89,7 @@ struct ExternalDataUnit {
     7: string description;
 }
 
+/** @skip documentation */
 struct ObjectProvenanceAction {
     1: string time;
     2: string service_name;
@@ -55,232 +107,142 @@ struct ObjectProvenanceAction {
     14: string description;
 }
 
+/** @skip documentation */
 typedef list<ObjectProvenanceAction> ObjectProvenance
-
-exception ServiceException {
-    1: required string message;
-    2: optional string stacktrace;
-    3: optional map<string,string> inputs;
-}
-
-exception AuthorizationException {
-    1: required string message;
-    2: optional string stacktrace;
-}
-
-exception AuthenticationException {
-    1: required string message;
-    2: optional string stacktrace;
-}
-
-exception ObjectReferenceException {
-    1: required string message;
-    2: optional string stacktrace;
-}
-
-exception AttributeException {
-    1: required string message;
-    2: optional string stacktrace;
-}
-
-exception TypeException {
-    1: required string message;
-    2: optional string stacktrace;
-    3: optional list<string> valid_types;
-}
-
+#%endinclude api_shared.thriftinc
 
 service thrift_service {
 
-    /**
-     * Retrieve object info.
-     *
-     */
-    ObjectInfo get_info(1:string token, 2:ObjectReference ref) throws (
-        1:ServiceException generic_exception,
-        2:AuthorizationException authorization_exception,
-        3:AuthenticationException authentication_exception,
-        4:ObjectReferenceException reference_exception,
-        5:AttributeException attribute_exception,
-        6:TypeException type_exception),
 
     /**
-     * Retrieve object history.
-     *
-     */
-    ObjectHistory get_history(1:string token, 2:ObjectReference ref) throws (
-        1:ServiceException generic_exception,
-        2:AuthorizationException authorization_exception,
-        3:AuthenticationException authentication_exception,
-        4:ObjectReferenceException reference_exception,
-        5:AttributeException attribute_exception,
-        6:TypeException type_exception),
-
-    /**
-     * Retrieve object provenance.
-     *
-     */
-    ObjectProvenance get_provenance(1:string token, 2:ObjectReference ref) throws (
-        1:ServiceException generic_exception,
-        2:AuthorizationException authorization_exception,
-        3:AuthenticationException authentication_exception,
-        4:ObjectReferenceException reference_exception,
-        5:AttributeException attribute_exception,
-        6:TypeException type_exception),
-
-    /**
-     * Retrieve object identifier.
-     *
-     */
-    i64 get_id(1:string token, 2:ObjectReference ref) throws (
-        1:ServiceException generic_exception,
-        2:AuthorizationException authorization_exception,
-        3:AuthenticationException authentication_exception,
-        4:ObjectReferenceException reference_exception,
-        5:AttributeException attribute_exception,
-        6:TypeException type_exception),
-
-    /**
-     * Retrieve object name.
-     *
-     */
-    string get_name(1:string token, 2:ObjectReference ref) throws (
-        1:ServiceException generic_exception,
-        2:AuthorizationException authorization_exception,
-        3:AuthenticationException authentication_exception,
-        4:ObjectReferenceException reference_exception,
-        5:AttributeException attribute_exception,
-        6:TypeException type_exception),
-
-    /**
-     * Retrieve object version.
-     *
-     */
-    string get_version(1:string token, 2:ObjectReference ref) throws (
-        1:ServiceException generic_exception,
-        2:AuthorizationException authorization_exception,
-        3:AuthenticationException authentication_exception,
-        4:ObjectReferenceException reference_exception,
-        5:AttributeException attribute_exception,
-        6:TypeException type_exception),
-
-    /**
-     * Retrieve parent Taxon.
-     *
-     */
+    * Retrieve parent Taxon.
+    *
+    * @return Reference to parent Taxon.
+    */
     ObjectReference get_parent(1:string token, 2:ObjectReference ref) throws (
-        1:ServiceException generic_exception,
-        2:AuthorizationException authorization_exception,
-        3:AuthenticationException authentication_exception,
-        4:ObjectReferenceException reference_exception,
-        5:AttributeException attribute_exception,
-        6:TypeException type_exception),
+    1:ServiceException generic_exception,
+    2:AuthorizationException authorization_exception,
+    3:AuthenticationException authentication_exception,
+    4:ObjectReferenceException reference_exception,
+    5:AttributeException attribute_exception,
+    6:TypeException type_exception),
 
     /**
-     * Retrieve children Taxon.
-     *
-     */
+    * Retrieve children Taxon.
+    *
+    * @return List of references to child Taxons.
+    */
     list<ObjectReference> get_children(1:string token, 2:ObjectReference ref) throws (
-        1:ServiceException generic_exception,
-        2:AuthorizationException authorization_exception,
-        3:AuthenticationException authentication_exception,
-        4:ObjectReferenceException reference_exception,
-        5:AttributeException attribute_exception,
-        6:TypeException type_exception),
+    1:ServiceException generic_exception,
+    2:AuthorizationException authorization_exception,
+    3:AuthenticationException authentication_exception,
+    4:ObjectReferenceException reference_exception,
+    5:AttributeException attribute_exception,
+    6:TypeException type_exception),
 
     /**
-     * Retrieve associated GenomeAnnotation objects.
-     *
-     */
+    * Retrieve the GenomeAnnotation(s) that refer to this Taxon.
+    * If this is accessing a KBaseGenomes.Genome object, it will
+    * return an empty list (this information is not available).
+    *
+    * @return List of references to GenomeAnnotation objects.
+    */
     list<ObjectReference> get_genome_annotations(1:string token, 2:ObjectReference ref) throws (
-        1:ServiceException generic_exception,
-        2:AuthorizationException authorization_exception,
-        3:AuthenticationException authentication_exception,
-        4:ObjectReferenceException reference_exception,
-        5:AttributeException attribute_exception,
-        6:TypeException type_exception),
+    1:ServiceException generic_exception,
+    2:AuthorizationException authorization_exception,
+    3:AuthenticationException authentication_exception,
+    4:ObjectReferenceException reference_exception,
+    5:AttributeException attribute_exception,
+    6:TypeException type_exception),
 
     /**
-     * Retrieve the scientific lineage.
-     *
-     */
+    * Retrieve the scientific lineage.
+    *
+    * @return Strings for each 'unit' of the lineage, ordered in
+    *   the usual way from Domain to Kingdom to Phylum, etc.
+    *
+    */
     list<string> get_scientific_lineage(1:string token, 2:ObjectReference ref) throws (
-        1:ServiceException generic_exception,
-        2:AuthorizationException authorization_exception,
-        3:AuthenticationException authentication_exception,
-        4:ObjectReferenceException reference_exception,
-        5:AttributeException attribute_exception,
-        6:TypeException type_exception),
+    1:ServiceException generic_exception,
+    2:AuthorizationException authorization_exception,
+    3:AuthenticationException authentication_exception,
+    4:ObjectReferenceException reference_exception,
+    5:AttributeException attribute_exception,
+    6:TypeException type_exception),
 
     /**
-     * Retrieve the scientific name.
-     *
-     */
+    * Retrieve the scientific name.
+    *
+    * @return The scientific name, e.g., "Escherichia Coli K12 str. MG1655"
+    */
     string get_scientific_name(1:string token, 2:ObjectReference ref) throws (
-        1:ServiceException generic_exception,
-        2:AuthorizationException authorization_exception,
-        3:AuthenticationException authentication_exception,
-        4:ObjectReferenceException reference_exception,
-        5:AttributeException attribute_exception,
-        6:TypeException type_exception),
+    1:ServiceException generic_exception,
+    2:AuthorizationException authorization_exception,
+    3:AuthenticationException authentication_exception,
+    4:ObjectReferenceException reference_exception,
+    5:AttributeException attribute_exception,
+    6:TypeException type_exception),
 
     /**
-     * Retrieve the taxonomic id.
-     *
-     */
+    * Retrieve the NCBI taxonomic ID of this Taxon.
+    * For type KBaseGenomes.Genome, the ``source_id`` will be returned.
+    *
+    * @return Integer taxonomic ID.
+    */
     i32 get_taxonomic_id(1:string token, 2:ObjectReference ref) throws (
-        1:ServiceException generic_exception,
-        2:AuthorizationException authorization_exception,
-        3:AuthenticationException authentication_exception,
-        4:ObjectReferenceException reference_exception,
-        5:AttributeException attribute_exception,
-        6:TypeException type_exception),
+    1:ServiceException generic_exception,
+    2:AuthorizationException authorization_exception,
+    3:AuthenticationException authentication_exception,
+    4:ObjectReferenceException reference_exception,
+    5:AttributeException attribute_exception,
+    6:TypeException type_exception),
 
     /**
-     * Retrieve the kingdom.
-     *
-     */
+    * Retrieve the kingdom.
+    *
+    */
     string get_kingdom(1:string token, 2:ObjectReference ref) throws (
-        1:ServiceException generic_exception,
-        2:AuthorizationException authorization_exception,
-        3:AuthenticationException authentication_exception,
-        4:ObjectReferenceException reference_exception,
-        5:AttributeException attribute_exception,
-        6:TypeException type_exception),
+    1:ServiceException generic_exception,
+    2:AuthorizationException authorization_exception,
+    3:AuthenticationException authentication_exception,
+    4:ObjectReferenceException reference_exception,
+    5:AttributeException attribute_exception,
+    6:TypeException type_exception),
 
     /**
-     * Retrieve the domain.
-     *
-     */
+    * Retrieve the domain.
+    *
+    */
     string get_domain(1:string token, 2:ObjectReference ref) throws (
-        1:ServiceException generic_exception,
-        2:AuthorizationException authorization_exception,
-        3:AuthenticationException authentication_exception,
-        4:ObjectReferenceException reference_exception,
-        5:AttributeException attribute_exception,
-        6:TypeException type_exception),
+    1:ServiceException generic_exception,
+    2:AuthorizationException authorization_exception,
+    3:AuthenticationException authentication_exception,
+    4:ObjectReferenceException reference_exception,
+    5:AttributeException attribute_exception,
+    6:TypeException type_exception),
 
     /**
-     * Retrieve the genetic code.
-     *
-     */
+    * Retrieve the genetic code.
+    *
+    */
     i32 get_genetic_code(1:string token, 2:ObjectReference ref) throws (
-        1:ServiceException generic_exception,
-        2:AuthorizationException authorization_exception,
-        3:AuthenticationException authentication_exception,
-        4:ObjectReferenceException reference_exception,
-        5:AttributeException attribute_exception,
-        6:TypeException type_exception),
+    1:ServiceException generic_exception,
+    2:AuthorizationException authorization_exception,
+    3:AuthenticationException authentication_exception,
+    4:ObjectReferenceException reference_exception,
+    5:AttributeException attribute_exception,
+    6:TypeException type_exception),
 
     /**
-     * Retrieve the aliases.
-     *
-     */
+    * Retrieve the aliases.
+    *
+    */
     list<string> get_aliases(1:string token, 2:ObjectReference ref) throws (
-        1:ServiceException generic_exception,
-        2:AuthorizationException authorization_exception,
-        3:AuthenticationException authentication_exception,
-        4:ObjectReferenceException reference_exception,
-        5:AttributeException attribute_exception,
-        6:TypeException type_exception)
+    1:ServiceException generic_exception,
+    2:AuthorizationException authorization_exception,
+    3:AuthenticationException authentication_exception,
+    4:ObjectReferenceException reference_exception,
+    5:AttributeException attribute_exception,
+    6:TypeException type_exception),
+
 }

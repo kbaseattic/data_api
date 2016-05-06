@@ -6,10 +6,8 @@ and the underlying contigs (GC content, length).
 
 # Stdlib
 import abc
-import itertools
+import functools
 import requests
-import re
-import collections
 import string
 import hashlib
 try:
@@ -23,6 +21,7 @@ from doekbase.data_api.util import get_logger, logged, PerfCollector, collect_pe
 from doekbase.data_api import exceptions
 from doekbase.data_api.taxonomy.taxon.service import ttypes
 from doekbase.handle.Client import AbstractHandle as handleClient
+from doekbase.data_api.blob import blob
 
 _log = get_logger(__file__)
 
@@ -34,11 +33,16 @@ TYPES = _CONTIGSET_TYPES + _ASSEMBLY_TYPES
 
 g_stats = PerfCollector('AssemblyAPI')
 
+# ============================================================================
+
 class AssemblyInterface(object):
     """API for a genome Assembly associated with a Genome Annotation.
     """
     
     __metaclass__ = abc.ABCMeta
+
+    #: Maximum length of lines of FASTA output
+    FASTA_LINE_LENGTH = 80
 
     @abc.abstractmethod    
     def get_assembly_id(self):
@@ -167,6 +171,17 @@ class AssemblyInterface(object):
         """
         pass
 
+    @abc.abstractmethod
+    def get_fasta(self):
+        """Create a FASTA representation of this assembly.
+
+        Returns:
+            (doekbase.data_api.blob.Blob) Temporary "blob" object
+        See Also:
+            :doc:`blob_api`
+        """
+        pass
+
 
 class AssemblyAPI(ObjectAPI, AssemblyInterface):
     def __init__(self, services, token, ref):
@@ -217,6 +232,11 @@ class AssemblyAPI(ObjectAPI, AssemblyInterface):
 
     def get_contigs(self, contig_id_list=None):
         return self.proxy.get_contigs(contig_id_list)
+
+    def get_fasta(self):
+        return self.proxy.get_fasta()
+
+# ============================================================================
 
 
 class _KBaseGenomes_ContigSet(ObjectAPI, AssemblyInterface):
@@ -385,6 +405,25 @@ class _KBaseGenomes_ContigSet(ObjectAPI, AssemblyInterface):
         """
         return sum(self._current_sequence.count(x) for x in ['g','G','c','C'])
 
+    def get_fasta(self):
+        temp_blob = blob.BlobBuffer() # XXX: change this to TemporaryBlobShockNode
+        self._create_fasta(temp_blob)
+        return temp_blob
+
+    def _create_fasta(self, stream):
+        raw_contigs = self.get_data()["contigs"]
+        num_bases = 0
+        # write out all contigs
+        i = 1
+        for c in raw_contigs:
+            desc = c.get('description', 'contig_{:d}'.format(i))
+            _create_fasta_contig_header(c['id'], desc, stream)
+            num_bases += _write_sequence_lines(c['sequence'], stream, self.FASTA_LINE_LENGTH)
+            i += 1
+        return num_bases
+
+# ============================================================================
+
 
 class _Assembly(ObjectAPI, AssemblyInterface):
     def __init__(self, services, token, ref):
@@ -469,10 +508,10 @@ class _Assembly(ObjectAPI, AssemblyInterface):
             hc = handleClient(url=self.services["handle_service_url"], token=self._token)
             handle = hc.hids_to_handles([fasta_ref])[0]
             shock_node_id = handle["id"]
-        except Exception, e:
+        except Exception as e:
             _log.debug("Failed to retrieve handle {} from {}".format(fasta_ref,
                                                                      self.services["handle_service_url"]))
-            _log.exception(e)
+            #_log.exception(e)
             shock_node_id = fasta_ref
 
         copy_keys = ["contig_id", "length", "gc_content", "md5", "name", "description", "is_complete", "is_circular"]
@@ -509,7 +548,7 @@ class _Assembly(ObjectAPI, AssemblyInterface):
         if num_contigs > total_contigs/3 or num_contigs == 0:
             try:
                 sequence_data = fetch_data(shock_node_id)
-            except Exception, e:
+            except Exception as e:
                 raise
 
             if num_contigs == 0:
@@ -546,6 +585,60 @@ class _Assembly(ObjectAPI, AssemblyInterface):
 
         return outContigs
 
+    def get_fasta(self):
+        b = blob.BlobShockNode(url=self._get_shock_url(),
+                               node_id=self._get_shock_node_id(),
+                               auth_token=self._get_shock_auth_token())
+        return b
+
+    def _get_shock_url(self):
+        try:
+            shock_url = self.services['shock_service_url']
+        except KeyError:
+            raise exceptions.ServiceError('Cannot contact data service: "shock_service_url" not given')
+        return shock_url
+
+    def _get_shock_auth_token(self):
+        return 'Oauth {0}'.format(self._token)
+
+    def _get_shock_node_id(self):
+        fasta_ref = self.get_data()['fasta_handle_ref']
+        shock_node_id = fasta_ref
+        try:
+            hc = handleClient(url=self.services['handle_service_url'], token=self._token)
+            handle = hc.hids_to_handles([fasta_ref])[0]
+            shock_node_id = handle['id']
+        except Exception as e:
+            _log.debug("Failed to retrieve handle {} from {}"
+                       .format(fasta_ref, self.services["handle_service_url"]))
+            _log.exception(e)
+        return shock_node_id
+
+
+# ------------------------------------------
+# FASTA helper functions
+
+def _create_fasta_contig_header(contig_id, description, stream):
+    stream.writeln('>{} {}'.format(contig_id, description))
+
+def _write_sequence_lines(seq, stream, line_length):
+    """Write a sequence of bases as a number of lines
+    of length no more than `line_length`.
+    """
+    seq_len, offs = len(seq), 0
+    # write out `line_length` chars at a time
+    while offs < seq_len:
+        next_offs = offs + line_length
+        stream.writeln(seq[offs:next_offs])
+        offs = next_offs
+    return seq_len
+
+# End: FASTA helper functions
+# --------------------------------------------
+
+
+
+# ============================================================================
 
 _as_log = get_logger('AssemblyClientAPI')
 
@@ -663,3 +756,10 @@ class AssemblyClientAPI(AssemblyInterface):
             }
 
         return out_contigs
+
+    @logged(_as_log)
+    @client_method
+    def get_fasta(self):
+        blob_ref = self.client.get_fasta(self._token, self.ref)
+        return blob.BlobShockNode(blob_ref)
+
