@@ -1799,6 +1799,9 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
         feature_container_references = self.get_data_subset(
             path_list=["feature_container_references"])["feature_container_references"]
 
+        if "mRNA" not in feature_container_references:
+            raise TypeError("mRNA features are not present in this GenomeAnnotation!")
+
         mrna_feature_container_ref = feature_container_references["mRNA"]
         mrna_feature_container = ObjectAPI(self.services,
                                            self._token,
@@ -1956,11 +1959,17 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
         if "locus" in feature_types:
             include_types.append("locus")
 
+        mrna_missing = False
         if "mRNA" in feature_types:
             include_types.append("mRNA")
+        else:
+            mrna_missing = True
 
+        cds_missing = False
         if "CDS" in feature_types:
             include_types.append("CDS")
+        else:
+            cds_missing = True
 
         feature_ids = self.get_feature_ids(filters={"type_list": include_types})["by_type"]
 
@@ -1983,21 +1992,30 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
         if feature_ids.has_key("locus"):
             gene_list.extend(feature_ids["locus"])
 
-        # retrieve pairwise inter-feature relationships between genes, mRNAs, CDSs
-        mrna_by_gene_list = self.get_mrna_by_gene(gene_list)
-        mrna_list = []
-        map(mrna_list.extend, mrna_by_gene_list.values())
-        cds_by_mrna_list = self.get_cds_by_mrna(mrna_list)
-        cds_by_gene_list = self.get_cds_by_gene(gene_list)
-        exons_by_mrna = self.get_mrna_exons(mrna_list)
-        # TODO fetch UTR info
-        #self.get_mrna_utrs(mrna_by_gene_list.values())
+        if mrna_missing:
+            mrna_by_gene_list = {g: [] for g in gene_list}
+            cds_by_mrna_list = {}
+            cds_by_gene_list = self.get_cds_by_gene(gene_list)
+            exons_by_mrna = {}
+        else:
+            # retrieve pairwise inter-feature relationships between genes, mRNAs, CDSs
+            mrna_by_gene_list = self.get_mrna_by_gene(gene_list)
+            mrna_list = []
+            map(mrna_list.extend, mrna_by_gene_list.values())
+            cds_by_mrna_list = self.get_cds_by_mrna(mrna_list)
+            cds_by_gene_list = self.get_cds_by_gene(gene_list)
+            exons_by_mrna = self.get_mrna_exons(mrna_list)
+            # TODO fetch UTR info
+            #self.get_mrna_utrs(mrna_by_gene_list.values())
 
         feature_id_list = []
         map(feature_id_list.extend, [feature_ids[x] for x in feature_ids])
         feature_data = self.get_features(feature_id_list=feature_id_list)
 
         def parse_aliases(feature_id):
+            if not feature_data[feature_id].has_key("feature_aliases"):
+                return [], []
+
             aliases = feature_data[feature_id]["feature_aliases"]
 
             alias_values = []
@@ -2090,12 +2108,17 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
             return mrna_line
 
         def get_cds_lines(mrna_id, gene_id):
-            cds_id = cds_by_mrna_list[mrna_id]
+            cds_id = None
+            if mrna_id:
+                cds_id = cds_by_mrna_list[mrna_id]
 
             parent = ""
 
             if cds_id is None:
-                cds_id = cds_by_gene_list[gene_id]
+                try:
+                    cds_id = cds_by_gene_list[gene_id][0]
+                except IndexError:
+                    cds_id = None
 
                 if cds_id is None:
                     _log.warn("mRNA {} and gene {} do not have an associated CDS".format(mrna_id, gene_id))
@@ -2103,7 +2126,10 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
             else:
                 parent = "Parent={};".format(mrna_id)
 
-            function_description = feature_data[cds_id]["feature_function"]
+            function_description = ""
+            if feature_data[cds_id].has_key("feature_function"):
+                function_description = feature_data[cds_id]["feature_function"]
+
             locations = feature_data[cds_id]["feature_locations"]
 
             phase = 0
@@ -2120,7 +2146,7 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
 
                 phase = (3 - running_length % 3) % 3
 
-                db_xref, alias = parse_aliases(mrna_id)
+                db_xref, alias = parse_aliases(cds_id)
                 db_xref = "".join(db_xref)
                 alias = "".join(alias)
 
@@ -2191,38 +2217,66 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
 
             genes_by_contig[location["contig_id"]][boundary].append(gene_id)
 
-        for contig_id in sorted(genes_by_contig):
-            ##NC_003070.9 1 30427671
-            gffdata.write("##sequence-region {}\t1\t{}\n".format(contig_id,
-                          str(contig_lengths[contig_id])))
+        if mrna_missing:
+            for contig_id in sorted(genes_by_contig):
+                ##NC_003070.9 1 30427671
+                gffdata.write("##sequence-region {}\t1\t{}\n".format(contig_id,
+                              str(contig_lengths[contig_id])))
 
-            if taxon_id != -1:
-                #http://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id=3702
-                gffdata.write("##species http://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id={}\n".format(
-                              str(taxon_id)))
-            else:
-                gffdata.write("##species unknown\n")
+                if taxon_id != -1:
+                    #http://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id=3702
+                    gffdata.write("##species http://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id={}\n".format(
+                                  str(taxon_id)))
+                else:
+                    gffdata.write("##species unknown\n")
 
-            # NC_003070.9	RefSeq	region	1	30427671	.	+	.	ID=id0;Dbxref=taxon:3702;Name=1;chromosome=1;ecotype=Columbia;gbkey=Src;genome=chromosome;mol_type=genomic DNA
-            gffdata.write("{}\t{}\texon\t{}\t{}\t.\t+\t.\tID={};gbkey=Src;mol_type=genomic DNA\n".format(
-                contig_id,
-                source_info['external_source'],
-                1,
-                str(contig_lengths[contig_id]),
-                contig_id
-            ))
+                # NC_003070.9	RefSeq	region	1	30427671	.	+	.	ID=id0;Dbxref=taxon:3702;Name=1;chromosome=1;ecotype=Columbia;gbkey=Src;genome=chromosome;mol_type=genomic DNA
+                gffdata.write("{}\t{}\tregion\t{}\t{}\t.\t+\t.\tID={};gbkey=Src;mol_type=genomic DNA\n".format(
+                    contig_id,
+                    source_info['external_source'],
+                    1,
+                    str(contig_lengths[contig_id]),
+                    contig_id
+                ))
 
-            for boundary in sorted(genes_by_contig[contig_id]):
-                # maybe sort the genes?
-                for gene_id in genes_by_contig[contig_id][boundary]:
-                    gffdata.write(get_gene_line(gene_id))
+                for boundary in sorted(genes_by_contig[contig_id]):
+                    # maybe sort the genes?
+                    for gene_id in genes_by_contig[contig_id][boundary]:
+                        gffdata.write(get_gene_line(gene_id))
+                        gffdata.write(get_cds_lines(None, gene_id))
+        else:
+            for contig_id in sorted(genes_by_contig):
+                ##NC_003070.9 1 30427671
+                gffdata.write("##sequence-region {}\t1\t{}\n".format(contig_id,
+                              str(contig_lengths[contig_id])))
 
-                    for mrna_id in mrna_by_gene_list[gene_id]:
-                        gffdata.write(get_mrna_line(gene_id, mrna_id))
-                        exons = exons_by_mrna[mrna_id]
-                        gffdata.write(get_exon_lines(mrna_id, exons, last_exon_id))
-                        last_exon_id += len(exons)
-                        gffdata.write(get_cds_lines(mrna_id, gene_id))
+                if taxon_id != -1:
+                    #http://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id=3702
+                    gffdata.write("##species http://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id={}\n".format(
+                                  str(taxon_id)))
+                else:
+                    gffdata.write("##species unknown\n")
+
+                # NC_003070.9	RefSeq	region	1	30427671	.	+	.	ID=id0;Dbxref=taxon:3702;Name=1;chromosome=1;ecotype=Columbia;gbkey=Src;genome=chromosome;mol_type=genomic DNA
+                gffdata.write("{}\t{}\tregion\t{}\t{}\t.\t+\t.\tID={};gbkey=Src;mol_type=genomic DNA\n".format(
+                    contig_id,
+                    source_info['external_source'],
+                    1,
+                    str(contig_lengths[contig_id]),
+                    contig_id
+                ))
+
+                for boundary in sorted(genes_by_contig[contig_id]):
+                    # maybe sort the genes?
+                    for gene_id in genes_by_contig[contig_id][boundary]:
+                        gffdata.write(get_gene_line(gene_id))
+
+                        for mrna_id in mrna_by_gene_list[gene_id]:
+                            gffdata.write(get_mrna_line(gene_id, mrna_id))
+                            exons = exons_by_mrna[mrna_id]
+                            gffdata.write(get_exon_lines(mrna_id, exons, last_exon_id))
+                            last_exon_id += len(exons)
+                            gffdata.write(get_cds_lines(mrna_id, gene_id))
 
         gffdata.write("###")
 
@@ -2482,7 +2536,4 @@ class GenomeAnnotationClientAPI(GenomeAnnotationInterface):
     @logged(_ga_log)
     @client_method
     def get_gff(self, gene_feature_id_list=None):
-        result = self.client.get_gff(self._token, self.ref, gene_feature_id_list)
-        out = blob.BlobBuffer()
-        out.write(result)
-        return out
+        raise NotImplementedError("This is a library only method.")
