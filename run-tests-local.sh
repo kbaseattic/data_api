@@ -12,6 +12,10 @@ if [ $num_files -eq 0 ]; then
     exit 2
 fi
 
+# build Thrift
+python setup.py build_thrift_servers
+python setup.py build_thrift_clients
+
 # start services
 data_api_start_service.py --config deployment.cfg --service taxon --port 9101  >taxon.out 2>&1 &
 data_api_start_service.py --config deployment.cfg --service assembly --port 9102 >assembly.out 2>&1 &

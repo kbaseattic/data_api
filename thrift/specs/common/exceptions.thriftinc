@@ -1,0 +1,51 @@
+
+
+
+
+
+exception ServiceException {
+    /** Readable message desribing the error condition. */
+    1: required string message;
+    /** Program stack trace */
+    2: optional string stacktrace;
+    /** Optional mapping */
+    3: optional map<string,string> inputs;
+}
+
+exception AuthorizationException {
+    /** Readable message desribing the error condition. */
+    1: required string message;
+    /** Program stack trace */
+    2: optional string stacktrace;
+}
+
+exception AuthenticationException {
+    /** Readable message desribing the error condition. */
+    1: required string message;
+    /** Program stack trace */
+    2: optional string stacktrace;
+}
+
+exception ObjectReferenceException {
+    /** Readable message desribing the error condition. */
+    1: required string message;
+    /** Program stack trace */
+    2: optional string stacktrace;
+}
+
+exception AttributeException {
+    /** Readable message desribing the error condition. */
+    1: required string message;
+    /** Program stack trace */
+    2: optional string stacktrace;
+}
+
+exception TypeException {
+    /** Readable message desribing the error condition. */
+    1: required string message;
+    /** Program stack trace */
+    2: optional string stacktrace;
+    /** List of types that would have been acceptable. */
+    3: optional list<string> valid_types;
+}
+

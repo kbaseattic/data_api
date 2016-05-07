@@ -118,9 +118,9 @@ class GenomeAnnotationService(service_core.BaseService):
         return output
 
     @server_method
-    def get_proteins(self, token=None, ref=None):
+    def get_proteins(self, token=None, ref=None, cds_id_list=None):
         ga_api = self._get_instance(token, ref)
-        result = ga_api.get_proteins()
+        result = ga_api.get_proteins(cds_id_list)
         output = {x: ttypes.Protein_data(**result[x]) for x in result}
 
         return output

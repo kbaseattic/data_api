@@ -232,11 +232,27 @@ class GenomeAnnotationInterface(object):
         pass
 
     @abc.abstractmethod
-    def get_proteins(self):
+    def get_proteins(self, cds_feature_id_list=None):
         """Retrieves all the available proteins for a genome.
 
+        Args:
+
+          cds_feature_id_list (list<str>): List of CDS features to retrieve proteins.
+              If None, returns all proteins.
+
         Returns:
-          list<dict>"""
+
+          dict: Mapping from CDS IDs to protein information with the following key/value pairs:
+
+          - protein_id : str
+              The identifier for the protein
+          - protein_amino_acid_sequence : str
+              The AA sequence for the protein
+          - protein_md5 : str
+              The MD5 of the protein sequence
+          - protein_aliases : dict<list<str>>
+              For each protein alias, there is a list of sources as key
+        """
         pass
 
     @abc.abstractmethod
@@ -525,8 +541,8 @@ class GenomeAnnotationAPI(ObjectAPI, GenomeAnnotationInterface):
     def get_features(self, feature_id_list=None):
         return self.proxy.get_features(feature_id_list)
 
-    def get_proteins(self):
-        return self.proxy.get_proteins()
+    def get_proteins(self, cds_feature_id_list=None):
+        return self.proxy.get_proteins(cds_feature_id_list)
 
     def get_mrna_utrs(self, mrna_feature_id_list=None):
         return self.proxy.get_mrna_utrs(mrna_feature_id_list)
@@ -986,22 +1002,22 @@ class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
 
         return out_features
 
-    def get_proteins(self):
+    def get_proteins(self, cds_feature_id_list=None):
         proteins = {}
         features = self.get_data()['features']
         
         for f in features:
             if "protein_translation" in f and len(f["protein_translation"]) > 0:
                 protein_id = f['id'] + ".protein"
-                proteins[protein_id] = {}
-                proteins[protein_id]["protein_id"] = protein_id
-                proteins[protein_id]["protein_amino_acid_sequence"] = f["protein_translation"]
-                proteins[protein_id]["protein_function"] = None
-                proteins[protein_id]["protein_aliases"] = None
-                proteins[protein_id]["protein_md5"] = hashlib.md5(f["protein_translation"].upper()).hexdigest()
+                proteins[f['id']] = {}
+                proteins[f['id']]["protein_id"] = protein_id
+                proteins[f['id']]["protein_amino_acid_sequence"] = f["protein_translation"]
+                proteins[f['id']]["protein_function"] = None
+                proteins[f['id']]["protein_aliases"] = None
+                proteins[f['id']]["protein_md5"] = hashlib.md5(f["protein_translation"].upper()).hexdigest()
 
                 # may need to revisit this                
-                proteins[protein_id]["protein_domain_locations"] = None
+                proteins[f['id']]["protein_domain_locations"] = None
         
         return proteins                
 
@@ -1101,11 +1117,11 @@ class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
         feature_ids = self.get_feature_ids(filters={"type_list": include_types})["by_type"]
 
         genes_missing = False
-        if not feature_ids.has_key("gene") and not feature_ids.has_key("locus"):
+        if "gene" not in feature_ids and "locus" not in feature_ids:
             genes_missing = True
-        elif feature_ids.has_key("gene") and len(feature_ids["gene"]) == 0:
+        elif "gene" in feature_ids and len(feature_ids["gene"]) == 0:
             genes_missing = True
-        elif feature_ids.has_key("locus") and len(feature_ids["locus"]) == 0:
+        elif "locus" in feature_ids and len(feature_ids["locus"]) == 0:
             genes_missing = True
 
         if genes_missing:
@@ -1113,10 +1129,10 @@ class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
             raise Exception("No genes present to generate the GFF format. {} {}".format(feature_types, feature_ids))
 
         gene_list = []
-        if feature_ids.has_key("gene"):
+        if "gene" in feature_ids:
             gene_list.extend(feature_ids["gene"])
 
-        if feature_ids.has_key("locus"):
+        if "locus" in feature_ids:
             gene_list.extend(feature_ids["locus"])
 
         feature_id_list = []
@@ -1163,7 +1179,7 @@ class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
             if location["strand"] == "-":
                 boundary = location["start"] - location["length"] + 1
 
-            if not genes_by_contig[location["contig_id"]].has_key(boundary):
+            if boundary not in genes_by_contig[location["contig_id"]]:
                 genes_by_contig[location["contig_id"]][boundary] = []
 
             genes_by_contig[location["contig_id"]][boundary].append(gene_id)
@@ -1543,18 +1559,53 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
 
         return out_features
 
-    def get_proteins(self):
+    def get_proteins(self, cds_feature_id_list=None):
+        feature_container_references = self.get_data_subset(
+            path_list=["feature_container_references"])["feature_container_references"]
+
+        if "CDS" in feature_container_references:
+            cds_feature_container_ref = feature_container_references["CDS"]
+            cds_feature_container = ObjectAPI(self.services,
+                                              self._token,
+                                              cds_feature_container_ref)
+        else:
+            raise TypeError("No CDS features are present!")
+
+        if cds_feature_id_list is None:
+            cds_feature_id_list = cds_feature_container.get_data()["features"].keys()
+
+        try:
+            cds_refs = ["features/" + x for x in cds_feature_id_list]
+            assert len(cds_refs) > 0
+        except TypeError:
+            raise TypeError("A list of strings indicating Feature " +
+                            "identifiers is required.")
+        except AssertionError:
+            raise TypeError("A list of strings indicating Feature " +
+                            "identifiers is required, " +
+                            "received an empty list.")
+
+        # fetch the CDS feature data
+        cds_features = cds_feature_container.get_data_subset(path_list=cds_refs)["features"]
+        # map the protein id to the CDS id, if the CDS maps to a protein
+        protein_cds_map = {cds_features[x]["CDS_properties"]["codes_for_protein_ref"][1]: x for x in cds_features
+                           if "codes_for_protein_ref" in cds_features[x]["CDS_properties"]}
+        cds_features = None
+
+        # grab the protein container and fetch the protein data
         protein_container = ObjectAPI(self.services, self._token, self.get_data()["protein_container_ref"])
         result = protein_container.get_data()["proteins"]
+        # filter out any proteins that do not map to a CDS in our list
+        proteins = {x: result[x] for x in result if x in protein_cds_map}
 
         output = {}
-        for x in result:
-            output[x] = {}
-            for k in result[x]:
+        for x in proteins:
+            output[protein_cds_map[x]] = {}
+            for k in proteins[x]:
                 if k.startswith("protein_"):
-                    output[x][k] = result[x][k]
+                    output[x][k] = proteins[x][k]
                 else:
-                    output[x]["protein_" + k] = result[x][k]
+                    output[x]["protein_" + k] = proteins[x][k]
         return output
 
     def _get_by_mrna(self, feature_type=None, mrna_feature_id_list=None):
@@ -1748,6 +1799,9 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
         feature_container_references = self.get_data_subset(
             path_list=["feature_container_references"])["feature_container_references"]
 
+        if "mRNA" not in feature_container_references:
+            raise TypeError("mRNA features are not present in this GenomeAnnotation!")
+
         mrna_feature_container_ref = feature_container_references["mRNA"]
         mrna_feature_container = ObjectAPI(self.services,
                                            self._token,
@@ -1905,20 +1959,26 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
         if "locus" in feature_types:
             include_types.append("locus")
 
+        mrna_missing = False
         if "mRNA" in feature_types:
             include_types.append("mRNA")
+        else:
+            mrna_missing = True
 
+        cds_missing = False
         if "CDS" in feature_types:
             include_types.append("CDS")
+        else:
+            cds_missing = True
 
         feature_ids = self.get_feature_ids(filters={"type_list": include_types})["by_type"]
 
         genes_missing = False
-        if not feature_ids.has_key("gene") and not feature_ids.has_key("locus"):
+        if "gene" not in feature_ids and "locus" not in feature_ids:
             genes_missing = True
-        elif feature_ids.has_key("gene") and len(feature_ids["gene"]) == 0:
+        elif "gene" in feature_ids and len(feature_ids["gene"]) == 0:
             genes_missing = True
-        elif feature_ids.has_key("locus") and len(feature_ids["locus"]) == 0:
+        elif "locus" in feature_ids and len(feature_ids["locus"]) == 0:
             genes_missing = True
 
         if genes_missing:
@@ -1926,27 +1986,36 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
             raise Exception("No genes present to generate the GFF format. {} {}".format(feature_types, feature_ids))
 
         gene_list = []
-        if feature_ids.has_key("gene"):
+        if "gene" in feature_ids:
             gene_list.extend(feature_ids["gene"])
 
-        if feature_ids.has_key("locus"):
+        if "locus" in feature_ids:
             gene_list.extend(feature_ids["locus"])
 
-        # retrieve pairwise inter-feature relationships between genes, mRNAs, CDSs
-        mrna_by_gene_list = self.get_mrna_by_gene(gene_list)
-        mrna_list = []
-        map(mrna_list.extend, mrna_by_gene_list.values())
-        cds_by_mrna_list = self.get_cds_by_mrna(mrna_list)
-        cds_by_gene_list = self.get_cds_by_gene(gene_list)
-        exons_by_mrna = self.get_mrna_exons(mrna_list)
-        # TODO fetch UTR info
-        #self.get_mrna_utrs(mrna_by_gene_list.values())
+        if mrna_missing:
+            mrna_by_gene_list = {g: [] for g in gene_list}
+            cds_by_mrna_list = {}
+            cds_by_gene_list = self.get_cds_by_gene(gene_list)
+            exons_by_mrna = {}
+        else:
+            # retrieve pairwise inter-feature relationships between genes, mRNAs, CDSs
+            mrna_by_gene_list = self.get_mrna_by_gene(gene_list)
+            mrna_list = []
+            map(mrna_list.extend, mrna_by_gene_list.values())
+            cds_by_mrna_list = self.get_cds_by_mrna(mrna_list)
+            cds_by_gene_list = self.get_cds_by_gene(gene_list)
+            exons_by_mrna = self.get_mrna_exons(mrna_list)
+            # TODO fetch UTR info
+            #self.get_mrna_utrs(mrna_by_gene_list.values())
 
         feature_id_list = []
         map(feature_id_list.extend, [feature_ids[x] for x in feature_ids])
         feature_data = self.get_features(feature_id_list=feature_id_list)
 
         def parse_aliases(feature_id):
+            if not "feature_aliases" in feature_data[feature_id]:
+                return [], []
+
             aliases = feature_data[feature_id]["feature_aliases"]
 
             alias_values = []
@@ -1962,8 +2031,9 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
             return alias_values, dbxref_values
 
         def get_gene_line(gene_id):
-            function_description = feature_data[gene_id]["feature_function"]
-            aliases = feature_data[gene_id]["feature_aliases"]
+            function_description = ""
+            if "feature_function" in feature_data[gene_id]:
+                function_description = feature_data[gene_id]["feature_function"]
             location = feature_data[gene_id]["feature_locations"][0]
 
             if location["strand"] == "+":
@@ -1995,7 +2065,9 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
             return gene_line
 
         def get_mrna_line(gene_id, mrna_id):
-            function_description = feature_data[mrna_id]["feature_function"]
+            function_description = ""
+            if "feature_function" in feature_data[mrna_id]:
+                function_description = feature_data[mrna_id]["feature_function"]
             locations = feature_data[mrna_id]["feature_locations"]
             lower_bound = None
             upper_bound = None
@@ -2039,12 +2111,17 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
             return mrna_line
 
         def get_cds_lines(mrna_id, gene_id):
-            cds_id = cds_by_mrna_list[mrna_id]
+            cds_id = None
+            if mrna_id:
+                cds_id = cds_by_mrna_list[mrna_id]
 
             parent = ""
 
             if cds_id is None:
-                cds_id = cds_by_gene_list[gene_id]
+                try:
+                    cds_id = cds_by_gene_list[gene_id][0]
+                except IndexError:
+                    cds_id = None
 
                 if cds_id is None:
                     _log.warn("mRNA {} and gene {} do not have an associated CDS".format(mrna_id, gene_id))
@@ -2052,7 +2129,10 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
             else:
                 parent = "Parent={};".format(mrna_id)
 
-            function_description = feature_data[cds_id]["feature_function"]
+            function_description = ""
+            if "feature_function" in feature_data[cds_id]:
+                function_description = feature_data[cds_id]["feature_function"]
+
             locations = feature_data[cds_id]["feature_locations"]
 
             phase = 0
@@ -2069,7 +2149,7 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
 
                 phase = (3 - running_length % 3) % 3
 
-                db_xref, alias = parse_aliases(mrna_id)
+                db_xref, alias = parse_aliases(cds_id)
                 db_xref = "".join(db_xref)
                 alias = "".join(alias)
 
@@ -2135,43 +2215,71 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
             if location["strand"] == "-":
                 boundary = location["start"] - location["length"] + 1
 
-            if not genes_by_contig[location["contig_id"]].has_key(boundary):
+            if boundary not in genes_by_contig[location["contig_id"]]:
                 genes_by_contig[location["contig_id"]][boundary] = []
 
             genes_by_contig[location["contig_id"]][boundary].append(gene_id)
 
-        for contig_id in sorted(genes_by_contig):
-            ##NC_003070.9 1 30427671
-            gffdata.write("##sequence-region {}\t1\t{}\n".format(contig_id,
-                          str(contig_lengths[contig_id])))
+        if mrna_missing:
+            for contig_id in sorted(genes_by_contig):
+                ##NC_003070.9 1 30427671
+                gffdata.write("##sequence-region {}\t1\t{}\n".format(contig_id,
+                              str(contig_lengths[contig_id])))
 
-            if taxon_id != -1:
-                #http://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id=3702
-                gffdata.write("##species http://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id={}\n".format(
-                              str(taxon_id)))
-            else:
-                gffdata.write("##species unknown\n")
+                if taxon_id != -1:
+                    #http://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id=3702
+                    gffdata.write("##species http://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id={}\n".format(
+                                  str(taxon_id)))
+                else:
+                    gffdata.write("##species unknown\n")
 
-            # NC_003070.9	RefSeq	region	1	30427671	.	+	.	ID=id0;Dbxref=taxon:3702;Name=1;chromosome=1;ecotype=Columbia;gbkey=Src;genome=chromosome;mol_type=genomic DNA
-            gffdata.write("{}\t{}\texon\t{}\t{}\t.\t+\t.\tID={};gbkey=Src;mol_type=genomic DNA\n".format(
-                contig_id,
-                source_info['external_source'],
-                1,
-                str(contig_lengths[contig_id]),
-                contig_id
-            ))
+                # NC_003070.9	RefSeq	region	1	30427671	.	+	.	ID=id0;Dbxref=taxon:3702;Name=1;chromosome=1;ecotype=Columbia;gbkey=Src;genome=chromosome;mol_type=genomic DNA
+                gffdata.write("{}\t{}\tregion\t{}\t{}\t.\t+\t.\tID={};gbkey=Src;mol_type=genomic DNA\n".format(
+                    contig_id,
+                    source_info['external_source'],
+                    1,
+                    str(contig_lengths[contig_id]),
+                    contig_id
+                ))
 
-            for boundary in sorted(genes_by_contig[contig_id]):
-                # maybe sort the genes?
-                for gene_id in genes_by_contig[contig_id][boundary]:
-                    gffdata.write(get_gene_line(gene_id))
+                for boundary in sorted(genes_by_contig[contig_id]):
+                    # maybe sort the genes?
+                    for gene_id in genes_by_contig[contig_id][boundary]:
+                        gffdata.write(get_gene_line(gene_id))
+                        gffdata.write(get_cds_lines(None, gene_id))
+        else:
+            for contig_id in sorted(genes_by_contig):
+                ##NC_003070.9 1 30427671
+                gffdata.write("##sequence-region {}\t1\t{}\n".format(contig_id,
+                              str(contig_lengths[contig_id])))
 
-                    for mrna_id in mrna_by_gene_list[gene_id]:
-                        gffdata.write(get_mrna_line(gene_id, mrna_id))
-                        exons = exons_by_mrna[mrna_id]
-                        gffdata.write(get_exon_lines(mrna_id, exons, last_exon_id))
-                        last_exon_id += len(exons)
-                        gffdata.write(get_cds_lines(mrna_id, gene_id))
+                if taxon_id != -1:
+                    #http://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id=3702
+                    gffdata.write("##species http://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id={}\n".format(
+                                  str(taxon_id)))
+                else:
+                    gffdata.write("##species unknown\n")
+
+                # NC_003070.9	RefSeq	region	1	30427671	.	+	.	ID=id0;Dbxref=taxon:3702;Name=1;chromosome=1;ecotype=Columbia;gbkey=Src;genome=chromosome;mol_type=genomic DNA
+                gffdata.write("{}\t{}\tregion\t{}\t{}\t.\t+\t.\tID={};gbkey=Src;mol_type=genomic DNA\n".format(
+                    contig_id,
+                    source_info['external_source'],
+                    1,
+                    str(contig_lengths[contig_id]),
+                    contig_id
+                ))
+
+                for boundary in sorted(genes_by_contig[contig_id]):
+                    # maybe sort the genes?
+                    for gene_id in genes_by_contig[contig_id][boundary]:
+                        gffdata.write(get_gene_line(gene_id))
+
+                        for mrna_id in mrna_by_gene_list[gene_id]:
+                            gffdata.write(get_mrna_line(gene_id, mrna_id))
+                            exons = exons_by_mrna[mrna_id]
+                            gffdata.write(get_exon_lines(mrna_id, exons, last_exon_id))
+                            last_exon_id += len(exons)
+                            gffdata.write(get_cds_lines(mrna_id, gene_id))
 
         gffdata.write("###")
 
@@ -2316,8 +2424,8 @@ class GenomeAnnotationClientAPI(GenomeAnnotationInterface):
 
     @logged(_ga_log)
     @client_method
-    def get_proteins(self):
-        result = self.client.get_proteins(self._token, self.ref)
+    def get_proteins(self, cds_feature_id_list=None):
+        result = self.client.get_proteins(self._token, self.ref, cds_feature_id_list)
 
         output = {}
         for x in result:
@@ -2431,7 +2539,4 @@ class GenomeAnnotationClientAPI(GenomeAnnotationInterface):
     @logged(_ga_log)
     @client_method
     def get_gff(self, gene_feature_id_list=None):
-        result = self.client.get_gff(self._token, self.ref, gene_feature_id_list)
-        out = blob.BlobBuffer()
-        out.write(result)
-        return out
+        raise NotImplementedError("This is a library only method.")

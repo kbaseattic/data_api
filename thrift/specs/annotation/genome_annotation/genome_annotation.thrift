@@ -313,7 +313,8 @@ service thrift_service {
      * @return Mapping from protein ID to data about the protein.
      */
     map<string, Protein_data> get_proteins(1:required string token,
-                                           2:required ObjectReference ref) throws (
+                                           2:required ObjectReference ref,
+                                           3:list<string> cds_id_list) throws (
         1:ServiceException generic_exception,
         2:AuthorizationException authorization_exception,
         3:AuthenticationException authentication_exception,

@@ -195,8 +195,10 @@ class BuildThriftClients(setuptools.Command):
 
     def _try_run(self):
         spec_base_path = "thrift/specs"
+        dest_base_path = "thrift/stubs"
+        spec_inc_obj = spec_base_path + "/object"
         spec_common_path = os.path.join(spec_base_path, 'common')
-        set_thrift_version(os.path.join(spec_common_path, 'version.tinc'), version)
+        set_thrift_version(os.path.join(spec_common_path, 'version.thriftinc'), version)
         for dirpath, dirnames, filenames in os.walk(spec_base_path):
             for f in filter(lambda _: _.endswith('.thrift'), filenames):
                 spec_path = os.path.abspath(os.path.join(dirpath, f))
@@ -208,7 +210,7 @@ class BuildThriftClients(setuptools.Command):
                     if os.path.exists(settings.generated_dir):
                         shutil.rmtree(settings.generated_dir)
                     # Run Thrift compiler to generate new stubs
-                    cmd = ["thrift", "-r", "--gen"]
+                    cmd = ["thrift",  "-I", spec_inc_obj, "-r", "--gen"]
                     cmd.append(settings.style)
                     cmd.append(spec_path)
                     _log.debug("{}: Thrift command = {}".format(lang, cmd))
@@ -235,14 +237,18 @@ class BuildThriftClients(setuptools.Command):
                         for x in generated_files:
                             for name in settings.copy_files:
                                 if name == os.path.basename(x):
-                                    destination = spec_path.rsplit("/",1)[0]\
-                                        .replace("specs", "stubs/" + lang)
-                                    shutil.copyfile(x, os.path.join(destination,
-                                                                    name))
+                                    thrift_file_path, _ = spec_path.rsplit("/", 1)
+                                    if lang == 'pythonhahaha' and name == 'object.thrift':
+                                        # For Python, move copies of 'object' package under each subdir
+                                        pass # STOPPED
+                                    else:
+                                        dest_path = thrift_file_path.replace("specs", "stubs/" + lang)
+                                        shutil.copyfile(x, os.path.join(dest_path, name))
                                 copied = True
                     if not copied:
                         raise Exception("Unable to find thrift-generated "
                                         "files to copy!")
+
         # Remove original generated directories
         for lang in client_languages:
             settings = thrift_build[lang]
@@ -272,8 +278,9 @@ class BuildThriftServers(setuptools.Command):
 
     def _try_run(self):
         spec_base_path = "thrift/specs"
+        spec_inc_obj = spec_base_path + "/object"
         spec_common_path = os.path.join(spec_base_path, 'common')
-        set_thrift_version(os.path.join(spec_common_path, 'version.tinc'), version)
+        set_thrift_version(os.path.join(spec_common_path, 'version.thriftinc'), version)
         start_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), spec_base_path)
         for dirpath, dirnames, filenames in os.walk(start_path):
             for f in filenames:
@@ -283,7 +290,7 @@ class BuildThriftServers(setuptools.Command):
                     # first generate all the twisted server code
                     settings = thrift_build['python_server']
 
-                    command = ["thrift", "-r", "--gen"]
+                    command = ["thrift",  "-I", spec_inc_obj, "-r", "--gen"]
                     command.append(settings.style)
                     command.append(spec_path)
                     errno = call_command(command, is_thrift=True)
