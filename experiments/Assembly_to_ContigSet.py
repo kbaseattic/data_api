@@ -34,17 +34,18 @@ ERROR = lambda(s): _log.error(s)
 contigset_type = 'KBaseGenomes.ContigSet-3.0'
 
 class Converter(object):
-    """Convert a new Genome Assembly object to an old ContigSet object.
+    """Convert a "new" Genome Assembly object to an "old" ContigSet object.
 
-    For larger Eukaryotes, the new ContigSet may not be able to fit the
-    sequence. In this case the sequence for *all* contigs will be dropped
-    and a warning will be printed. In some extreme cases, even the contigs
-    without sequence will be over the object size limit (see `MAX_OBJECT_BYTES`),
-    in which case the contigs will be empty and the resulting object will be
-    just the top-level metadata.
+    For larger Eukaryotes, the sequence may not fit in a single workspace
+    object (limit is in `MAX_OBJECT_BYTES`), which is how the ContigSet stores it.
+    In this case, the sequence for *all* contigs will be dropped
+    and a warning will be printed. In some extreme cases in which even the contigs
+    without sequence will be over the object size limit, the list of contigs will be
+    empty (zero-length) and the resulting object will be just the top-level metadata.
 
-    To use, initialize with the Assembly object reference and the KBase instance
-    abbreviation, then call :meth:`convert()` with the target workspace.
+    To perform the conversion, construct this class with the Assembly object
+    reference and the KBase instance abbreviation (see keys of `all_services`), then
+    call :meth:`convert()` with the target workspace.
     """
     MAX_OBJECT_BYTES = 1e9 # Maximum size of object allowed by workspace (1GB, with slop)
 
@@ -53,11 +54,26 @@ class Converter(object):
             "workspace_service_url": "https://ci.kbase.us/services/ws/",
             "shock_service_url": "https://ci.kbase.us/services/shock-api/",
             "handle_service_url": "https://ci.kbase.us/services/handle_service/"
+        },
+        'prod': {
+            "workspace_service_url": "https://kbase.us/services/ws/",
+            "shock_service_url": "https://kbase.us/services/shock-api/",
+            "handle_service_url": "https://kbase.us/services/handle_service/"
         }
     }
     token = os.environ["KB_AUTH_TOKEN"]
 
     def __init__(self, kbase_instance='ci', ref=None):
+        """Create the converter.
+
+        You will need to run :meth:`convert`, with a target workspace
+        identifier, to actually perform the conversion.
+
+        Args:
+            kbase_instance (str): Short code for instance of KBase ('prod' or 'ci')
+            ref (str): KBase object reference for the source Assembly object,
+                       e.g. "ReferenceGenomeAnnotations/kb|g.166819_assembly".
+        """
         self.services = self.all_services[kbase_instance]
         self.asm_ref = ref
         # Connect to AssemblyAPI and retrieve Assembly object
@@ -83,13 +99,16 @@ class Converter(object):
 
         Args:
             workspace_id (str or int): Numeric workspace identifier
+        Returns:
+            (str) Workspace reference of created object
         """
         INFO('building contig_set')
         contig_set_dict = self._build_contig_set()
 
         INFO('uploading workspace data')
         ws_name = 'kb|ws.{}'.format(workspace_id)
-        self._upload_to_workspace(contig_set_dict, ws_name)
+        contigset_ref = self._upload_to_workspace(contig_set_dict, ws_name)
+        return contigset_ref
 
     def _build_contig_set(self):
         """Build ContigSet dict from the Data API Assembly object.
@@ -139,7 +158,7 @@ class Converter(object):
         elif sequence_size + contigs_size > self.MAX_OBJECT_BYTES:
             self.include_sequence = False
             WARN('Sequence ({:d}) and contigs ({:d} =~ {:d} bytes) size together is too big. '
-                 'Dropping sequence.')
+                 'Dropping sequence.'.format(sequence_size, num_contigs, contigs_size))
         elif sequence_size > self.MAX_OBJECT_BYTES:
             WARN('Sequence ({:d}) size is too big. Dropping sequence.'.format(sequence_size))
             self.include_sequence = False
@@ -187,6 +206,12 @@ class Converter(object):
     def _upload_to_workspace(self, contig_set, target_ws):
         """Upload the contigset data to the Workspace.
         Taken from Gavin's file converter.
+
+        Args:
+            contig_set (dict): Populated ContigSet structure
+            target_ws (str): Reference to target workspace
+        Returns:
+            (str) Workspace reference for created object
         """
         source_ref = self.asm_ref
         ws = Workspace(self.services['workspace_service_url'], token=self.token)
@@ -204,6 +229,7 @@ class Converter(object):
                          ]
              }
         )
+        return '{}/{}'.format(target_ws, contig_set['name'])
 
 
 def _parse_args():
@@ -226,7 +252,8 @@ if __name__ == '__main__':
     INFO('Initialize converter')
     converter = Converter(ref=args.asmobj)
     INFO('Convert object')
-    converter.convert(workspace_id=args.workspace_id)
-    INFO('Done')
+    ref = converter.convert(workspace_id=args.workspace_id)
+    INFO('Done.')
+    print('ContigSet {} created'.format(ref))
     sys.exit(0)
 
