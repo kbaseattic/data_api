@@ -12,8 +12,8 @@ import sys
 # Local
 from doekbase.data_api.sequence.assembly.api import AssemblyAPI
 from doekbase.workspace.client import Workspace
-from doekbase.data_api.core import ObjectAPI
 from doekbase.handle.Client import AbstractHandle as handleClient
+from doekbase.data_api.pbar import PBar # progress-bar
 
 # Set up logging
 
@@ -63,7 +63,7 @@ class Converter(object):
     }
     token = os.environ["KB_AUTH_TOKEN"]
 
-    def __init__(self, kbase_instance='ci', ref=None):
+    def __init__(self, kbase_instance='ci', ref=None, show_progress_bar=False):
         """Create the converter.
 
         You will need to run :meth:`convert`, with a target workspace
@@ -78,10 +78,8 @@ class Converter(object):
         self.asm_ref = ref
         # Connect to AssemblyAPI and retrieve Assembly object
         self.asm = AssemblyAPI(self.services, self.token, ref)
-        self.asm_object = ObjectAPI(self.services, token=self.token, ref=ref)
 
-        INFO('external source: {}'.format(
-            self.asm_object.get_data_subset(["external_source"])))
+        INFO('external source: {}'.format(self.external_source))
 
         # connect to Handle service
         try:
@@ -93,6 +91,8 @@ class Converter(object):
 
         # flags for handling over-large objects
         self.include_sequence, self.include_contigs = True, True
+
+        self._show_pbar = show_progress_bar
 
     def convert(self, workspace_id=None):
         """Create ContigSet and upload it to the workspace.
@@ -128,12 +128,13 @@ class Converter(object):
         # Construct top-level metadata
         fasta_ref, fasta_node, fasta_handle = self._get_fasta_info()
         a = self.asm # local alias
+        asm_id = a.get_assembly_id()
         contig_set_dict = {
-            'id': a.get_assembly_id(),
-            'name': a.get_assembly_id(),
-            'md5': a.get_data_subset(['md5'])['md5'],
-            'source_id': a.get_data_subset(['external_source_id'])['external_source_id'],
-            'source': a.get_data_subset(['external_source'])['external_source'],
+            'id': asm_id,
+            'name': asm_id,
+            'md5': self.md5,
+            'source_id': self.external_source_id,
+            'source': self.external_source,
             'reads_ref': '',
             'fasta_ref': fasta_handle,
             'contigs': contigs_list,
@@ -166,9 +167,13 @@ class Converter(object):
     def _build_contig_list(self, contigs):
         """Build list of contigs as dictionary for ContigSet.
         """
+        pbar = PBar(len(contigs), 60) if self._show_pbar else None
         contigs_list = []
         for c_id, c_val in contigs.iteritems():
-            DEBUG("contig: {}".format(c_id))
+            if _log.isEnabledFor(logging.DEBUG):
+                DEBUG("contig: {}".format(c_id))
+            elif pbar:
+                pbar.inc(1)
             contig_dict = {
                 'id': c_val['contig_id'],
                 'length': c_val['length'],
@@ -182,13 +187,15 @@ class Converter(object):
                 # 'complete': ??,
             }
             contigs_list.append(contig_dict)
+        if pbar:
+            pbar.done()
         return contigs_list
 
     def _get_fasta_info(self):
         """Get FASTA reference, shock node ID, and handle ID
         """
         # Get FASTA ref
-        fasta_ref = self.asm_object.get_data_subset(['fasta_handle_ref'])['fasta_handle_ref']
+        fasta_ref = self.fasta_handle_ref
         INFO("got FASTA ref: {}".format(fasta_ref))
         # Get Handle for FASTA ref
         handles = self.handle_client.hids_to_handles([fasta_ref])
@@ -231,12 +238,35 @@ class Converter(object):
         )
         return '{}/{}'.format(target_ws, contig_set['name'])
 
+    # Asssembly property accessors
+
+    @property
+    def external_source(self):
+        return self._asm_prop('external_source')
+
+    @property
+    def external_source_id(self):
+        return self._asm_prop('external_source_id')
+
+    @property
+    def fasta_handle_ref(self):
+        return self._asm_prop('fasta_handle_ref')
+
+    @property
+    def md5(self):
+        return self._asm_prop('md5')
+
+    def _asm_prop(self, name):
+        return self.asm.get_data_subset([name])[name]
+
 
 def _parse_args():
     parser = argparse.ArgumentParser(description=__doc__.strip())
     parser.add_argument('workspace_id', default='6502')
     parser.add_argument('-a', dest='asmobj', help='Assembly object', metavar='ID',
                         default="ReferenceGenomeAnnotations/kb|g.166819_assembly")
+    parser.add_argument('-p', dest='progress', help='Show progress bar(s)',
+                        action='store_true')
     parser.add_argument('-v', dest='vb', action='count', default=0,
                         help='Increase verbosity (repeatable)')
     return parser.parse_args()
@@ -250,7 +280,7 @@ if __name__ == '__main__':
     else:
         _log.setLevel(logging.WARN)
     INFO('Initialize converter')
-    converter = Converter(ref=args.asmobj)
+    converter = Converter(ref=args.asmobj, show_progress_bar=args.progress)
     INFO('Convert object')
     ref = converter.convert(workspace_id=args.workspace_id)
     INFO('Done.')
