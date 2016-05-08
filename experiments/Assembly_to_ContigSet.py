@@ -106,7 +106,7 @@ class Converter(object):
         contig_set_dict = self._build_contig_set()
 
         INFO('uploading workspace data')
-        ws_name = 'kb|ws.{}'.format(workspace_id)
+        ws_name = workspace_id
         contigset_ref = self._upload_to_workspace(contig_set_dict, ws_name)
         return contigset_ref
 
@@ -263,7 +263,7 @@ class Converter(object):
 def _parse_args():
     parser = argparse.ArgumentParser(description=__doc__.strip())
     parser.add_argument('workspace_id', default='6502')
-    parser.add_argument('-a', dest='asmobj', help='Assembly object', metavar='ID',
+    parser.add_argument('-a', dest='asmobj', help='Assembly object (%(default)s)', metavar='ID',
                         default="ReferenceGenomeAnnotations/kb|g.166819_assembly")
     parser.add_argument('-p', dest='progress', help='Show progress bar(s)',
                         action='store_true')
