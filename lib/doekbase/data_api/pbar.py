@@ -12,7 +12,9 @@ class PBar(object):
     c3 = '.' # right end marker
     p = ['|', '/', '-', '\\'] # cur-pos spinner chars
 
-    def __init__(self, total, width, ostrm=sys.stdout):
+    def __init__(self, total=100, width=60, ostrm=sys.stdout):
+        assert total > 0
+        assert width > 0
         self.n, self.w, self.c, self.i = total, width, 0, 0
         self.o = ostrm
 
