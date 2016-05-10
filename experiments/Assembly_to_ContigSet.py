@@ -238,7 +238,7 @@ class Converter(object):
         )
         return '{}/{}'.format(target_ws, contig_set['name'])
 
-    # Asssembly property accessors
+    # Object property accessors
 
     @property
     def external_source(self):
