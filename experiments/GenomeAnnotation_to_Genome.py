@@ -1,218 +1,266 @@
 """
 Make a Genome from a GenomeAnnotation
 """
+# Stdlib
 import argparse
-import json
+import itertools
 import logging
 import os
-
-from doekbase.data_api.sequence.assembly.api import AssemblyAPI
+import sys
+# Local
 from doekbase.data_api.annotation.genome_annotation.api import GenomeAnnotationAPI
-from doekbase.data_api.taxonomy.taxon.api import TaxonAPI
-from doekbase.data_api.core import ObjectAPI
-
 from doekbase.workspace.client import Workspace
 from doekbase.handle.Client import AbstractHandle as handleClient
 
-services = {
-    'ci': {
-        "workspace_service_url": "https://ci.kbase.us/services/ws/",
-        "shock_service_url": "https://ci.kbase.us/services/shock-api/",
-        "handle_service_url": "https://ci.kbase.us/services/handle_service/"
-    }
-}
-
-token = os.environ["KB_AUTH_TOKEN"]
-
-contigset_type = 'KBaseGenomes.ContigSet-3.0'
-
-GenomAnnotation_type = 'KBaseGenomeAnnotations.GenomeAnnotation-2.1'
-
-_log = logging.getLogger('ContigSet')
+# Set up logging
+_log = logging.getLogger('GenomeAnnotation')
 _ = logging.StreamHandler()
 _.setFormatter(logging.Formatter('%(asctime)s [%(levelname)s] %(message)s'))
 _log.addHandler(_)
 _log.setLevel(logging.INFO)
+DEBUG = lambda(s): _log.debug(s)
+INFO = lambda(s): _log.info(s)
+WARN = lambda(s): _log.warn(s)
+ERROR = lambda(s): _log.error(s)
 
-def hey(s):
-    _log.info(s)
+# Constants
+contigset_type = 'KBaseGenomes.ContigSet-3.0'
+ga_type = 'KBaseGenomeAnnotations.GenomeAnnotation-2.1'
 
 
-#from Gavin's file converter
-def upload_workspace_data(cs, ws_url, source_ref, target_ws, obj_name):
-    ws = Workspace(ws_url, token=token)
-    type_ = contigset_type #ws.translate_from_MD5_types([contigset_type])[contigset_type][0]
-    ws.save_objects(
-        {'workspace': target_ws,
-         'objects': [{'name': obj_name,
-                      'type': type_,
-                      'data': cs,
-                      'provenance': [{'script': 'fakey',
-                                      'script_ver': '1.2.3',
-                                      'input_ws_objects': [source_ref],
-                                      }]
-                      }
-                     ]
-         }
-    )
+class Converter(object):
+    """Convert a "new" GenomeAnnotation object to an "old" Genome/ContigSet object.
+    """
+    class FTCode(object):
+        CDS = 'CDS'
+        RNA = 'RNA'
+        GENE = 'gene'
+        PROTEIN = 'protein'
 
-def parse_args():
-    parser = argparse.ArgumentParser()
+    all_services = {
+        'ci': {
+            "workspace_service_url": "https://ci.kbase.us/services/ws/",
+            "shock_service_url": "https://ci.kbase.us/services/shock-api/",
+            "handle_service_url": "https://ci.kbase.us/services/handle_service/"
+        },
+        'prod': {
+            "workspace_service_url": "https://kbase.us/services/ws/",
+            "shock_service_url": "https://kbase.us/services/shock-api/",
+            "handle_service_url": "https://kbase.us/services/handle_service/"
+        }
+    }
+    token = os.environ["KB_AUTH_TOKEN"]
+
+    def __init__(self, kbase_instance='ci', ref=None, show_progress_bar=False):
+        """Create the converter.
+
+        You will need to run :meth:`convert`, with a target workspace
+        identifier, to actually perform the conversion.
+
+        Args:
+            kbase_instance (str): Short code for instance of KBase ('prod' or 'ci')
+            ref (str): KBase object reference for the source Assembly object,
+                       e.g. "ReferenceGenomeAnnotations/kb|g.166819_assembly".
+            show_progress_bar (bool): If True, show a progress bar on stdout.
+        """
+        self.services = self.all_services[kbase_instance]
+        self.obj_ref = ref
+        # Connect to API and retrieve object
+        self.ga = GenomeAnnotationAPI(self.services, self.token, ref)
+
+        INFO('external source: {}'.format(self.external_source))
+
+        # connect to Handle service
+        try:
+            self.handle_client = handleClient(
+                url=self.services['handle_service_url'], token=self.token)
+        except Exception as err:
+            ERROR('Cannot connect to handle service: {}'.format(err))
+            raise
+
+        self._show_pbar = show_progress_bar
+
+    def convert(self, workspace_id):
+        taxon = self.ga.get_taxon()
+        assembly = self.ga.get_assembly()
+        genome = {
+            'id': self.external_source_id,
+            'scientific_name': taxon.get_scientific_name(),
+            'domain': taxon.get_domain(),
+            'genetic_code': taxon.get_genetic_code(),
+            'dna_size': assembly.get_dna_size(),
+            'num_contigs': assembly.get_number_contigs(),
+            'contig_lengths': assembly.get_contig_lengths(),
+            'contig_ids': assembly.get_contig_ids(),
+            'source': self.external_source,
+            'source_id': self.external_source_id,
+            'md5': self.md5,
+            'taxonomy': taxon.get_scientific_lineage(),
+            'gc_content': assembly.get_gc_content(),
+            'complete': 1,
+            'publications': []
+        }
+        # the Contig list is duplicated in both Genome and ContigSet,
+        # per convention of the Genome uploader only the ContigSet field is populated
+
+        INFO('populating features')
+        genome['features']  = itertools.chain(self._get_proteins(),
+                                              self._get_genes(),
+                                              self._get_rna())
+
+        INFO('uploading workspace data')
+
+        ref = '{}/1/1'.format(workspace_id)
+
+        # fill with proper ref
+        genome['contigset_ref'] = ref
+
+        name = genome['id']
+        if isinstance(genome['id'], (int, long)):
+            name = str(genome['id']) + "_Genome"
+
+        INFO('uploading workspace data')
+        ws_name = workspace_id
+        target_ref = self._upload_to_workspace(genome, ws_name)
+        return target_ref
+
+    def _get_features_by_type(self, t):
+        ids = self.ga.get_feature_ids(filters={'type_list': [t]})['by_type'].get(t, [])
+        return self.ga.get_features(ids) if ids else []
+
+
+    def _get_proteins(self):
+        INFO('getting proteins')
+        proteins = self.ga.get_proteins()
+        cds_features = self._get_features_by_type(self.FTCode.CDS)
+        for name, val in proteins.iteritems():
+            DEBUG('add protein {}'.format(name))
+            feature = {
+                'id': name,
+                'type': self.FTCode.PROTEIN,
+                'function': val['function'],
+                'protein_translation': val['protein_amino_acid_sequence'],
+                'aliases': val['protein_aliases']
+            }
+            if name in cds_features:
+                feature.update({
+                'type': self.FTCode.CDS,
+                'location': val['feature_locations'],
+                'md5': val['feature_md5'],
+                'dna_sequence': val['feature_dna_sequence'],
+                'dna_sequence_length': val['feature_dna_sequence_length']
+                })
+            yield feature
+
+    def _get_genes(self):
+        return self._get_features(self.FTCode.GENE)
+
+    def _get_rna(self):
+        return self._get_features(self.FTCode.RNA)
+
+    def _get_features(self, t):
+        INFO('getting {}s'.format(t))
+        features = self._get_features_by_type(t)
+        for name, val in features.iteritems():
+            DEBUG('add gene {}'.format(name))
+            yield {
+                'id': name,
+                'type': t,
+                'function': val['feature_function'],
+                'protein_translation': '',
+                'location': val['feature_locations'],
+                'md5': val['feature_md5'],
+                'dna_sequence': val['feature_dna_sequence'],
+                'dna_sequence_length': val['feature_dna_sequence_length'],
+                'aliases': val['feature_aliases']
+            }
+
+    def _upload_to_workspace(self, obj, target_ws):
+        """Upload the data to the Workspace.
+        Taken from Gavin's file converter.
+
+        Args:
+            obj (dict): Populated ContigSet structure
+            target_ws (str): Reference to target workspace
+        Returns:
+            (str) Workspace reference for created object
+        """
+        source_ref = self.obj_ref
+        ws = Workspace(self.services['workspace_service_url'], token=self.token)
+        type_ = ga_type  # ws.translate_from_MD5_types([contigset_type])[contigset_type][0]
+        ws.save_objects(
+            {'workspace': target_ws,
+             'objects': [{'name': obj['name'],
+                          'type': type_,
+                          'data': obj,
+                          'provenance': [{'script': __name__,
+                                          'script_ver': '1.2.3',
+                                          'input_ws_objects': [source_ref],
+                                          }]
+                          }
+                         ]
+             }
+        )
+        return '{}/{}'.format(target_ws, obj['name'])
+
+
+    # Object property accessors
+
+    @property
+    def external_source(self):
+        return self._obj_prop('external_source')
+
+    @property
+    def external_source_id(self):
+        return self._obj_prop('external_source_id')
+
+    @property
+    def fasta_handle_ref(self):
+        return self._obj_prop('fasta_handle_ref')
+
+    @property
+    def md5(self):
+        return self._obj_prop('md5')
+
+    def _obj_prop(self, name):
+        return self.ga.get_data_subset([name])[name]
+
+
+def _parse_args():
+    parser = argparse.ArgumentParser(description=__doc__.strip())
     parser.add_argument('workspace_id', default='6502')
-    parser.add_argument('-g', dest='gaobj', help='GenomeAnnotation object', metavar='ID',
+    parser.add_argument('-o', dest='gaobj', help='GenomeAnnotation object (%(default)s)',
+                        metavar='ID',
                         default="ReferenceGenomeAnnotations/kb|g.166819")
-    args = parser.parse_args()
-    return args
+    parser.add_argument('-p', dest='progress', help='Show progress bar(s)',
+                        action='store_true')
+    parser.add_argument('-v', dest='vb', action='count', default=0,
+                        help='Increase verbosity (repeatable)')
+    return parser.parse_args()
 
 def main():
-
-    args = parse_args()
+    args = _parse_args()
+    if args.vb > 1:
+        _log.setLevel(logging.DEBUG)
+    elif args.vb > 0:
+        _log.setLevel(logging.INFO)
+    else:
+        _log.setLevel(logging.WARN)
+    INFO('Initialize converter')
+    converter = Converter(ref=args.gaobj, show_progress_bar=args.progress)
+    INFO('Convert object')
+    ref = converter.convert(workspace_id=args.workspace_id)
+    INFO('Done.')
+    print('Genome {} created'.format(ref))
+    sys.exit(0)
 
     #genome_ref = '6838/146'#ReferenceGenomeAnnotations/kb|g.166819
-
-
-    ga_api = GenomeAnnotationAPI(services['ci'], token=token, ref=args.gaobj)
-
-    ga_object = ObjectAPI(services['ci'], token=token, ref=args.gaobj)
-    asm_object = ObjectAPI(services['ci'], token=token, ref=(args.gaobj+"_assembly"))
-    hey('external source: {}'.format(asm_object.get_data_subset(["external_source"])))
-
-    tax_api = ga_api.get_taxon()
-
-    asm_api = ga_api.get_assembly()
-
-
-    genome_dict = dict()
-
-    genome_dict['id'] = asm_object.get_data_subset(["external_source"])["external_source"]
-
-    genome_dict['scientific_name'] = tax_api.get_scientific_name()
-    genome_dict['domain'] = tax_api.get_domain()
-    genome_dict['genetic_code'] = tax_api.get_genetic_code()
-    genome_dict['dna_size'] = asm_api.get_dna_size()
-    genome_dict['num_contigs'] = asm_api.get_number_contigs()
-
-    genome_dict['contig_lengths'] = asm_api.get_contig_lengths()
-    genome_dict['contig_ids'] = asm_api.get_contig_ids()
-    genome_dict['source'] = asm_object.get_data_subset(["external_source_id"])["external_source_id"]
-    genome_dict['source_id'] = asm_object.get_data_subset(["external_source"])["external_source"]
-    genome_dict['md5'] = asm_object.get_data_subset(["md5"])["md5"]
-    genome_dict['taxonomy'] = tax_api.get_scientific_lineage()
-    genome_dict['gc_content'] = asm_api.get_gc_content()
-    genome_dict['complete'] = 1
-
-    #not loaded in GenomeAnnotation?
-    #genome_dict['publications'] = 
-
-
-    #the Contig list is duplicated in both Genome and ContigSet, 
-    #per convention of the Genome uploader only the ContigSet field is populated
-
-    feature_list = []
-    proteins = ga_api.get_proteins()
-    print "proteins"
-
-    feature_ids = ga_api.get_feature_ids(filters={"type_list":['CDS']})
-    if 'CDS' in feature_ids['by_type']:
-        features_CDS = ga_api.get_features(feature_ids['by_type']['CDS'])
-        print "CDS"
-
-    for p in proteins:
-        print p
-        #print proteins[p].keys()
-        feature_dict = dict()
-        feature_dict['id'] = p
-
-        if features_cds[p]:
-            feature_dict['type'] = 'CDS'
-        else :
-              feature_dict['type'] = 'protein'        
-
-        feature_dict['function'] = function = proteins[p]['function']
-        feature_dict['protein_translation'] = proteins[p]['protein_amino_acid_sequence']        
-        feature_dict['aliases'] = proteins[p]['protein_aliases']
-
-        if features_cds[p]:
-            feature_dict['location'] = features_cds[p]['feature_locations']        
-            feature_dict['md5'] = features_cds[p]['feature_md5']
-            feature_dict['dna_sequence'] = features_cds[p]['feature_dna_sequence'] 
-            feature_dict['dna_sequence_length'] = features_cds[p]['feature_dna_sequence_length']
-
-
-        feature_list.append(feature_dict)
-        
-
-    feature_ids_gene = ga_api.get_feature_ids(filters={"type_list":['gene']})
-    print "ids gene"
-    if 'gene' in feature_ids_gene['by_type']:
-        features = ga_api.get_features(feature_ids_gene['by_type']['gene'])
-        print"gene"
-
-        for f in features:
-            print f
-            #print features[f]
-            feature_dict = dict()
-            feature_dict['id'] = features[f]['feature_id'] 
-            feature_dict['location'] = features[f]['feature_locations']
-            feature_dict['type'] = 'gene'
-            feature_dict['function'] = features[f]['feature_function']
-            feature_dict['md5'] = features[f]['feature_md5']
-            feature_dict['protein_translation'] = ""
-            feature_dict['dna_sequence'] = features[f]['feature_dna_sequence'] 
-            feature_dict['dna_sequence_length'] = features[f]['feature_dna_sequence_length']
-            feature_dict['aliases'] = features[f]['feature_aliases']
-            feature_list.append(feature_dict)
-
-        
-        
-    #RNA
-    feature_ids_RNA = ga_api.get_feature_ids(filters={"type_list":['RNA']})
-    print "ids RNA"
-
-    if 'RNA' in feature_ids_RNA['by_type']:
-        features = ga_api.get_features(feature_ids_RNA['by_type']['RNA'])
-        print"gene"
-
-        #obj.get_features(obj.get_feature_ids({'region_list':filters})['by_type']['gene'])
-
-        for f in features:
-            print f
-            #print features[f]
-            feature_dict = dict()
-            feature_dict['id'] = features[f]['feature_id'] 
-            feature_dict['location'] = features[f]['feature_locations']
-            feature_dict['type'] = 'RNA'
-            feature_dict['function'] = features[f]['feature_function']
-            feature_dict['md5'] = features[f]['feature_md5']
-            feature_dict['protein_translation'] = ""
-            feature_dict['dna_sequence'] = features[f]['feature_dna_sequence'] 
-            feature_dict['dna_sequence_length'] = features[f]['feature_dna_sequence_length']
-            feature_dict['aliases'] = features[f]['feature_aliases']
-            feature_list.append(feature_dict)
-
-
-
-    genome_dict['features'] = feature_list
-
-
-
-    _log.info('uploading workspace data')
-
-    ref = '{}/1/1'.format(args.workspace_id)
-
-    #fill with proper ref
-    genome_dict['contigset_ref'] = ref
-
-
-    name = genome_dict['id']
-    if isinstance( genome_dict['id'], ( int, long ) ):
-        name = str(genome_dict['id']) + "_Genome"
-
-    ws_name = 'kb|ws.{}'.format(args.workspace_id)
-    upload_workspace_data(
-                genome_dict, services['ci']["workspace_service_url"], ref,
-                ws_name, name)
-    _log.info('done')
+    # ga_api = GenomeAnnotationAPI(services['ci'], token=token, ref=args.gaobj)
+    # ga_object = ObjectAPI(services['ci'], token=token, ref=args.gaobj)
+    # asm_object = ObjectAPI(services['ci'], token=token, ref=(args.gaobj+"_assembly"))
+    # hey('external source: {}'.format(asm_object.get_data_subset(["external_source"])))
+    # tax_api = ga_api.get_taxon()
+    # asm_api = ga_api.get_assembly()
 
 if __name__ == '__main__':
     main()
