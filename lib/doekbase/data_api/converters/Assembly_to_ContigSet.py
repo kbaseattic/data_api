@@ -17,17 +17,19 @@ from doekbase.data_api.pbar import PBar # progress-bar
 
 # Set up logging
 
-_log = logging.getLogger('ContigSet')
+_log = logging.getLogger('data_api.converter.Assembly_to_Contigset')
 _log_handler = logging.StreamHandler()
 _log_handler.setFormatter(
     logging.Formatter('%(asctime)s [%(levelname)s] %(message)s'))
 _log.addHandler(_log_handler)
-_log.setLevel(logging.INFO)
 DEBUG = lambda(s): _log.debug(s)
 INFO = lambda(s): _log.info(s)
 WARN = lambda(s): _log.warn(s)
 ERROR = lambda(s): _log.error(s)
 
+def _set_converter_loglevel(level):
+    """Set log level for converters in general"""
+    logging.getLogger('data_api.converter').setLevel(level)
 
 # Constants
 
@@ -94,11 +96,11 @@ class Converter(object):
 
         self._show_pbar = show_progress_bar
 
-    def convert(self, workspace_id=None):
+    def convert(self, workspace_name=None):
         """Create ContigSet and upload it to the workspace.
 
         Args:
-            workspace_id (str or int): Numeric workspace identifier
+            workspace_name (str): Workspace identifier (name)
         Returns:
             (str) Workspace reference of created object
         """
@@ -106,8 +108,7 @@ class Converter(object):
         contig_set_dict = self._build_contig_set()
 
         INFO('uploading workspace data')
-        ws_name = workspace_id
-        contigset_ref = self._upload_to_workspace(contig_set_dict, ws_name)
+        contigset_ref = self._upload_to_workspace(contig_set_dict, workspace_name)
         return contigset_ref
 
     def _build_contig_set(self):
@@ -126,7 +127,6 @@ class Converter(object):
             contigs_list = []
 
         # Construct top-level metadata
-        fasta_ref, fasta_node, fasta_handle = self._get_fasta_info()
         a = self.asm # local alias
         asm_id = a.get_assembly_id()
         contig_set_dict = {
@@ -136,9 +136,11 @@ class Converter(object):
             'source_id': self.external_source_id,
             'source': self.external_source,
             'reads_ref': '',
-            'fasta_ref': fasta_handle,
             'contigs': contigs_list,
         }
+        fasta_ref, fasta_node, fasta_handle = self._get_fasta_info()
+        if fasta_handle is not None:
+            contig_set_dict['fasta_ref'] = fasta_handle
 
         return contig_set_dict
 
@@ -196,7 +198,10 @@ class Converter(object):
         """
         # Get FASTA ref
         fasta_ref = self.fasta_handle_ref
-        INFO("got FASTA ref: {}".format(fasta_ref))
+        if fasta_ref is None:
+            WARN('no FASTA handle ref. found in Assembly')
+            return None, None, None
+        INFO('got FASTA ref: {}'.format(fasta_ref))
         # Get Handle for FASTA ref
         handles = self.handle_client.hids_to_handles([fasta_ref])
         if len(handles) != 1:
@@ -220,6 +225,7 @@ class Converter(object):
         Returns:
             (str) Workspace reference for created object
         """
+        INFO('Uploading "{}" to target workspace: {}'.format(contig_set['name'], target_ws))
         source_ref = self.asm_ref
         ws = Workspace(self.services['workspace_service_url'], token=self.token)
         type_ = contigset_type #ws.translate_from_MD5_types([contigset_type])[contigset_type][0]
@@ -242,11 +248,11 @@ class Converter(object):
 
     @property
     def external_source(self):
-        return self._asm_prop('external_source')
+        return self._asm_prop('external_source', default='unknown')
 
     @property
     def external_source_id(self):
-        return self._asm_prop('external_source_id')
+        return self._asm_prop('external_source_id', default='')
 
     @property
     def fasta_handle_ref(self):
@@ -256,13 +262,13 @@ class Converter(object):
     def md5(self):
         return self._asm_prop('md5')
 
-    def _asm_prop(self, name):
-        return self.asm.get_data_subset([name])[name]
+    def _asm_prop(self, name, default=None):
+        return self.asm.get_data_subset([name]).get(name, default)
 
 
 def _parse_args():
     parser = argparse.ArgumentParser(description=__doc__.strip())
-    parser.add_argument('workspace_id', default='6502')
+    parser.add_argument('workspace', default='6502')
     parser.add_argument('-a', dest='asmobj', help='Assembly object (%(default)s)', metavar='ID',
                         default="ReferenceGenomeAnnotations/kb|g.166819_assembly")
     parser.add_argument('-p', dest='progress', help='Show progress bar(s)',
@@ -274,15 +280,23 @@ def _parse_args():
 if __name__ == '__main__':
     args = _parse_args()
     if args.vb > 1:
-        _log.setLevel(logging.DEBUG)
+        _set_converter_loglevel(logging.DEBUG)
     elif args.vb > 0:
-        _log.setLevel(logging.INFO)
+        _set_converter_loglevel(logging.INFO)
     else:
-        _log.setLevel(logging.WARN)
+        _set_converter_loglevel(logging.WARN)
     INFO('Initialize converter')
     converter = Converter(ref=args.asmobj, show_progress_bar=args.progress)
     INFO('Convert object')
-    ref = converter.convert(workspace_id=args.workspace_id)
+    # Get name for workspace
+    workspace_name = args.workspace
+    try:
+        ws_int_id = int(workspace_name)
+        workspace_name = Workspace(url=Converter.all_services['ci'], token=Converter.token).get_workspace_info(ws_int_id)[1]
+        INFO('Workspace ID={} converted to name={}'.format(ws_int_id, workspace_name))
+    except ValueError:
+        pass
+    ref = converter.convert(workspace_name=workspace_name)
     INFO('Done.')
     print('ContigSet {} created'.format(ref))
     sys.exit(0)
