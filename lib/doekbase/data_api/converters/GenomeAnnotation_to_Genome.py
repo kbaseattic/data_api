@@ -122,9 +122,6 @@ class Converter(object):
         # this is calculated as we go along, so need to add last
         genome['md5'] = self.md5
 
-        # the Contig list is duplicated in both Genome and ContigSet,
-        # per convention of the Genome uploader only the ContigSet field is populated
-
         INFO('uploading workspace data')
         target_ref = self._upload_to_workspace(genome, workspace_name)
         return target_ref
@@ -341,14 +338,6 @@ def main():
     INFO('Done.')
     print('Genome {} created'.format(ref))
     sys.exit(0)
-
-    #genome_ref = '6838/146'#ReferenceGenomeAnnotations/kb|g.166819
-    # ga_api = GenomeAnnotationAPI(services['ci'], token=token, ref=args.gaobj)
-    # ga_object = ObjectAPI(services['ci'], token=token, ref=args.gaobj)
-    # asm_object = ObjectAPI(services['ci'], token=token, ref=(args.gaobj+"_assembly"))
-    # hey('external source: {}'.format(asm_object.get_data_subset(["external_source"])))
-    # tax_api = ga_api.get_taxon()
-    # asm_api = ga_api.get_assembly()
 
 if __name__ == '__main__':
     main()
