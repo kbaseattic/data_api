@@ -217,7 +217,7 @@ class GenomeConverter(Converter):
             if name in cds_features:
                 self._update_md5(cds_features[name]['feature_md5'])
         # generate one feature at a time
-        in_cds_features = 0
+        has_cds, no_cds = set(), []
         for name, val in proteins.iteritems():
             if pbar and not _log.isEnabledFor(logging.DEBUG):
                 pbar.inc(1)
@@ -229,20 +229,22 @@ class GenomeConverter(Converter):
                     'protein_translation': val['protein_amino_acid_sequence'],
                     'aliases': val.get('protein_aliases',{}).keys()
                 }
-                if name in cds_features:
-                    in_cds_features += 1
-                    cds_val = cds_features[name]
-                    feature.update({
-                    'type': self.FTCode.CDS,
-                    'location': self._convert_feature_locations(cds_val.get('feature_locations',[])),
-                    'md5': cds_val['feature_md5'],
-                    'dna_sequence': cds_val.get('feature_dna_sequence',''),
-                    'dna_sequence_length': cds_val['feature_dna_sequence_length']
-                    })
-                    feature['aliases'].extend(
-                        cds_val['feature_aliases'].keys())
-                else:
-                    INFO('protein {} not CDS'.format(name))
+                if name not in cds_features:
+                    ERROR('protein {} not CDS'.format(name))
+                    no_cds.append(name)
+                    # this will cause this function to raise a ValueError
+                    continue
+                has_cds.add(name)
+                cds_val = cds_features[name]
+                feature.update({
+                #'type': self.FTCode.CDS, - feature type stays 'protein'
+                'location': self._convert_feature_locations(cds_val.get('feature_locations',[])),
+                'md5': cds_val['feature_md5'],
+                'dna_sequence': cds_val.get('feature_dna_sequence',''),
+                'dna_sequence_length': cds_val['feature_dna_sequence_length']
+                })
+                feature['aliases'].extend(
+                    cds_val['feature_aliases'].keys())
             except KeyError:
                 ERROR('populating feature {}: bad value: {}'.format(name, val))
                 raise
@@ -252,8 +254,19 @@ class GenomeConverter(Converter):
             yield feature
         if pbar:
             pbar.done()
-        INFO('{:d} proteins also CDS, {:d} proteins were not'.format(
-            in_cds_features, len(proteins) - in_cds_features))
+        if len(no_cds) == 0:
+            INFO('all {:d} proteins in had associated CDS'.format(
+                len(proteins)))
+        else:
+            # Abort if any proteins did not have a CDS
+            msg = '{:d} proteins had no associated CDS: '.format(len(no_cds))
+            if len(no_cds) > 10:
+                msg += ', '.join(no_cds[:10]) + ', ...'
+            else:
+                msg += ', '.join(no_cds)
+            ERROR(msg)
+            raise ValueError(msg)
+        self._protein_ids = has_cds
 
     def _get_features_except(self, types):
         """Get all features except those in `types`.
@@ -277,12 +290,16 @@ class GenomeConverter(Converter):
             if len(features) == 0:
                 INFO('No features of type={}'.format(t))
         # eagerly update MD5, so lazy evaluation doesn't change result
-        for val in features.itervalues():
+        for name, val in features.iteritems():
+            if t == self.FTCode.CDS and name in self._protein_ids:
+                continue # already did this one as a protein
             self._update_md5(val['feature_md5'])
         # generate one feature at a time
         for name, val in features.iteritems():
             if pbar and not _log.isEnabledFor(logging.DEBUG):
                 pbar.inc(1)
+            if t == self.FTCode.CDS and name in self._protein_ids:
+                continue # already did this one as a protein
             feature = {
                 'id': name,
                 'type': t,
