@@ -14,10 +14,12 @@ __author__ = 'Dan Gunter <dkgunter@lbl.gov>'
 __date__ = '5/12/16'
 
 # Stdlib
+import abc
 import hashlib
 import itertools
 import logging
 import os
+import re
 # Local
 from doekbase.data_api.annotation.genome_annotation.api import GenomeAnnotationAPI
 from doekbase.data_api.sequence.assembly.api import AssemblyAPI
@@ -45,6 +47,7 @@ ga_type = 'KBaseGenomeAnnotations.GenomeAnnotation-2.1'
 genome_type = 'KBaseGenomes.Genome-8.0'
 
 class Converter(object):
+    __metaclass__ = abc.ABCMeta
     class FTCode(object):
         CDS = 'CDS'
         RNA = 'RNA'
@@ -95,6 +98,10 @@ class Converter(object):
         # progress-bar nonsense
         self._show_pbar = show_progress_bar
 
+    @abc.abstractmethod
+    def convert(self, workspace_name):
+        pass
+
     def get_target_name(self):
         """Form the target object name from the source name of `self.api_obj`.
         Uses class variable `target_suffix` to form the new name.
@@ -125,7 +132,8 @@ class Converter(object):
             (str) Workspace reference for created object
         """
         source_ref = self.obj_ref
-        ws = Workspace(self.services['workspace_service_url'], token=self.token)
+        target_ws = self._normalize_ws_to_name(target_ws)
+        ws = self._connect_to_workspace()
         INFO('Creating object {} in workspace {}'.format(target_name, target_ws))
         ws.save_objects(
             {'workspace': target_ws,
@@ -141,6 +149,22 @@ class Converter(object):
              }
         )
         return '{}/{}'.format(target_ws, target_name)
+
+    def _connect_to_workspace(self):
+        return Workspace(self.services['workspace_service_url'], token=self.token)
+
+    def _normalize_ws_to_name(self, ws_id):
+        """Make sure WS is not a number, but a name"""
+        if re.match('\d+', ws_id):
+            # fetch name from ID
+            client = self._connect_to_workspace()
+            wsi = {'id': ws_id}
+            info = client.get_workspace_info(wsi)
+            name = info[1]
+        else:
+            # it is already a name
+            name = ws_id
+        return name
 
     # Object property accessors
 
@@ -268,7 +292,7 @@ class GenomeConverter(Converter):
                 'md5': val['feature_md5'],
                 'dna_sequence': val['feature_dna_sequence'],
                 'dna_sequence_length': val['feature_dna_sequence_length'],
-                'aliases': val['feature_aliases'].keys() + p_aliases
+                'aliases': list(set(val['feature_aliases'].keys() + p_aliases))
             }
             if _log.isEnabledFor(logging.DEBUG):
                 DEBUG('adding feature {} md5={}'.format(
