@@ -14,12 +14,10 @@ __author__ = 'Dan Gunter <dkgunter@lbl.gov>'
 __date__ = '5/12/16'
 
 # Stdlib
-import argparse
 import hashlib
 import itertools
 import logging
 import os
-import sys
 # Local
 from doekbase.data_api.annotation.genome_annotation.api import GenomeAnnotationAPI
 from doekbase.data_api.sequence.assembly.api import AssemblyAPI
@@ -66,6 +64,9 @@ class Converter(object):
     }
     token = os.environ["KB_AUTH_TOKEN"]
 
+    #: Override this in subclasses to create a naming convention
+    #: between source and target objects.
+    target_suffix = 'generic'
 
     def __init__(self, kbase_instance='ci', ref=None, show_progress_bar=False):
         """Create the converter.
@@ -75,14 +76,14 @@ class Converter(object):
 
         Args:
             kbase_instance (str): Short code for instance of KBase ('prod' or 'ci')
-            ref (str): KBase object reference for the source Assembly object,
-                       e.g. "ReferenceGenomeAnnotations/kb|g.166819_assembly".
+            ref (str): KBase object reference for the source object
             show_progress_bar (bool): If True, show a progress bar on stdout.
         """
         self.services = self.all_services[kbase_instance]
         self._kb_instance = kbase_instance
         self.obj_ref = ref
         self.api_obj = None
+        self._target_name = None
 
         # connect to Handle service
         try:
@@ -93,6 +94,24 @@ class Converter(object):
             raise
         # progress-bar nonsense
         self._show_pbar = show_progress_bar
+
+    def get_target_name(self):
+        """Form the target object name from the source name of `self.api_obj`.
+        Uses class variable `target_suffix` to form the new name.
+        Result is cached and re-used after first call.
+
+        Returns:
+            (str) target name
+        Raises:
+            ValueError, if self.api_obj is None
+        """
+        if self.api_obj is None:
+            raise ValueError('Cannot get target name if source object is '
+                             'not yet defined.')
+        if self._target_name is None:
+            source_name = self.api_obj.get_info()['object_name']
+            self._target_name = source_name + '_' + self.target_suffix
+        return self._target_name
 
     def _upload_to_workspace(self, data=None, target_ws=None, target_name=None,
                              type_=None):
@@ -139,8 +158,11 @@ class Converter(object):
 
 
 class GenomeConverter(Converter):
-    """Convert a "new" GenomeAnnotation object to an "old" Genome/ContigSet object.
+    """Convert a "new" GenomeAnnotation object to an "old"
+       Genome/ContigSet object.
     """
+    target_suffix = 'genome'
+
     def __init__(self, **kw):
         """Create the converter.
 
@@ -159,7 +181,7 @@ class GenomeConverter(Converter):
         contig_lengths = assembly.get_contig_lengths()
         self.proteins = self.api_obj.get_proteins()
         genome = {
-            'id': self.external_source_id,
+            'id': self.get_target_name(), #self.external_source_id,
             'scientific_name': taxon.get_scientific_name(),
             'domain': taxon.get_domain(),
             'genetic_code': taxon.get_genetic_code(),
@@ -279,7 +301,7 @@ class GenomeConverter(Converter):
         INFO('Uploading object to workspace "{}"'.format(target_ws))
         return self._upload_to_workspace(
             data=data, type_=genome_type,
-            target_name=self.api_obj.get_info()['object_name'] + '_Genome',
+            target_name=self.get_target_name(),
             target_ws=target_ws)
 
     # Object property accessors
@@ -309,6 +331,8 @@ class AssemblyConverter(Converter):
     call :meth:`convert()` with the target workspace.
     """
     MAX_OBJECT_BYTES = 1e9 # Maximum size of object allowed by workspace (1GB, with slop)
+
+    target_suffix = 'contigset'
 
     def __init__(self, **kw):
         """Create the converter.
@@ -356,7 +380,7 @@ class AssemblyConverter(Converter):
         asm_id = a.get_assembly_id()
         contig_set_dict = {
             'id': asm_id,
-            'name': asm_id,
+            'name': self.get_target_name(),
             'md5': self.md5,
             'source_id': self.external_source_id,
             'source': self.external_source,
@@ -451,7 +475,7 @@ class AssemblyConverter(Converter):
         """
         return self._upload_to_workspace(data=contig_set, target_ws=target_ws,
                                          type_=contigset_type,
-                                         target_name=contig_set['name'])
+                                         target_name=self.get_target_name())
 
     @property
     def md5(self):
