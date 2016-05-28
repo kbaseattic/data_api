@@ -20,6 +20,13 @@ from doekbase.data_api.wsfile import WorkspaceFile
 from doekbase.data_api import cache
 from doekbase.data_api.util import PerfCollector, collect_performance
 
+# Version
+
+DATA_API_VERSION = "0.1.0"
+
+def version():
+    return DATA_API_VERSION
+
 # Logging
 
 _log = get_logger('doekbase.data_api.core')

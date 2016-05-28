@@ -12,6 +12,7 @@ import re
 # Local
 from doekbase.workspace.client import Workspace
 from doekbase.handle.Client import AbstractHandle as handleClient
+from doekbase.data_api.core import version
 
 # Set up logging
 _log = logging.getLogger('data_api.converter')
@@ -120,14 +121,17 @@ class Converter(object):
         source_ref = self.obj_ref
         target_ws = self._normalize_ws_to_name(target_ws)
         ws = self._connect_to_workspace()
-        INFO('Creating object {} in workspace {}'.format(target_name, target_ws))
+        script_name = '{}.{}'.format(self.__class__.__module__, self.__class__.__name__)
+        script_version = version()
+        INFO('Creating object {} in workspace {}, script = {} v{}'.format(
+            target_name, target_ws, script_name, script_version))
         ws.save_objects(
             {'workspace': target_ws,
              'objects': [{'name': target_name,
                           'type': type_,
                           'data': data,
-                          'provenance': [{'script': __name__,
-                                          'script_ver': '1.2.3',
+                          'provenance': [{'script': script_name,
+                                          'script_ver': script_version,
                                           'input_ws_objects': [source_ref],
                                           }]
                           }

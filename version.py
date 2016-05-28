@@ -13,21 +13,57 @@ Examples:
 Files affected:
   VERSION - this is where the version number is changed
 """
+# Stdlib
 import argparse
 import os
 import re
+import shutil
+import six
 import sys
 
 curdir = os.path.dirname(sys.argv[0])
 version_file = os.path.join(curdir, 'VERSION')
 changelog_file = os.path.join(curdir, 'CHANGELOG')
+install_locations = {
+    'python':
+        { 'lib/doekbase/data_api/core.py': 'DATA_API_VERSION' }
+}
+def install():
+    """Install version
+    """
+    version = _get_version()
+    for module_path, variable in six.iteritems(install_locations['python']):
+        pattern = '^\s*{}\s*=\s*[\'"].*[\'"]\s*'.format(variable)
+        #print("pattern = {}".format(pattern))
+        re_pattern = re.compile(pattern)
+        replacement = '{} = "{}"\n'.format(variable, version)
+        path = os.path.join(curdir, module_path)
+        tmp_path = path + '-tmp'
+        shutil.copy(path, tmp_path)
+        changes = 0
+        with open(path) as input_file, open(tmp_path, 'w') as output_file:
+            for line in input_file:
+                if re_pattern.match(line):
+                    modified_line = re.sub(pattern, replacement, line)
+                    output_file.write(modified_line)
+                    changes += 1
+                else:
+                    output_file.write(line)
+        if changes > 0:
+            shutil.move(tmp_path, path)
+            print("version updated in {infile}: {ver}".format(infile=path, ver=version))
+        else:
+            print("version unchanged in {infile}: {ver}".format(infile=path, ver=version))
+            os.unlink(tmp_path)
 
 def show():
     """Show (print) current version, from main version file.
     """
-    version = open(version_file).read().strip()
-    print(version)
-    
+    print(_get_version())
+
+def _get_version():
+    return open(version_file).read().strip()
+
 def history(ascending=False):
     """Show (print) version history, extracted from Changelog.
     """
@@ -57,7 +93,7 @@ def bump(major=False, minor=False):
     """
     # read and parse current version
     version_re = '(\d+)\.(\d+)\.(\d+)(-?\w*)'
-    old_version = open(version_file).read().strip()
+    old_version = _get_version()
     m = re.match(version_re, old_version)
     if not m:
         raise ValueError('Invalid version in {}: {}'.format(version_file, old_version))
@@ -81,14 +117,16 @@ def main():
     p = argparse.ArgumentParser(description=__doc__.strip().split('\n')[0], 
                                 epilog=__doc__[__doc__.find('Examples'):],
                                 formatter_class=argparse.RawDescriptionHelpFormatter)
-    p.add_argument('command', help='Command: bump, show, or history')
+    p.add_argument('command', help='Command: install, bump, show, or history')
     p.add_argument('--major', action='store_true', dest='bump_major', help='Do a major version bump')
     p.add_argument('--minor', action='store_true', dest='bump_minor', help='Do a minor version bump')
     p.add_argument('--asc', action='store_true', dest='history_asc', help='Show history with earliest first')
     args = p.parse_args()
     command = args.command.lower()
     try:
-        if command == 'bump':
+        if command == 'install':
+            install()
+        elif command == 'bump':
             if args.bump_major and args.bump_minor:
                 p.error('Cannot bump both major and minor versions at the same time. Pick one.')
             bump(major=args.bump_major, minor=args.bump_minor)
