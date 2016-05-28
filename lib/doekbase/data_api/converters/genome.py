@@ -3,39 +3,42 @@ Genome Annotation and Assembly converters.
 
 Class hierarchy::
 
-            Converter [base class]
+            base.Converter
               ^
               |
          +----+-----------------+
          |                      |
       AssemblyConverter     GenomeConverter
+
+Usage::
+
+    from doekbase.data_api.converters import genome
+
+    # Genome annotation
+    obj = genome.GenomeConverter(ref='6052/40/1', kbase_instance='ci')
+    new_obj_ref = obj.convert(target_workspace_id)
+    # NOTE: side-effect of this conversion is to also create a ContigSet
+    # object, by converting the associated Assembly, in the same workspace.
+
+    # Assembly
+    obj = genome.AssemblyConverter(ref='6052/31/1', kbase_instance='ci')
+    new_obj_ref = obj.convert(target_workspace_id)
 """
 __author__ = 'Dan Gunter <dkgunter@lbl.gov>'
 __date__ = '5/12/16'
 
 # Stdlib
-import abc
 import hashlib
 import itertools
 import logging
-import os
-import re
 # Local
+from . import base
+from .base import DEBUG, INFO, WARN, ERROR
 from doekbase.data_api.annotation.genome_annotation.api import GenomeAnnotationAPI
 from doekbase.data_api.sequence.assembly.api import AssemblyAPI
-from doekbase.workspace.client import Workspace
-from doekbase.handle.Client import AbstractHandle as handleClient
 from doekbase.data_api.pbar import PBar
 
-# Set up logging
-_log = logging.getLogger('data_api.converter')
-_ = logging.StreamHandler()
-_.setFormatter(logging.Formatter('%(asctime)s [%(levelname)s] %(message)s'))
-_log.addHandler(_)
-DEBUG = lambda(s): _log.debug(s)
-INFO = lambda(s): _log.info(s)
-WARN = lambda(s): _log.warn(s)
-ERROR = lambda(s): _log.error(s)
+_log = logging.getLogger('data_api.converter.genome')
 
 def set_converter_loglevel(level):
     """Set log level for converters in general"""
@@ -46,142 +49,7 @@ contigset_type = 'KBaseGenomes.ContigSet-3.0'
 ga_type = 'KBaseGenomeAnnotations.GenomeAnnotation-2.1'
 genome_type = 'KBaseGenomes.Genome-8.0'
 
-class Converter(object):
-    __metaclass__ = abc.ABCMeta
-    class FTCode(object):
-        CDS = 'CDS'
-        RNA = 'RNA'
-        GENE = 'gene'
-
-    all_services = {
-        'ci': {
-            "workspace_service_url": "https://ci.kbase.us/services/ws/",
-            "shock_service_url": "https://ci.kbase.us/services/shock-api/",
-            "handle_service_url": "https://ci.kbase.us/services/handle_service/"
-        },
-        'prod': {
-            "workspace_service_url": "https://kbase.us/services/ws/",
-            "shock_service_url": "https://kbase.us/services/shock-api/",
-            "handle_service_url": "https://kbase.us/services/handle_service/"
-        }
-    }
-    token = os.environ["KB_AUTH_TOKEN"]
-
-    #: Override this in subclasses to create a naming convention
-    #: between source and target objects.
-    target_suffix = 'generic'
-
-    def __init__(self, kbase_instance='ci', ref=None, show_progress_bar=False):
-        """Create the converter.
-
-        You will need to run :meth:`convert`, with a target workspace
-        identifier, to actually perform the conversion.
-
-        Args:
-            kbase_instance (str): Short code for instance of KBase ('prod' or 'ci')
-            ref (str): KBase object reference for the source object
-            show_progress_bar (bool): If True, show a progress bar on stdout.
-        """
-        self.services = self.all_services[kbase_instance]
-        self._kb_instance = kbase_instance
-        self.obj_ref = ref
-        self.api_obj = None
-        self._target_name = None
-
-        # connect to Handle service
-        try:
-            self.handle_client = handleClient(
-                url=self.services['handle_service_url'], token=self.token)
-        except Exception as err:
-            ERROR('Cannot connect to handle service: {}'.format(err))
-            raise
-        # progress-bar nonsense
-        self._show_pbar = show_progress_bar
-
-    @abc.abstractmethod
-    def convert(self, workspace_name):
-        pass
-
-    def get_target_name(self):
-        """Form the target object name from the source name of `self.api_obj`.
-        Uses class variable `target_suffix` to form the new name.
-        Result is cached and re-used after first call.
-
-        Returns:
-            (str) target name
-        Raises:
-            ValueError, if self.api_obj is None
-        """
-        if self.api_obj is None:
-            raise ValueError('Cannot get target name if source object is '
-                             'not yet defined.')
-        if self._target_name is None:
-            source_name = self.api_obj.get_info()['object_name']
-            self._target_name = source_name + '_' + self.target_suffix
-        return self._target_name
-
-    def _upload_to_workspace(self, data=None, target_ws=None, target_name=None,
-                             type_=None):
-        """Upload the data to the Workspace.
-        Taken from Gavin's file converter.
-
-        Args:
-            data (dict): Populated ContigSet structure
-            target_ws (str): Reference to target workspace
-        Returns:
-            (str) Workspace reference for created object
-        """
-        source_ref = self.obj_ref
-        target_ws = self._normalize_ws_to_name(target_ws)
-        ws = self._connect_to_workspace()
-        INFO('Creating object {} in workspace {}'.format(target_name, target_ws))
-        ws.save_objects(
-            {'workspace': target_ws,
-             'objects': [{'name': target_name,
-                          'type': type_,
-                          'data': data,
-                          'provenance': [{'script': __name__,
-                                          'script_ver': '1.2.3',
-                                          'input_ws_objects': [source_ref],
-                                          }]
-                          }
-                         ]
-             }
-        )
-        return '{}/{}'.format(target_ws, target_name)
-
-    def _connect_to_workspace(self):
-        return Workspace(self.services['workspace_service_url'], token=self.token)
-
-    def _normalize_ws_to_name(self, ws_id):
-        """Make sure WS is not a number, but a name"""
-        if re.match('\d+', ws_id):
-            # fetch name from ID
-            client = self._connect_to_workspace()
-            wsi = {'id': ws_id}
-            info = client.get_workspace_info(wsi)
-            name = info[1]
-        else:
-            # it is already a name
-            name = ws_id
-        return name
-
-    # Object property accessors
-
-    @property
-    def external_source(self):
-        return self._obj_prop('external_source', default='unknown')
-
-    @property
-    def external_source_id(self):
-        return self._obj_prop('external_source_id', default='')
-
-
-    def _obj_prop(self, name, default=None):
-        return self.api_obj.get_data_subset([name]).get(name, default)
-
-
-class GenomeConverter(Converter):
+class GenomeConverter(base.Converter):
     """Convert a "new" GenomeAnnotation object to an "old"
        Genome/ContigSet object.
     """
@@ -192,11 +60,12 @@ class GenomeConverter(Converter):
 
         See :class:`Converter` for keyword argument descriptions.
         """
-        Converter.__init__(self, **kw)
+        base.Converter.__init__(self, **kw)
         # Connect to API and retrieve object
         self.api_obj = GenomeAnnotationAPI(self.services, self.token, self.obj_ref)
         # overall genome MD5, see :meth:`_update_md5`, and `md5` property
         self._genome_md5 = hashlib.md5()
+        self.proteins = None
 
     def convert(self, workspace_name):
         taxon = self.api_obj.get_taxon()
@@ -301,7 +170,8 @@ class GenomeConverter(Converter):
         if pbar:
             pbar.done()
 
-    def _convert_feature_locations(self, locations):
+    @staticmethod
+    def _convert_feature_locations(locations):
         """Convert feature location dict returned from
         GenomeAnnotation API `get_features()` to the tuple in the Genome.
         """
@@ -340,7 +210,7 @@ class GenomeConverter(Converter):
         self._genome_md5.update(val)
 
 
-class AssemblyConverter(Converter):
+class AssemblyConverter(base.Converter):
     """Convert a "new" Genome Assembly object to an "old" ContigSet object.
 
     For larger Eukaryotes, the sequence may not fit in a single workspace
@@ -363,7 +233,7 @@ class AssemblyConverter(Converter):
 
         See :class:`Converter` for descriptions of keyword arguments.
         """
-        Converter.__init__(self, **kw)
+        base.Converter.__init__(self, **kw)
         # Connect to AssemblyAPI and retrieve Assembly object
         self.api_obj = AssemblyAPI(self.services, self.token, self.obj_ref)
         # flags for handling over-large objects

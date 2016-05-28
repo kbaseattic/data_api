@@ -28,14 +28,14 @@ TEST_CI_WS_ID = '7609'
 TEST_CI_GA_OBJID = '6052/40/1'
 
 def test_genome_annotation_init():
-    """Init converter, but don't run convert"""
+    """Init GA converter, but don't run convert"""
     _ga_init()
 
 def _ga_init():
     return genome.GenomeConverter(ref=TEST_CI_GA_OBJID, kbase_instance='ci')
 
 def test_genome_annotation_convert():
-    """Init and run converter on a test object"""
+    """Init and run GA converter on a test object"""
     obj = _ga_init()
     result = obj.convert(TEST_CI_WS_ID)
     assert(result)
@@ -47,14 +47,14 @@ def test_genome_annotation_convert():
 TEST_CI_ASM_OBJID = '6052/31/1'
 
 def test_assembly_init():
-    """Init converter, but don't run convert"""
+    """Init Assembly converter, but don't run convert"""
     _asm_init()
 
 def _asm_init():
     return genome.AssemblyConverter(ref=TEST_CI_ASM_OBJID, kbase_instance='ci')
 
 def test_assembly_convert():
-    """Init and run converter on a test object"""
+    """Init and run Assembly converter on a test object"""
     obj = _asm_init()
     result = obj.convert(TEST_CI_WS_ID)
     assert(result)
