@@ -43,7 +43,7 @@ class Converter(object):
             "handle_service_url": "https://kbase.us/services/handle_service/"
         }
     }
-    token = os.environ["KB_AUTH_TOKEN"]
+    token = os.environ.get("KB_AUTH_TOKEN", "")
 
     #: Override this in subclasses to create a naming convention
     #: between source and target objects. For example, change this to
