@@ -11,7 +11,7 @@ import logging
 import os
 import sys
 # local
-from doekbase.data_api.converters import genome
+from doekbase.data_api.converters import base, genome
 from doekbase.workspace.client import Workspace
 
 _log = logging.getLogger('data_api.converter.script')
@@ -71,8 +71,8 @@ def main():
     try:
         ws_int_id = int(workspace_name)
         workspace_name = Workspace(
-            url=genome.Converter.all_services[kbase_instance]['workspace_service_url'],
-            token=genome.Converter.token).get_workspace_info({'id': ws_int_id})[1]
+            url=base.Converter.all_services[kbase_instance]['workspace_service_url'],
+            token=base.Converter.token).get_workspace_info({'id': ws_int_id})[1]
         INFO('Workspace ID={} converted to name={}'.format(ws_int_id, workspace_name))
     except ValueError:
         pass
