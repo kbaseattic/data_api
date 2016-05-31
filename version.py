@@ -17,8 +17,8 @@ Files affected:
 import argparse
 import os
 import re
+#import six
 import shutil
-import six
 import sys
 
 curdir = os.path.dirname(sys.argv[0])
@@ -32,7 +32,8 @@ def install():
     """Install version
     """
     version = _get_version()
-    for module_path, variable in six.iteritems(install_locations['python']):
+    #for module_path, variable in six.iteritems(install_locations['python']):
+    for module_path, variable in install_locations['python'].iteritems():
         pattern = '^\s*{}\s*=\s*[\'"].*[\'"]\s*'.format(variable)
         #print("pattern = {}".format(pattern))
         re_pattern = re.compile(pattern)
