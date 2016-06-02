@@ -67,12 +67,14 @@ class GenomeConverter(base.Converter):
         self._genome_md5 = hashlib.md5()
         self.proteins = None
 
-    def convert(self, workspace_name):
+    def convert(self, workspace_name, contigset_ref=None):
         taxon = self.api_obj.get_taxon()
         assembly = self.api_obj.get_assembly()
         contig_ids = assembly.get_contig_ids()
         contig_lengths = assembly.get_contig_lengths()
         self.proteins = self.api_obj.get_proteins()
+        if contigset_ref is None:
+            contigset_ref = self._create_contigset(assembly, workspace_name)
         genome = {
             'id': self.get_target_name(), #self.external_source_id,
             'scientific_name': taxon.get_scientific_name(),
@@ -89,7 +91,7 @@ class GenomeConverter(base.Converter):
             'features': itertools.chain(*self._get_features_except({})),
             'complete': 1,
             'publications': [],
-            'contigset_ref': self._create_contigset(assembly, workspace_name)
+            'contigset_ref': contigset_ref
             #'quality': {},
             #'close_genomes': [],
             #'analysis_events': []
@@ -325,7 +327,7 @@ class AssemblyConverter(base.Converter):
                 'md5': c_val['md5'],
                 'sequence': c_val['sequence'] if self.include_sequence else '',
                 'name': c_val['name'],
-                'description': c_val['description'],
+                'description': c_val.get('description', 'No description'),
                 # 'genetic_code': ??,
                 # 'cell_compartment': ??,
                 # 'replicon_geometry': ??,
@@ -380,3 +382,87 @@ class AssemblyConverter(base.Converter):
         return self._obj_prop('fasta_handle_ref', default='')
 
 
+#####################################################################
+# High-level interface to convert new type to old type.
+# This would be called by the KBase uploaders.
+#####################################################################
+
+class ConvertOldTypeException(Exception):
+    def __init__(self, err, ws_url=None, source_ref=None):
+        msg = 'Convert to legacy type. ref={ref} workspace={ws}: {err}'.format(
+            ref=source_ref, ws=ws_url, err=err)
+        Exception.__init__(self, msg)
+
+def convert_genome(shock_url=None, handle_url=None, ws_url=None, obj_name=None,
+                   ws_name=None, contigset_ref=None):
+    """Convert uploaded GenomeAnnotation to a Genome + ContigSet object.
+
+    Args:
+        shock_url (str): Shock service URL
+        handle_url (str): Handle service URL
+        ws_url (str): Workspace service URL
+        obj_name (str): Name of source object
+        ws_name (str): Name of source object's workspace
+        contigset_ref (str or None): If not None, reference to existing ContigSet that was converted
+             from the existing Assembly. If None, a new ContigSet will be created.
+    Returns:
+        (str) Object reference of Genome object
+    Raises:
+        ConversionError, if conversion fails
+    """
+    # Add custom set of service URLs,
+    # since the Converter is invoked with a named group of URLs.
+    kb_services = 'upload'
+    base.Converter.all_services[kb_services] = dict(
+        workspace_service_url=ws_url, shock_service_url=shock_url,
+        handle_service_url=handle_url)
+
+    # create source reference from upload workspace and object names
+    source_ref = '{}/{}'.format(ws_name, obj_name)
+
+    # perform the conversion
+    INFO('Begin: Convert source={}'.format(source_ref))
+    try:
+        converter = GenomeConverter(kbase_instance=kb_services, ref=source_ref)
+        target_ref = converter.convert(ws_name, contigset_ref=contigset_ref)
+    except Exception as e:
+        ERROR('Failed: Convert source={}: {}'.format(source_ref, e))
+        raise ConvertOldTypeException(e, ws_url=ws_url, source_ref=source_ref)
+    INFO('Success: Convert source={} output={}'.format(source_ref, target_ref))
+    return target_ref
+
+def convert_assembly(shock_url=None, handle_url=None, ws_url=None, obj_name=None,
+                   ws_name=None):
+    """Convert uploaded Assembly to a ContigSet object.
+
+    Args:
+        shock_url (str): Shock service URL
+        handle_url (str): Handle service URL
+        ws_url (str): Workspace service URL
+        obj_name (str): Name of source object
+        ws_name (str): Name of source object's workspace
+    Returns:
+        (str) Object reference of ContigSet object
+    Raises:
+        ConversionError, if conversion fails
+    """
+    # Add custom set of service URLs,
+    # since the Converter is invoked with a named group of URLs.
+    kb_services = 'upload'
+    base.Converter.all_services[kb_services] = dict(
+        workspace_service_url=ws_url, shock_service_url=shock_url,
+        handle_service_url=handle_url)
+
+    # create source reference from upload workspace and object names
+    source_ref = '{}/{}'.format(ws_name, obj_name)
+
+    # perform the conversion
+    INFO('Begin: Convert source={}'.format(source_ref))
+    try:
+        converter = AssemblyConverter(kbase_instance=kb_services, ref=source_ref)
+        target_ref = converter.convert(ws_name)
+    except Exception as e:
+        ERROR('Failed: Convert source={}: {}'.format(source_ref, e))
+        raise ConvertOldTypeException(e, ws_url=ws_url, source_ref=source_ref)
+    INFO('Success: Convert source={} output={}'.format(source_ref, target_ref))
+    return target_ref
