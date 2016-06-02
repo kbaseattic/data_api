@@ -1610,12 +1610,11 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
 
         output = {}
         for x in proteins:
-            output[protein_cds_map[x]] = {}
-            for k in proteins[x]:
-                if k.startswith("protein_"):
-                    output[x][k] = proteins[x][k]
-                else:
-                    output[x]["protein_" + k] = proteins[x][k]
+            protein_old, protein_new = proteins[x], {}
+            for old_key in protein_old:
+                new_key = old_key if old_key.startswith("protein_") else "protein_" + old_key
+                protein_new[new_key] = protein_old[old_key]
+            output[protein_cds_map[x]] = protein_new
         return output
 
     def _get_by_mrna(self, feature_type=None, mrna_feature_id_list=None):

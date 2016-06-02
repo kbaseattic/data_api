@@ -10,3 +10,4 @@ source =
 omit =
     /*/tests/performance/*
     /*/service/*
+    /*/converters/*

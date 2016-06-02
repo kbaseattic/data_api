@@ -100,6 +100,12 @@ class _JSONObjectEncoder(_json.JSONEncoder):
             return list(obj)
         if isinstance(obj, frozenset):
             return list(obj)
+        try:
+            iterable = iter(obj)
+        except TypeError:
+            pass
+        else:
+            return list(iterable)
         return _json.JSONEncoder.default(self, obj)
 
 

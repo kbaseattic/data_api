@@ -113,7 +113,8 @@ You can view examples using a local ipython/jupyter notebook:
 
 Use semantic versioning, "x.y.z", where x is major, or incompatible, differences, y is new but backwards-compatible, and z is minor changes and bugfixes.
 
-Keep the version current in the file `VERSION` at the root level.
+Keep the version current in the file `VERSION` in the top-level directory. You can install the version in all relevant
+source files by running `./version.py install` from the same directory.
 
 Record changes in a human-readable format in the `CHANGELOG` at the root level. Each version should:
 
