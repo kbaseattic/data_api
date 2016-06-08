@@ -89,6 +89,10 @@ class Converter(object):
         """
         pass
 
+    @property
+    def metadata(self):
+        return self.api_obj.object_metadata
+
     def get_target_name(self):
         """Form the target object name from the source name of `self.api_obj`.
         Uses class variable `target_suffix` to form the new name.
@@ -171,3 +175,56 @@ class Converter(object):
         return self.api_obj.get_data_subset([name]).get(name, default)
 
 
+class GenomeName(object):
+    """Pick a proper name for uploaded or converted genome data.
+    """
+    # Configure with these prefixes/codes
+    annotation_type = 'annotation'
+    assembly_type = 'assembly'
+    old_annotation_type = 'genome'
+    old_assembly_type = 'contigset'
+    legacy = 'legacy'
+    legacy_prefix = False # false means suffix
+
+    def __init__(self, base_name, source=None):
+        """Ctor.
+
+        Args:
+            base_name (str): Base name, from user or uploader
+            source (str or None): If not None, the source to add to name
+        """
+        self._kw = {'name': base_name}
+        if source is None:
+            self._base_format = '{name}_{type}'
+        else:
+            self._base_format = '{name}_{source}_{type}'
+            self._kw['source'] = source
+
+    def get_assembly(self):
+        """Get name for Assembly object."""
+        return self._base_format.format(type=self.assembly_type, **self._kw)
+
+
+    def get_genome_annotation(self):
+        """Get name for GA object."""
+        return self._base_format.format(type=self.annotation_type, **self._kw)
+
+
+    def get_contigset(self):
+        """Get name for ContigSet object."""
+        if self.legacy_prefix:
+            name_format = '{old}_' + self._base_format
+        else:
+            name_format = self._base_format + '_{old}'
+        return name_format.format(old=self.legacy,
+                                  type=self.old_assembly_type, **self._kw)
+
+    def get_genome(self):
+        """Get name for Genome object."""
+        if self.legacy_prefix:
+            name_format = '{old}_' + self._base_format
+        else:
+            name_format = self._base_format + '_{old}'
+        return name_format.format(old=self.legacy,
+                                  type=self.old_annotation_type,
+                                  **self._kw)

@@ -371,7 +371,8 @@ class AssemblyConverter(base.Converter):
         """
         return self._upload_to_workspace(data=contig_set, target_ws=target_ws,
                                          type_=contigset_type,
-                                         target_name=self.get_target_name())
+                                         target_name=self.get_target_name(),
+                                         metadata=self.metadata)
 
     @property
     def md5(self):
