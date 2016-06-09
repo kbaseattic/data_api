@@ -50,6 +50,11 @@ class Converter(object):
     #: 'contigset' for created contigset objects.
     target_suffix = 'generic'
 
+    #: Show this blurb in the converted object metadata
+    ABOUT_BLURB = "Down-converted from a KBase " + \
+    "{from_type} object. Methods using this type are being upgraded "\
+    "to use the Data API."
+
     def __init__(self, kbase_instance='ci', ref=None, show_progress_bar=False):
         """Create the converter.
 
@@ -93,24 +98,6 @@ class Converter(object):
     def metadata(self):
         return self.api_obj.object_metadata
 
-    def get_target_name(self):
-        """Form the target object name from the source name of `self.api_obj`.
-        Uses class variable `target_suffix` to form the new name.
-        Result is cached and re-used after first call.
-
-        Returns:
-            (str) target name
-        Raises:
-            ValueError, if self.api_obj is None
-        """
-        if self.api_obj is None:
-            raise ValueError('Cannot get target name if source object is '
-                             'not yet defined.')
-        if self._target_name is None:
-            source_name = self.api_obj.get_info()['object_name']
-            self._target_name = source_name + '_' + self.target_suffix
-        return self._target_name
-
     def _upload_to_workspace(self, data=None, target_ws=None, target_name=None,
                              type_=None):
         """Upload the data to the Workspace.
@@ -129,6 +116,10 @@ class Converter(object):
         script_version = version()
         INFO('Creating object {} in workspace {}, script = {} v{}'.format(
             target_name, target_ws, script_name, script_version))
+        if self.__class__.__name__.startswith('Genome'):
+            new_type = 'GenomeAnnotation'
+        else:
+            new_type = 'Assembly'
         ws.save_objects(
             {'workspace': target_ws,
              'objects': [{'name': target_name,
@@ -137,7 +128,8 @@ class Converter(object):
                           'provenance': [{'script': script_name,
                                           'script_ver': script_version,
                                           'input_ws_objects': [source_ref],
-                                          }]
+                                          }],
+                          'meta': {'note': self.ABOUT_BLURB.format(from_type=new_type)}
                           }
                          ]
              }
@@ -170,6 +162,9 @@ class Converter(object):
     def external_source_id(self):
         return self._obj_prop('external_source_id', default='')
 
+    @property
+    def object_name(self):
+        return self.api_obj.get_info()['object_name']
 
     def _obj_prop(self, name, default=None):
         return self.api_obj.get_data_subset([name]).get(name, default)
@@ -179,7 +174,7 @@ class GenomeName(object):
     """Pick a proper name for uploaded or converted genome data.
     """
     # Configure with these prefixes/codes
-    annotation_type = 'annotation'
+    annotation_type = None # if None, do not add type for GA
     assembly_type = 'assembly'
     old_annotation_type = 'genome'
     old_assembly_type = 'contigset'
@@ -199,19 +194,31 @@ class GenomeName(object):
         else:
             self._base_format = '{name}_{source}_{type}'
             self._kw['source'] = source
+        # conditionally strip type for the genome annotation
+        if self.annotation_type is None:
+            self._ann_format = self._base_format[:self._base_format.rfind('_')]
+            self._ann_kw = self._kw
+        else:
+            self._ann_format = self._base_format
+            self._ann_kw = self._kw.copy()
+            self._ann_kw['type'] = self.annotation_type
 
     def get_assembly(self):
         """Get name for Assembly object."""
         return self._base_format.format(type=self.assembly_type, **self._kw)
 
-
     def get_genome_annotation(self):
         """Get name for GA object."""
-        return self._base_format.format(type=self.annotation_type, **self._kw)
-
+        return self._ann_format.format(**self._ann_kw)
 
     def get_contigset(self):
         """Get name for ContigSet object."""
+        name = self._kw['name']
+        if name.endswith('_' + self.assembly_type):
+            # strip last component, the _assembly suffix, before
+            # adding in the contigset suffix.
+            name = name[:name.rfind('_')]
+            self._kw['name'] = name
         if self.legacy_prefix:
             name_format = '{old}_' + self._base_format
         else:
