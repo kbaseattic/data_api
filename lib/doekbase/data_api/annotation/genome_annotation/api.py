@@ -58,6 +58,22 @@ FEATURE_DESCRIPTIONS = {
 _log = get_logger("GenomeAnnotationAPI")
 
 
+def get_location_start_stop(location):
+    start = 0
+    stop = 0
+
+    if location["strand"] == "+":
+        start = location["start"]
+        stop = location["start"] + location["length"] - 1
+    elif location["strand"] == "-":
+        start = location["start"] - location["length"] + 1
+        stop = location["start"]
+    else:
+        raise TypeError("Location strand was {} instead of + or - !".format(location["strand"]))
+
+    return start, stop
+
+
 class GenomeAnnotationInterface(object):
     __metaclass__ = abc.ABCMeta
 
@@ -1143,13 +1159,7 @@ class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
             aliases = feature_data[gene_id]["feature_aliases"]
             location = feature_data[gene_id]["feature_locations"][0]
 
-            if location["strand"] == "+":
-                start = location["start"]
-                stop = location["start"] + location["length"]
-
-            if location["strand"] == "-":
-                start = location["start"] - location["length"] + 1
-                stop = location["start"]
+            start, stop = get_location_start_stop(location)
 
             db_xref = "".join(["Dbxref={};".format(x) for x in aliases])
 
@@ -1600,12 +1610,11 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
 
         output = {}
         for x in proteins:
-            output[protein_cds_map[x]] = {}
-            for k in proteins[x]:
-                if k.startswith("protein_"):
-                    output[x][k] = proteins[x][k]
-                else:
-                    output[x]["protein_" + k] = proteins[x][k]
+            protein_old, protein_new = proteins[x], {}
+            for old_key in protein_old:
+                new_key = old_key if old_key.startswith("protein_") else "protein_" + old_key
+                protein_new[new_key] = protein_old[old_key]
+            output[protein_cds_map[x]] = protein_new
         return output
 
     def _get_by_mrna(self, feature_type=None, mrna_feature_id_list=None):
@@ -2036,13 +2045,7 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
                 function_description = feature_data[gene_id]["feature_function"]
             location = feature_data[gene_id]["feature_locations"][0]
 
-            if location["strand"] == "+":
-                start = location["start"]
-                stop = location["start"] + location["length"]
-
-            if location["strand"] == "-":
-                start = location["start"] - location["length"] + 1
-                stop = location["start"]
+            start, stop = get_location_start_stop(location)
 
             db_xref, alias = parse_aliases(gene_id)
             db_xref = "".join(db_xref)
@@ -2074,13 +2077,7 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
 
             # find min/max locations for this mrna
             for location in locations:
-                if location["strand"] == "+":
-                    start = location["start"]
-                    stop = location["start"] + location["length"]
-
-                if location["strand"] == "-":
-                    start = location["start"] - location["length"] + 1
-                    stop = location["start"]
+                start, stop = get_location_start_stop(location)
 
                 if lower_bound is None or start < lower_bound:
                     lower_bound = start
@@ -2126,6 +2123,8 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
                 if cds_id is None:
                     _log.warn("mRNA {} and gene {} do not have an associated CDS".format(mrna_id, gene_id))
                     return ""
+
+                parent = "Parent={}".format(gene_id)
             else:
                 parent = "Parent={};".format(mrna_id)
 
@@ -2139,13 +2138,7 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
             running_length = 0
             cds_lines = []
             for location in locations:
-                if location["strand"] == "+":
-                    start = location["start"]
-                    stop = location["start"] + location["length"]
-
-                if location["strand"] == "-":
-                    start = location["start"] - location["length"] + 1
-                    stop = location["start"]
+                start, stop = get_location_start_stop(location)
 
                 phase = (3 - running_length % 3) % 3
 
@@ -2183,13 +2176,7 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
 
                 location = x["exon_location"]
 
-                if location["strand"] == "+":
-                    start = location["start"]
-                    stop = location["start"] + location["length"]
-
-                if location["strand"] == "-":
-                    start = location["start"] - location["length"] + 1
-                    stop = location["start"]
+                start, stop = get_location_start_stop(location)
 
                 exon_lines.append("{}\t{}\texon\t{}\t{}\t.\t{}\t.\tID={};Parent={};Name={};\n".format(
                     contig_id,

@@ -351,7 +351,6 @@ class BuildThriftServers(setuptools.Command):
                                         " files to copy!")
                     shutil.rmtree(settings.generated_dir)
 
-
 config = {
     "description": "KBase Data API",
     "author": "Matt Henderson",
@@ -381,9 +380,15 @@ config = {
     "zip_safe": True
 }
 
-setuptools.setup(package_dir = {'': 'lib'},
-                 script_args = filter_args(),
-                 install_requires = get_dependencies(),
-                 cmdclass = {'build_thrift_servers': BuildThriftServers,
-                             'build_thrift_clients': BuildThriftClients},
-                 **config)
+def main():
+    subprocess.check_call(['./version.py', 'install'])
+    setuptools.setup(package_dir = {'': 'lib'},
+                     script_args = filter_args(),
+                     install_requires = get_dependencies(),
+                     cmdclass = {'build_thrift_servers': BuildThriftServers,
+                                 'build_thrift_clients': BuildThriftClients},
+                     **config)
+    return 0
+
+if __name__ == '__main__':
+    sys.exit(main())

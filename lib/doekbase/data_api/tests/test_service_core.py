@@ -4,7 +4,7 @@ Test doekbase.data_api.service_core module
 __author__ = 'Dan Gunter <dkgunter@lbl.gov>'
 __date__ = '12/27/15'
 
-from twisted import internet
+import twisted.internet.reactor
 from doekbase.data_api import service_core as sc
 from doekbase.data_api import exceptions as dapi_exc
 from doekbase.data_api.taxonomy.taxon.service import ttypes as tax_ttypes
@@ -126,7 +126,7 @@ class TestStartService(ut.TestCase):
         #start_service() works for semi-reasonable inputs
         args = (TaxonService, taxon_thrift_service, logging.getLogger())
         # make sure reactor loop stops immediately after it starts
-        internet.reactor.callWhenRunning(sc.stop_service)
+        twisted.internet.reactor.callWhenRunning(sc.stop_service)
         # start the reactor loop
         sc.start_service(*args)
 
@@ -138,11 +138,11 @@ class TestStartService(ut.TestCase):
         sc.os = os # put it back!
 
     def test_start_service_twisted_exception(self):
-        orig_reactor = sc.twisted.internet.reactor
-        sc.twisted.internet.reactor = MockReactor()
+        orig_reactor = twisted.internet.reactor
+        twisted.internet.reactor = MockReactor()
         args = (TaxonService, taxon_thrift_service, logging.getLogger())
         self.assertRaises(RuntimeError, sc.start_service, *args)
-        sc.twisted.internet.reactor = orig_reactor # set it back
+        twisted.internet.reactor = orig_reactor # set it back
 
 class MockOSModule(object):
     """Fake OS module for testing the process group killing, without
