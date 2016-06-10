@@ -1,18 +1,10 @@
 """
-Genome Annotation downloader.
+GenomeAnnotation to GenBank downloader.
 
-Class hierarchy::
-
-            base.Converter
-              ^
-              |
-         +----+-----------------+
-         |                      |
-      AssemblyConverter     GenomeConverter
 
 Usage::
 
-    from doekbase.data_api.converters import genome
+    from doekbase.data_api.downloaders import GenomeAnnotation
 
     # Genome annotation
     obj = genome.GenomeConverter(ref='6052/40/1', kbase_instance='ci')
@@ -24,8 +16,8 @@ Usage::
     obj = genome.AssemblyConverter(ref='6052/31/1', kbase_instance='ci')
     new_obj_ref = obj.convert(target_workspace_id)
 """
-__author__ = 'Dan Gunter <dkgunter@lbl.gov>'
-__date__ = '5/12/16'
+__author__ = 'Marcin Joachimiak <mjoachimiak@lbl.gov>'
+__date__ = '6/10/16'
 
 # Stdlib
 import hashlib
