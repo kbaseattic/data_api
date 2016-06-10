@@ -14,12 +14,12 @@ import subprocess
 from doekbase.data_api.downloaders import GenomeAnnotation
 
 
-logger = script_utils.stderrlogger(__file__, level=logging.DEBUG)
+#logger = script_utils.stderrlogger(__file__, level=logging.DEBUG)
     
-    try:
-        downloadAsGBK()
-    except Exception, e:
-        logger.exception(e)
-        sys.exit(1)
-    
-    sys.exit(0)
+try:
+    downloadAsGBK()
+except Exception, e:
+    logger.exception(e)
+    sys.exit(1)
+
+sys.exit(0)
