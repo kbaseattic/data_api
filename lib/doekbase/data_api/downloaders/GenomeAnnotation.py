@@ -37,19 +37,8 @@ from doekbase.workspace.client import Workspace
 from doekbase.data_api.core import ObjectAPI
 from doekbase.handle.Client import AbstractHandle as handleClient
 
-genome_ref = '6838/Shewanella_oneidensis_MR1'#Pseudomonas_syringae_pv_tomato_strDC3000'
-#'7364/20'#
-#genome_ref = 'ReferenceGenomeAnnotations/kb|g.440'#ReferenceGenomeAnnotations/kb|g.166819'#6838/146'#ReferenceGenomeAnnotationsV5/kb|g.166819
-#ReferenceGenomeAnnotations/kb%7Cg.440
-#ecoli: 6838/106/1
 
-ga_api = GenomeAnnotationAPI(services, token=token, ref=genome_ref)
-
-tax_api = ga_api.get_taxon()
-
-asm_api = ga_api.get_assembly()
-
-
+###example method, needs refactoring
 def downloadAsGBK():
 
   genome_ref = '6838/Shewanella_oneidensis_MR1'#Pseudomonas_syringae_pv_tomato_strDC3000'
@@ -420,13 +409,17 @@ def formatAnnotation(function,  allfunction, first, nexta) :
   format_function = ""
 
   isfirst = 1
+
+  #print "formatAnnotation "+ function+"\t"+str(len(function)) +"\t"+ str(first)+"\t"+str(len(allfunction))
+
   if (len(function) < first) :
       format_function = format_function+(function + "\"\n")
+      #print "FIRST format_function "+ format_function
   else :
       counter2 = 0
       index2 = 0
       while (index2 < len(allfunction)) :
-          #print format_function
+          #print "format_function "+ str(counter2) +"\t"+ format_function
           counter2 = counter2 + len(allfunction[index2]) + 1
 
           if (((isfirst == 1 and counter2 >= first) or counter2 >= nexta)) :
@@ -468,7 +461,7 @@ def formatAnnotation(function,  allfunction, first, nexta) :
       
   if(len(format_function) == 0):
       format_function = ""
-  #print format_function
+  #print "formatAnnotation end "+ format_function
   return format_function
 
 
