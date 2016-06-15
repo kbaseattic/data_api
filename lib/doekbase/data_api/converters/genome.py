@@ -75,8 +75,9 @@ class GenomeConverter(base.Converter):
         self.proteins = self.api_obj.get_proteins()
         if contigset_ref is None:
             contigset_ref = self._create_contigset(assembly, workspace_name)
+        self.target_name = base.GenomeName(self.object_name).get_genome()
         genome = {
-            'id': self.get_target_name(), #self.external_source_id,
+            'id': self.target_name, #self.external_source_id,
             'scientific_name': taxon.get_scientific_name(),
             'domain': taxon.get_domain(),
             'genetic_code': taxon.get_genetic_code(),
@@ -197,7 +198,7 @@ class GenomeConverter(base.Converter):
         INFO('Uploading object to workspace "{}"'.format(target_ws))
         return self._upload_to_workspace(
             data=data, type_=genome_type,
-            target_name=self.get_target_name(),
+            target_name=self.target_name,
             target_ws=target_ws)
 
     # Object property accessors
@@ -274,9 +275,10 @@ class AssemblyConverter(base.Converter):
         # Construct top-level metadata
         a = self.api_obj # local alias
         asm_id = a.get_assembly_id()
+        self.target_name = base.GenomeName(self.object_name).get_contigset()
         contig_set_dict = {
             'id': asm_id,
-            'name': self.get_target_name(),
+            'name': self.target_name,
             'md5': self.md5,
             'source_id': self.external_source_id,
             'source': self.external_source,
@@ -369,9 +371,10 @@ class AssemblyConverter(base.Converter):
         Returns:
             (str) Workspace reference for created object
         """
+        object_name = self.object_name
         return self._upload_to_workspace(data=contig_set, target_ws=target_ws,
                                          type_=contigset_type,
-                                         target_name=self.get_target_name())
+                                         target_name=self.target_name)
 
     @property
     def md5(self):
