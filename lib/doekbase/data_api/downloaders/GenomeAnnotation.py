@@ -37,8 +37,9 @@ def downloadAsGBK(genome_ref, services, token, output_file, working_dir):
 
   output_file = working_dir + output_file
 
-  if genome_ref is None or len(genome_ref) == 0:
-      genome_ref = '6838/Shewanella_oneidensis_MR1'#Pseudomonas_syringae_pv_tomato_strDC3000'
+  #if genome_ref is None or len(genome_ref) == 0:
+  #    genome_ref = '6838/Shewanella_oneidensis_MR1'#Pseudomonas_syringae_pv_tomato_strDC3000'
+  
   #'7364/20'#
   #genome_ref = 'ReferenceGenomeAnnotations/kb|g.440'#ReferenceGenomeAnnotations/kb|g.166819'#6838/146'#ReferenceGenomeAnnotationsV5/kb|g.166819
   #ReferenceGenomeAnnotations/kb%7Cg.440
