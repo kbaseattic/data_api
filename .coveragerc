@@ -11,3 +11,4 @@ omit =
     /*/tests/performance/*
     /*/service/*
     /*/converters/*
+    /*/downloaders/*
