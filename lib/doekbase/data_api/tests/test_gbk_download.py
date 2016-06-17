@@ -14,7 +14,8 @@ import subprocess
 from doekbase.data_api.downloaders import GenomeAnnotation
 
 
-def main() :
+#def main() :
+if __name__ == '__main__':	
 	#logger = script_utils.stderrlogger(__file__, level=logging.DEBUG)
 	    
 	token = os.environ.get("KB_AUTH_TOKEN")
@@ -25,10 +26,12 @@ def main() :
 
 	try:
 		print "starting"
-	    downloadAsGBK("", services, token)
-	    print "done"
+		GenomeAnnotation.downloadAsGBK("", services, token, "test.gbk", "./")
+		print "done"
 	except Exception, e:
-	    logger.exception(e)
+	    #ogger.exception(e)
+	    print "Exception"
+	    raise
 	    sys.exit(1)
 
 	sys.exit(0)

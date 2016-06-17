@@ -26,23 +26,19 @@ import logging
 import os
 import string
 # Local
-from . import base
-from .base import DEBUG, INFO, WARN, ERROR
-from doekbase.data_api.pbar import PBar
+##from . import base
+#rom .base import DEBUG, INFO, WARN, ERROR
+#from doekbase.data_api.pbar import PBar
 
-#from doekbase.data_api.sequence.assembly.api import AssemblyAPI
 from doekbase.data_api.annotation.genome_annotation.api import GenomeAnnotationAPI
-#from doekbase.data_api.taxonomy.taxon.api import TaxonAPI
-from doekbase.workspace.client import Workspace
-from doekbase.data_api.core import ObjectAPI
-from doekbase.handle.Client import AbstractHandle as handleClient
-
 
 ###example method, needs refactoring
-def downloadAsGBK(genome_ref, services, token):
+def downloadAsGBK(genome_ref, services, token, output_file, working_dir):
 
-if genome_ref None or len(genome_ref) == 0:
-    genome_ref = '6838/Shewanella_oneidensis_MR1'#Pseudomonas_syringae_pv_tomato_strDC3000'
+  output_file = working_dir + output_file
+
+  if genome_ref is None or len(genome_ref) == 0:
+      genome_ref = '6838/Shewanella_oneidensis_MR1'#Pseudomonas_syringae_pv_tomato_strDC3000'
   #'7364/20'#
   #genome_ref = 'ReferenceGenomeAnnotations/kb|g.440'#ReferenceGenomeAnnotations/kb|g.166819'#6838/146'#ReferenceGenomeAnnotationsV5/kb|g.166819
   #ReferenceGenomeAnnotations/kb%7Cg.440
@@ -73,7 +69,7 @@ if genome_ref None or len(genome_ref) == 0:
   else:
       temp_file_name = "".join(filename_chars)+".gbk"
 
-  output_file = os.path.join(working_directory,temp_file_name)
+  output_file = os.path.join(working_dir,temp_file_name)
 
   contig_ids = asm_api.get_contig_ids()
   contig_lengths = asm_api.get_contig_lengths(contig_ids)
@@ -102,7 +98,7 @@ if genome_ref None or len(genome_ref) == 0:
           writeFeaturesOrdered(ga_api, regions, out_file)
           
           ###TODO write contig sequence
-          writeContig(contig_id, out_file)
+          writeContig(contig_id, out_file, asm_api)
           break
 
   out_file.close()
@@ -112,7 +108,7 @@ if genome_ref None or len(genome_ref) == 0:
 
 
 
-def writeHeader(contig_id, contig_lengths, fulltax, tax_api, out_file):
+def writeHeader(contig_id, contig_lengths, full_tax, tax_api, out_file):
     out_file.write("LOCUS       " + contig_id + "             " + str(contig_lengths[contig_id]) + " bp    " +"DNA\n")
     sn = tax_api.get_scientific_name()
     out_file.write("DEFINITION  " + sn + " genome.\n")
@@ -127,11 +123,11 @@ def writeHeader(contig_id, contig_lengths, fulltax, tax_api, out_file):
 
         counter = 0
         index = 0
-        while (index < len(fulltax)):
-            formatTax = formatTax+(fulltax[index])
-            if (index < len(fulltax) - 1):
+        while (index < len(full_tax)):
+            formatTax = formatTax+(full_tax[index])
+            if (index < len(full_tax) - 1):
                 formatTax=formatTax+(" ")
-            counter=counter+ len(fulltax[index]) + 1
+            counter=counter+ len(full_tax[index]) + 1
             index=index+1
 
             if (counter >= 65 or len(fulltaxstring) < 80):
@@ -397,7 +393,7 @@ def writeLocation(feature_locations, out_file):
   else:
       out_file.write("\n")
 
-def writeContig(contig_id, outfile) :
+def writeContig(contig_id, outfile, asm_api) :
   print "getting contig"
   contigdata = asm_api.get_contigs([contig_id])
   print contigdata
