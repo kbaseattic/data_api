@@ -18,6 +18,7 @@ pyyaml==3.11
 sphinx_rtd_theme>=0.1.9
 redis==2.10.3
 requests==2.7.0
+simplejson
 six==1.9.0
 #Sphinx<=1.2.99
 Sphinx>=1.3
