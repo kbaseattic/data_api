@@ -149,7 +149,6 @@ class Workspace(object):
         if self.timeout < 1:
             raise ValueError('Timeout value must be at least 1 second')
 
-    @profile
     def _call(self, method, params):
         arg_hash = {'method': method,
                     'params': params,
