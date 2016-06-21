@@ -6,11 +6,17 @@
 ############################################################
 
 try:
-    import json as _json
-except ImportError:
-    import sys
-    sys.path.append('simplejson-2.3.3')
     import simplejson as _json
+except ImportError:
+    try:
+        import json as _json
+    except ImportError:
+        raise ImportError("Python installation missing a json module!")
+
+try:
+    import cStringIO as StringIO
+except ImportError:
+    import StringIO
 
 import requests as _requests
 import urlparse as _urlparse
@@ -96,16 +102,15 @@ class ServerError(Exception):
 class _JSONObjectEncoder(_json.JSONEncoder):
 
     def default(self, obj):
-        if isinstance(obj, set):
+        if isinstance(obj, (set, frozenset)):
             return list(obj)
-        if isinstance(obj, frozenset):
-            return list(obj)
+
         try:
             iterable = iter(obj)
+            return list(iterable)
         except TypeError:
             pass
-        else:
-            return list(iterable)
+
         return _json.JSONEncoder.default(self, obj)
 
 
@@ -144,6 +149,7 @@ class Workspace(object):
         if self.timeout < 1:
             raise ValueError('Timeout value must be at least 1 second')
 
+    @profile
     def _call(self, method, params):
         arg_hash = {'method': method,
                     'params': params,
@@ -166,7 +172,7 @@ class Workspace(object):
                 raise ServerError('Unknown', 0, ret.text)
         if ret.status_code != _requests.codes.OK:
             ret.raise_for_status()
-        resp = _json.loads(ret.text)
+        resp = _json.loads(ret.content)
         if 'result' not in resp:
             raise ServerError('Unknown', 0, 'An unknown server error occurred')
         return resp['result']
