@@ -39,7 +39,7 @@ def downloadAsGBK(genome_ref, services, token, output_file, working_dir):
 
   #if genome_ref is None or len(genome_ref) == 0:
   #    genome_ref = '6838/Shewanella_oneidensis_MR1'#Pseudomonas_syringae_pv_tomato_strDC3000'
-  
+
   #'7364/20'#
   #genome_ref = 'ReferenceGenomeAnnotations/kb|g.440'#ReferenceGenomeAnnotations/kb|g.166819'#6838/146'#ReferenceGenomeAnnotationsV5/kb|g.166819
   #ReferenceGenomeAnnotations/kb%7Cg.440
@@ -53,7 +53,7 @@ def downloadAsGBK(genome_ref, services, token, output_file, working_dir):
 
   genome_name = str(ga_api.get_id())
 
-  print genome_name
+  #print genome_name
 
   valid_chars = "-_.(){0}{1}".format(string.ascii_letters, string.digits)
   temp_file_name = ""
@@ -88,7 +88,7 @@ def downloadAsGBK(genome_ref, services, token, output_file, working_dir):
           start=1
           stop=contig_lengths[contig_id]
 
-          print contig_id
+          #print contig_id
           writeHeader(contig_id, contig_lengths, full_tax, tax_api, out_file)
           regions = []
           contig_add = {"contig_id": contig_id, "start": start, "length": stop-start, "strand": "+"}
@@ -104,7 +104,7 @@ def downloadAsGBK(genome_ref, services, token, output_file, working_dir):
 
   out_file.close()
 
-  print "done "+output_file
+  #print "done "+output_file
 
 
 
@@ -117,7 +117,7 @@ def writeHeader(contig_id, contig_lengths, full_tax, tax_api, out_file):
     out_file.write("  ORGANISM  " + sn + "\n")
 
     fulltaxstring = ';'.join(full_tax)
-    print full_tax
+    #print full_tax
 
     if (full_tax):
         formatTax = ""
@@ -148,13 +148,13 @@ def writeHeader(contig_id, contig_lengths, full_tax, tax_api, out_file):
 
 def writeFeaturesOrdered(ga_api, regions, out_file):
     types = ga_api.get_feature_types()    
-    print types
+    #print types
     
-    print "Getting feature ids"
+    #print "Getting feature ids"
     feature_ids = ga_api.get_feature_ids(filters={"region_list":regions,"type_list":types})    
     #print feature_ids
                     
-    print "Getting proteins"
+    #print "Getting proteins"
     proteins = ga_api.get_proteins()
     
     all_ids = []
@@ -162,33 +162,33 @@ def writeFeaturesOrdered(ga_api, regions, out_file):
         all_ids = all_ids + feature_ids['by_type'][t] 
     #print all_ids
     
-    print "Getting all features for contig"
+    #print "Getting all features for contig"
     features = ga_api.get_features(all_ids)#['by_type']['gene'])
     numfeat = str(len(features))
-    print "number of features "+numfeat
+    #print "number of features "+numfeat
     
     if('gene' in feature_ids['by_type']):
         cds_by_gene = ga_api.get_cds_by_gene(feature_ids['by_type']['gene'])
     
         cds_by_gene_keys = cds_by_gene.keys()
-        print "cds_by_gene "
-        print cds_by_gene[cds_by_gene_keys[1]]
+        #print "cds_by_gene "
+        #print cds_by_gene[cds_by_gene_keys[1]]
     
     mrna_by_cds = ga_api.get_mrna_by_cds(feature_ids['by_type']['CDS']);
     
     mrna_by_cds_keys = mrna_by_cds.keys()
-    print "mrna_by_cds "
-    print mrna_by_cds[mrna_by_cds_keys[1]]   
+    #print "mrna_by_cds "
+    #print mrna_by_cds[mrna_by_cds_keys[1]]   
 
     count = 0
     for feat in features:
         if features[feat]['feature_type'] == 'gene':
             count = count +1
-            print feat+"\t"+features[feat]['feature_type']
-            print features[feat]
+            #print feat+"\t"+features[feat]['feature_type']
+            #print features[feat]
             function = features[feat]['feature_function']
             allfunction = function.split(" ")
-            print "FUNCTION "+function
+            #print "FUNCTION "+function
             format_function = formatAnnotation(function, allfunction, 48, 58)
 
             #print features[feat]
@@ -199,9 +199,9 @@ def writeFeaturesOrdered(ga_api, regions, out_file):
 
             aliases = features[feat]['feature_aliases']
             if(aliases is not None and len(aliases)>0):
-                print "ALIASES "+feat
-                for k, v in aliases.iteritems():
-                    print k, v
+                #print "ALIASES "+feat
+                #for k, v in aliases.iteritems():
+                #    print k, v
                 
                 #aliases_keys = aliases.keys()
                 #print aliases_keys[0]
@@ -233,15 +233,15 @@ def writeFeaturesOrdered(ga_api, regions, out_file):
             if feat in cds_by_gene :
                 cds_id = cds_by_gene[feat]
 
-                print "CDS"
-                print cds_id
+                #print "CDS"
+                #print cds_id
                 for cds in cds_id:                
 
                     mrna_id = mrna_by_cds[cds]
                     if mrna_id is not None:
-                        print "mRNA " + mrna_id
+                        #print "mRNA " + mrna_id
                         functionmRNA = features[mrna_id]['feature_function']
-                        print "FUNCTION mRNA " + functionmRNA
+                        #print "FUNCTION mRNA " + functionmRNA
                         allfunctionmRNA = functionmRNA.split(" ")
                         format_functionmRNA = formatAnnotation(functionmRNA, allfunctionmRNA, 48, 58)
 
@@ -280,11 +280,11 @@ def writeFeaturesOrdered(ga_api, regions, out_file):
                     # /transcript_id="NM_099984.5"
                     # /db_xref="GI:240253989"
 
-                    print "CDS "+ cds
-                    print features[cds]['feature_function']
+                    #print "CDS "+ cds
+                    #print features[cds]['feature_function']
                     allfunction = function.split(" ")
                     format_function = formatAnnotation(function, allfunction, 48, 58)
-                    print "format_function "+format_function
+                    #print "format_function "+format_function
 
                     out_file.write("     CDS             ")
                     writeLocation(features[cds]['feature_locations'], out_file)
@@ -328,7 +328,7 @@ def writeFeaturesOrdered(ga_api, regions, out_file):
                             #print "protein_translation "+protein_translation
                             protein_translation_final = formatString(protein_translation, 44, 58)
 
-                        print feat +"\tprotein_translation "+ protein_translation_final
+                        #print feat +"\tprotein_translation "+ protein_translation_final
 
                         out_file.write("                     /translation=\"" + protein_translation_final);
 
@@ -395,10 +395,10 @@ def writeLocation(feature_locations, out_file):
       out_file.write("\n")
 
 def writeContig(contig_id, outfile, asm_api) :
-  print "getting contig"
+  #print "getting contig"
   contigdata = asm_api.get_contigs([contig_id])
-  print contigdata
-  print contigdata.keys()
+  #print contigdata
+  #print contigdata.keys()
   outfile.write(formatDNASequence(contigdata[contig_id]['sequence'], 10, 60))
   outfile.write("//\n")
 
