@@ -53,8 +53,6 @@ def downloadAsGBK(genome_ref, services, token, output_file, working_dir):
 
   genome_name = str(ga_api.get_id())
 
-  #print genome_name
-
   contig_ids = asm_api.get_contig_ids()
   contig_lengths = asm_api.get_contig_lengths(contig_ids)
 
