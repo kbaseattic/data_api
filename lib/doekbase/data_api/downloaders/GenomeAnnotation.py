@@ -55,23 +55,6 @@ def downloadAsGBK(genome_ref, services, token, output_file, working_dir):
 
   #print genome_name
 
-  valid_chars = "-_.(){0}{1}".format(string.ascii_letters, string.digits)
-  temp_file_name = ""
-  filename_chars = list()
-
-  for character in genome_name:
-      if character in valid_chars:
-          filename_chars.append(character)
-      else:
-          filename_chars.append("_")
-
-  if len(filename_chars) == 0:
-      temp_file_name = "GenBankFile"
-  else:
-      temp_file_name = "".join(filename_chars)+".gbk"
-
-  output_file = os.path.join(working_dir,temp_file_name)
-
   contig_ids = asm_api.get_contig_ids()
   contig_lengths = asm_api.get_contig_lengths(contig_ids)
 
