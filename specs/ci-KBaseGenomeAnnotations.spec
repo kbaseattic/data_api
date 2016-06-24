@@ -583,3 +583,5 @@ typedef structure {
   string original_source_file_name; 
   counts_map feature_counts_map;
 }GenomeAnnotationSummary;
+
+};
