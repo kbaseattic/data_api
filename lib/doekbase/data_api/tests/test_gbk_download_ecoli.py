@@ -26,7 +26,7 @@ if __name__ == '__main__':
 
 	try:
 		print "starting"
-		GenomeAnnotation.downloadAsGBK("7824/GCF_000001735.3_TAIR10_genomic_GA", services, token, "test.gbk", "./")
+		GenomeAnnotation.downloadAsGBK("7824/GCF_000005845.2_ASM584v2_genomic_GA", services, token, "test.gbk", "./")
 		print "done"
 	except Exception, e:
 	    #ogger.exception(e)
