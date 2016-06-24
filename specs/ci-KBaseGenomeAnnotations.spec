@@ -558,8 +558,8 @@ The GenomeAnnotationSummary is a hidden object that's purpose is to optimize lan
 This object needs to be generated every time a new version of the genome annotation is generated.
 dropped alias_source_counts_map for now
 
-@optional aliases genetic_code scientific_lineage
-@optional external_source external_source_id external_source_origination_date original_source_file_name 
+@optional organism_aliases genetic_code scientific_lineage assembly_source assembly_source_id assembly_source_origination_date
+@optional external_source external_source_origination_date original_source_file_name 
 
 */ 
 typedef structure { 
@@ -567,7 +567,7 @@ typedef structure {
   string scientific_name; 
   int taxonomy_id; 
   string kingdom; 
-  string scientific_lineage
+  string scientific_lineage;
   int genetic_code;
   list<string> organism_aliases;
   string assembly_source;
