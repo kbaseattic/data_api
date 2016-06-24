@@ -563,7 +563,7 @@ dropped alias_source_counts_map for now
 
 */ 
 typedef structure { 
-  string genome_annotation_ref genome_annotation_ref; 
+  genome_annotation_ref genome_annotation_ref; 
   string scientific_name; 
   int taxonomy_id; 
   string kingdom; 
