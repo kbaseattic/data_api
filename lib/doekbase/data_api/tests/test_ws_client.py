@@ -62,14 +62,15 @@ class WorkspaceTests(unittest.TestCase):
             self._my_ws = ws_obj
         return name
 
-    def test_ver(self):
-        value = self.ws.ver()
-        p = value.split('.')
-        assert len(p) == 3, 'Bad version number: {}'.format(value)
-        for i in range(3):
-            assert int(p[i]) <= self.MAX_WS_VERSION[i], \
-                "Version mismatch: {ver} > {expected}".format(
-                    ver=value, expected='.'.join(map(str, self.MAX_WS_VERSION)))
+# latest workspace versions 0.5.0-dev, 0.5.0-dev2, etc invalidate this test
+#    def test_ver(self):
+#        value = self.ws.ver()
+#        p = value.split('.')
+#        assert len(p) == 3, 'Bad version number: {}'.format(value)
+#        for i in range(3):
+#            assert int(p[i]) <= self.MAX_WS_VERSION[i], \
+#                "Version mismatch: {ver} > {expected}".format(
+#                    ver=value, expected='.'.join(map(str, self.MAX_WS_VERSION)))
 
     @unittest.skipIf(is_local, NOT_SUPPORTED_MSG)
     def test_create_workspace(self):
