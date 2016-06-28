@@ -14,7 +14,6 @@ import subprocess
 from doekbase.data_api.downloaders import GenomeAnnotation
 
 
-#def main() :
 if __name__ == '__main__':	
 	#logger = script_utils.stderrlogger(__file__, level=logging.DEBUG)
 	    
@@ -28,6 +27,10 @@ if __name__ == '__main__':
 		print "starting"
 		GenomeAnnotation.downloadAsGBK("7824/GCF_000001735.3_TAIR10_genomic_GA", services, token, "test.gbk", "./")
 		print "done"
+
+		GenomeAnnotation.testGBKDownload_vs_API(services, token, genome_ref, output_file_name)
+		print "done testing"
+		
 	except Exception, e:
 	    #ogger.exception(e)
 	    print "Exception"
