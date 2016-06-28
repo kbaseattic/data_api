@@ -1,6 +1,11 @@
 # Stdlib
 import logging
 
+try:
+    import cStringIO as StringIO
+except ImportError:
+    import StringIO
+
 # Third-party
 import zope.interface
 
@@ -113,9 +118,9 @@ class GenomeAnnotationService(service_core.BaseService):
         return output
 
     @server_method
-    def get_proteins(self, token=None, ref=None):
+    def get_proteins(self, token=None, ref=None, cds_id_list=None):
         ga_api = self._get_instance(token, ref)
-        result = ga_api.get_proteins()
+        result = ga_api.get_proteins(cds_id_list)
         output = {x: ttypes.Protein_data(**result[x]) for x in result}
 
         return output
@@ -225,5 +230,16 @@ class GenomeAnnotationService(service_core.BaseService):
                 output[mrna_id][utr_id] = ttypes.UTR_data(
                     utr_locations=[ttypes.Region(**x) for x in regions],
                     utr_dna_sequence=result[mrna_id][utr_id]["utr_dna_sequence"])
+
+        return output
+
+    @server_method
+    def get_gff(self, token=None, ref=None, gene_id_list=None):
+        ga_api = self._get_instance(token, ref)
+        result = ga_api.get_gff()
+
+        buf = StringIO.StringIO()
+        result.to_file(buf)
+        output = buf.getvalue()
 
         return output

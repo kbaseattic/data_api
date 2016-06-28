@@ -2970,6 +2970,252 @@ assembly.thrift_service_get_contigs_result.prototype.write = function(output) {
   return;
 };
 
+assembly.thrift_service_to_fasta_args = function(args) {
+  this.token = null;
+  this.ref = null;
+  if (args) {
+    if (args.token !== undefined) {
+      this.token = args.token;
+    } else {
+      throw new Thrift.TProtocolException(Thrift.TProtocolExceptionType.UNKNOWN, 'Required field token is unset!');
+    }
+    if (args.ref !== undefined) {
+      this.ref = args.ref;
+    } else {
+      throw new Thrift.TProtocolException(Thrift.TProtocolExceptionType.UNKNOWN, 'Required field ref is unset!');
+    }
+  }
+};
+assembly.thrift_service_to_fasta_args.prototype = {};
+assembly.thrift_service_to_fasta_args.prototype.read = function(input) {
+  input.readStructBegin();
+  while (true)
+  {
+    var ret = input.readFieldBegin();
+    var fname = ret.fname;
+    var ftype = ret.ftype;
+    var fid = ret.fid;
+    if (ftype == Thrift.Type.STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 1:
+      if (ftype == Thrift.Type.STRING) {
+        this.token = input.readString().value;
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 2:
+      if (ftype == Thrift.Type.STRING) {
+        this.ref = input.readString().value;
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      default:
+        input.skip(ftype);
+    }
+    input.readFieldEnd();
+  }
+  input.readStructEnd();
+  return;
+};
+
+assembly.thrift_service_to_fasta_args.prototype.write = function(output) {
+  output.writeStructBegin('thrift_service_to_fasta_args');
+  if (this.token !== null && this.token !== undefined) {
+    output.writeFieldBegin('token', Thrift.Type.STRING, 1);
+    output.writeString(this.token);
+    output.writeFieldEnd();
+  }
+  if (this.ref !== null && this.ref !== undefined) {
+    output.writeFieldBegin('ref', Thrift.Type.STRING, 2);
+    output.writeString(this.ref);
+    output.writeFieldEnd();
+  }
+  output.writeFieldStop();
+  output.writeStructEnd();
+  return;
+};
+
+assembly.thrift_service_to_fasta_result = function(args) {
+  this.success = null;
+  this.generic_exception = null;
+  this.authorization_exception = null;
+  this.authentication_exception = null;
+  this.reference_exception = null;
+  this.attribute_exception = null;
+  this.type_exception = null;
+  if (args instanceof assembly.ServiceException) {
+    this.generic_exception = args;
+    return;
+  }
+  if (args instanceof assembly.AuthorizationException) {
+    this.authorization_exception = args;
+    return;
+  }
+  if (args instanceof assembly.AuthenticationException) {
+    this.authentication_exception = args;
+    return;
+  }
+  if (args instanceof assembly.ObjectReferenceException) {
+    this.reference_exception = args;
+    return;
+  }
+  if (args instanceof assembly.AttributeException) {
+    this.attribute_exception = args;
+    return;
+  }
+  if (args instanceof assembly.TypeException) {
+    this.type_exception = args;
+    return;
+  }
+  if (args) {
+    if (args.success !== undefined) {
+      this.success = args.success;
+    }
+    if (args.generic_exception !== undefined) {
+      this.generic_exception = args.generic_exception;
+    }
+    if (args.authorization_exception !== undefined) {
+      this.authorization_exception = args.authorization_exception;
+    }
+    if (args.authentication_exception !== undefined) {
+      this.authentication_exception = args.authentication_exception;
+    }
+    if (args.reference_exception !== undefined) {
+      this.reference_exception = args.reference_exception;
+    }
+    if (args.attribute_exception !== undefined) {
+      this.attribute_exception = args.attribute_exception;
+    }
+    if (args.type_exception !== undefined) {
+      this.type_exception = args.type_exception;
+    }
+  }
+};
+assembly.thrift_service_to_fasta_result.prototype = {};
+assembly.thrift_service_to_fasta_result.prototype.read = function(input) {
+  input.readStructBegin();
+  while (true)
+  {
+    var ret = input.readFieldBegin();
+    var fname = ret.fname;
+    var ftype = ret.ftype;
+    var fid = ret.fid;
+    if (ftype == Thrift.Type.STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 0:
+      if (ftype == Thrift.Type.STRING) {
+        this.success = input.readString().value;
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 1:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.generic_exception = new assembly.ServiceException();
+        this.generic_exception.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 2:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.authorization_exception = new assembly.AuthorizationException();
+        this.authorization_exception.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 3:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.authentication_exception = new assembly.AuthenticationException();
+        this.authentication_exception.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 4:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.reference_exception = new assembly.ObjectReferenceException();
+        this.reference_exception.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 5:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.attribute_exception = new assembly.AttributeException();
+        this.attribute_exception.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 6:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.type_exception = new assembly.TypeException();
+        this.type_exception.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      default:
+        input.skip(ftype);
+    }
+    input.readFieldEnd();
+  }
+  input.readStructEnd();
+  return;
+};
+
+assembly.thrift_service_to_fasta_result.prototype.write = function(output) {
+  output.writeStructBegin('thrift_service_to_fasta_result');
+  if (this.success !== null && this.success !== undefined) {
+    output.writeFieldBegin('success', Thrift.Type.STRING, 0);
+    output.writeString(this.success);
+    output.writeFieldEnd();
+  }
+  if (this.generic_exception !== null && this.generic_exception !== undefined) {
+    output.writeFieldBegin('generic_exception', Thrift.Type.STRUCT, 1);
+    this.generic_exception.write(output);
+    output.writeFieldEnd();
+  }
+  if (this.authorization_exception !== null && this.authorization_exception !== undefined) {
+    output.writeFieldBegin('authorization_exception', Thrift.Type.STRUCT, 2);
+    this.authorization_exception.write(output);
+    output.writeFieldEnd();
+  }
+  if (this.authentication_exception !== null && this.authentication_exception !== undefined) {
+    output.writeFieldBegin('authentication_exception', Thrift.Type.STRUCT, 3);
+    this.authentication_exception.write(output);
+    output.writeFieldEnd();
+  }
+  if (this.reference_exception !== null && this.reference_exception !== undefined) {
+    output.writeFieldBegin('reference_exception', Thrift.Type.STRUCT, 4);
+    this.reference_exception.write(output);
+    output.writeFieldEnd();
+  }
+  if (this.attribute_exception !== null && this.attribute_exception !== undefined) {
+    output.writeFieldBegin('attribute_exception', Thrift.Type.STRUCT, 5);
+    this.attribute_exception.write(output);
+    output.writeFieldEnd();
+  }
+  if (this.type_exception !== null && this.type_exception !== undefined) {
+    output.writeFieldBegin('type_exception', Thrift.Type.STRUCT, 6);
+    this.type_exception.write(output);
+    output.writeFieldEnd();
+  }
+  output.writeFieldStop();
+  output.writeStructEnd();
+  return;
+};
+
 assembly.thrift_serviceClient = function(input, output) {
     this.input = input;
     this.output = (!output) ? input : output;
@@ -3627,4 +3873,63 @@ assembly.thrift_serviceClient.prototype.recv_get_contigs = function() {
     return result.success;
   }
   throw 'get_contigs failed: unknown result';
+};
+assembly.thrift_serviceClient.prototype.to_fasta = function(token, ref, callback) {
+  if (callback === undefined) {
+    this.send_to_fasta(token, ref);
+    return this.recv_to_fasta();
+  } else {
+    var postData = this.send_to_fasta(token, ref, true);
+    return this.output.getTransport()
+      .jqRequest(this, postData, arguments, this.recv_to_fasta);
+  }
+};
+
+assembly.thrift_serviceClient.prototype.send_to_fasta = function(token, ref, callback) {
+  this.output.writeMessageBegin('to_fasta', Thrift.MessageType.CALL, this.seqid);
+  var args = new assembly.thrift_service_to_fasta_args();
+  args.token = token;
+  args.ref = ref;
+  args.write(this.output);
+  this.output.writeMessageEnd();
+  return this.output.getTransport().flush(callback);
+};
+
+assembly.thrift_serviceClient.prototype.recv_to_fasta = function() {
+  var ret = this.input.readMessageBegin();
+  var fname = ret.fname;
+  var mtype = ret.mtype;
+  var rseqid = ret.rseqid;
+  if (mtype == Thrift.MessageType.EXCEPTION) {
+    var x = new Thrift.TApplicationException();
+    x.read(this.input);
+    this.input.readMessageEnd();
+    throw x;
+  }
+  var result = new assembly.thrift_service_to_fasta_result();
+  result.read(this.input);
+  this.input.readMessageEnd();
+
+  if (null !== result.generic_exception) {
+    throw result.generic_exception;
+  }
+  if (null !== result.authorization_exception) {
+    throw result.authorization_exception;
+  }
+  if (null !== result.authentication_exception) {
+    throw result.authentication_exception;
+  }
+  if (null !== result.reference_exception) {
+    throw result.reference_exception;
+  }
+  if (null !== result.attribute_exception) {
+    throw result.attribute_exception;
+  }
+  if (null !== result.type_exception) {
+    throw result.type_exception;
+  }
+  if (null !== result.success) {
+    return result.success;
+  }
+  throw 'to_fasta failed: unknown result';
 };

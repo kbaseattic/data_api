@@ -25,15 +25,14 @@ If you are using the Python library, then you can instantiate the :class:`doekba
 
     .. py:method:: __init__(services=None, token=None, ref=None)
 
-    Construct a new AssemblyAPI object, which connects directly to the
-    KBase backend stores.
+        Construct a new AssemblyAPI object, which connects directly to the
+        KBase backend stores.
 
-    :param dict services: Dictionary with service urls, including:
-        workspace_service_url for the Workspace service, e.g.
-        "https://kbase.us/services/ws/".
-    :param str token: KBase login token
-    :param str ref: KBase object reference, in the format expected by the
-        KBase workspace: |wsref|.
+        :param dict services: Dictionary with service urls, including:
+            workspace_service_url for the Workspace service, e.g.
+            "https://kbase.us/services/ws/".
+        :param str token: KBase login token:param str ref: KBase object reference, in the format expected by the
+            KBase workspace: |wsref|.
         
 For example::
 
