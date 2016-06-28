@@ -176,6 +176,7 @@ class ObjectAPI(object):
             global_read = (wsinfo_obj.globalread == 'r')
         self._cache = cache.ObjectCache(
             self._info["object_reference_versioned"],
+            domain=ws_url,
             is_public=global_read)
 
         # TODO always use a versioned reference to the data object
