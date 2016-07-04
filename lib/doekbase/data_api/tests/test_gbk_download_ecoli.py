@@ -31,12 +31,12 @@ if __name__ == '__main__':
         genome_ref = "7824/GCF_000005845.2_ASM584v2_genomic_GA"
         output_file_name = "test.gbk"
 
-        print dir(GenomeAnnotation)
+        #print dir(GenomeAnnotation)
 
         GenomeAnnotation.downloadAsGBK(genome_ref, services, token, output_file_name, "./")
         print "done w upload"
 
-        print sys.path
+        #print sys.path
         GenomeAnnotation.testGBKDownload_vs_API(services, token, genome_ref, output_file_name)
         print "done testing"
 
