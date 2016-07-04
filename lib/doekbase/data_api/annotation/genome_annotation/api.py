@@ -2124,7 +2124,7 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
                     _log.warn("mRNA {} and gene {} do not have an associated CDS".format(mrna_id, gene_id))
                     return ""
 
-                parent = "Parent={}".format(gene_id)
+                parent = "Parent={};".format(gene_id)
             else:
                 parent = "Parent={};".format(mrna_id)
 
