@@ -498,6 +498,24 @@ class GenomeAnnotationInterface(object):
         """
         pass
 
+    @abc.abstractmethod
+    def save_summary(self):
+        """Create the GenomeAnnotationSummary object for a GenomeAnnotation.
+           This object is specialized for Landing Page use.
+        Saves the GenomeAnnotationSummary to the same workspace as the GenomeAnnotation object.
+        """
+        pass
+
+    @abc.abstractmethod
+    def get_summary(self):
+        """Gets GenomeAnnotationSummary object for a GenomeAnnotation.
+           This object is specialized for Landing Page use.
+        Just get a dump of the GenomeAnnotationSummary object.
+        """
+        pass
+
+
+
 
 @fix_docs
 class GenomeAnnotationAPI(ObjectAPI, GenomeAnnotationInterface):
@@ -587,6 +605,11 @@ class GenomeAnnotationAPI(ObjectAPI, GenomeAnnotationInterface):
     def get_gff(self, gene_feature_id_list=None):
         return self.proxy.get_gff(gene_feature_id_list)
 
+    def save_summary(self):
+        return self.proxy.save_summary()
+
+    def get_summary(self):
+        return self.proxy.get_summary()
 
 @fix_docs
 class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
@@ -1212,6 +1235,7 @@ class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
         out.write(gffdata.getvalue())
 
         return out
+
 
 
 @fix_docs
@@ -2274,6 +2298,100 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
         out.write(gffdata.getvalue())
 
         return out
+
+    def  save_summary(self):
+        from doekbase.data_api.sequence.assembly.api import AssemblyAPI, AssemblyClientAPI 
+        from doekbase.data_api.taxonomy.taxon.api import TaxonAPI, TaxonClientAPI
+        import doekbase.workspace.client 
+ 
+        ws_client = doekbase.workspace.client.Workspace(self.services["workspace_service_url"]) 
+        taxon_object = ga_object.get_taxon() 
+        assembly_object = ga_object.get_assembly() 
+        
+        summary_object = dict() 
+        ga_object_info = ga_object.get_info() 
+
+        ga_object_ref = ga_object_info["object_reference_versioned"] 
+        summary_object["genome_annotation_ref"] = ga_object_ref 
+ 
+        #TAXON PORTION                                                                                                 
+        summary_object["scientific_name"] = taxon_object.get_scientific_name() 
+        try: 
+            summary_object["taxonomy_id"] = taxon_object.get_taxonomic_id() 
+        except AttributeError: 
+            summary_object["taxonomy_id"] = "Tax ID not present" 
+        try: 
+            summary_object["kingdom"] = taxon_object.get_kingdom() 
+        except AttributeError: 
+            summary_object["kingdom"] = "kingdom not present" 
+        try: 
+            summary_object["genetic_code"] = taxon_object.get_genetic_code() 
+        except AttributeError: 
+            summary_object["genetic_code"] = "genetic code not present" 
+        try: 
+            summary_object["scientific_lineage"] = ";".join(taxon_object.get_scientific_lineage()) 
+        except AttributeError: 
+            summary_object["scientific_lineage"] = "scientific lineage not present" 
+        summary_object["organism_aliases"] = taxon_object.get_aliases() 
+        if len(summary_object["organism_aliases"]) == 0: 
+            summary_object["organism_aliases"] = ["No organism aliases present"] 
+
+        #ASSEMBLY PORTION
+        assembly_source_info = assembly_object.get_external_source_info()
+        try:
+            summary_object["assembly_source"] = assembly_source_info["external_source"]
+        except AttributeError:
+            assembly_source_info = "assembly source not present"
+        try :
+            summary_object["assembly_source_id"] = assembly_source_info["external_source_id"]
+        except AttributeError:
+            summary_object["assembly_source_id"] = "assembly source id not present"
+        try:
+            summary_object["assembly_source_origination_date"] = assembly_source_info["external_source_origination_date"]
+        except AttributeError:
+            summary_object["assembly_source_origination_date"] = "assembly_source_origination_date not present"
+ 
+        assembly_stats_info = assembly_object.get_stats()
+        summary_object["gc_content"] = assembly_stats_info["gc_content"]
+        summary_object["dna_size"] = assembly_stats_info["dna_size"]
+        summary_object["num_contigs"] = assembly_stats_info["num_contigs"]
+        summary_object["contig_ids"] = assembly_object.get_contig_ids()
+
+        #GENOME ANNOTATION PORTION
+        try: 
+            summary_object["external_source"] = ga_object.get_data_subset(path_list=["external_source"])["external_source"] 
+        except AttributeError:
+            summary_object["external_source"] = "annotation source is not present" 
+        try: 
+            summary_object["external_source_origination_date"] = ga_object.get_data_subset(path_list=["external_source_origination_date"])["external_source_origination_date"] 
+        except AttributeError:
+            summary_object["external_source_origination date"] = "annotation source date is not present" 
+        try: 
+            summary_object["release"] = ga_object.get_data_subset(path_list=["release"])["release"] 
+        except AttributeError:
+            summary_object["release"] = "annotation release is not present" 
+        try: 
+            summary_object["original_source_file_name"] = ga_object.get_data_subset(path_list=["original_source_file_name"])["original_source_file_name"] 
+        except AttributeError:
+            summary_object["original_source_file_name"] = "original source file name is unknown" 
+        summary_object["feature_counts_map"] = ga_object.get_feature_type_counts() 
+
+        summary_provenance = [{"script": __file__, 
+                               "script_ver": "0.1", 
+                               "description": "This summary object was generated by running the summary object creation on object {}".format(ga_object_ref) 
+                           }] 
+ 
+        summary_save_info =  ws_client.save_objects({"workspace": ga_object_info["workspace_name"],
+                                                     "objects":[ { "type":"KBaseGenomeAnnotations.GenomeAnnotationSummary", 
+                                                                   "data":summary_object, 
+                                                                   "name": "{}_summary".format(ga_object_info["object_name"]), 
+                                                                   "hidden":1, 
+                                                                   "provenance":summary_provenance}]}) 
+        return True;
+
+    def  get_summary(self): 
+        pass
+
 
 
 _ga_log = get_logger('GenomeAnnotationClientAPI')
