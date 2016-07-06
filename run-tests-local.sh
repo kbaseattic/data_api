@@ -1,4 +1,22 @@
 #!/bin/sh
+# check for test resource
+if [ ! -e test_resources -o ! -d test_resources ]; then
+    printf "Abort: Directory 'test_resources/' missing (or not a directory)\n"
+    exit 1
+fi
+num_files=$(ls -l test_resources | wc -l)
+if [ $num_files -eq 0 ]; then
+    printf "Abort: Directory 'test_resources/' is empty\n"
+    printf "You can check it out from git with this command:\n"
+    printf "    git submodule update --init\n"
+    exit 2
+fi
+
+# build Thrift
+python setup.py build_thrift_servers
+python setup.py build_thrift_clients
+
+# start services
 data_api_start_service.py --config deployment.cfg --service taxon --port 9101  >taxon.out 2>&1 &
 data_api_start_service.py --config deployment.cfg --service assembly --port 9102 >assembly.out 2>&1 &
 data_api_start_service.py --config deployment.cfg --service genome_annotation --port 9103 >ga.out 2>&1 &

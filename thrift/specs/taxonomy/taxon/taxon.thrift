@@ -2,13 +2,13 @@ namespace py taxon
 namespace js taxon
 namespace perl DOEKBase.DataAPI.taxonomy.taxon
 
-/*
-TODO - Automatically populate version from setup.py.
-*/
+#%include api_shared.thriftinc
+/* Include all shared files for API */
+const string VERSION = "0.1.0"
 
-const string VERSION = "{{version}}"
 
-typedef string ObjectReference
+
+
 
 exception ServiceException {
     /** Readable message desribing the error condition. */
@@ -55,6 +55,8 @@ exception TypeException {
     /** List of types that would have been acceptable. */
     3: optional list<string> valid_types;
 }
+
+typedef string ObjectReference
 
 /** @skip documentation */
 struct ObjectInfo {
@@ -107,211 +109,140 @@ struct ObjectProvenanceAction {
 
 /** @skip documentation */
 typedef list<ObjectProvenanceAction> ObjectProvenance
+#%endinclude api_shared.thriftinc
 
 service thrift_service {
 
 
     /**
-     * Retrieve parent Taxon.
-     *
-     * @return Reference to parent Taxon.
-     */
+    * Retrieve parent Taxon.
+    *
+    * @return Reference to parent Taxon.
+    */
     ObjectReference get_parent(1:string token, 2:ObjectReference ref) throws (
-        1:ServiceException generic_exception,
-        2:AuthorizationException authorization_exception,
-        3:AuthenticationException authentication_exception,
-        4:ObjectReferenceException reference_exception,
-        5:AttributeException attribute_exception,
-        6:TypeException type_exception),
+    1:ServiceException generic_exception,
+    2:AuthorizationException authorization_exception,
+    3:AuthenticationException authentication_exception,
+    4:ObjectReferenceException reference_exception,
+    5:AttributeException attribute_exception,
+    6:TypeException type_exception),
 
     /**
-     * Retrieve children Taxon.
-     *
-     * @return List of references to child Taxons.
-     */
+    * Retrieve children Taxon.
+    *
+    * @return List of references to child Taxons.
+    */
     list<ObjectReference> get_children(1:string token, 2:ObjectReference ref) throws (
-        1:ServiceException generic_exception,
-        2:AuthorizationException authorization_exception,
-        3:AuthenticationException authentication_exception,
-        4:ObjectReferenceException reference_exception,
-        5:AttributeException attribute_exception,
-        6:TypeException type_exception),
+    1:ServiceException generic_exception,
+    2:AuthorizationException authorization_exception,
+    3:AuthenticationException authentication_exception,
+    4:ObjectReferenceException reference_exception,
+    5:AttributeException attribute_exception,
+    6:TypeException type_exception),
 
     /**
-     * Retrieve the GenomeAnnotation(s) that refer to this Taxon.
-     * If this is accessing a KBaseGenomes.Genome object, it will
-     * return an empty list (this information is not available).
-     *
-     * @return List of references to GenomeAnnotation objects.
-     */
+    * Retrieve the GenomeAnnotation(s) that refer to this Taxon.
+    * If this is accessing a KBaseGenomes.Genome object, it will
+    * return an empty list (this information is not available).
+    *
+    * @return List of references to GenomeAnnotation objects.
+    */
     list<ObjectReference> get_genome_annotations(1:string token, 2:ObjectReference ref) throws (
-        1:ServiceException generic_exception,
-        2:AuthorizationException authorization_exception,
-        3:AuthenticationException authentication_exception,
-        4:ObjectReferenceException reference_exception,
-        5:AttributeException attribute_exception,
-        6:TypeException type_exception),
+    1:ServiceException generic_exception,
+    2:AuthorizationException authorization_exception,
+    3:AuthenticationException authentication_exception,
+    4:ObjectReferenceException reference_exception,
+    5:AttributeException attribute_exception,
+    6:TypeException type_exception),
 
     /**
-     * Retrieve the scientific lineage.
-     *
-     * @return Strings for each 'unit' of the lineage, ordered in
-     *   the usual way from Domain to Kingdom to Phylum, etc.
-     *
-     */
+    * Retrieve the scientific lineage.
+    *
+    * @return Strings for each 'unit' of the lineage, ordered in
+    *   the usual way from Domain to Kingdom to Phylum, etc.
+    *
+    */
     list<string> get_scientific_lineage(1:string token, 2:ObjectReference ref) throws (
-        1:ServiceException generic_exception,
-        2:AuthorizationException authorization_exception,
-        3:AuthenticationException authentication_exception,
-        4:ObjectReferenceException reference_exception,
-        5:AttributeException attribute_exception,
-        6:TypeException type_exception),
+    1:ServiceException generic_exception,
+    2:AuthorizationException authorization_exception,
+    3:AuthenticationException authentication_exception,
+    4:ObjectReferenceException reference_exception,
+    5:AttributeException attribute_exception,
+    6:TypeException type_exception),
 
     /**
-     * Retrieve the scientific name.
-     *
-     * @return The scientific name, e.g., "Escherichia Coli K12 str. MG1655"
-     */
+    * Retrieve the scientific name.
+    *
+    * @return The scientific name, e.g., "Escherichia Coli K12 str. MG1655"
+    */
     string get_scientific_name(1:string token, 2:ObjectReference ref) throws (
-        1:ServiceException generic_exception,
-        2:AuthorizationException authorization_exception,
-        3:AuthenticationException authentication_exception,
-        4:ObjectReferenceException reference_exception,
-        5:AttributeException attribute_exception,
-        6:TypeException type_exception),
+    1:ServiceException generic_exception,
+    2:AuthorizationException authorization_exception,
+    3:AuthenticationException authentication_exception,
+    4:ObjectReferenceException reference_exception,
+    5:AttributeException attribute_exception,
+    6:TypeException type_exception),
 
     /**
-     * Retrieve the NCBI taxonomic ID of this Taxon.
-     * For type KBaseGenomes.Genome, the ``source_id`` will be returned.
-     *
-     * @return Integer taxonomic ID.
-     */
+    * Retrieve the NCBI taxonomic ID of this Taxon.
+    * For type KBaseGenomes.Genome, the ``source_id`` will be returned.
+    *
+    * @return Integer taxonomic ID.
+    */
     i32 get_taxonomic_id(1:string token, 2:ObjectReference ref) throws (
-        1:ServiceException generic_exception,
-        2:AuthorizationException authorization_exception,
-        3:AuthenticationException authentication_exception,
-        4:ObjectReferenceException reference_exception,
-        5:AttributeException attribute_exception,
-        6:TypeException type_exception),
+    1:ServiceException generic_exception,
+    2:AuthorizationException authorization_exception,
+    3:AuthenticationException authentication_exception,
+    4:ObjectReferenceException reference_exception,
+    5:AttributeException attribute_exception,
+    6:TypeException type_exception),
 
     /**
-     * Retrieve the kingdom.
-     *
-     */
+    * Retrieve the kingdom.
+    *
+    */
     string get_kingdom(1:string token, 2:ObjectReference ref) throws (
-        1:ServiceException generic_exception,
-        2:AuthorizationException authorization_exception,
-        3:AuthenticationException authentication_exception,
-        4:ObjectReferenceException reference_exception,
-        5:AttributeException attribute_exception,
-        6:TypeException type_exception),
+    1:ServiceException generic_exception,
+    2:AuthorizationException authorization_exception,
+    3:AuthenticationException authentication_exception,
+    4:ObjectReferenceException reference_exception,
+    5:AttributeException attribute_exception,
+    6:TypeException type_exception),
 
     /**
-     * Retrieve the domain.
-     *
-     */
+    * Retrieve the domain.
+    *
+    */
     string get_domain(1:string token, 2:ObjectReference ref) throws (
-        1:ServiceException generic_exception,
-        2:AuthorizationException authorization_exception,
-        3:AuthenticationException authentication_exception,
-        4:ObjectReferenceException reference_exception,
-        5:AttributeException attribute_exception,
-        6:TypeException type_exception),
+    1:ServiceException generic_exception,
+    2:AuthorizationException authorization_exception,
+    3:AuthenticationException authentication_exception,
+    4:ObjectReferenceException reference_exception,
+    5:AttributeException attribute_exception,
+    6:TypeException type_exception),
 
     /**
-     * Retrieve the genetic code.
-     *
-     */
+    * Retrieve the genetic code.
+    *
+    */
     i32 get_genetic_code(1:string token, 2:ObjectReference ref) throws (
-        1:ServiceException generic_exception,
-        2:AuthorizationException authorization_exception,
-        3:AuthenticationException authentication_exception,
-        4:ObjectReferenceException reference_exception,
-        5:AttributeException attribute_exception,
-        6:TypeException type_exception),
+    1:ServiceException generic_exception,
+    2:AuthorizationException authorization_exception,
+    3:AuthenticationException authentication_exception,
+    4:ObjectReferenceException reference_exception,
+    5:AttributeException attribute_exception,
+    6:TypeException type_exception),
 
     /**
-     * Retrieve the aliases.
-     *
-     */
+    * Retrieve the aliases.
+    *
+    */
     list<string> get_aliases(1:string token, 2:ObjectReference ref) throws (
-        1:ServiceException generic_exception,
-        2:AuthorizationException authorization_exception,
-        3:AuthenticationException authentication_exception,
-        4:ObjectReferenceException reference_exception,
-        5:AttributeException attribute_exception,
-        6:TypeException type_exception),
-
-    /**
-     * Retrieve object info.
-     * @skip documentation
-     */
-    ObjectInfo get_info(1:string token, 2:ObjectReference ref) throws (
-        1:ServiceException generic_exception,
-        2:AuthorizationException authorization_exception,
-        3:AuthenticationException authentication_exception,
-        4:ObjectReferenceException reference_exception,
-        5:AttributeException attribute_exception,
-        6:TypeException type_exception),
-
-    /**
-     * Retrieve object history.
-     * @skip documentation
-     */
-    ObjectHistory get_history(1:string token, 2:ObjectReference ref) throws (
-        1:ServiceException generic_exception,
-        2:AuthorizationException authorization_exception,
-        3:AuthenticationException authentication_exception,
-        4:ObjectReferenceException reference_exception,
-        5:AttributeException attribute_exception,
-        6:TypeException type_exception),
-
-    /**
-     * Retrieve object provenance.
-     * @skip documentation
-     */
-    ObjectProvenance get_provenance(1:string token, 2:ObjectReference ref) throws (
-        1:ServiceException generic_exception,
-        2:AuthorizationException authorization_exception,
-        3:AuthenticationException authentication_exception,
-        4:ObjectReferenceException reference_exception,
-        5:AttributeException attribute_exception,
-        6:TypeException type_exception),
-
-    /**
-     * Retrieve object identifier.
-     * @skip documentation
-     */
-    i64 get_id(1:string token, 2:ObjectReference ref) throws (
-        1:ServiceException generic_exception,
-        2:AuthorizationException authorization_exception,
-        3:AuthenticationException authentication_exception,
-        4:ObjectReferenceException reference_exception,
-        5:AttributeException attribute_exception,
-        6:TypeException type_exception),
-
-    /**
-     * Retrieve object name.
-     * @skip documentation
-     */
-    string get_name(1:string token, 2:ObjectReference ref) throws (
-        1:ServiceException generic_exception,
-        2:AuthorizationException authorization_exception,
-        3:AuthenticationException authentication_exception,
-        4:ObjectReferenceException reference_exception,
-        5:AttributeException attribute_exception,
-        6:TypeException type_exception),
-
-    /**
-     * Retrieve object version.
-     * @skip documentation
-     */
-    string get_version(1:string token, 2:ObjectReference ref) throws (
-        1:ServiceException generic_exception,
-        2:AuthorizationException authorization_exception,
-        3:AuthenticationException authentication_exception,
-        4:ObjectReferenceException reference_exception,
-        5:AttributeException attribute_exception,
-        6:TypeException type_exception)
+    1:ServiceException generic_exception,
+    2:AuthorizationException authorization_exception,
+    3:AuthenticationException authentication_exception,
+    4:ObjectReferenceException reference_exception,
+    5:AttributeException attribute_exception,
+    6:TypeException type_exception),
 
 }
