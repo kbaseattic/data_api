@@ -286,8 +286,8 @@ class AssemblyConverter(base.Converter):
             'contigs': contigs_list,
         }
         fasta_ref, fasta_node, fasta_handle = self._get_fasta_info()
-        if fasta_handle is not None:
-            contig_set_dict['fasta_ref'] = fasta_handle
+        if fasta_node is not None:
+            contig_set_dict['fasta_ref'] = fasta_node
 
         return contig_set_dict
 
