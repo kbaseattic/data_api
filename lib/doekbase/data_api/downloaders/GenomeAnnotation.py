@@ -25,7 +25,7 @@ import StringIO
 # Local
 from doekbase.data_api.annotation.genome_annotation.api import GenomeAnnotationAPI
 
-@profile
+#@profile
 ###example method, needs refactoring
 def downloadAsGBK(genome_ref=None, services=None, token=None, output_file=None, working_dir=None):
     ga_api = GenomeAnnotationAPI(services, token=token, ref=genome_ref)
@@ -111,7 +111,7 @@ def writeHeader(contig_id=None, contig_lengths=None, full_tax=None, tax_api=None
     out_file.write("{}/mol_type=\"DNA\"\n".format(" " * 21))
 
 
-@profile
+#@profile
 def writeFeaturesOrdered(ga_api=None, regions=None, out_file=None):
     feature_ids = ga_api.get_feature_ids(filters={"region_list": regions})
 
@@ -179,7 +179,7 @@ def writeFeaturesOrdered(ga_api=None, regions=None, out_file=None):
                         out_file.write("{}mRNA".format(" " * 5, " " * 12))
                         writeLocation(features[mrna_id]['feature_locations'], out_file)
 
-                        out_file.write("{}/kbase_id=\"\"\n".format(" " * 21, mrna_id))
+                        out_file.write("{}/kbase_id=\"{}\"\n".format(" " * 21, mrna_id))
 
                         if format_functionmRNA is not None:
                             out_file.write("{}/function=\"{}".format(" " * 21, format_functionmRNA))
@@ -217,7 +217,7 @@ def writeFeaturesOrdered(ga_api=None, regions=None, out_file=None):
 
                     out_file.write("{}CDS{}".format(" " * 5, " " * 13))
                     writeLocation(features[cds]['feature_locations'], out_file)
-                    out_file.write("{}/kbase_id=\"\"\n".format(" " * 21, cds))
+                    out_file.write("{}/kbase_id=\"{}\"\n".format(" " * 21, cds))
 
                     # out_file.write("                     /note=\"" + formatNote)
                     # out_file.write("                     /codon_start=1\n")
@@ -239,7 +239,7 @@ def writeFeaturesOrdered(ga_api=None, regions=None, out_file=None):
                                 out_file.write("{}/db_xref=\"{}:{}\"\n".format(" " * 21, aliases[s][0], s))
                             else:
                                 key = aliases[s][0].replace("Genbank ", "")
-                                out_file.write("{}/" + key + "=\"{}\"\n".format(" " * 21, s))
+                                out_file.write("{}/{}=\"{}\"\n".format(" " * 21, key, s))
 
                     getprot = proteins.get(cds)
                     if getprot is not None:
@@ -250,7 +250,7 @@ def writeFeaturesOrdered(ga_api=None, regions=None, out_file=None):
                             # what is 44 and 58?
                             protein_translation_final = formatString(protein_translation, 44, 58)
 
-                        out_file.write("{}/translation=\"".format(" " * 21, protein_translation_final))
+                        out_file.write("{}/translation=\"{}".format(" " * 21, protein_translation_final))
 
                         #     CDS             complement(join(6915..7069,7157..7232,7384..7450,
                         # 7564..7649,7762..7835,7942..7987,8236..8325,8417..8464,
@@ -281,7 +281,7 @@ def writeFeaturesOrdered(ga_api=None, regions=None, out_file=None):
                         # FKIFLLAMLVWEFPMSVIFFVDILLLTSNSMALKVMTESTMTRCIAVCLIAHLIRFLV
                         # GQIFEPTIFLIQIGSLLQYMSYFFRIV"
 
-@profile
+#@profile
 def writeLocation(feature_locations=None, out_file=None):
     added = 0
     complement = False
@@ -321,14 +321,15 @@ def writeLocation(feature_locations=None, out_file=None):
 
     out_file.write(tail)
 
-@profile
+#@profile
 def writeContig(contig_id=None, outfile=None, asm_api=None):
     contigdata = asm_api.get_contigs([contig_id])
     # significance of 10 and 60?
+    outfile.write("ORIGIN\n")
     outfile.write(formatDNASequence(contigdata[contig_id]['sequence'], 10, 60))
     outfile.write("//\n")
 
-@profile
+#@profile
 def formatAnnotation(function=None, allfunction=None, first=None, nexta=None):
     format_function = ""
 
@@ -384,7 +385,7 @@ def formatAnnotation(function=None, allfunction=None, first=None, nexta=None):
 
 
 ###formats a string into lines of given length (first line can be different)
-@profile
+#@profile
 def formatString(s, one, two):
     s = s.replace("\"", "")
     out = ""
@@ -427,7 +428,7 @@ def formatString(s, one, two):
 
     return out
 
-@profile
+###@profile
 def formatDNASequence(s, charnum, linenum):
     out = StringIO.StringIO()
     # out += "        1 tctcgcagag ttcttttttg tattaacaaa cccaaaaccc atagaattta atgaacccaa\n"
@@ -455,11 +456,12 @@ def formatDNASequence(s, charnum, linenum):
         # if we haven't reached the end, write the current index starting from 1
         indexString = str(index + 1)
         out.write("{}{} ".format(" " * (9 - len(indexString)), indexString))
-    return out
+    return out.getvalue()
 
 
 def testGBKDownload_vs_API(services, token, ref, output_file_name):
     ga_api = GenomeAnnotationAPI(services, token, ref)
+    asm_api = ga_api.get_assembly();
 
     feature_counts = ga_api.get_feature_type_counts()
     print feature_counts
@@ -467,6 +469,7 @@ def testGBKDownload_vs_API(services, token, ref, output_file_name):
     gene = 0
     cds = 0
     mrna = 0
+    contig = 0
     with open(output_file_name, "r") as f:
         for line in f:
             if line.find("     gene            ") != -1:
@@ -475,47 +478,28 @@ def testGBKDownload_vs_API(services, token, ref, output_file_name):
                 cds = cds + 1
             elif line.find("     mRNA            ") != -1:
                 mrna = mrna + 1
+            elif line.find("ORIGIN") == 0:
+                contig = contig + 1
 
     if 'mRNA' in feature_counts.keys():
         if mrna != feature_counts['mRNA']:
             print "mrna count different " + str(mrna) + " vs " + str(feature_counts['mRNA'])
         else:
-            print "mrna agree"
+            print "mrnas agree"
+
     if cds != feature_counts['CDS']:
         print "cds count different " + str(cds) + " vs " + str(feature_counts['CDS'])
     else:
-        print "cds agree"
+        print "cdss agree"
+
     if gene != feature_counts['gene']:
         print "gene count different " + str(gene) + " vs " + str(feature_counts['gene'])
     else:
-        print "gene agree"
+        print "genes agree"
 
-
-def formatDNASequence(s, charnum, linenum):
-    out = ""
-    # out += "        1 tctcgcagag ttcttttttg tattaacaaa cccaaaaccc atagaattta atgaacccaa\n"
-
-    out = out + ("        1 ")
-    index = 1
-    counter = 0
-    size = len(s)
-    for last in xrange(0, size):
-        end = min(size, last + charnum)
-        out = out + s[last: end]
-        last = last + charnum
-        counter = counter + 1
-        if counter == 6 and len(s) > end:
-            out = out + ("\n")
-            index = index + 60
-            indexStr = str(index)
-            length = len(indexStr)
-            out = out + (" " * (9 - length) + indexStr + " ")
-            counter = 0
-        else:
-            out = out + (" ")
-
-    if out[len(out) - 1] == ' ':
-        out = out[:len(out) - 1]
-    out = out + ("\n")
-
-    return out
+    numcontigs = len(asm_api.get_contig_ids())
+    print "numcontigs "+str(numcontigs)
+    if contig != numcontigs:
+        print "contig count different " + str(contig) + " vs " + str(numcontigs)
+    else:
+        print "contigs agree"
