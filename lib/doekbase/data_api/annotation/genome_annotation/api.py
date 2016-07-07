@@ -2633,6 +2633,8 @@ class GenomeAnnotationClientAPI(GenomeAnnotationInterface):
     @client_method
     def get_mrna_by_cds(self, cds_feature_id_list=None):
         return self.client.get_mrna_by_cds(self._token, self.ref, cds_feature_id_list)
+    def get_gff(self, gene_feature_id_list=None):
+        raise NotImplementedError("This is a library only method.")
 
     @logged(_ga_log)
     @client_method
@@ -2658,3 +2660,15 @@ class GenomeAnnotationClientAPI(GenomeAnnotationInterface):
     @client_method
     def get_gff(self, gene_feature_id_list=None):
         raise NotImplementedError("This is a library only method.")
+
+    @logged(_ga_log)
+    @client_method
+    def get_summary(self):
+        raise NotImplementedError("Not implemented yet")
+
+    @logged(_ga_log)
+    @client_method
+    def save_summary(self):
+        raise NotImplementedError("Not implemented yet")
+
+
