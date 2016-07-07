@@ -1236,6 +1236,19 @@ class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
 
         return out
 
+    def save_summary(self): 
+        """Create the GenomeAnnotationSummary object for a GenomeAnnotation. 
+           This object is specialized for Landing Page use. 
+           Saves the GenomeAnnotationSummary to the same workspace as the GenomeAnnotation object.
+        """ 
+        pass 
+ 
+    def get_summary(self):
+        """Gets GenomeAnnotationSummary object for a GenomeAnnotation.
+           This object is specialized for Landing Page use.
+           Just get a dump of the GenomeAnnotationSummary object.
+        """ 
+        pass 
 
 
 @fix_docs
