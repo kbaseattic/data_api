@@ -6,6 +6,7 @@ import os
 import argparse
 import logging
 import subprocess
+import pkgutil
 
 # 3rd party imports
 # None
@@ -22,20 +23,25 @@ if __name__ == '__main__':
                 "shock_service_url": "https://ci.kbase.us/services/shock-api/",
                 "handle_service_url": "https://ci.kbase.us/services/handle_service/"}
 
-    try:
+    # for importer, modname, ispkg in pkgutil.walk_packages(path=None, onerror=lambda x: None):
+    #		print(modname)
 
+    try:
+        print "starting"
         genome_ref = "7824/GCF_000005845.2_ASM584v2_genomic_GA"
         output_file_name = "test.gbk"
-        
-        print "starting"
-        GenomeAnnotation.downloadAsGBK("7824/GCF_000001735.3_TAIR10_genomic_GA", services, token, "test.gbk", "./")
-        print "done"
 
+        #print dir(GenomeAnnotation)
+
+        GenomeAnnotation.downloadAsGBK(genome_ref, services, token, output_file_name, "./")
+        print "done w upload"
+
+        #print sys.path
         GenomeAnnotation.testGBKDownload_vs_API(services, token, genome_ref, output_file_name)
         print "done testing"
 
     except Exception, e:
-        # ogger.exception(e)
+        # logger.exception(e)
         print "Exception"
         raise
 
