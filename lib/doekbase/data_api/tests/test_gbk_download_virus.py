@@ -7,14 +7,20 @@ import time
 import argparse
 import logging
 import subprocess
+import pkgutil
 
 # 3rd party imports
 # None
 
 # KBase imports
+#sys.path.append("../downloaders")
+#import GenomeAnnotation
 from doekbase.data_api.downloaders import GenomeAnnotation
 
 if __name__ == '__main__':
+
+    print os.getcwd()
+    print sys.path
     # logger = script_utils.stderrlogger(__file__, level=logging.DEBUG)
 
     token = os.environ.get("KB_AUTH_TOKEN")
@@ -23,24 +29,33 @@ if __name__ == '__main__':
                 "shock_service_url": "https://ci.kbase.us/services/shock-api/",
                 "handle_service_url": "https://ci.kbase.us/services/handle_service/"}
 
-    try:
+    # for importer, modname, ispkg in pkgutil.walk_packages(path=None, onerror=lambda x: None):
+    #		print(modname)
 
-        genome_ref = "7824/GCF_000005845.2_ASM584v2_genomic_GA"
-        output_file_name = "GCF_000005845.2_ASM584v2_genomic_GA.gbk"
+    try:
 
         start = time.time()
         print "starting"
-        GenomeAnnotation.downloadAsGBK("7824/GCF_000001735.3_TAIR10_genomic_GA", services, token, "test.gbk", "./")
-        print "done"
-        print end - start + " s"
+        genome_ref = "8431/12319_RefSeq"
+        output_file_name = "12319_RefSeq.gbk"
 
+        #print dir(GenomeAnnotation)
+
+        GenomeAnnotation.downloadAsGBK(genome_ref, services, token, output_file_name, "./")
+        print "done w upload"
+        end = time.time()
+        print end - start +" s"
+
+        #print sys.path
         start = time.time()
         GenomeAnnotation.testGBKDownload_vs_API(services, token, genome_ref, output_file_name)
         print "done testing"
+        end = time.time()
         print end - start + " s"
 
+
     except Exception, e:
-        # ogger.exception(e)
+        # logger.exception(e)
         print "Exception"
         raise
 

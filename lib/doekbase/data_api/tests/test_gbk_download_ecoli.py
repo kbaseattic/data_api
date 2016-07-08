@@ -3,6 +3,7 @@
 # standard library imports
 import sys
 import os
+import time
 import argparse
 import logging
 import subprocess
@@ -12,9 +13,14 @@ import pkgutil
 # None
 
 # KBase imports
+#sys.path.append("../downloaders")
+#import GenomeAnnotation
 from doekbase.data_api.downloaders import GenomeAnnotation
 
 if __name__ == '__main__':
+
+    print os.getcwd()
+    print sys.path
     # logger = script_utils.stderrlogger(__file__, level=logging.DEBUG)
 
     token = os.environ.get("KB_AUTH_TOKEN")
@@ -27,18 +33,22 @@ if __name__ == '__main__':
     #		print(modname)
 
     try:
+        start = time.time()
         print "starting"
         genome_ref = "7824/GCF_000005845.2_ASM584v2_genomic_GA"
-        output_file_name = "test.gbk"
+        output_file_name = "GCF_000005845.2_ASM584v2_genomic_GA.gbk"
 
         #print dir(GenomeAnnotation)
 
         GenomeAnnotation.downloadAsGBK(genome_ref, services, token, output_file_name, "./")
         print "done w upload"
+        print end - start + " s"
 
         #print sys.path
+        start = time.time()
         GenomeAnnotation.testGBKDownload_vs_API(services, token, genome_ref, output_file_name)
         print "done testing"
+        print end - start + " s"
 
     except Exception, e:
         # logger.exception(e)

@@ -22,6 +22,8 @@ __date__ = '6/10/16'
 import os
 import string
 import StringIO
+import re
+
 # Local
 from doekbase.data_api.annotation.genome_annotation.api import GenomeAnnotationAPI
 
@@ -77,7 +79,9 @@ def downloadAsGBK(genome_ref=None, services=None, token=None, output_file=None, 
             #break
 
 def writeHeader(contig_id=None, contig_lengths=None, full_tax=None, tax_api=None, out_file=None):
-    out_file.write("LOCUS{}{}{} bp   DNA\n".format(" " * 7, contig_id, " " * 13, contig_lengths[contig_id]))
+
+    #print "contig_lengths[contig_id] "+ str(contig_lengths[contig_id])
+    out_file.write("LOCUS{}{}{}{} bp   DNA\n".format(" " * 7, contig_id, " " * 13, contig_lengths[contig_id]))
 
     sn = tax_api.get_scientific_name()
 
@@ -447,6 +451,7 @@ def formatDNASequence(s, charnum, linenum):
                 index = size
                 break
             else:
+                #print "len(s[index:index + charnum]) "+str(len(s[index:index + charnum]))
                 out.write("{} ".format(s[index:index + charnum]))
                 index += charnum
         # add a line break
@@ -458,48 +463,85 @@ def formatDNASequence(s, charnum, linenum):
         out.write("{}{} ".format(" " * (9 - len(indexString)), indexString))
     return out.getvalue()
 
-
+#method to perform basic validation of the downloaded Genbank file
 def testGBKDownload_vs_API(services, token, ref, output_file_name):
     ga_api = GenomeAnnotationAPI(services, token, ref)
-    asm_api = ga_api.get_assembly();
+    asm_api = ga_api.get_assembly()
 
     feature_counts = ga_api.get_feature_type_counts()
-    print feature_counts
 
     gene = 0
     cds = 0
     mrna = 0
     contig = 0
+    opencontig = 0
+    countseqlines = 0
+    seq = ""
+    curloc = ""
+
+    #contig_lens = asm_api.get_contig_lengths()
+
     with open(output_file_name, "r") as f:
         for line in f:
-            if line.find("     gene            ") != -1:
+            if opencontig == 1 and line.find("//") != 0:
+                countseqlines = countseqlines + 1
+                start = line.find("1 ")
+                line_stripped = line[start+2:]
+                #reg expr for all white space
+                line_stripped = re.sub(r'\s+', '', line_stripped)#line_stripped.replace(" ","")
+                #print "."+line+".\n."+line_stripped+"."
+                seq = seq + line_stripped
+
+            #collect counts of file properties
+            if line.find("LOCUS       ") != -1:
+                start = line.find("LOCUS       ")  + len("LOCUS       ")
+                nextindex = line[start:].find(" ")+start
+                curloc = line[start:nextindex]
+                #print "curloc ."+curloc+".\t"+str(start)+"\t"+str(nextindex)
+            elif line.find("     gene            ") != -1:
                 gene = gene + 1
             elif line.find("     CDS             ") != -1:
                 cds = cds + 1
             elif line.find("     mRNA            ") != -1:
                 mrna = mrna + 1
             elif line.find("ORIGIN") == 0:
+                seq = ""
+                countseqlines = 0
+                opencontig = 1
                 contig = contig + 1
+            elif line.find("//") == 0:
+                opencontig = 0
+
+                reflen = asm_api.get_contig_lengths([curloc])[curloc]
+                #print reflen
+                if len(seq) != reflen:
+                    print "contig len different " + curloc+"\t"+ str(len(seq)) + " vs " + str(reflen)
+                else:
+                    print "contig len agree "+curloc+"\t"+ str(len(seq))
+                #print curloc
+                #print seq
+
+                seq = ""
 
     if 'mRNA' in feature_counts.keys():
         if mrna != feature_counts['mRNA']:
             print "mrna count different " + str(mrna) + " vs " + str(feature_counts['mRNA'])
         else:
-            print "mrnas agree"
+            print "mrnas agree "+str(mrna)
 
     if cds != feature_counts['CDS']:
         print "cds count different " + str(cds) + " vs " + str(feature_counts['CDS'])
     else:
-        print "cdss agree"
+        print "cdss agree "+str(cds)
 
     if gene != feature_counts['gene']:
         print "gene count different " + str(gene) + " vs " + str(feature_counts['gene'])
     else:
-        print "genes agree"
+        print "genes agree "+str(gene)
 
     numcontigs = len(asm_api.get_contig_ids())
     print "numcontigs "+str(numcontigs)
     if contig != numcontigs:
         print "contig count different " + str(contig) + " vs " + str(numcontigs)
     else:
-        print "contigs agree"
+        print "contigs agree "+str(numcontigs)
