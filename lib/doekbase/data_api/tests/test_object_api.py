@@ -135,9 +135,26 @@ def test_get_data_subset():
 
 
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
-def test_get_referrers():
+def test_get_referrers_default():
     _log.info("Input {}".format(t))
     referrers = t.get_referrers()
+    _log.info("Output {}".format(referrers))
+
+    all_refs = [x for k in referrers for x in referrers[k]]
+
+    found = set()
+    for x in all_refs:
+        # check to see if there is more than one version of an object
+        r = x.rsplit("/",1)[0]
+
+        assert r not in found
+        found.add(r)
+
+
+@skipUnless(shared.can_connect, 'Cannot connect to workspace')
+def test_get_referrers_all_versions():
+    _log.info("Input {}".format(t))
+    referrers = t.get_referrers(most_recent=False)
     _log.info("Output {}".format(referrers))
 
     assert referrers is not None
