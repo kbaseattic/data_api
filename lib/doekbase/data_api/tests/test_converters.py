@@ -17,7 +17,7 @@ from doekbase.data_api.converters.base import GenomeName
 
 # Target workspace in CI environment
 TEST_CI_WS_NAME = "Converter-Test-Narrative"
-TEST_CI_WS_ID = '7609'
+TEST_CI_WS_ID = '8020'
 
 g_kbase_instance = 'ci'
 
@@ -52,7 +52,7 @@ def skip_unless_connect():
 ################################################################
 
 # Input GenomeAnnotation reference object in CI
-TEST_CI_GA_OBJID = '6052/40/1'
+TEST_CI_GA_OBJID = '8020/39/1'
 
 def test_genome_annotation_init():
     """Init GA converter, but don't run convert"""
@@ -73,7 +73,7 @@ def test_genome_annotation_convert():
 # Assembly -> ContigSet
 ################################################################
 
-TEST_CI_ASM_OBJID = '6052/31/1'
+TEST_CI_ASM_OBJID = '8020/30/1'
 
 def test_assembly_init():
     """Init Assembly converter, but don't run convert"""

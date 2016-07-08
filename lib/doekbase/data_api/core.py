@@ -446,22 +446,33 @@ class ObjectAPI(object):
         
         object_refs_by_type = {}
 
-        # keep track of which objects we have seen so far, the first instance will be the latest
-        # so only keep that reference
-        found_objects = {}
-        for x in referrers:
-            typestring = self.ws_client.translate_to_MD5_types([x[2]]).values()[0]
+        if most_recent:
+            # loop through all references and track the most recent for each unique object
+            found_objects = {}
+            for x in referrers:
+                typestring = self.ws_client.translate_to_MD5_types([x[2]]).values()[0]
 
-            if typestring not in object_refs_by_type:
-                object_refs_by_type[typestring] = []
+                if typestring not in object_refs_by_type:
+                    object_refs_by_type[typestring] = []
 
-            unversioned_ref = str(x[6]) + "/" + str(x[0])
-            if most_recent and unversioned_ref in found_objects:
-                continue
+                unversioned_ref = str(x[6]) + "/" + str(x[0])
+                if unversioned_ref in found_objects:
+                    if x[4] > found_objects[unversioned_ref]:
+                        found_objects[unversioned_ref] = (typestring, x[4])
+                else:
+                    # Mark an entry for a new object
+                    found_objects[unversioned_ref] = (typestring, x[4])
 
-            # Mark an entry for a new object
-            found_objects[unversioned_ref] = None
-            object_refs_by_type[typestring].append(str(x[6]) + "/" + str(x[0]) + "/" + str(x[4]))
+            for x in found_objects:
+                object_refs_by_type[found_objects[x][0]].append(x + "/" + str(found_objects[x][1]))
+        else:
+            for x in referrers:
+                typestring = self.ws_client.translate_to_MD5_types([x[2]]).values()[0]
+
+                if typestring not in object_refs_by_type:
+                    object_refs_by_type[typestring] = []
+
+                object_refs_by_type[typestring].append(str(x[6]) + "/" + str(x[0]) + "/" + str(x[4]))
 
         return object_refs_by_type
 
