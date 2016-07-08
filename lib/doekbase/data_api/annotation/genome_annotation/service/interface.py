@@ -234,12 +234,15 @@ class GenomeAnnotationService(service_core.BaseService):
         return output
 
     @server_method
-    def get_gff(self, token=None, ref=None, gene_id_list=None):
+    def get_summary(self, token=None, ref=None):
         ga_api = self._get_instance(token, ref)
-        result = ga_api.get_gff()
+        result = ga_api.get_summary()
 
-        buf = StringIO.StringIO()
-        result.to_file(buf)
-        output = buf.getvalue()
+        return result
 
-        return output
+    @server_method
+    def get_summary(self, token=None, ref=None):
+        ga_api = self._get_instance(token, ref)
+        result = ga_api.save_summary()
+
+        return result

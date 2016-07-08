@@ -1906,4 +1906,424 @@ genome_annotation.UTR_data.prototype.write = function(output) {
   return;
 };
 
+genome_annotation.Summary_data = function(args) {
+  this.scientific_name = null;
+  this.taxonomy_id = null;
+  this.kingdom = null;
+  this.scientific_lineage = null;
+  this.genetic_code = null;
+  this.organism_aliases = null;
+  this.assembly_source = null;
+  this.assembly_source_id = null;
+  this.asembly_source_date = null;
+  this.gc_content = null;
+  this.dna_size = null;
+  this.num_contigs = null;
+  this.contig_ids = null;
+  this.external_source = null;
+  this.external_source_date = null;
+  this.release = null;
+  this.original_source_filename = null;
+  this.feature_type_counts = null;
+  if (args) {
+    if (args.scientific_name !== undefined) {
+      this.scientific_name = args.scientific_name;
+    }
+    if (args.taxonomy_id !== undefined) {
+      this.taxonomy_id = args.taxonomy_id;
+    }
+    if (args.kingdom !== undefined) {
+      this.kingdom = args.kingdom;
+    }
+    if (args.scientific_lineage !== undefined) {
+      this.scientific_lineage = args.scientific_lineage;
+    }
+    if (args.genetic_code !== undefined) {
+      this.genetic_code = args.genetic_code;
+    }
+    if (args.organism_aliases !== undefined) {
+      this.organism_aliases = args.organism_aliases;
+    }
+    if (args.assembly_source !== undefined) {
+      this.assembly_source = args.assembly_source;
+    }
+    if (args.assembly_source_id !== undefined) {
+      this.assembly_source_id = args.assembly_source_id;
+    }
+    if (args.asembly_source_date !== undefined) {
+      this.asembly_source_date = args.asembly_source_date;
+    }
+    if (args.gc_content !== undefined) {
+      this.gc_content = args.gc_content;
+    }
+    if (args.dna_size !== undefined) {
+      this.dna_size = args.dna_size;
+    }
+    if (args.num_contigs !== undefined) {
+      this.num_contigs = args.num_contigs;
+    }
+    if (args.contig_ids !== undefined) {
+      this.contig_ids = args.contig_ids;
+    }
+    if (args.external_source !== undefined) {
+      this.external_source = args.external_source;
+    }
+    if (args.external_source_date !== undefined) {
+      this.external_source_date = args.external_source_date;
+    }
+    if (args.release !== undefined) {
+      this.release = args.release;
+    }
+    if (args.original_source_filename !== undefined) {
+      this.original_source_filename = args.original_source_filename;
+    }
+    if (args.feature_type_counts !== undefined) {
+      this.feature_type_counts = args.feature_type_counts;
+    }
+  }
+};
+genome_annotation.Summary_data.prototype = {};
+genome_annotation.Summary_data.prototype.read = function(input) {
+  input.readStructBegin();
+  while (true)
+  {
+    var ret = input.readFieldBegin();
+    var fname = ret.fname;
+    var ftype = ret.ftype;
+    var fid = ret.fid;
+    if (ftype == Thrift.Type.STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 1:
+      if (ftype == Thrift.Type.STRING) {
+        this.scientific_name = input.readString().value;
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 2:
+      if (ftype == Thrift.Type.I64) {
+        this.taxonomy_id = input.readI64().value;
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 3:
+      if (ftype == Thrift.Type.STRING) {
+        this.kingdom = input.readString().value;
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 4:
+      if (ftype == Thrift.Type.LIST) {
+        var _size216 = 0;
+        var _rtmp3220;
+        this.scientific_lineage = [];
+        var _etype219 = 0;
+        _rtmp3220 = input.readListBegin();
+        _etype219 = _rtmp3220.etype;
+        _size216 = _rtmp3220.size;
+        for (var _i221 = 0; _i221 < _size216; ++_i221)
+        {
+          var elem222 = null;
+          elem222 = input.readString().value;
+          this.scientific_lineage.push(elem222);
+        }
+        input.readListEnd();
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 5:
+      if (ftype == Thrift.Type.BYTE) {
+        this.genetic_code = input.readByte().value;
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 6:
+      if (ftype == Thrift.Type.LIST) {
+        var _size223 = 0;
+        var _rtmp3227;
+        this.organism_aliases = [];
+        var _etype226 = 0;
+        _rtmp3227 = input.readListBegin();
+        _etype226 = _rtmp3227.etype;
+        _size223 = _rtmp3227.size;
+        for (var _i228 = 0; _i228 < _size223; ++_i228)
+        {
+          var elem229 = null;
+          elem229 = input.readString().value;
+          this.organism_aliases.push(elem229);
+        }
+        input.readListEnd();
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 7:
+      if (ftype == Thrift.Type.STRING) {
+        this.assembly_source = input.readString().value;
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 8:
+      if (ftype == Thrift.Type.STRING) {
+        this.assembly_source_id = input.readString().value;
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 9:
+      if (ftype == Thrift.Type.STRING) {
+        this.asembly_source_date = input.readString().value;
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 10:
+      if (ftype == Thrift.Type.DOUBLE) {
+        this.gc_content = input.readDouble().value;
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 11:
+      if (ftype == Thrift.Type.I64) {
+        this.dna_size = input.readI64().value;
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 12:
+      if (ftype == Thrift.Type.I64) {
+        this.num_contigs = input.readI64().value;
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 13:
+      if (ftype == Thrift.Type.LIST) {
+        var _size230 = 0;
+        var _rtmp3234;
+        this.contig_ids = [];
+        var _etype233 = 0;
+        _rtmp3234 = input.readListBegin();
+        _etype233 = _rtmp3234.etype;
+        _size230 = _rtmp3234.size;
+        for (var _i235 = 0; _i235 < _size230; ++_i235)
+        {
+          var elem236 = null;
+          elem236 = input.readString().value;
+          this.contig_ids.push(elem236);
+        }
+        input.readListEnd();
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 14:
+      if (ftype == Thrift.Type.STRING) {
+        this.external_source = input.readString().value;
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 15:
+      if (ftype == Thrift.Type.STRING) {
+        this.external_source_date = input.readString().value;
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 16:
+      if (ftype == Thrift.Type.STRING) {
+        this.release = input.readString().value;
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 17:
+      if (ftype == Thrift.Type.STRING) {
+        this.original_source_filename = input.readString().value;
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 18:
+      if (ftype == Thrift.Type.MAP) {
+        var _size237 = 0;
+        var _rtmp3241;
+        this.feature_type_counts = {};
+        var _ktype238 = 0;
+        var _vtype239 = 0;
+        _rtmp3241 = input.readMapBegin();
+        _ktype238 = _rtmp3241.ktype;
+        _vtype239 = _rtmp3241.vtype;
+        _size237 = _rtmp3241.size;
+        for (var _i242 = 0; _i242 < _size237; ++_i242)
+        {
+          if (_i242 > 0 ) {
+            if (input.rstack.length > input.rpos[input.rpos.length -1] + 1) {
+              input.rstack.pop();
+            }
+          }
+          var key243 = null;
+          var val244 = null;
+          key243 = input.readString().value;
+          val244 = input.readI64().value;
+          this.feature_type_counts[key243] = val244;
+        }
+        input.readMapEnd();
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      default:
+        input.skip(ftype);
+    }
+    input.readFieldEnd();
+  }
+  input.readStructEnd();
+  return;
+};
+
+genome_annotation.Summary_data.prototype.write = function(output) {
+  output.writeStructBegin('Summary_data');
+  if (this.scientific_name !== null && this.scientific_name !== undefined) {
+    output.writeFieldBegin('scientific_name', Thrift.Type.STRING, 1);
+    output.writeString(this.scientific_name);
+    output.writeFieldEnd();
+  }
+  if (this.taxonomy_id !== null && this.taxonomy_id !== undefined) {
+    output.writeFieldBegin('taxonomy_id', Thrift.Type.I64, 2);
+    output.writeI64(this.taxonomy_id);
+    output.writeFieldEnd();
+  }
+  if (this.kingdom !== null && this.kingdom !== undefined) {
+    output.writeFieldBegin('kingdom', Thrift.Type.STRING, 3);
+    output.writeString(this.kingdom);
+    output.writeFieldEnd();
+  }
+  if (this.scientific_lineage !== null && this.scientific_lineage !== undefined) {
+    output.writeFieldBegin('scientific_lineage', Thrift.Type.LIST, 4);
+    output.writeListBegin(Thrift.Type.STRING, this.scientific_lineage.length);
+    for (var iter245 in this.scientific_lineage)
+    {
+      if (this.scientific_lineage.hasOwnProperty(iter245))
+      {
+        iter245 = this.scientific_lineage[iter245];
+        output.writeString(iter245);
+      }
+    }
+    output.writeListEnd();
+    output.writeFieldEnd();
+  }
+  if (this.genetic_code !== null && this.genetic_code !== undefined) {
+    output.writeFieldBegin('genetic_code', Thrift.Type.BYTE, 5);
+    output.writeByte(this.genetic_code);
+    output.writeFieldEnd();
+  }
+  if (this.organism_aliases !== null && this.organism_aliases !== undefined) {
+    output.writeFieldBegin('organism_aliases', Thrift.Type.LIST, 6);
+    output.writeListBegin(Thrift.Type.STRING, this.organism_aliases.length);
+    for (var iter246 in this.organism_aliases)
+    {
+      if (this.organism_aliases.hasOwnProperty(iter246))
+      {
+        iter246 = this.organism_aliases[iter246];
+        output.writeString(iter246);
+      }
+    }
+    output.writeListEnd();
+    output.writeFieldEnd();
+  }
+  if (this.assembly_source !== null && this.assembly_source !== undefined) {
+    output.writeFieldBegin('assembly_source', Thrift.Type.STRING, 7);
+    output.writeString(this.assembly_source);
+    output.writeFieldEnd();
+  }
+  if (this.assembly_source_id !== null && this.assembly_source_id !== undefined) {
+    output.writeFieldBegin('assembly_source_id', Thrift.Type.STRING, 8);
+    output.writeString(this.assembly_source_id);
+    output.writeFieldEnd();
+  }
+  if (this.asembly_source_date !== null && this.asembly_source_date !== undefined) {
+    output.writeFieldBegin('asembly_source_date', Thrift.Type.STRING, 9);
+    output.writeString(this.asembly_source_date);
+    output.writeFieldEnd();
+  }
+  if (this.gc_content !== null && this.gc_content !== undefined) {
+    output.writeFieldBegin('gc_content', Thrift.Type.DOUBLE, 10);
+    output.writeDouble(this.gc_content);
+    output.writeFieldEnd();
+  }
+  if (this.dna_size !== null && this.dna_size !== undefined) {
+    output.writeFieldBegin('dna_size', Thrift.Type.I64, 11);
+    output.writeI64(this.dna_size);
+    output.writeFieldEnd();
+  }
+  if (this.num_contigs !== null && this.num_contigs !== undefined) {
+    output.writeFieldBegin('num_contigs', Thrift.Type.I64, 12);
+    output.writeI64(this.num_contigs);
+    output.writeFieldEnd();
+  }
+  if (this.contig_ids !== null && this.contig_ids !== undefined) {
+    output.writeFieldBegin('contig_ids', Thrift.Type.LIST, 13);
+    output.writeListBegin(Thrift.Type.STRING, this.contig_ids.length);
+    for (var iter247 in this.contig_ids)
+    {
+      if (this.contig_ids.hasOwnProperty(iter247))
+      {
+        iter247 = this.contig_ids[iter247];
+        output.writeString(iter247);
+      }
+    }
+    output.writeListEnd();
+    output.writeFieldEnd();
+  }
+  if (this.external_source !== null && this.external_source !== undefined) {
+    output.writeFieldBegin('external_source', Thrift.Type.STRING, 14);
+    output.writeString(this.external_source);
+    output.writeFieldEnd();
+  }
+  if (this.external_source_date !== null && this.external_source_date !== undefined) {
+    output.writeFieldBegin('external_source_date', Thrift.Type.STRING, 15);
+    output.writeString(this.external_source_date);
+    output.writeFieldEnd();
+  }
+  if (this.release !== null && this.release !== undefined) {
+    output.writeFieldBegin('release', Thrift.Type.STRING, 16);
+    output.writeString(this.release);
+    output.writeFieldEnd();
+  }
+  if (this.original_source_filename !== null && this.original_source_filename !== undefined) {
+    output.writeFieldBegin('original_source_filename', Thrift.Type.STRING, 17);
+    output.writeString(this.original_source_filename);
+    output.writeFieldEnd();
+  }
+  if (this.feature_type_counts !== null && this.feature_type_counts !== undefined) {
+    output.writeFieldBegin('feature_type_counts', Thrift.Type.MAP, 18);
+    output.writeMapBegin(Thrift.Type.STRING, Thrift.Type.I64, Thrift.objectLength(this.feature_type_counts));
+    for (var kiter248 in this.feature_type_counts)
+    {
+      if (this.feature_type_counts.hasOwnProperty(kiter248))
+      {
+        var viter249 = this.feature_type_counts[kiter248];
+        output.writeString(kiter248);
+        output.writeI64(viter249);
+      }
+    }
+    output.writeMapEnd();
+    output.writeFieldEnd();
+  }
+  output.writeFieldStop();
+  output.writeStructEnd();
+  return;
+};
+
 genome_annotation.VERSION = '{{version}}';

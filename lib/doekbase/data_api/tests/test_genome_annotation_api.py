@@ -21,8 +21,10 @@ from doekbase.data_api import exceptions
 
 _log = logging.getLogger(__name__)
 
-genome_new = "ReferenceGenomeAnnotations/kb|g.166819"
-genome_old = "OriginalReferenceGenomes/kb|g.166819"
+#genome_new = "ReferenceGenomeAnnotations/kb|g.166819"
+#genome_old = "OriginalReferenceGenomes/kb|g.166819"
+genome_new = "8020/39"
+genome_old = "8020/41"
 t_new = None
 t_new_e = None
 t_old = None
@@ -546,6 +548,44 @@ def test_get_gff_valid_new():
     assert error_caught
 
 
+@skipUnless(shared.can_connect, 'Cannot connect to workspace')
+def test_get_summary_new():
+    _log.debug("Input {}".format(genome_new))
+    for t_o in [t_new, t_new_e, t_client_new]:
+        summary_t_o = t_o.get_summary()
+        assert "taxonomy" in summary_t_o
+        assert "scientific_name" in summary_t_o["taxonomy"]
+        assert "taxonomy_id" in summary_t_o["taxonomy"]
+        assert "kingdom" in summary_t_o["taxonomy"]
+        assert "scientific_lineage" in summary_t_o["taxonomy"]
+        assert "genetic_code" in summary_t_o["taxonomy"]
+        assert "organism_aliases" in summary_t_o["taxonomy"]
+
+        assert "assembly" in summary_t_o
+        assert "assembly_source" in summary_t_o["assembly"]
+        assert "assembly_source_id" in summary_t_o["assembly"]
+        assert "assembly_source_date" in summary_t_o["assembly"]
+        assert "gc_content" in summary_t_o["assembly"]
+        assert "dna_size" in summary_t_o["assembly"]
+        assert "num_contigs" in summary_t_o["assembly"]
+        assert "contig_ids" in summary_t_o["assembly"]
+
+        assert "annotation" in summary_t_o
+        assert "external_source" in summary_t_o["annotation"]
+        assert "external_source_date" in summary_t_o["annotation"]
+        assert "release" in summary_t_o["annotation"]
+        assert "original_source_filename" in summary_t_o["annotation"]
+        assert "feature_type_counts" in summary_t_o["annotation"]
+
+
+@skipUnless(shared.can_connect, 'Cannot connect to workspace')
+def test_save_summary_new():
+    _log.debug("Input {}".format(genome_new))
+    for t_o in [t_new, t_new_e, t_client_new]:
+        saved = t_o.save_summary()
+        assert saved
+
+
 ######## Old Genome Annotation Type tests
 
 
@@ -929,3 +969,27 @@ def test_get_gff_valid_old():
         error_caught = True
 
     assert error_caught
+
+@skipUnless(shared.can_connect, 'Cannot connect to workspace')
+def test_get_summary_old():
+    _log.debug("Input {}".format(genome_old))
+    for t_o in [t_old, t_old_e, t_client_old]:
+        error_caught = False
+        try:
+            summary_t_o = t_o.get_summary()
+        except TypeError:
+            error_caught = True
+
+        assert error_caught
+
+@skipUnless(shared.can_connect, 'Cannot connect to workspace')
+def test_save_summary_old():
+    _log.debug("Input {}".format(genome_old))
+    for t_o in [t_old, t_old_e, t_client_old]:
+        error_caught = False
+        try:
+            saved = t_o.save_summary()
+        except TypeError:
+            error_caught = True
+
+        assert error_caught
