@@ -44,14 +44,14 @@ if __name__ == '__main__':
         GenomeAnnotation.downloadAsGBK(genome_ref, services, token, output_file_name, "./")
         print "done w upload"
         end = time.time()
-        print end - start +" s"
+        print str(end - start) + " s"
 
         #print sys.path
         start = time.time()
         GenomeAnnotation.testGBKDownload_vs_API(services, token, genome_ref, output_file_name)
         print "done testing"
         end = time.time()
-        print end - start + " s"
+        print str(end - start) + " s"
 
 
     except Exception, e:

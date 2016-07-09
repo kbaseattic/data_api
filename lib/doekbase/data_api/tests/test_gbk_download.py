@@ -33,13 +33,13 @@ if __name__ == '__main__':
         GenomeAnnotation.downloadAsGBK("7824/GCF_000001735.3_TAIR10_genomic_GA", services, token, "test.gbk", "./")
         print "done"
         end = time.time()
-        print end - start + " s"
+        print str(end - start) + " s"
 
         start = time.time()
         GenomeAnnotation.testGBKDownload_vs_API(services, token, genome_ref, output_file_name)
         print "done testing"
         end = time.time()
-        print end - start + " s"
+        print str(end - start) + " s"
 
     except Exception, e:
         # ogger.exception(e)
