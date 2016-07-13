@@ -25,12 +25,12 @@ if __name__ == '__main__':
 
     try:
 
-        genome_ref = "7824/GCF_000005845.2_ASM584v2_genomic_GA"
-        output_file_name = "GCF_000005845.2_ASM584v2_genomic_GA.gbk"
+        genome_ref = "7824/GCF_000001735.3_TAIR10_genomic_GA"
+        output_file_name = "GCF_000001735.3_TAIR10_genomic_GA.gbk"
 
         start = time.time()
         print "starting"
-        GenomeAnnotation.downloadAsGBK("7824/GCF_000001735.3_TAIR10_genomic_GA", services, token, "test.gbk", "./")
+        GenomeAnnotation.downloadAsGBK(genome_ref, services, token, output_file_name, "./")
         print "done"
         end = time.time()
         print str(end - start) + " s"
