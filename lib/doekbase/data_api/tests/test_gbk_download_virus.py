@@ -36,23 +36,22 @@ if __name__ == '__main__':
 
         start = time.time()
         print "starting"
-        genome_ref = "8431/12319_RefSeq"
-        output_file_name = "12319_RefSeq.gbk"
+        genome_ref = "8020/12319_RefSeq"#"8431/12319_RefSeq"
+        output_file_name = "12319_RefSeq.gbk"#"12319_RefSeq.gbk"
 
         #print dir(GenomeAnnotation)
 
         GenomeAnnotation.downloadAsGBK(genome_ref, services, token, output_file_name, "./")
         print "done w upload"
         end = time.time()
-        print str(end - start) + " s"
+        print end - start
 
         #print sys.path
         start = time.time()
         GenomeAnnotation.testGBKDownload_vs_API(services, token, genome_ref, output_file_name)
         print "done testing"
         end = time.time()
-        print str(end - start) + " s"
-
+        print end - start
 
     except Exception, e:
         # logger.exception(e)

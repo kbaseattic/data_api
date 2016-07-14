@@ -24,6 +24,7 @@ import string
 import StringIO
 import re
 import datetime
+import operator
 
 # Local
 from doekbase.data_api.annotation.genome_annotation.api import GenomeAnnotationAPI
@@ -32,17 +33,20 @@ from doekbase.data_api.annotation.genome_annotation.api import GenomeAnnotationA
 # @profile
 ###example method, needs refactoring
 def downloadAsGBK(genome_ref=None, services=None, token=None, output_file=None, working_dir=None):
+
+    print "new APIs start"
     ga_api = GenomeAnnotationAPI(services, token=token, ref=genome_ref)
     tax_api = ga_api.get_taxon()
     asm_api = ga_api.get_assembly()
+    print "new APIs done"
 
     genome_name = str(ga_api.get_id())
 
-    print genome_name
+    print "genome_name "+genome_name
 
     contig_ids = asm_api.get_contig_ids()
     contig_lengths = asm_api.get_contig_lengths(contig_ids)
-    print contig_ids
+    print "contig_ids "+str(contig_ids)
 
     full_tax = tax_api.get_scientific_lineage()
 
@@ -64,7 +68,7 @@ def downloadAsGBK(genome_ref=None, services=None, token=None, output_file=None, 
     with open(outpath, "w") as out_file:
         # create per-contig section in gbk file
         for contig_id in contig_ids:
-            print contig_id
+            print "contig_id "+contig_id
             stop = contig_lengths[contig_id]
 
             writeHeader(contig_id, contig_lengths, full_tax, tax_api, out_file)
@@ -79,7 +83,7 @@ def downloadAsGBK(genome_ref=None, services=None, token=None, output_file=None, 
             ###TODO write contig sequence
             writeContig(contig_id, out_file, asm_api)
             # break
-
+    print "done writing "+outpath
 
 def writeHeader(contig_id=None, contig_lengths=None, full_tax=None, tax_api=None, out_file=None):
     # print "contig_lengths[contig_id] "+ str(contig_lengths[contig_id])
@@ -159,21 +163,7 @@ def writeFeaturesOrdered(ga_api=None, regions=None, out_file=None):
             aliases = features[feat]['feature_aliases']
 
             if aliases is not None and len(aliases) > 0:
-                # TODO handle different alias cases and types
-                #     gene            3631..5899
-                #             /gene="NAC001"
-                #             /locus_tag="AT1G01010"
-                #             /gene_synonym="ANAC001; NAC domain containing protein 1;
-                #             NAC001; T25K16.1; T25K16_1"
-                #             /db_xref="GeneID:839580"
-                for s in aliases:
-                    if (aliases[s][0].find("Genbank ") == -1):
-                        out_file.write("{}/db_xref=\"{}:{}\"\n".format(" " * 21, aliases[s][0], s))
-                    else:
-                        key = aliases[s][0].replace("Genbank ", "")
-                        key = key.lower()
-                        key = key.replace(" ", "_")
-                        out_file.write("{}/{}=\"{}\"\n".format(" " * 21, key, s))
+                writeAliases(feat, aliases, out_file)
 
             if feat in cds_by_gene:
                 cds_id = cds_by_gene[feat]
@@ -185,7 +175,7 @@ def writeFeaturesOrdered(ga_api=None, regions=None, out_file=None):
                         allfunctionmRNA = functionmRNA.split(" ")
                         format_functionmRNA = formatAnnotation(functionmRNA, allfunctionmRNA, 48, 58)
 
-                        out_file.write("{}mRNA".format(" " * 5, " " * 12))
+                        out_file.write("{}mRNA{}".format(" " * 5, " " * 12))
                         writeLocation(features[mrna_id]['feature_locations'], out_file)
 
                         out_file.write("{}/kbase_id=\"{}\"\n".format(" " * 21, mrna_id))
@@ -196,14 +186,7 @@ def writeFeaturesOrdered(ga_api=None, regions=None, out_file=None):
                         aliases = features[mrna_id]['feature_aliases']
 
                         if (aliases is not None and len(aliases) > 0):
-                            for s in aliases:
-                                if (aliases[s][0].find("Genbank ") == -1):
-                                    out_file.write("{}/db_xref=\"{}:{}\"\n".format(" " * 21, aliases[s][0], s))
-                                else:
-                                    key = aliases[s][0].replace("Genbank ", "")
-                                    key = key.lower()
-                                    key = key.replace(" ", "_")
-                                    out_file.write("{}/{}=\"{}\"\n".format(" " * 21, key, s))
+                            writeAliases(mrna_id, aliases, out_file)
 
                     # mRNA            complement(join(5928..6263,6437..7069,7157..7232,
                     # 7384..7450,7564..7649,7762..7835,7942..7987,8236..8325,
@@ -241,16 +224,8 @@ def writeFeaturesOrdered(ga_api=None, regions=None, out_file=None):
 
                     aliases = features[cds]['feature_aliases']
 
-                    ###TODO handle different alias cases and types
-                    if len(aliases) > 0:
-                        for s in aliases:
-                            if (aliases[s][0].find("Genbank ") == -1):
-                                out_file.write("{}/db_xref=\"{}:{}\"\n".format(" " * 21, aliases[s][0], s))
-                            else:
-                                key = aliases[s][0].replace("Genbank ", "")
-                                key = key.lower()
-                                key = key.replace(" ", "_")
-                                out_file.write("{}/{}=\"{}\"\n".format(" " * 21, key, s))
+                    if (aliases is not None and len(aliases) > 0):
+                        writeAliases(mrna_id, aliases, out_file)
 
                     getprot = proteins.get(cds)
                     if getprot is not None:
@@ -292,7 +267,64 @@ def writeFeaturesOrdered(ga_api=None, regions=None, out_file=None):
                         # FKIFLLAMLVWEFPMSVIFFVDILLLTSNSMALKVMTESTMTRCIAVCLIAHLIRFLV
                         # GQIFEPTIFLIQIGSLLQYMSYFFRIV"
 
+#format the alias info
+def writeAliases(feat, aliases, out_file):
+    #     gene            3631..5899
+    #             /gene="NAC001"
+    #             /locus_tag="AT1G01010"
+    #             /gene_synonym="ANAC001; NAC domain containing protein 1;
+    #             NAC001; T25K16.1; T25K16_1"
+    #             /db_xref="GeneID:839580"
 
+    #sort by value
+    sorted_aliases = sorted(aliases.items(), key=operator.itemgetter(1))
+
+    #print str(sorted_aliases)
+
+    aliasindex = 0
+    store_syn = ""
+    store_key = ""
+    # for s in sorted_aliases:
+    while aliasindex < len(sorted_aliases):
+        #if aliasindex == 0:
+        #    print str(sorted_aliases[aliasindex][0])+"\t"+str(sorted_aliases[aliasindex][1])
+
+        #if sorted_aliases[aliasindex][1][0].lower().find("synonym") != -1:
+        #    print "0 "+feat+"\t"+str(aliasindex)+"\t"+str(sorted_aliases[aliasindex][0])+"\t"+str(sorted_aliases[aliasindex][1])
+
+        #if non-genbank key
+        if (sorted_aliases[aliasindex][1][0].find("Genbank ") == -1):
+            out_file.write("{}/db_xref=\"{}:{}\"\n".format(" " * 21, sorted_aliases[aliasindex][1][0], sorted_aliases[aliasindex][0]))
+            if len(store_syn) > 2:
+                lastindex = store_syn.rfind("; ")
+                print "lastindex "+str(lastindex)+"\t"+str(len(store_syn)-2)+"\t"+store_syn[0:len(store_syn)-2]+"."
+                if(lastindex == len(store_syn)-2):
+                    store_syn = store_syn[0:len(store_syn)-2]
+                out_file.write("{}/{}=\"{}\"\n".format(" " * 21, store_key, store_syn))
+                store_syn = ""
+                store_key = ""
+        #if genbank key
+        else:
+            key = sorted_aliases[aliasindex][1][0].replace("Genbank ", "")
+            key = key.lower()
+            key = key.replace(" ", "_")
+            if key.find("synonym") != -1:
+                store_syn = store_syn + sorted_aliases[aliasindex][0] + "; "
+                #print store_syn
+                store_key = key
+            else:
+                out_file.write("{}/{}=\"{}\"\n".format(" " * 21, key, sorted_aliases[aliasindex][0]))
+                if len(store_syn) > 2:
+                    lastindex = store_syn.rfind("; ")
+                    print "lastindex " + str(lastindex)+"\t"+str(len(store_syn)-2)+"\t"+store_syn[0:len(store_syn)-2]+"."
+                    if (lastindex == len(store_syn) - 2):
+                        store_syn = store_syn[:-2]
+                    out_file.write("{}/{}=\"{}\"\n".format(" " * 21, store_key, store_syn))
+                store_syn = ""
+                store_key = ""
+        aliasindex = aliasindex + 1
+
+#format the location data
 # @profile
 def writeLocation(feature_locations=None, out_file=None):
     added = 0
@@ -307,10 +339,9 @@ def writeLocation(feature_locations=None, out_file=None):
 
         if (len(feature_locations) > 1):
             if (added == 0):
-                out_file.write(" join(")
+                out_file.write("join(")
             isJoin = True
 
-        ###TODO output location info
         if complement == 0:
             start = now4['start']
             stop = now4['start'] + now4['length'] - 1

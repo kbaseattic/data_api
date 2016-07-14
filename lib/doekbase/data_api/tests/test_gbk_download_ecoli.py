@@ -17,6 +17,7 @@ import pkgutil
 #import GenomeAnnotation
 from doekbase.data_api.downloaders import GenomeAnnotation
 
+
 if __name__ == '__main__':
 
     print os.getcwd()
@@ -35,8 +36,8 @@ if __name__ == '__main__':
     try:
         start = time.time()
         print "starting"
-        genome_ref = "7824/GCF_000005845.2_ASM584v2_genomic_GA"
-        output_file_name = "GCF_000005845.2_ASM584v2_genomic_GA.gbk"
+        genome_ref = "8020/511145_RefSeq"#"7824/GCF_000005845.2_ASM584v2_genomic_GA"
+        output_file_name = "511145_RefSeq.gbk"#"GCF_000005845.2_ASM584v2_genomic_GA.gbk"
 
         #print dir(GenomeAnnotation)
 
