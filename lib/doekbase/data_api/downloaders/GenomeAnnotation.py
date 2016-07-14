@@ -23,24 +23,30 @@ import os
 import string
 import StringIO
 import re
+import datetime
+import operator
 
 # Local
 from doekbase.data_api.annotation.genome_annotation.api import GenomeAnnotationAPI
 
-#@profile
+
+# @profile
 ###example method, needs refactoring
 def downloadAsGBK(genome_ref=None, services=None, token=None, output_file=None, working_dir=None):
+
+    print "new APIs start"
     ga_api = GenomeAnnotationAPI(services, token=token, ref=genome_ref)
     tax_api = ga_api.get_taxon()
     asm_api = ga_api.get_assembly()
+    print "new APIs done"
 
     genome_name = str(ga_api.get_id())
 
-    print genome_name
+    print "genome_name "+genome_name
 
     contig_ids = asm_api.get_contig_ids()
     contig_lengths = asm_api.get_contig_lengths(contig_ids)
-    print contig_ids
+    print "contig_ids "+str(contig_ids)
 
     full_tax = tax_api.get_scientific_lineage()
 
@@ -62,7 +68,7 @@ def downloadAsGBK(genome_ref=None, services=None, token=None, output_file=None, 
     with open(outpath, "w") as out_file:
         # create per-contig section in gbk file
         for contig_id in contig_ids:
-            print contig_id
+            print "contig_id "+contig_id
             stop = contig_lengths[contig_id]
 
             writeHeader(contig_id, contig_lengths, full_tax, tax_api, out_file)
@@ -76,11 +82,11 @@ def downloadAsGBK(genome_ref=None, services=None, token=None, output_file=None, 
 
             ###TODO write contig sequence
             writeContig(contig_id, out_file, asm_api)
-            #break
+            # break
+    print "done writing "+outpath
 
 def writeHeader(contig_id=None, contig_lengths=None, full_tax=None, tax_api=None, out_file=None):
-
-    #print "contig_lengths[contig_id] "+ str(contig_lengths[contig_id])
+    # print "contig_lengths[contig_id] "+ str(contig_lengths[contig_id])
     out_file.write("LOCUS{}{}{}{} bp   DNA\n".format(" " * 7, contig_id, " " * 13, contig_lengths[contig_id]))
 
     sn = tax_api.get_scientific_name()
@@ -107,7 +113,10 @@ def writeHeader(contig_id=None, contig_lengths=None, full_tax=None, tax_api=None
 
         out_file.write("{}{}.\n".format(" " * 12, "".join(lineage)))
 
-    out_file.write("COMMENT{}Exported from the DOE KnowledgeBase.\n".format(" " * 5))
+    now = datetime.datetime.now()
+    timestamp = now.strftime("%Y-%m-%d %H:%M:%S")
+    # print timestamp
+    out_file.write("COMMENT{}Exported from the DOE KnowledgeBase at {}.\n".format(" " * 5, timestamp))
 
     out_file.write("FEATURES{}Location/Qualifiers\n".format(" " * 13))
     out_file.write("{}source{}1..{}\n".format(" " * 5, " " * 10, contig_lengths[contig_id]))
@@ -115,7 +124,7 @@ def writeHeader(contig_id=None, contig_lengths=None, full_tax=None, tax_api=None
     out_file.write("{}/mol_type=\"DNA\"\n".format(" " * 21))
 
 
-#@profile
+# @profile
 def writeFeaturesOrdered(ga_api=None, regions=None, out_file=None):
     feature_ids = ga_api.get_feature_ids(filters={"region_list": regions})
 
@@ -148,27 +157,13 @@ def writeFeaturesOrdered(ga_api=None, regions=None, out_file=None):
             out_file.write("{}gene{}{}..{}\n".format(" " * 5, " " * 12, curstart, curstop))
             out_file.write("{}/kbase_id=\"{}\"\n".format(" " * 21, feat))
 
-            if format_function is not None:
+            if format_function is not None and len(format_function) > 0:
                 out_file.write("{}/function=\"{}".format(" " * 21, format_function))
-            else:
-                out_file.write("{}/function=\"\"\n".format(" " * 21))
 
             aliases = features[feat]['feature_aliases']
 
             if aliases is not None and len(aliases) > 0:
-                # TODO handle different alias cases and types
-                #     gene            3631..5899
-                #             /gene="NAC001"
-                #             /locus_tag="AT1G01010"
-                #             /gene_synonym="ANAC001; NAC domain containing protein 1;
-                #             NAC001; T25K16.1; T25K16_1"
-                #             /db_xref="GeneID:839580"
-                for s in aliases:
-                    if (aliases[s][0].find("Genbank ") == -1):
-                        out_file.write("{}/db_xref=\"{}:{}\"\n".format(" " * 21, aliases[s][0], s))
-                    else:
-                        key = aliases[s][0].replace("Genbank ", "")
-                        out_file.write("{}/{}=\"{}\"\n".format(" " * 21, key, s))
+                writeAliases(feat, aliases, out_file)
 
             if feat in cds_by_gene:
                 cds_id = cds_by_gene[feat]
@@ -180,25 +175,18 @@ def writeFeaturesOrdered(ga_api=None, regions=None, out_file=None):
                         allfunctionmRNA = functionmRNA.split(" ")
                         format_functionmRNA = formatAnnotation(functionmRNA, allfunctionmRNA, 48, 58)
 
-                        out_file.write("{}mRNA".format(" " * 5, " " * 12))
+                        out_file.write("{}mRNA{}".format(" " * 5, " " * 12))
                         writeLocation(features[mrna_id]['feature_locations'], out_file)
 
                         out_file.write("{}/kbase_id=\"{}\"\n".format(" " * 21, mrna_id))
 
-                        if format_functionmRNA is not None:
+                        if format_functionmRNA is not None and len(format_functionmRNA) > 0:
                             out_file.write("{}/function=\"{}".format(" " * 21, format_functionmRNA))
-                        else:
-                            out_file.write("{}/function=\"\"\n".format(" " * 21))
 
                         aliases = features[mrna_id]['feature_aliases']
 
                         if (aliases is not None and len(aliases) > 0):
-                            for s in aliases:
-                                if (aliases[s][0].find("Genbank ") == -1):
-                                    out_file.write("{}/db_xref=\"{}:{}\"\n".format(" " * 21, aliases[s][0], s))
-                                else:
-                                    key = aliases[s][0].replace("Genbank ", "")
-                                    out_file.write("{}/{}=\"{}\"\n".format(" " * 21, key, s))
+                            writeAliases(mrna_id, aliases, out_file)
 
                     # mRNA            complement(join(5928..6263,6437..7069,7157..7232,
                     # 7384..7450,7564..7649,7762..7835,7942..7987,8236..8325,
@@ -215,9 +203,11 @@ def writeFeaturesOrdered(ga_api=None, regions=None, out_file=None):
                     # /transcript_id="NM_099984.5"
                     # /db_xref="GI:240253989"
 
-                    allfunction = function.split(" ")
+                    functionCDS = features[cds]['feature_function']
+
+                    allfunctionCDS = functionCDS.split(" ")
                     # what is the significance
-                    format_function = formatAnnotation(function, allfunction, 48, 58)
+                    format_functionCDS = formatAnnotation(functionCDS, allfunctionCDS, 48, 58)
 
                     out_file.write("{}CDS{}".format(" " * 5, " " * 13))
                     writeLocation(features[cds]['feature_locations'], out_file)
@@ -227,23 +217,15 @@ def writeFeaturesOrdered(ga_api=None, regions=None, out_file=None):
                     # out_file.write("                     /codon_start=1\n")
                     # out_file.write"                     /transl_table=11\n")
                     # out_file.write("                     /product=\"" + cds + "\"\n")
-                    if format_function is not None:
-                        out_file.write("{}/function=\"{}".format(" " * 21, format_function))
-                    else:
-                        out_file.write("{}/function=\"\"\n".format(" " * 21))
+                    if format_functionCDS is not None and len(format_functionCDS) > 0:
+                        out_file.write("{}/function=\"{}".format(" " * 21, format_functionCDS))
 
-                    out_file.write("{}/protein_id=\"{}\"\n".format(" " * 21, cds))
+                    # out_file.write("{}/protein_id=\"{}\"\n".format(" " * 21, cds))
 
                     aliases = features[cds]['feature_aliases']
 
-                    ###TODO handle different alias cases and types
-                    if len(aliases) > 0:
-                        for s in aliases:
-                            if (aliases[s][0].find("Genbank ") == -1):
-                                out_file.write("{}/db_xref=\"{}:{}\"\n".format(" " * 21, aliases[s][0], s))
-                            else:
-                                key = aliases[s][0].replace("Genbank ", "")
-                                out_file.write("{}/{}=\"{}\"\n".format(" " * 21, key, s))
+                    if (aliases is not None and len(aliases) > 0):
+                        writeAliases(mrna_id, aliases, out_file)
 
                     getprot = proteins.get(cds)
                     if getprot is not None:
@@ -285,7 +267,65 @@ def writeFeaturesOrdered(ga_api=None, regions=None, out_file=None):
                         # FKIFLLAMLVWEFPMSVIFFVDILLLTSNSMALKVMTESTMTRCIAVCLIAHLIRFLV
                         # GQIFEPTIFLIQIGSLLQYMSYFFRIV"
 
-#@profile
+#format the alias info
+def writeAliases(feat, aliases, out_file):
+    #     gene            3631..5899
+    #             /gene="NAC001"
+    #             /locus_tag="AT1G01010"
+    #             /gene_synonym="ANAC001; NAC domain containing protein 1;
+    #             NAC001; T25K16.1; T25K16_1"
+    #             /db_xref="GeneID:839580"
+
+    #sort by value
+    sorted_aliases = sorted(aliases.items(), key=operator.itemgetter(1))
+
+    #print str(sorted_aliases)
+
+    aliasindex = 0
+    store_syn = ""
+    store_key = ""
+    # for s in sorted_aliases:
+    while aliasindex < len(sorted_aliases):
+        #if aliasindex == 0:
+        #    print str(sorted_aliases[aliasindex][0])+"\t"+str(sorted_aliases[aliasindex][1])
+
+        #if sorted_aliases[aliasindex][1][0].lower().find("synonym") != -1:
+        #    print "0 "+feat+"\t"+str(aliasindex)+"\t"+str(sorted_aliases[aliasindex][0])+"\t"+str(sorted_aliases[aliasindex][1])
+
+        #if non-genbank key
+        if (sorted_aliases[aliasindex][1][0].find("Genbank ") == -1):
+            out_file.write("{}/db_xref=\"{}:{}\"\n".format(" " * 21, sorted_aliases[aliasindex][1][0], sorted_aliases[aliasindex][0]))
+            if len(store_syn) > 2:
+                lastindex = store_syn.rfind("; ")
+                print "lastindex "+str(lastindex)+"\t"+str(len(store_syn)-2)+"\t"+store_syn[0:len(store_syn)-2]+"."
+                if(lastindex == len(store_syn)-2):
+                    store_syn = store_syn[0:len(store_syn)-2]
+                out_file.write("{}/{}=\"{}\"\n".format(" " * 21, store_key, store_syn))
+                store_syn = ""
+                store_key = ""
+        #if genbank key
+        else:
+            key = sorted_aliases[aliasindex][1][0].replace("Genbank ", "")
+            key = key.lower()
+            key = key.replace(" ", "_")
+            if key.find("synonym") != -1:
+                store_syn = store_syn + sorted_aliases[aliasindex][0] + "; "
+                #print store_syn
+                store_key = key
+            else:
+                out_file.write("{}/{}=\"{}\"\n".format(" " * 21, key, sorted_aliases[aliasindex][0]))
+                if len(store_syn) > 2:
+                    lastindex = store_syn.rfind("; ")
+                    print "lastindex " + str(lastindex)+"\t"+str(len(store_syn)-2)+"\t"+store_syn[0:len(store_syn)-2]+"."
+                    if (lastindex == len(store_syn) - 2):
+                        store_syn = store_syn[:-2]
+                    out_file.write("{}/{}=\"{}\"\n".format(" " * 21, store_key, store_syn))
+                store_syn = ""
+                store_key = ""
+        aliasindex = aliasindex + 1
+
+#format the location data
+# @profile
 def writeLocation(feature_locations=None, out_file=None):
     added = 0
     complement = False
@@ -302,7 +342,6 @@ def writeLocation(feature_locations=None, out_file=None):
                 out_file.write("join(")
             isJoin = True
 
-        ###TODO output location info
         if complement == 0:
             start = now4['start']
             stop = now4['start'] + now4['length'] - 1
@@ -325,7 +364,9 @@ def writeLocation(feature_locations=None, out_file=None):
 
     out_file.write(tail)
 
-#@profile
+
+# @profile
+# writes out the formatted contig sequence
 def writeContig(contig_id=None, outfile=None, asm_api=None):
     contigdata = asm_api.get_contigs([contig_id])
     # significance of 10 and 60?
@@ -333,15 +374,17 @@ def writeContig(contig_id=None, outfile=None, asm_api=None):
     outfile.write(formatDNASequence(contigdata[contig_id]['sequence'], 10, 60))
     outfile.write("//\n")
 
-#@profile
+
+# @profile
+# formats the function fields string
 def formatAnnotation(function=None, allfunction=None, first=None, nexta=None):
     format_function = ""
 
     isfirst = True
 
-    if len(function) < first:
+    if function is not None and len(function) > 2 and len(function) < first:
         format_function = format_function + (function + "\"\n")
-    else:
+    elif len(function) > 2:
         counter2 = 0
         index2 = 0
         while (index2 < len(allfunction)):
@@ -374,22 +417,20 @@ def formatAnnotation(function=None, allfunction=None, first=None, nexta=None):
 
             index2 = index2 + 1
 
-    if len(format_function) == 0 or format_function is None:
-        format_function = "\"\n"
+    if len(format_function) == 0 or format_function == "":
+        format_function = None  # "\"\n"
+    # check if formatting ended
+    elif format_function is not None:
+        formatindex = format_function.find("\"\n")
 
-    formatindex = format_function.find("\"\n")
-
-    if formatindex != len(format_function) - 2:
-        format_function = format_function + ("\"\n")
-
-    if len(format_function) == 0:
-        format_function = ""
+        if formatindex != len(format_function) - 2:
+            format_function = format_function + ("\"\n")
 
     return format_function
 
 
 ###formats a string into lines of given length (first line can be different)
-#@profile
+# @profile
 def formatString(s, one, two):
     s = s.replace("\"", "")
     out = ""
@@ -426,11 +467,11 @@ def formatString(s, one, two):
                 out = out + ("\n")
         counter = counter + 1
 
-
     if len(out) == 0 or out is None:
         out = "\"\n"
 
     return out
+
 
 ###@profile
 def formatDNASequence(s, charnum, linenum):
@@ -451,7 +492,7 @@ def formatDNASequence(s, charnum, linenum):
                 index = size
                 break
             else:
-                #print "len(s[index:index + charnum]) "+str(len(s[index:index + charnum]))
+                # print "len(s[index:index + charnum]) "+str(len(s[index:index + charnum]))
                 out.write("{} ".format(s[index:index + charnum]))
                 index += charnum
         # add a line break
@@ -463,7 +504,8 @@ def formatDNASequence(s, charnum, linenum):
         out.write("{}{} ".format(" " * (9 - len(indexString)), indexString))
     return out.getvalue()
 
-#method to perform basic validation of the downloaded Genbank file
+
+# method to perform basic validation of the downloaded Genbank file
 def testGBKDownload_vs_API(services, token, ref, output_file_name):
     ga_api = GenomeAnnotationAPI(services, token, ref)
     asm_api = ga_api.get_assembly()
@@ -479,25 +521,25 @@ def testGBKDownload_vs_API(services, token, ref, output_file_name):
     seq = ""
     curloc = ""
 
-    #contig_lens = asm_api.get_contig_lengths()
+    # contig_lens = asm_api.get_contig_lengths()
 
     with open(output_file_name, "r") as f:
         for line in f:
             if opencontig == 1 and line.find("//") != 0:
                 countseqlines = countseqlines + 1
                 start = line.find("1 ")
-                line_stripped = line[start+2:]
-                #reg expr for all white space
-                line_stripped = re.sub(r'\s+', '', line_stripped)#line_stripped.replace(" ","")
-                #print "."+line+".\n."+line_stripped+"."
+                line_stripped = line[start + 2:]
+                # reg expr for all white space
+                line_stripped = re.sub(r'\s+', '', line_stripped)  # line_stripped.replace(" ","")
+                # print "."+line+".\n."+line_stripped+"."
                 seq = seq + line_stripped
 
-            #collect counts of file properties
+            # collect counts of file properties
             if line.find("LOCUS       ") != -1:
-                start = line.find("LOCUS       ")  + len("LOCUS       ")
-                nextindex = line[start:].find(" ")+start
+                start = line.find("LOCUS       ") + len("LOCUS       ")
+                nextindex = line[start:].find(" ") + start
                 curloc = line[start:nextindex]
-                #print "curloc ."+curloc+".\t"+str(start)+"\t"+str(nextindex)
+                # print "curloc ."+curloc+".\t"+str(start)+"\t"+str(nextindex)
             elif line.find("     gene            ") != -1:
                 gene = gene + 1
             elif line.find("     CDS             ") != -1:
@@ -513,13 +555,13 @@ def testGBKDownload_vs_API(services, token, ref, output_file_name):
                 opencontig = 0
 
                 reflen = asm_api.get_contig_lengths([curloc])[curloc]
-                #print reflen
+                # print reflen
                 if len(seq) != reflen:
-                    print "contig len different " + curloc+"\t"+ str(len(seq)) + " vs " + str(reflen)
+                    print "contig len different " + curloc + "\t" + str(len(seq)) + " vs " + str(reflen)
                 else:
-                    print "contig len agree "+curloc+"\t"+ str(len(seq))
-                #print curloc
-                #print seq
+                    print "contig len agree " + curloc + "\t" + str(len(seq))
+                # print curloc
+                # print seq
 
                 seq = ""
 
@@ -527,21 +569,21 @@ def testGBKDownload_vs_API(services, token, ref, output_file_name):
         if mrna != feature_counts['mRNA']:
             print "mrna count different " + str(mrna) + " vs " + str(feature_counts['mRNA'])
         else:
-            print "mrnas agree "+str(mrna)
+            print "mrnas agree " + str(mrna)
 
     if cds != feature_counts['CDS']:
         print "cds count different " + str(cds) + " vs " + str(feature_counts['CDS'])
     else:
-        print "cdss agree "+str(cds)
+        print "cdss agree " + str(cds)
 
     if gene != feature_counts['gene']:
         print "gene count different " + str(gene) + " vs " + str(feature_counts['gene'])
     else:
-        print "genes agree "+str(gene)
+        print "genes agree " + str(gene)
 
     numcontigs = len(asm_api.get_contig_ids())
-    print "numcontigs "+str(numcontigs)
+    print "numcontigs " + str(numcontigs)
     if contig != numcontigs:
         print "contig count different " + str(contig) + " vs " + str(numcontigs)
     else:
-        print "contigs agree "+str(numcontigs)
+        print "contigs agree " + str(numcontigs)
