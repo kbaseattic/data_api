@@ -614,7 +614,7 @@ service thrift_service {
      * @return summary data
      */
     bool save_summary(1:required string token,
-                              2:required ObjectReference ref) throws (
+                      2:required ObjectReference ref) throws (
         1:ServiceException generic_exception,
         2:AuthorizationException authorization_exception,
         3:AuthenticationException authentication_exception,

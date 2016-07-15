@@ -13,8 +13,10 @@ from doekbase.data_api.taxonomy.taxon.api import TaxonClientAPI
 
 _log = logging.getLogger(__name__)
 
-taxon_new = "ReferenceTaxons/242159_taxon"
-taxon_old = "OriginalReferenceGenomes/kb|g.166819"
+#taxon_new = "ReferenceTaxons/242159_taxon"
+#taxon_old = "OriginalReferenceGenomes/kb|g.166819"
+taxon_new = "ReferenceTaxons/3702_taxon"
+taxon_old = "8020/13/1"
 t_new = None
 t_new_e = None
 t_old = None
@@ -68,32 +70,32 @@ def test_get_parent_new():
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
 def test_get_children_new():
     _log.info("Input {}".format(taxon_new))
-    children = t_new.get_children()
+    children = [x.ref for x in t_new.get_children()]
     _log.info("Output {}".format(children))
     assert isinstance(children, list)
     #and len(children) > 0
-    children_e = t_new_e.get_children()
+    children_e = [x.ref for x in t_new_e.get_children()]
     assert isinstance(children_e, list)
     assert children == children_e, \
         "Children mismatch {} != {}".format(
-            ','.join([str(x) for x in children]),
-            ','.join([str(x) for x in children_e]))
+            ','.join(children),
+            ','.join(children_e))
     children_c = t_client_new.get_children()
     assert isinstance(children_c, list)
     assert children == children_c, \
         "Children mismatch {} != {}".format(
-            ','.join([str(x) for x in children]),
-            ','.join([str(x) for x in children_c]))
+            ','.join(children),
+            ','.join(children_c))
 
 
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
 def test_get_genome_annotations_new():
     _log.info("Input {}".format(taxon_new))
-    annotations = t_new.get_genome_annotations()
+    annotations = [x.ref for x in t_new.get_genome_annotations()]
     _log.info("Output {}".format(annotations))
     assert isinstance(annotations, list)
     #and len(annotations) > 0
-    annotations_e = t_new_e.get_genome_annotations()
+    annotations_e = [x.ref for x in t_new_e.get_genome_annotations()]
     assert isinstance(annotations_e, list)
     assert annotations == annotations_e, \
         "Annotation mismatch {} != {}".format(
@@ -154,11 +156,10 @@ def test_get_kingdom_new():
     _log.info("Input {}".format(taxon_new))
     kingdom = t_new.get_kingdom()
     _log.info("Output {}".format(kingdom))
-    assert kingdom == "Viridiplantae"
     kingdom_e = t_new_e.get_kingdom()
-    assert kingdom_e == "Viridiplantae"
     kingdom_c = t_client_new.get_kingdom()
-    assert kingdom_c == "Viridiplantae"
+    assert kingdom == kingdom_e
+    assert kingdom == kingdom_c
 
 
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')

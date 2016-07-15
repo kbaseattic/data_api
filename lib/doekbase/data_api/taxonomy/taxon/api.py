@@ -147,7 +147,7 @@ class _KBaseGenomes_Genome(ObjectAPI, TaxonInterface):
         from doekbase.data_api.annotation.genome_annotation.api import GenomeAnnotationAPI
 
         referrers = self.get_referrers()
-        annotations = list()
+        annotations = []
 
         if ref_only:
             return [self.ref]
@@ -216,7 +216,7 @@ class _Taxon(ObjectAPI, TaxonInterface):
         from doekbase.data_api.annotation.genome_annotation.api import TYPES as GA_TYPES
 
         referrers = self.get_referrers()
-        annotations = list()
+        annotations = []
 
         if ref_only:
             for object_type in referrers:

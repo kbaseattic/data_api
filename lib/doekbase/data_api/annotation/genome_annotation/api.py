@@ -2400,24 +2400,26 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
         summary_object["contig_ids"] = assembly_object.get_contig_ids()
 
         # Annotation summary information
-        try:
-            summary_object["external_source"] = self.get_data_subset(path_list=["external_source"])["external_source"]
-        except AttributeError:
+        annotation_info = self.get_data_subset(path_list=[
+            "external_source","external_source_origination_date","release","original_source_file_name"])
+        if annotation_info.has_key("external_source"):
+            summary_object["external_source"] = annotation_info["external_source"]
+        else:
             summary_object["external_source"] = "annotation source is not present"
 
-        try:
-            summary_object["external_source_origination_date"] = self.get_data_subset(path_list=["external_source_origination_date"])["external_source_origination_date"]
-        except AttributeError:
+        if annotation_info.has_key("external_source_origination_date"):
+            summary_object["external_source_origination_date"] = annotation_info["external_source_origination_date"]
+        else:
             summary_object["external_source_origination date"] = "annotation source date is not present"
 
-        try:
-            summary_object["release"] = self.get_data_subset(path_list=["release"])["release"]
-        except AttributeError:
+        if annotation_info.has_key("release"):
+            summary_object["release"] = annotation_info["release"]
+        else:
             summary_object["release"] = "annotation release is not present"
 
-        try:
-            summary_object["original_source_file_name"] = self.get_data_subset(path_list=["original_source_file_name"])["original_source_file_name"]
-        except AttributeError:
+        if annotation_info.has_key("original_source_file_name"):
+            summary_object["original_source_file_name"] = annotation_info["original_source_file_name"]
+        else:
             summary_object["original_source_file_name"] = "original source file name is unknown"
 
         summary_object["feature_counts_map"] = self.get_feature_type_counts()
@@ -2450,9 +2452,13 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
 
     def get_summary(self):
         refs = self.get_referrers()
-        all_summaries = [t for t in refs if t.startswith("KBaseGenomeAnnotations.GenomeAnnotationSummary")]
+        all_summary_types = sorted([t for t in refs if t.startswith("KBaseGenomeAnnotations.GenomeAnnotationSummary")])
+
+        if len(all_summary_types) == 0:
+            raise TypeError("Missing GenomeAnnotationSummary for {}".format(self.ref))
+
         # the highest version type will be last, and there should only ever be one summary object per version
-        latest_summary = refs[all_summaries[-1]][0]
+        latest_summary = all_summary_types[-1]
         summary = ObjectAPI(self.services, self.token, latest_summary).get_data()
 
         out = {

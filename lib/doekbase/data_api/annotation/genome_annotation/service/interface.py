@@ -237,12 +237,10 @@ class GenomeAnnotationService(service_core.BaseService):
     def get_summary(self, token=None, ref=None):
         ga_api = self._get_instance(token, ref)
         result = ga_api.get_summary()
-
         return result
 
     @server_method
-    def get_summary(self, token=None, ref=None):
+    def save_summary(self, token=None, ref=None):
         ga_api = self._get_instance(token, ref)
         result = ga_api.save_summary()
-
         return result
