@@ -2458,8 +2458,8 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
             raise TypeError("Missing GenomeAnnotationSummary for {}".format(self.ref))
 
         # the highest version type will be last, and there should only ever be one summary object per version
-        latest_summary = all_summary_types[-1]
-        summary = ObjectAPI(self.services, self.token, latest_summary).get_data()
+        latest_summary = refs[all_summary_types[-1]][0]
+        summary = ObjectAPI(self.services, self._token, latest_summary).get_data()
 
         out = {
             "taxonomy": {
@@ -2473,7 +2473,7 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
             "assembly": {
                 "assembly_source": summary["assembly_source"],
                 "assembly_source_id": summary["assembly_source_id"],
-                "assembly_source_date": summary["assembly_source_date"],
+                "assembly_source_date": summary["assembly_source_origination_date"],
                 "gc_content": summary["gc_content"],
                 "dna_size": summary["dna_size"],
                 "num_contigs": summary["num_contigs"],
@@ -2484,7 +2484,7 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
                 "external_source_date": summary["external_source_origination_date"],
                 "release": summary["release"],
                 "original_filename": summary["original_source_file_name"],
-                "feature_type_counts": summary["feature_type_counts"]
+                "feature_type_counts": summary["feature_counts_map"]
             }
         }
 

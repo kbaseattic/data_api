@@ -1915,7 +1915,7 @@ genome_annotation.Summary_data = function(args) {
   this.organism_aliases = null;
   this.assembly_source = null;
   this.assembly_source_id = null;
-  this.asembly_source_date = null;
+  this.assembly_source_date = null;
   this.gc_content = null;
   this.dna_size = null;
   this.num_contigs = null;
@@ -1950,8 +1950,8 @@ genome_annotation.Summary_data = function(args) {
     if (args.assembly_source_id !== undefined) {
       this.assembly_source_id = args.assembly_source_id;
     }
-    if (args.asembly_source_date !== undefined) {
-      this.asembly_source_date = args.asembly_source_date;
+    if (args.assembly_source_date !== undefined) {
+      this.assembly_source_date = args.assembly_source_date;
     }
     if (args.gc_content !== undefined) {
       this.gc_content = args.gc_content;
@@ -2080,7 +2080,7 @@ genome_annotation.Summary_data.prototype.read = function(input) {
       break;
       case 9:
       if (ftype == Thrift.Type.STRING) {
-        this.asembly_source_date = input.readString().value;
+        this.assembly_source_date = input.readString().value;
       } else {
         input.skip(ftype);
       }
@@ -2252,9 +2252,9 @@ genome_annotation.Summary_data.prototype.write = function(output) {
     output.writeString(this.assembly_source_id);
     output.writeFieldEnd();
   }
-  if (this.asembly_source_date !== null && this.asembly_source_date !== undefined) {
-    output.writeFieldBegin('asembly_source_date', Thrift.Type.STRING, 9);
-    output.writeString(this.asembly_source_date);
+  if (this.assembly_source_date !== null && this.assembly_source_date !== undefined) {
+    output.writeFieldBegin('assembly_source_date', Thrift.Type.STRING, 9);
+    output.writeString(this.assembly_source_date);
     output.writeFieldEnd();
   }
   if (this.gc_content !== null && this.gc_content !== undefined) {

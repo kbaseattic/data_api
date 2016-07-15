@@ -209,7 +209,7 @@ struct Summary_data {
     /** Identifier for the Assembly used by the source organization. */
     8: string assembly_source_id;
     /** Date of origin the source indicates for the Assembly. */
-    9: string asembly_source_date;
+    9: string assembly_source_date;
     /** GC content for the entire Assembly. */
     10: double gc_content;
     /** Total DNA size for the Assembly. */

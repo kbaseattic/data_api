@@ -1660,7 +1660,7 @@ class Summary_data(object):
    - organism_aliases: Aliases for the organism associated with this GenomeAnnotation.
    - assembly_source: Source organization for the Assembly.
    - assembly_source_id: Identifier for the Assembly used by the source organization.
-   - asembly_source_date: Date of origin the source indicates for the Assembly.
+   - assembly_source_date: Date of origin the source indicates for the Assembly.
    - gc_content: GC content for the entire Assembly.
    - dna_size: Total DNA size for the Assembly.
    - num_contigs: Number of contigs in the Assembly.
@@ -1682,7 +1682,7 @@ class Summary_data(object):
     (6, TType.LIST, 'organism_aliases', (TType.STRING,None), None, ), # 6
     (7, TType.STRING, 'assembly_source', None, None, ), # 7
     (8, TType.STRING, 'assembly_source_id', None, None, ), # 8
-    (9, TType.STRING, 'asembly_source_date', None, None, ), # 9
+    (9, TType.STRING, 'assembly_source_date', None, None, ), # 9
     (10, TType.DOUBLE, 'gc_content', None, None, ), # 10
     (11, TType.I64, 'dna_size', None, None, ), # 11
     (12, TType.I64, 'num_contigs', None, None, ), # 12
@@ -1694,7 +1694,7 @@ class Summary_data(object):
     (18, TType.MAP, 'feature_type_counts', (TType.STRING,None,TType.I64,None), None, ), # 18
   )
 
-  def __init__(self, scientific_name=None, taxonomy_id=None, kingdom=None, scientific_lineage=None, genetic_code=None, organism_aliases=None, assembly_source=None, assembly_source_id=None, asembly_source_date=None, gc_content=None, dna_size=None, num_contigs=None, contig_ids=None, external_source=None, external_source_date=None, release=None, original_source_filename=None, feature_type_counts=None,):
+  def __init__(self, scientific_name=None, taxonomy_id=None, kingdom=None, scientific_lineage=None, genetic_code=None, organism_aliases=None, assembly_source=None, assembly_source_id=None, assembly_source_date=None, gc_content=None, dna_size=None, num_contigs=None, contig_ids=None, external_source=None, external_source_date=None, release=None, original_source_filename=None, feature_type_counts=None,):
     self.scientific_name = scientific_name
     self.taxonomy_id = taxonomy_id
     self.kingdom = kingdom
@@ -1703,7 +1703,7 @@ class Summary_data(object):
     self.organism_aliases = organism_aliases
     self.assembly_source = assembly_source
     self.assembly_source_id = assembly_source_id
-    self.asembly_source_date = asembly_source_date
+    self.assembly_source_date = assembly_source_date
     self.gc_content = gc_content
     self.dna_size = dna_size
     self.num_contigs = num_contigs
@@ -1775,7 +1775,7 @@ class Summary_data(object):
           iprot.skip(ftype)
       elif fid == 9:
         if ftype == TType.STRING:
-          self.asembly_source_date = iprot.readString();
+          self.assembly_source_date = iprot.readString();
         else:
           iprot.skip(ftype)
       elif fid == 10:
@@ -1882,9 +1882,9 @@ class Summary_data(object):
       oprot.writeFieldBegin('assembly_source_id', TType.STRING, 8)
       oprot.writeString(self.assembly_source_id)
       oprot.writeFieldEnd()
-    if self.asembly_source_date is not None:
-      oprot.writeFieldBegin('asembly_source_date', TType.STRING, 9)
-      oprot.writeString(self.asembly_source_date)
+    if self.assembly_source_date is not None:
+      oprot.writeFieldBegin('assembly_source_date', TType.STRING, 9)
+      oprot.writeString(self.assembly_source_date)
       oprot.writeFieldEnd()
     if self.gc_content is not None:
       oprot.writeFieldBegin('gc_content', TType.DOUBLE, 10)
@@ -1946,7 +1946,7 @@ class Summary_data(object):
     value = (value * 31) ^ hash(self.organism_aliases)
     value = (value * 31) ^ hash(self.assembly_source)
     value = (value * 31) ^ hash(self.assembly_source_id)
-    value = (value * 31) ^ hash(self.asembly_source_date)
+    value = (value * 31) ^ hash(self.assembly_source_date)
     value = (value * 31) ^ hash(self.gc_content)
     value = (value * 31) ^ hash(self.dna_size)
     value = (value * 31) ^ hash(self.num_contigs)
