@@ -79,6 +79,7 @@ def test_get_children_new():
         "Children mismatch {} != {}".format(
             ','.join(children),
             ','.join(children_e))
+    _log.info(t_client_new.get_children())
     children_c = [x.ref for x in t_client_new.get_children()]
     _log.info("Output {}".format(children_c))
     assert isinstance(children_c, list)
