@@ -199,6 +199,7 @@ class _Taxon(ObjectAPI, TaxonInterface):
 
     def get_children(self, ref_only=False):
         referrers = self.get_referrers()
+        _log.debug("taxon.get_children(): {}".format(referrers))
         children = list()
 
         if ref_only:
