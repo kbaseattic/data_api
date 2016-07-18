@@ -13,8 +13,8 @@ from doekbase.data_api.taxonomy.taxon.api import TaxonClientAPI
 
 _log = logging.getLogger(__name__)
 
-taxon_new = "ReferenceTaxons/3702_taxon/1"
-taxon_old = "8020/13/1"
+taxon_new = "1779/616059/1"
+taxon_old = "OriginalReferenceGenomes/kb|g.166819/1"
 t_new = None
 t_new_e = None
 t_old = None
@@ -78,7 +78,7 @@ def test_get_children_new():
         "Children mismatch {} != {}".format(
             ','.join(children),
             ','.join(children_e))
-    children_c = t_client_new.get_children()
+    children_c = [x.ref for x in t_client_new.get_children()]
     assert isinstance(children_c, list)
     assert children == children_c, \
         "Children mismatch {} != {}".format(
