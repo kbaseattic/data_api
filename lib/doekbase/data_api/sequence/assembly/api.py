@@ -6,14 +6,14 @@ and the underlying contigs (GC content, length).
 
 # Stdlib
 import abc
-import functools
+import sys
 import requests
 import string
 import hashlib
 try:
     import cStringIO as StringIO
 except ImportError:
-    import StringIO as StringIO
+    import StringIO
 
 # Local
 from doekbase.data_api.core import ObjectAPI
@@ -651,15 +651,15 @@ class AssemblyClientAPI(AssemblyInterface):
             try:
                 return func(self, *args, **kwargs)
             except ttypes.AttributeException, e:
-                raise AttributeError(e.message)
+                raise AttributeError, AttributeError(e.message), sys.exc_info()[2]
             except ttypes.AuthenticationException, e:
-                raise exceptions.AuthenticationError(e.message)
+                raise exceptions.AuthenticationError, exceptions.AuthenticationError(e.message), sys.exc_info()[2]
             except ttypes.AuthorizationException, e:
-                raise exceptions.AuthorizationError(e.message)
+                raise exceptions.AuthorizationError, exceptions.AuthorizationError(e.message), sys.exc_info()[2]
             except ttypes.TypeException, e:
-                raise exceptions.TypeError(e.message)
+                raise TypeError, TypeError(e.message), sys.exc_info()[2]
             except ttypes.ServiceException, e:
-                raise exceptions.ServiceError(e.message)
+                raise exceptions.ServiceError, exceptions.ServiceError(e.message), sys.exc_info()[2]
             except Exception, e:
                 raise
             finally:

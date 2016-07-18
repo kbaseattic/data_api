@@ -6,7 +6,7 @@ Assembly and Taxon associated with an annotation, as well as retrieving individu
 # stdlib imports
 import abc
 import hashlib
-import time
+import sys
 
 try:
     import cStringIO as StringIO
@@ -2503,15 +2503,15 @@ class GenomeAnnotationClientAPI(GenomeAnnotationInterface):
             try:
                 return func(self, *args, **kwargs)
             except ttypes.AttributeException, e:
-                raise AttributeError(e.message)
+                raise AttributeError, AttributeError(e.message), sys.exc_info()[2]
             except ttypes.AuthenticationException, e:
-                raise exceptions.AuthenticationError(e.message)
+                raise exceptions.AuthenticationError, exceptions.AuthenticationError(e.message), sys.exc_info()[2]
             except ttypes.AuthorizationException, e:
-                raise exceptions.AuthorizationError(e.message)
+                raise exceptions.AuthorizationError, exceptions.AuthorizationError(e.message), sys.exc_info()[2]
             except ttypes.TypeException, e:
-                raise TypeError(e.message)
+                raise TypeError, TypeError(e.message), sys.exc_info()[2]
             except ttypes.ServiceException, e:
-                raise exceptions.ServiceError(e.message)
+                raise exceptions.ServiceError, exceptions.ServiceError(e.message), sys.exc_info()[2]
             except Exception, e:
                 raise
             finally:
