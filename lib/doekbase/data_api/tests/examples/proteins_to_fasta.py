@@ -30,7 +30,7 @@ def get_protein_fasta(data):
 def run(ws_url='https://ci.kbase.us/services/ws/'):
 
     #an example KBase reference genome
-    genomeref = "ReferenceGenomeAnnotations/kb|g.166819"
+    genomeref = "ReferenceGenomeAnnotations/kb|g.166819/1"
 
     #creating a new GenomeAnnotation object
     genome_annotation = GenomeAnnotationAPI(services = {"workspace_service_url": ws_url}, token=os.environ.get('KB_AUTH_TOKEN'), ref=genomeref)

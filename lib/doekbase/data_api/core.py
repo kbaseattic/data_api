@@ -16,7 +16,7 @@ except ImportError:
 # Local
 from doekbase.data_api.util import get_logger, log_start, log_end
 from doekbase.workspace.client import Workspace
-from doekbase.data_api.wsfile import WorkspaceFile
+from doekbase.data_api.wsfile import workspace_file_client, WorkspaceFile, OBJECT_MAPPING_FILE
 from doekbase.data_api import cache
 from doekbase.data_api.util import PerfCollector, collect_performance
 
@@ -129,7 +129,7 @@ class ObjectAPI(object):
         else:
             _log.debug('Load from Workspace file at {}'.format(ws_url))
             local_workspace = True
-            self.ws_client = self._init_ws_from_files(ws_url)
+            self.ws_client = self._init_ws_from_files(ws_url, ref)
 
         info_values = self.ws_client.get_object_info_new({
             "objects": [{"ref": self.ref}],
@@ -190,24 +190,27 @@ class ObjectAPI(object):
     def cache_stats(self):
         return self._cache.stats
 
-    def _init_ws_from_files(self, path):
+    def _init_ws_from_files(self, path, ref):
         ext = '.msgpack'
         extlen = len(ext)
         WorkspaceFile.use_msgpack = True
-        client = WorkspaceFile(path)
-        num_loaded = 0
-        for name in os.listdir(path):
-            if name.endswith(ext):
-                ref = name[:-extlen]
-                t0 = log_start(_log, 'load', level=logging.DEBUG,
-                               kvp={'ref': ref})
-                client.load(ref)
-                log_end(_log, t0, 'client.load', level=logging.DEBUG,
-                        kvp={'ref': ref})
-            num_loaded += 1
-        if num_loaded == 0:
-            raise ValueError('No files with extension "{e}" found in path {p}'
-                             .format(e=ext, p=path))
+        client = workspace_file_client(path)
+
+        # load the file to object reference mapping
+        # filename object_ref
+        # 8020_39.msgpack 8020/39/1
+        ref_map = client._load_filemap()
+
+        if ref_map.has_key(ref):
+            obj_filename = ref_map[ref]
+            t0 = log_start(_log, 'load', level=logging.DEBUG,
+                    kvp={'ref': ref, "filename": obj_filename})
+            client.load(obj_filename)
+            log_end(_log, t0, 'client.load', level=logging.DEBUG,
+                kvp={'ref': ref, "filename": obj_filename})
+        else:
+            raise ValueError('No files found in {} for ref {r}'
+                             .format(os.path.join(path, OBJECT_MAPPING_FILE), r=ref))
         return client
 
     @collect_performance(g_stats)

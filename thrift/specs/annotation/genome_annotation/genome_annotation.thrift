@@ -191,6 +191,44 @@ struct UTR_data {
     2: string utr_dna_sequence;
 }
 
+struct Summary_data {
+    /** Scientific name of the organism. */
+    1: string scientific_name;
+    /** NCBI taxonomic id of the organism. */
+    2: i64 taxonomy_id;
+    /** Taxonomic kingdom of the organism. */
+    3: string kingdom;
+    /** Scientific lineage of the organism. */
+    4: list<string> scientific_lineage;
+    /** Scientific name of the organism. */
+    5: byte genetic_code;
+    /** Aliases for the organism associated with this GenomeAnnotation. */
+    6: list<string> organism_aliases;
+    /** Source organization for the Assembly. */
+    7: string assembly_source;
+    /** Identifier for the Assembly used by the source organization. */
+    8: string assembly_source_id;
+    /** Date of origin the source indicates for the Assembly. */
+    9: string assembly_source_date;
+    /** GC content for the entire Assembly. */
+    10: double gc_content;
+    /** Total DNA size for the Assembly. */
+    11: i64 dna_size;
+    /** Number of contigs in the Assembly. */
+    12: i64 num_contigs;
+    /** Contig identifier strings for the Assembly. */
+    13: list<string> contig_ids;
+    /** Name of the external source. */
+    14: string external_source;
+    /** Date of origin the external source indicates for this GenomeAnnotation. */
+    15: string external_source_date;
+    /** Release version for this GenomeAnnotation data. */
+    16: string release;
+    /** Name of the file used to generate this GenomeAnnotation. */
+    17: string original_source_filename;
+    /** Number of features of each type. */
+    18: map<string, i64> feature_type_counts;
+}
 
 service thrift_service {
     /**
@@ -554,23 +592,33 @@ service thrift_service {
         3:AuthenticationException authentication_exception,
         4:ObjectReferenceException reference_exception,
         5:AttributeException attribute_exception,
-        6:TypeException type_exception)
+        6:TypeException type_exception),
 
     /**
-     * Retrieve a GFF representation of this GenomeAnnotation.
+     * Retrieve a summary representation of this GenomeAnnotation.
      *
-     * @param gene_id_list List of gene Feature IDs for which to retrieve GFF.
-     * If empty, returns GFF data for all genes in this GenomeAnnotation.
-     * @return GFF data
+     * @return summary data
      */
-    binary get_gff(1:required string token,
-                   2:required ObjectReference ref,
-                   3:list<string> gene_id_list) throws (
+    Summary_data get_summary(1:required string token,
+                             2:required ObjectReference ref) throws (
+        1:ServiceException generic_exception,
+        2:AuthorizationException authorization_exception,
+        3:AuthenticationException authentication_exception,
+        4:ObjectReferenceException reference_exception,
+        5:AttributeException attribute_exception,
+        6:TypeException type_exception),
+
+    /**
+     * Retrieve a summary representation of this GenomeAnnotation.
+     *
+     * @return summary data
+     */
+    bool save_summary(1:required string token,
+                      2:required ObjectReference ref) throws (
         1:ServiceException generic_exception,
         2:AuthorizationException authorization_exception,
         3:AuthenticationException authentication_exception,
         4:ObjectReferenceException reference_exception,
         5:AttributeException attribute_exception,
         6:TypeException type_exception)
-
 }

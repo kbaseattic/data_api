@@ -1648,3 +1648,323 @@ class UTR_data(object):
 
   def __ne__(self, other):
     return not (self == other)
+
+class Summary_data(object):
+  """
+  Attributes:
+   - scientific_name: Scientific name of the organism.
+   - taxonomy_id: NCBI taxonomic id of the organism.
+   - kingdom: Taxonomic kingdom of the organism.
+   - scientific_lineage: Scientific lineage of the organism.
+   - genetic_code: Scientific name of the organism.
+   - organism_aliases: Aliases for the organism associated with this GenomeAnnotation.
+   - assembly_source: Source organization for the Assembly.
+   - assembly_source_id: Identifier for the Assembly used by the source organization.
+   - assembly_source_date: Date of origin the source indicates for the Assembly.
+   - gc_content: GC content for the entire Assembly.
+   - dna_size: Total DNA size for the Assembly.
+   - num_contigs: Number of contigs in the Assembly.
+   - contig_ids: Contig identifier strings for the Assembly.
+   - external_source: Name of the external source.
+   - external_source_date: Date of origin the external source indicates for this GenomeAnnotation.
+   - release: Release version for this GenomeAnnotation data.
+   - original_source_filename: Name of the file used to generate this GenomeAnnotation.
+   - feature_type_counts: Number of features of each type.
+  """
+
+  thrift_spec = (
+    None, # 0
+    (1, TType.STRING, 'scientific_name', None, None, ), # 1
+    (2, TType.I64, 'taxonomy_id', None, None, ), # 2
+    (3, TType.STRING, 'kingdom', None, None, ), # 3
+    (4, TType.LIST, 'scientific_lineage', (TType.STRING,None), None, ), # 4
+    (5, TType.BYTE, 'genetic_code', None, None, ), # 5
+    (6, TType.LIST, 'organism_aliases', (TType.STRING,None), None, ), # 6
+    (7, TType.STRING, 'assembly_source', None, None, ), # 7
+    (8, TType.STRING, 'assembly_source_id', None, None, ), # 8
+    (9, TType.STRING, 'assembly_source_date', None, None, ), # 9
+    (10, TType.DOUBLE, 'gc_content', None, None, ), # 10
+    (11, TType.I64, 'dna_size', None, None, ), # 11
+    (12, TType.I64, 'num_contigs', None, None, ), # 12
+    (13, TType.LIST, 'contig_ids', (TType.STRING,None), None, ), # 13
+    (14, TType.STRING, 'external_source', None, None, ), # 14
+    (15, TType.STRING, 'external_source_date', None, None, ), # 15
+    (16, TType.STRING, 'release', None, None, ), # 16
+    (17, TType.STRING, 'original_source_filename', None, None, ), # 17
+    (18, TType.MAP, 'feature_type_counts', (TType.STRING,None,TType.I64,None), None, ), # 18
+  )
+
+  def __init__(self, scientific_name=None, taxonomy_id=None, kingdom=None, scientific_lineage=None, genetic_code=None, organism_aliases=None, assembly_source=None, assembly_source_id=None, assembly_source_date=None, gc_content=None, dna_size=None, num_contigs=None, contig_ids=None, external_source=None, external_source_date=None, release=None, original_source_filename=None, feature_type_counts=None,):
+    self.scientific_name = scientific_name
+    self.taxonomy_id = taxonomy_id
+    self.kingdom = kingdom
+    self.scientific_lineage = scientific_lineage
+    self.genetic_code = genetic_code
+    self.organism_aliases = organism_aliases
+    self.assembly_source = assembly_source
+    self.assembly_source_id = assembly_source_id
+    self.assembly_source_date = assembly_source_date
+    self.gc_content = gc_content
+    self.dna_size = dna_size
+    self.num_contigs = num_contigs
+    self.contig_ids = contig_ids
+    self.external_source = external_source
+    self.external_source_date = external_source_date
+    self.release = release
+    self.original_source_filename = original_source_filename
+    self.feature_type_counts = feature_type_counts
+
+  def read(self, iprot):
+    if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
+      fastbinary.decode_binary(self, iprot.trans, (self.__class__, self.thrift_spec))
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 1:
+        if ftype == TType.STRING:
+          self.scientific_name = iprot.readString();
+        else:
+          iprot.skip(ftype)
+      elif fid == 2:
+        if ftype == TType.I64:
+          self.taxonomy_id = iprot.readI64();
+        else:
+          iprot.skip(ftype)
+      elif fid == 3:
+        if ftype == TType.STRING:
+          self.kingdom = iprot.readString();
+        else:
+          iprot.skip(ftype)
+      elif fid == 4:
+        if ftype == TType.LIST:
+          self.scientific_lineage = []
+          (_etype194, _size191) = iprot.readListBegin()
+          for _i195 in xrange(_size191):
+            _elem196 = iprot.readString();
+            self.scientific_lineage.append(_elem196)
+          iprot.readListEnd()
+        else:
+          iprot.skip(ftype)
+      elif fid == 5:
+        if ftype == TType.BYTE:
+          self.genetic_code = iprot.readByte();
+        else:
+          iprot.skip(ftype)
+      elif fid == 6:
+        if ftype == TType.LIST:
+          self.organism_aliases = []
+          (_etype200, _size197) = iprot.readListBegin()
+          for _i201 in xrange(_size197):
+            _elem202 = iprot.readString();
+            self.organism_aliases.append(_elem202)
+          iprot.readListEnd()
+        else:
+          iprot.skip(ftype)
+      elif fid == 7:
+        if ftype == TType.STRING:
+          self.assembly_source = iprot.readString();
+        else:
+          iprot.skip(ftype)
+      elif fid == 8:
+        if ftype == TType.STRING:
+          self.assembly_source_id = iprot.readString();
+        else:
+          iprot.skip(ftype)
+      elif fid == 9:
+        if ftype == TType.STRING:
+          self.assembly_source_date = iprot.readString();
+        else:
+          iprot.skip(ftype)
+      elif fid == 10:
+        if ftype == TType.DOUBLE:
+          self.gc_content = iprot.readDouble();
+        else:
+          iprot.skip(ftype)
+      elif fid == 11:
+        if ftype == TType.I64:
+          self.dna_size = iprot.readI64();
+        else:
+          iprot.skip(ftype)
+      elif fid == 12:
+        if ftype == TType.I64:
+          self.num_contigs = iprot.readI64();
+        else:
+          iprot.skip(ftype)
+      elif fid == 13:
+        if ftype == TType.LIST:
+          self.contig_ids = []
+          (_etype206, _size203) = iprot.readListBegin()
+          for _i207 in xrange(_size203):
+            _elem208 = iprot.readString();
+            self.contig_ids.append(_elem208)
+          iprot.readListEnd()
+        else:
+          iprot.skip(ftype)
+      elif fid == 14:
+        if ftype == TType.STRING:
+          self.external_source = iprot.readString();
+        else:
+          iprot.skip(ftype)
+      elif fid == 15:
+        if ftype == TType.STRING:
+          self.external_source_date = iprot.readString();
+        else:
+          iprot.skip(ftype)
+      elif fid == 16:
+        if ftype == TType.STRING:
+          self.release = iprot.readString();
+        else:
+          iprot.skip(ftype)
+      elif fid == 17:
+        if ftype == TType.STRING:
+          self.original_source_filename = iprot.readString();
+        else:
+          iprot.skip(ftype)
+      elif fid == 18:
+        if ftype == TType.MAP:
+          self.feature_type_counts = {}
+          (_ktype210, _vtype211, _size209 ) = iprot.readMapBegin()
+          for _i213 in xrange(_size209):
+            _key214 = iprot.readString();
+            _val215 = iprot.readI64();
+            self.feature_type_counts[_key214] = _val215
+          iprot.readMapEnd()
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
+      oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
+      return
+    oprot.writeStructBegin('Summary_data')
+    if self.scientific_name is not None:
+      oprot.writeFieldBegin('scientific_name', TType.STRING, 1)
+      oprot.writeString(self.scientific_name)
+      oprot.writeFieldEnd()
+    if self.taxonomy_id is not None:
+      oprot.writeFieldBegin('taxonomy_id', TType.I64, 2)
+      oprot.writeI64(self.taxonomy_id)
+      oprot.writeFieldEnd()
+    if self.kingdom is not None:
+      oprot.writeFieldBegin('kingdom', TType.STRING, 3)
+      oprot.writeString(self.kingdom)
+      oprot.writeFieldEnd()
+    if self.scientific_lineage is not None:
+      oprot.writeFieldBegin('scientific_lineage', TType.LIST, 4)
+      oprot.writeListBegin(TType.STRING, len(self.scientific_lineage))
+      for iter216 in self.scientific_lineage:
+        oprot.writeString(iter216)
+      oprot.writeListEnd()
+      oprot.writeFieldEnd()
+    if self.genetic_code is not None:
+      oprot.writeFieldBegin('genetic_code', TType.BYTE, 5)
+      oprot.writeByte(self.genetic_code)
+      oprot.writeFieldEnd()
+    if self.organism_aliases is not None:
+      oprot.writeFieldBegin('organism_aliases', TType.LIST, 6)
+      oprot.writeListBegin(TType.STRING, len(self.organism_aliases))
+      for iter217 in self.organism_aliases:
+        oprot.writeString(iter217)
+      oprot.writeListEnd()
+      oprot.writeFieldEnd()
+    if self.assembly_source is not None:
+      oprot.writeFieldBegin('assembly_source', TType.STRING, 7)
+      oprot.writeString(self.assembly_source)
+      oprot.writeFieldEnd()
+    if self.assembly_source_id is not None:
+      oprot.writeFieldBegin('assembly_source_id', TType.STRING, 8)
+      oprot.writeString(self.assembly_source_id)
+      oprot.writeFieldEnd()
+    if self.assembly_source_date is not None:
+      oprot.writeFieldBegin('assembly_source_date', TType.STRING, 9)
+      oprot.writeString(self.assembly_source_date)
+      oprot.writeFieldEnd()
+    if self.gc_content is not None:
+      oprot.writeFieldBegin('gc_content', TType.DOUBLE, 10)
+      oprot.writeDouble(self.gc_content)
+      oprot.writeFieldEnd()
+    if self.dna_size is not None:
+      oprot.writeFieldBegin('dna_size', TType.I64, 11)
+      oprot.writeI64(self.dna_size)
+      oprot.writeFieldEnd()
+    if self.num_contigs is not None:
+      oprot.writeFieldBegin('num_contigs', TType.I64, 12)
+      oprot.writeI64(self.num_contigs)
+      oprot.writeFieldEnd()
+    if self.contig_ids is not None:
+      oprot.writeFieldBegin('contig_ids', TType.LIST, 13)
+      oprot.writeListBegin(TType.STRING, len(self.contig_ids))
+      for iter218 in self.contig_ids:
+        oprot.writeString(iter218)
+      oprot.writeListEnd()
+      oprot.writeFieldEnd()
+    if self.external_source is not None:
+      oprot.writeFieldBegin('external_source', TType.STRING, 14)
+      oprot.writeString(self.external_source)
+      oprot.writeFieldEnd()
+    if self.external_source_date is not None:
+      oprot.writeFieldBegin('external_source_date', TType.STRING, 15)
+      oprot.writeString(self.external_source_date)
+      oprot.writeFieldEnd()
+    if self.release is not None:
+      oprot.writeFieldBegin('release', TType.STRING, 16)
+      oprot.writeString(self.release)
+      oprot.writeFieldEnd()
+    if self.original_source_filename is not None:
+      oprot.writeFieldBegin('original_source_filename', TType.STRING, 17)
+      oprot.writeString(self.original_source_filename)
+      oprot.writeFieldEnd()
+    if self.feature_type_counts is not None:
+      oprot.writeFieldBegin('feature_type_counts', TType.MAP, 18)
+      oprot.writeMapBegin(TType.STRING, TType.I64, len(self.feature_type_counts))
+      for kiter219,viter220 in self.feature_type_counts.items():
+        oprot.writeString(kiter219)
+        oprot.writeI64(viter220)
+      oprot.writeMapEnd()
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def validate(self):
+    return
+
+
+  def __hash__(self):
+    value = 17
+    value = (value * 31) ^ hash(self.scientific_name)
+    value = (value * 31) ^ hash(self.taxonomy_id)
+    value = (value * 31) ^ hash(self.kingdom)
+    value = (value * 31) ^ hash(self.scientific_lineage)
+    value = (value * 31) ^ hash(self.genetic_code)
+    value = (value * 31) ^ hash(self.organism_aliases)
+    value = (value * 31) ^ hash(self.assembly_source)
+    value = (value * 31) ^ hash(self.assembly_source_id)
+    value = (value * 31) ^ hash(self.assembly_source_date)
+    value = (value * 31) ^ hash(self.gc_content)
+    value = (value * 31) ^ hash(self.dna_size)
+    value = (value * 31) ^ hash(self.num_contigs)
+    value = (value * 31) ^ hash(self.contig_ids)
+    value = (value * 31) ^ hash(self.external_source)
+    value = (value * 31) ^ hash(self.external_source_date)
+    value = (value * 31) ^ hash(self.release)
+    value = (value * 31) ^ hash(self.original_source_filename)
+    value = (value * 31) ^ hash(self.feature_type_counts)
+    return value
+
+  def __repr__(self):
+    L = ['%s=%r' % (key, value)
+      for key, value in self.__dict__.iteritems()]
+    return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+  def __eq__(self, other):
+    return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+  def __ne__(self, other):
+    return not (self == other)

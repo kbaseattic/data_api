@@ -11,7 +11,7 @@ from doekbase.data_api.core import ObjectAPI
 
 _log = logging.getLogger(__name__)
 
-t_ref = "ReferenceTaxons/242159_taxon"
+t_ref = "ReferenceTaxons/280699_taxon/1"
 t = None
 
 
