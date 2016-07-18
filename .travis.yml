@@ -15,7 +15,7 @@ before_install:
 
 install:
   - printf "Unpacking test data\n"
-  - cd test_resources/data; 7z e "*.7z"; ls -lh 8020_41_1.*; cd ../..
+  - cd test_resources/data; 7z e "*.7z"; cd ../..
   - pip install -r requirements.txt
   - python setup.py install -vv
 
