@@ -61,7 +61,7 @@ def dump_refs(refs, url, token, dir_name, use_msgpack):
     for ref in refs:
         print('Get {}'.format(ref))
         record = workspace_to_file(ref, url, token=token)
-        fname = opj(dir_name, ref.replace('/', '_'))
+        fname = opj(dir_name, record["ref"].replace('/', '_'))
         if use_msgpack:
             fname += '.msgpack'
             method = msgpack.dump
