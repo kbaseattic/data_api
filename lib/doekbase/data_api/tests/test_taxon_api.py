@@ -37,9 +37,9 @@ def setup():
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
 def test_bogus_type():
     inputs = ["Bogus",
-              "ReferenceGenomeAnnotations/kb|g.166819",
-              "ReferenceGenomeAnnotations/kb|g.166819_assembly",
-              "OriginalReferenceGenomes/kb|g.166819.contigset"]
+              "ReferenceGenomeAnnotations/kb|g.166819/1",
+              "ReferenceGenomeAnnotations/kb|g.166819_assembly/1",
+              "OriginalReferenceGenomes/kb|g.166819.contigset/1"]
     _log.info("Input {}".format(inputs))
     for x in inputs:
         try:
