@@ -350,7 +350,7 @@ class TaxonClientAPI(TaxonInterface):
             except ttypes.AuthorizationException, e:
                 raise exceptions.AuthorizationError(e.message)
             except ttypes.TypeException, e:
-                raise exceptions.TypeError(e.message)
+                raise TypeError(e.message)
             except ttypes.ServiceException, e:
                 raise exceptions.ServiceError(e.message)
             except Exception, e:
