@@ -199,8 +199,7 @@ class _Taxon(ObjectAPI, TaxonInterface):
 
     def get_children(self, ref_only=False):
         referrers = self.get_referrers()
-        with open('debug.txt') as f:
-            f.write("taxon.get_children(): {}".format(referrers))
+        _log.info("taxon.get_children(): {}".format(referrers))
         children = list()
 
         if ref_only:
@@ -219,6 +218,7 @@ class _Taxon(ObjectAPI, TaxonInterface):
         from doekbase.data_api.annotation.genome_annotation.api import TYPES as GA_TYPES
 
         referrers = self.get_referrers()
+        _log.info("taxon.get_genome_annotations(): {}".format(referrers))
         annotations = []
 
         if ref_only:
