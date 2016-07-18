@@ -10,12 +10,12 @@ cache:
 
 before_install:
   - sudo apt-get -qq update
-  - sudo apt-get install genometools p7zip
+  - sudo apt-get install genometools p7zip-full
   - redis-server redis.conf &
 
 install:
   - printf "Unpacking test data\n"
-  - cd test_resources/data; 7za e *.7z; cd ../..
+  - cd test_resources/data; 7z e *.7z; cd ../..
   - pip install -r requirements.txt
   - python setup.py install -vv
 
