@@ -50,8 +50,7 @@ class TestCache(unittest.TestCase):
             redis_region.get('foo')
             self.regions['Redis'] = redis_region
         except Exception as err:
-            _log.warn('Skipping Redis tests, simple get gave error: {'
-                      'e}'.format(e=err))
+            _log.warn('Skipping Redis tests, simple get gave error: {e}'.format(e=err))
         self._clear_keys = []
 
     def tearDown(self):
@@ -170,8 +169,8 @@ class TestCache(unittest.TestCase):
 
 class TestCachedObjectAPI(unittest.TestCase):
 
-    genome_new = "ReferenceGenomeAnnotations/kb|g.166819"
-    genome_old = "OriginalReferenceGenomes/kb|g.166819"
+    genome_new = "ReferenceGenomeAnnotations/kb|g.166819/1"
+    genome_old = "OriginalReferenceGenomes/kb|g.166819/1"
 
     def setUp(self):
         services = shared.get_services()

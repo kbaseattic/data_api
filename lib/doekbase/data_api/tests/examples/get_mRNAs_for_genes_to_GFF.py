@@ -79,7 +79,7 @@ def get_gff(gene,genome_annotation):
 
 def run(ws_url='https://ci.kbase.us/services/ws/'):
     #an example KBase reference genome
-    genomeref = "ReferenceGenomeAnnotations/kb|g.166819"
+    genomeref = "ReferenceGenomeAnnotations/kb|g.166819/1"
     #instantiate a new genome annotation API
     genome_annotation = GenomeAnnotationAPI(services = {"workspace_service_url": ws_url}, token=os.environ.get('KB_AUTH_TOKEN'), ref=genomeref)
     genes=['kb|g.166819.locus.1','kb|g.166819.locus.2','kb|g.166819.locus.3']

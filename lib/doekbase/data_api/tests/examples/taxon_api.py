@@ -20,7 +20,7 @@ def fetch_and_print_taxon(ws_url='https://ci.kbase.us/services/ws/'):
          ``dump_wsfile`` utility.
     """
     # Initialize API with target object
-    taxon_ref = 'ReferenceTaxons/242159_taxon'
+    taxon_ref = 'ReferenceTaxons/242159_taxon/1'
     # Try to connect to remote service
     taxon = TaxonAPI(token=os.environ.get('KB_AUTH_TOKEN'), ref=taxon_ref,
                      services={'workspace_service_url': ws_url})

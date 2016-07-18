@@ -14,8 +14,8 @@ except:
     import StringIO
 import unittest
 
-assembly_new = "ReferenceGenomeAnnotations/kb|g.166819_assembly"
-assembly_old = "OriginalReferenceGenomes/kb|g.166819.contigset"
+assembly_new = "ReferenceGenomeAnnotations/kb|g.166819_assembly/1"
+assembly_old = "OriginalReferenceGenomes/kb|g.166819.contigset/1"
 
 def setup():
     shared.setup()

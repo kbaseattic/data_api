@@ -22,20 +22,13 @@ def contig_gc(genome_annotation, genome="kb|g.166819"):
 def run(ws_url='https://ci.kbase.us/services/ws/'):
 
     #an example KBase reference genome
-    genomeref = "ReferenceGenomeAnnotations/kb|g.166819"
+    genomeref = "ReferenceGenomeAnnotations/kb|g.166819/1"
     #creating a new GenomeAnnotation object
     genome_annotation = GenomeAnnotationAPI(services = {"workspace_service_url": ws_url}, token=os.environ.get('KB_AUTH_TOKEN'), ref=genomeref)
          
     gc = contig_gc(genome_annotation, genomeref)
 
     print gc
-
-    outfile = '166819_GC.txt'
-    
-    with open(outfile, 'w') as f:
-        f.write(json.dumps(gc))
-
-
 
 if __name__ == '__main__':
     run()

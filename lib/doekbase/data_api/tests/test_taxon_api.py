@@ -13,9 +13,7 @@ from doekbase.data_api.taxonomy.taxon.api import TaxonClientAPI
 
 _log = logging.getLogger(__name__)
 
-#taxon_new = "ReferenceTaxons/242159_taxon"
-#taxon_old = "OriginalReferenceGenomes/kb|g.166819"
-taxon_new = "ReferenceTaxons/3702_taxon"
+taxon_new = "ReferenceTaxons/3702_taxon/1"
 taxon_old = "8020/13/1"
 t_new = None
 t_new_e = None

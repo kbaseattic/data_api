@@ -15,10 +15,10 @@ from doekbase.workspace import client as ws_client
 
 _log = logging.getLogger('doekbase.tests.test_ws_client')
 
-genome_new = "ReferenceGenomeAnnotations/kb|g.166819"
-genome_old = "OriginalReferenceGenomes/kb|g.166819"
-taxon_new = "ReferenceTaxons/242159_taxon"
-taxon_old = "OriginalReferenceGenomes/kb|g.166819"
+genome_new = "8020/39/1"
+genome_old = "8020/41/1"
+taxon_new = "ReferenceTaxons/280699_taxon/1"
+taxon_old = "8020/41/1"
 
 def generic_object():
     """Get a generic object."""
