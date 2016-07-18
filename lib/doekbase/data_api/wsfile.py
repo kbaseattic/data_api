@@ -79,7 +79,7 @@ def workspace_to_file(ref, workspace='narrative', token=None):
     objlist = ws.get_objects([{'ref': ref}])
     obj, oi = objlist[0], objlist[0]['info']
     canonical_ref = "{0}/{1}/{2}".format(oi[6], oi[0], oi[4])
-    canonical_name = "{0}/{1}".format(oi[7], oi[1])
+    canonical_name = "{0}/{1}/{2}".format(oi[7], oi[1], oi[4])
     # convert to our schema
     d = {'ref': canonical_ref,
          'type': oi[2],

@@ -13,8 +13,8 @@ from doekbase.data_api.sequence.assembly.api import _Assembly
 
 _log = logging.getLogger(__name__)
 
-assembly_new = "ReferenceGenomeAnnotations/kb|g.166819_assembly/1"
-assembly_old = "OriginalReferenceGenomes/kb|g.166819.contigset/1"
+assembly_new = "8020/30/1"
+assembly_old = "8020/40/1"
 t_new = None
 t_new_e = None
 t_old = None
