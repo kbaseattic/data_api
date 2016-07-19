@@ -292,9 +292,7 @@ class WorkspaceFile(object):
     def list_referencing_objects(self, prm):
         #print("@@ list_referencing_objects({})".format(prm))
         # use the object mapping to load any missing object data for references
-        for ref in self._file_map:
-            if ref not in self._mapping:
-                self.load(self._file_map[ref])
+        self._load_all_files()
 
         result = []
         for refs in prm:
@@ -431,6 +429,11 @@ class WorkspaceFile(object):
         if ref in self._mapping:
             result.append(self._get_record(ref))
         return result
+
+    def _load_all_files(self):
+        for ref in self._file_map:
+            if ref not in self._mapping:
+                self.load(self._file_map[ref])
 
     def _load_filemap(self):
         map_filename = os.path.join(self._wd, OBJECT_MAPPING_FILE)

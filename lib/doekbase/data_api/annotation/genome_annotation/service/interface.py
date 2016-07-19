@@ -237,7 +237,13 @@ class GenomeAnnotationService(service_core.BaseService):
     def get_summary(self, token=None, ref=None):
         ga_api = self._get_instance(token, ref)
         result = ga_api.get_summary()
-        return result
+
+        flattened_result = {}
+        for k in ["taxonomy", "assembly", "annotation"]:
+            flattened_result.update({x: result[k][x] for x in result[k]})
+
+        out = ttypes.Summary_data(**flattened_result)
+        return out
 
     @server_method
     def save_summary(self, token=None, ref=None):
