@@ -2455,7 +2455,9 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
         all_summary_types = sorted([t for t in refs if t.startswith("KBaseGenomeAnnotations.GenomeAnnotationSummary")])
 
         if len(all_summary_types) == 0:
-            raise TypeError("Missing GenomeAnnotationSummary for {}".format(self.ref))
+            self.save_summary()
+            refs = self.get_referrers()
+            all_summary_types = sorted([t for t in refs if t.startswith("KBaseGenomeAnnotations.GenomeAnnotationSummary")])
 
         # the highest version type will be last, and there should only ever be one summary object per version
         latest_summary = refs[all_summary_types[-1]][0]
@@ -2468,7 +2470,7 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
                 "kingdom": summary["kingdom"],
                 "scientific_lineage": [x.strip() for x in summary["scientific_lineage"].split(";")],
                 "genetic_code": summary["genetic_code"],
-                "aliases": summary["organism_aliases"]
+                "organism_aliases": summary["organism_aliases"]
             },
             "assembly": {
                 "assembly_source": summary["assembly_source"],
@@ -2483,7 +2485,7 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
                 "external_source": summary["external_source"],
                 "external_source_date": summary["external_source_origination_date"],
                 "release": summary["release"],
-                "original_filename": summary["original_source_file_name"],
+                "original_source_filename": summary["original_source_file_name"],
                 "feature_type_counts": summary["feature_counts_map"]
             }
         }
@@ -2746,7 +2748,20 @@ class GenomeAnnotationClientAPI(GenomeAnnotationInterface):
     @logged(_ga_log)
     @client_method
     def get_summary(self):
-        return self.client.get_summary(self._token, self.ref)
+        result = self.client.get_summary(self._token, self.ref)
+
+        taxonomy_keys = ["scientific_name", "taxonomy_id", "kingdom",
+                         "scientific_lineage", "genetic_code", "organism_aliases"]
+        assembly_keys = ["assembly_source", "assembly_source_id", "assembly_source_date",
+                         "gc_content", "dna_size", "num_contigs", "contig_ids"]
+        annotation_keys = ["external_source", "external_source_date", "release",
+                           "original_source_filename", "feature_type_counts"]
+        out = {
+            "taxonomy": {k: result.__dict__[k] for k in taxonomy_keys},
+            "assembly": {k: result.__dict__[k] for k in assembly_keys},
+            "annotation": {k: result.__dict__[k] for k in annotation_keys}
+        }
+        return out
 
     @logged(_ga_log)
     @client_method
