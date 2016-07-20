@@ -313,7 +313,8 @@ service thrift_service {
      * @return Mapping from protein ID to data about the protein.
      */
     map<string, Protein_data> get_proteins(1:required string token,
-                                           2:required ObjectReference ref) throws (
+                                           2:required ObjectReference ref,
+                                           3:list<string> cds_id_list) throws (
         1:ServiceException generic_exception,
         2:AuthorizationException authorization_exception,
         3:AuthenticationException authentication_exception,
@@ -548,6 +549,23 @@ service thrift_service {
     map<string, map<string, UTR_data>> get_mrna_utrs(1:required string token,
                                                      2:required ObjectReference ref,
                                                      3:list<string> mrna_id_list) throws (
+        1:ServiceException generic_exception,
+        2:AuthorizationException authorization_exception,
+        3:AuthenticationException authentication_exception,
+        4:ObjectReferenceException reference_exception,
+        5:AttributeException attribute_exception,
+        6:TypeException type_exception)
+
+    /**
+     * Retrieve a GFF representation of this GenomeAnnotation.
+     *
+     * @param gene_id_list List of gene Feature IDs for which to retrieve GFF.
+     * If empty, returns GFF data for all genes in this GenomeAnnotation.
+     * @return GFF data
+     */
+    binary get_gff(1:required string token,
+                   2:required ObjectReference ref,
+                   3:list<string> gene_id_list) throws (
         1:ServiceException generic_exception,
         2:AuthorizationException authorization_exception,
         3:AuthenticationException authentication_exception,

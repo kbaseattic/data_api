@@ -20,8 +20,7 @@ except:
 class Iface(object):
   def get_assembly_id(self, token, ref):
     """
-    Retrieve Assembly identifier string.
-
+    Retrieve Assembly ID.
 
     Parameters:
      - token
@@ -32,6 +31,8 @@ class Iface(object):
   def get_genome_annotations(self, token, ref):
     """
     Retrieve associated GenomeAnnotation objects.
+
+    @return List of GenomeAnnotation object references
 
 
     Parameters:
@@ -44,6 +45,7 @@ class Iface(object):
     """
     Retrieve the external source information for this Assembly.
 
+    @return Metadata about the external source
 
     Parameters:
      - token
@@ -53,7 +55,7 @@ class Iface(object):
 
   def get_stats(self, token, ref):
     """
-    Retrieve the Assembly stats.
+    Retrieve the derived statistical information about this Assembly.
 
 
     Parameters:
@@ -66,6 +68,7 @@ class Iface(object):
     """
     Retrieve the number of contigs for this Assembly.
 
+    @return Total number of contiguous sequences.
 
     Parameters:
      - token
@@ -77,6 +80,7 @@ class Iface(object):
     """
     Retrieve the total GC content for this Assembly.
 
+    @return Proportion of GC content, between 0 and 1.
 
     Parameters:
      - token
@@ -88,6 +92,7 @@ class Iface(object):
     """
     Retrieve the total DNA size for this Assembly.
 
+    @return Total DNA size
 
     Parameters:
      - token
@@ -99,6 +104,7 @@ class Iface(object):
     """
     Retrieve the contig identifiers for this Assembly.
 
+    @return List of contig IDs.
 
     Parameters:
      - token
@@ -110,6 +116,7 @@ class Iface(object):
     """
     Retrieve the lengths of the contigs in this Assembly.
 
+    @return Mapping of contig ID to contig length.
 
     Parameters:
      - token
@@ -122,6 +129,7 @@ class Iface(object):
     """
     Retrieve the gc content for contigs in this Assembly.
 
+    @return Mapping of contig IDs to GC content proportion.
 
     Parameters:
      - token
@@ -134,11 +142,22 @@ class Iface(object):
     """
     Retrieve all the data for the contigs in this Assembly.
 
+    @return Mapping of contig ID to details for that contig.
 
     Parameters:
      - token
      - ref
      - contig_id_list
+    """
+    pass
+
+  def to_fasta(self, token, ref):
+    """
+    Get reference to FASTA data
+
+    Parameters:
+     - token
+     - ref
     """
     pass
 
@@ -152,8 +171,7 @@ class Client(Iface):
 
   def get_assembly_id(self, token, ref):
     """
-    Retrieve Assembly identifier string.
-
+    Retrieve Assembly ID.
 
     Parameters:
      - token
@@ -201,6 +219,8 @@ class Client(Iface):
   def get_genome_annotations(self, token, ref):
     """
     Retrieve associated GenomeAnnotation objects.
+
+    @return List of GenomeAnnotation object references
 
 
     Parameters:
@@ -250,6 +270,7 @@ class Client(Iface):
     """
     Retrieve the external source information for this Assembly.
 
+    @return Metadata about the external source
 
     Parameters:
      - token
@@ -296,7 +317,7 @@ class Client(Iface):
 
   def get_stats(self, token, ref):
     """
-    Retrieve the Assembly stats.
+    Retrieve the derived statistical information about this Assembly.
 
 
     Parameters:
@@ -346,6 +367,7 @@ class Client(Iface):
     """
     Retrieve the number of contigs for this Assembly.
 
+    @return Total number of contiguous sequences.
 
     Parameters:
      - token
@@ -394,6 +416,7 @@ class Client(Iface):
     """
     Retrieve the total GC content for this Assembly.
 
+    @return Proportion of GC content, between 0 and 1.
 
     Parameters:
      - token
@@ -442,6 +465,7 @@ class Client(Iface):
     """
     Retrieve the total DNA size for this Assembly.
 
+    @return Total DNA size
 
     Parameters:
      - token
@@ -490,6 +514,7 @@ class Client(Iface):
     """
     Retrieve the contig identifiers for this Assembly.
 
+    @return List of contig IDs.
 
     Parameters:
      - token
@@ -538,6 +563,7 @@ class Client(Iface):
     """
     Retrieve the lengths of the contigs in this Assembly.
 
+    @return Mapping of contig ID to contig length.
 
     Parameters:
      - token
@@ -588,6 +614,7 @@ class Client(Iface):
     """
     Retrieve the gc content for contigs in this Assembly.
 
+    @return Mapping of contig IDs to GC content proportion.
 
     Parameters:
      - token
@@ -638,6 +665,7 @@ class Client(Iface):
     """
     Retrieve all the data for the contigs in this Assembly.
 
+    @return Mapping of contig ID to details for that contig.
 
     Parameters:
      - token
@@ -684,6 +712,53 @@ class Client(Iface):
       raise result.type_exception
     raise TApplicationException(TApplicationException.MISSING_RESULT, "get_contigs failed: unknown result");
 
+  def to_fasta(self, token, ref):
+    """
+    Get reference to FASTA data
+
+    Parameters:
+     - token
+     - ref
+    """
+    self.send_to_fasta(token, ref)
+    return self.recv_to_fasta()
+
+  def send_to_fasta(self, token, ref):
+    self._oprot.writeMessageBegin('to_fasta', TMessageType.CALL, self._seqid)
+    args = to_fasta_args()
+    args.token = token
+    args.ref = ref
+    args.write(self._oprot)
+    self._oprot.writeMessageEnd()
+    self._oprot.trans.flush()
+
+  def recv_to_fasta(self):
+    iprot = self._iprot
+    (fname, mtype, rseqid) = iprot.readMessageBegin()
+    if mtype == TMessageType.EXCEPTION:
+      x = TApplicationException()
+      x.read(iprot)
+      iprot.readMessageEnd()
+      raise x
+    result = to_fasta_result()
+    result.read(iprot)
+    iprot.readMessageEnd()
+    if result.success is not None:
+      return result.success
+    if result.generic_exception is not None:
+      raise result.generic_exception
+    if result.authorization_exception is not None:
+      raise result.authorization_exception
+    if result.authentication_exception is not None:
+      raise result.authentication_exception
+    if result.reference_exception is not None:
+      raise result.reference_exception
+    if result.attribute_exception is not None:
+      raise result.attribute_exception
+    if result.type_exception is not None:
+      raise result.type_exception
+    raise TApplicationException(TApplicationException.MISSING_RESULT, "to_fasta failed: unknown result");
+
 
 class Processor(Iface, TProcessor):
   def __init__(self, handler):
@@ -700,6 +775,7 @@ class Processor(Iface, TProcessor):
     self._processMap["get_contig_lengths"] = Processor.process_get_contig_lengths
     self._processMap["get_contig_gc_content"] = Processor.process_get_contig_gc_content
     self._processMap["get_contigs"] = Processor.process_get_contigs
+    self._processMap["to_fasta"] = Processor.process_to_fasta
 
   def process(self, iprot, oprot):
     (name, type, seqid) = iprot.readMessageBegin()
@@ -976,6 +1052,30 @@ class Processor(Iface, TProcessor):
     except TypeException, type_exception:
       result.type_exception = type_exception
     oprot.writeMessageBegin("get_contigs", TMessageType.REPLY, seqid)
+    result.write(oprot)
+    oprot.writeMessageEnd()
+    oprot.trans.flush()
+
+  def process_to_fasta(self, seqid, iprot, oprot):
+    args = to_fasta_args()
+    args.read(iprot)
+    iprot.readMessageEnd()
+    result = to_fasta_result()
+    try:
+      result.success = self._handler.to_fasta(args.token, args.ref)
+    except ServiceException, generic_exception:
+      result.generic_exception = generic_exception
+    except AuthorizationException, authorization_exception:
+      result.authorization_exception = authorization_exception
+    except AuthenticationException, authentication_exception:
+      result.authentication_exception = authentication_exception
+    except ObjectReferenceException, reference_exception:
+      result.reference_exception = reference_exception
+    except AttributeException, attribute_exception:
+      result.attribute_exception = attribute_exception
+    except TypeException, type_exception:
+      result.type_exception = type_exception
+    oprot.writeMessageBegin("to_fasta", TMessageType.REPLY, seqid)
     result.write(oprot)
     oprot.writeMessageEnd()
     oprot.trans.flush()
@@ -3571,6 +3671,236 @@ class get_contigs_result(object):
         oprot.writeString(kiter76)
         viter77.write(oprot)
       oprot.writeMapEnd()
+      oprot.writeFieldEnd()
+    if self.generic_exception is not None:
+      oprot.writeFieldBegin('generic_exception', TType.STRUCT, 1)
+      self.generic_exception.write(oprot)
+      oprot.writeFieldEnd()
+    if self.authorization_exception is not None:
+      oprot.writeFieldBegin('authorization_exception', TType.STRUCT, 2)
+      self.authorization_exception.write(oprot)
+      oprot.writeFieldEnd()
+    if self.authentication_exception is not None:
+      oprot.writeFieldBegin('authentication_exception', TType.STRUCT, 3)
+      self.authentication_exception.write(oprot)
+      oprot.writeFieldEnd()
+    if self.reference_exception is not None:
+      oprot.writeFieldBegin('reference_exception', TType.STRUCT, 4)
+      self.reference_exception.write(oprot)
+      oprot.writeFieldEnd()
+    if self.attribute_exception is not None:
+      oprot.writeFieldBegin('attribute_exception', TType.STRUCT, 5)
+      self.attribute_exception.write(oprot)
+      oprot.writeFieldEnd()
+    if self.type_exception is not None:
+      oprot.writeFieldBegin('type_exception', TType.STRUCT, 6)
+      self.type_exception.write(oprot)
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def validate(self):
+    return
+
+
+  def __hash__(self):
+    value = 17
+    value = (value * 31) ^ hash(self.success)
+    value = (value * 31) ^ hash(self.generic_exception)
+    value = (value * 31) ^ hash(self.authorization_exception)
+    value = (value * 31) ^ hash(self.authentication_exception)
+    value = (value * 31) ^ hash(self.reference_exception)
+    value = (value * 31) ^ hash(self.attribute_exception)
+    value = (value * 31) ^ hash(self.type_exception)
+    return value
+
+  def __repr__(self):
+    L = ['%s=%r' % (key, value)
+      for key, value in self.__dict__.iteritems()]
+    return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+  def __eq__(self, other):
+    return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+  def __ne__(self, other):
+    return not (self == other)
+
+class to_fasta_args(object):
+  """
+  Attributes:
+   - token
+   - ref
+  """
+
+  thrift_spec = (
+    None, # 0
+    (1, TType.STRING, 'token', None, None, ), # 1
+    (2, TType.STRING, 'ref', None, None, ), # 2
+  )
+
+  def __init__(self, token=None, ref=None,):
+    self.token = token
+    self.ref = ref
+
+  def read(self, iprot):
+    if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
+      fastbinary.decode_binary(self, iprot.trans, (self.__class__, self.thrift_spec))
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 1:
+        if ftype == TType.STRING:
+          self.token = iprot.readString();
+        else:
+          iprot.skip(ftype)
+      elif fid == 2:
+        if ftype == TType.STRING:
+          self.ref = iprot.readString();
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
+      oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
+      return
+    oprot.writeStructBegin('to_fasta_args')
+    if self.token is not None:
+      oprot.writeFieldBegin('token', TType.STRING, 1)
+      oprot.writeString(self.token)
+      oprot.writeFieldEnd()
+    if self.ref is not None:
+      oprot.writeFieldBegin('ref', TType.STRING, 2)
+      oprot.writeString(self.ref)
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def validate(self):
+    if self.token is None:
+      raise TProtocol.TProtocolException(message='Required field token is unset!')
+    if self.ref is None:
+      raise TProtocol.TProtocolException(message='Required field ref is unset!')
+    return
+
+
+  def __hash__(self):
+    value = 17
+    value = (value * 31) ^ hash(self.token)
+    value = (value * 31) ^ hash(self.ref)
+    return value
+
+  def __repr__(self):
+    L = ['%s=%r' % (key, value)
+      for key, value in self.__dict__.iteritems()]
+    return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+  def __eq__(self, other):
+    return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+  def __ne__(self, other):
+    return not (self == other)
+
+class to_fasta_result(object):
+  """
+  Attributes:
+   - success
+   - generic_exception
+   - authorization_exception
+   - authentication_exception
+   - reference_exception
+   - attribute_exception
+   - type_exception
+  """
+
+  thrift_spec = (
+    (0, TType.STRING, 'success', None, None, ), # 0
+    (1, TType.STRUCT, 'generic_exception', (ServiceException, ServiceException.thrift_spec), None, ), # 1
+    (2, TType.STRUCT, 'authorization_exception', (AuthorizationException, AuthorizationException.thrift_spec), None, ), # 2
+    (3, TType.STRUCT, 'authentication_exception', (AuthenticationException, AuthenticationException.thrift_spec), None, ), # 3
+    (4, TType.STRUCT, 'reference_exception', (ObjectReferenceException, ObjectReferenceException.thrift_spec), None, ), # 4
+    (5, TType.STRUCT, 'attribute_exception', (AttributeException, AttributeException.thrift_spec), None, ), # 5
+    (6, TType.STRUCT, 'type_exception', (TypeException, TypeException.thrift_spec), None, ), # 6
+  )
+
+  def __init__(self, success=None, generic_exception=None, authorization_exception=None, authentication_exception=None, reference_exception=None, attribute_exception=None, type_exception=None,):
+    self.success = success
+    self.generic_exception = generic_exception
+    self.authorization_exception = authorization_exception
+    self.authentication_exception = authentication_exception
+    self.reference_exception = reference_exception
+    self.attribute_exception = attribute_exception
+    self.type_exception = type_exception
+
+  def read(self, iprot):
+    if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
+      fastbinary.decode_binary(self, iprot.trans, (self.__class__, self.thrift_spec))
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 0:
+        if ftype == TType.STRING:
+          self.success = iprot.readString();
+        else:
+          iprot.skip(ftype)
+      elif fid == 1:
+        if ftype == TType.STRUCT:
+          self.generic_exception = ServiceException()
+          self.generic_exception.read(iprot)
+        else:
+          iprot.skip(ftype)
+      elif fid == 2:
+        if ftype == TType.STRUCT:
+          self.authorization_exception = AuthorizationException()
+          self.authorization_exception.read(iprot)
+        else:
+          iprot.skip(ftype)
+      elif fid == 3:
+        if ftype == TType.STRUCT:
+          self.authentication_exception = AuthenticationException()
+          self.authentication_exception.read(iprot)
+        else:
+          iprot.skip(ftype)
+      elif fid == 4:
+        if ftype == TType.STRUCT:
+          self.reference_exception = ObjectReferenceException()
+          self.reference_exception.read(iprot)
+        else:
+          iprot.skip(ftype)
+      elif fid == 5:
+        if ftype == TType.STRUCT:
+          self.attribute_exception = AttributeException()
+          self.attribute_exception.read(iprot)
+        else:
+          iprot.skip(ftype)
+      elif fid == 6:
+        if ftype == TType.STRUCT:
+          self.type_exception = TypeException()
+          self.type_exception.read(iprot)
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
+      oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
+      return
+    oprot.writeStructBegin('to_fasta_result')
+    if self.success is not None:
+      oprot.writeFieldBegin('success', TType.STRING, 0)
+      oprot.writeString(self.success)
       oprot.writeFieldEnd()
     if self.generic_exception is not None:
       oprot.writeFieldBegin('generic_exception', TType.STRUCT, 1)

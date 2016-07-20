@@ -10,7 +10,6 @@ __date__ = '9/26/15'
 
 # System
 import hashlib
-import logging
 import os
 import time
 import uuid
@@ -111,16 +110,17 @@ class ObjectCache(object):
     cache_class = NullCache   #: Class for cache backend
     cache_params = {}         #: Constructor parameters for cache backend
 
-    def __init__(self, ref, stats=None, cache_class=None, cache_params=None, is_public=True):
+    def __init__(self, ref, domain=None, stats=None, cache_class=None, cache_params=None, is_public=True):
         """Constructor.
 
         Args:
           ref (str): Key for caching
+          domain (str): namespace for keys
           stats (PerfCollector): Shared statistics object
           cache_class (class): Subclass of `Cache`
           cache_params (dict): Parameters for cache constructor
         """
-        self._key = ref
+        self._key = "{}-{}".format(domain, ref)
         self._public = is_public
         # init performance statistics
         self._stats = stats or PerfCollector(self.__class__.__name__)
