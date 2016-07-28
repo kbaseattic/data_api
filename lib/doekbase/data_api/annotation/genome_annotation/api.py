@@ -1842,7 +1842,7 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
                             "strand": x["strand"],
                             "length": utr_length
                         })
-                        utr3_sequence.append(mrna_sequence[offset:offset + utr_length])
+                        utr3_sequence.append(mrna_sequence[offset + (x["length"] - utr_length):offset + x["length"]])  
                     elif exon_min > cds_max:
                         # the exon starts after the cds ends
                         utr3_locations.append(x)
