@@ -2424,17 +2424,17 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
 
         summary_object["feature_counts_map"] = self.get_feature_type_counts()
 
-        summary_object["assembly_ref"] = ga_object.get_data_subset(path_list=["assembly_ref"])["assembly_ref"]
-        summary_object["taxon_ref"] = ga_object.get_data_subset(path_list=["taxon_ref"])["taxon_ref"]
+        summary_object["assembly_ref"] = self.get_data_subset(path_list=["assembly_ref"])["assembly_ref"]
+        summary_object["taxon_ref"] = self.get_data_subset(path_list=["taxon_ref"])["taxon_ref"]
 
         try: 
-            alias_source_dict = ga_object.get_data_subset(path_list=["alias_source_counts_map"])["alias_source_counts_map"]
+            alias_source_dict = self.get_data_subset(path_list=["alias_source_counts_map"])["alias_source_counts_map"]
             summary_object["alias_sources"] = alias_source_dict.keys()
         except: 
             summary_object["alias_sources"] = list() 
 
         proteins = dict() 
-        proteins = ga_object.get_proteins()
+        proteins = self.get_proteins()
         summary_object["cds_coding_for_proteins_count"] = len(proteins) 
 
         summary_provenance = [
@@ -2461,6 +2461,7 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
             })
             return True
         except Exception, e:
+            print e
             return False
 
     def get_summary(self):
