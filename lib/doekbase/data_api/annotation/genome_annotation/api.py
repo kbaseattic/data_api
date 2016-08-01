@@ -2461,7 +2461,6 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
             })
             return True
         except Exception, e:
-            print e
             return False
 
     def get_summary(self):
