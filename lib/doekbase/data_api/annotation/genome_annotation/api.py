@@ -505,7 +505,8 @@ class GenomeAnnotationInterface(object):
         Args:
           None
         Returns:
-          bool - Success/Failure
+           tuple (first element bool - Success/Failure, 2nd element is python summary object-
+                 (Done so if do not have permissions to write to the ws, the summary object can still be retrieved))
         """
         pass
 
@@ -2459,22 +2460,22 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
                     }
                 ]
             })
-            return True
+            return True, summary_object
         except Exception, e:
-            return False
+            print("WS Save Summary Error: {0}".format(e))
+            return False, summary_object
 
     def get_summary(self):
         refs = self.get_referrers()
         all_summary_types = sorted([t for t in refs if t.startswith("KBaseGenomeAnnotations.GenomeAnnotationSummary")])
 
         if len(all_summary_types) == 0:
-            self.save_summary()
-            refs = self.get_referrers()
-            all_summary_types = sorted([t for t in refs if t.startswith("KBaseGenomeAnnotations.GenomeAnnotationSummary")])
-
-        # the highest version type will be last, and there should only ever be one summary object per version
-        latest_summary = refs[all_summary_types[-1]][0]
-        summary = ObjectAPI(self.services, self._token, latest_summary).get_data()
+            save_summary_result = self.save_summary()
+            summary = save_summary_result[1]
+        else:
+            # the highest version type will be last, and there should only ever be one summary object per version
+            latest_summary = refs[all_summary_types[-1]][0]
+            summary = ObjectAPI(self.services, self._token, latest_summary).get_data()
 
         out = {
             "taxonomy": {
