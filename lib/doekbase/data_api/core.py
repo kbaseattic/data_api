@@ -22,7 +22,7 @@ from doekbase.data_api.util import PerfCollector, collect_performance
 
 # Version
 
-DATA_API_VERSION = "0.1.0"
+DATA_API_VERSION = "0.3.0"
 
 def version():
     return DATA_API_VERSION
