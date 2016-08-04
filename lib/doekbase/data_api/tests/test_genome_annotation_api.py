@@ -21,8 +21,6 @@ from doekbase.data_api import exceptions
 
 _log = logging.getLogger(__name__)
 
-#genome_new = "ReferenceGenomeAnnotations/kb|g.166819"
-#genome_old = "OriginalReferenceGenomes/kb|g.166819"
 genome_new = "8020/39/1"
 genome_old = "8020/41/1"
 t_new = None
@@ -168,7 +166,7 @@ def test_get_feature_ids_new():
 
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
 def test_get_feature_ids_invalid_filters_new():
-    invalid_filters = {"invalid_key": ["kb|g.166819.mRNA.0"]}
+    invalid_filters = {"invalid_key": ["kb_g.166819.mRNA.0"]}
     _log.debug("Input {} {}".format(genome_new, invalid_filters))
     for t_o in [t_new, t_new_e, t_client_new]:
         error_caught = False
@@ -475,7 +473,6 @@ def test_get_mrna_exons_one_new():
 
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
 def test_get_cds_by_mrna_valid_new():
-    #inputs = ["kb|g.166819.mRNA.0", "kb|g.166819.mRNA.238"]
     for t_o in [t_new, t_new_e, t_client_new]:
         inputs = fetch_new_mrna_ids(t_o)
         _log.debug("Input {} {}".format(genome_new, inputs))
@@ -486,7 +483,7 @@ def test_get_cds_by_mrna_valid_new():
 
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
 def test_get_cds_by_mrna_invalid_new():
-    inputs = ["kb|g.166819.mRNA.99999999999", "kb|g.166819.CDS.1"]
+    inputs = ["kb_g.166819.mRNA.99999999999", "kb_g.166819.CDS.1"]
     _log.debug("Input {} {}".format(genome_new, inputs))
     for t_o in [t_new, t_new_e, t_client_new]:
         cds_t_o = t_o.get_cds_by_mrna(inputs)
@@ -496,7 +493,6 @@ def test_get_cds_by_mrna_invalid_new():
 
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
 def test_get_mrna_by_cds_valid_new():
-    #inputs = ["kb|g.166819.CDS.0", "kb|g.166819.CDS.278"]
     for t_o in [t_new, t_new_e, t_client_new]:
         inputs = fetch_new_cds_ids(t_o)
         _log.debug("Input {} {}".format(genome_new, inputs))
@@ -507,7 +503,7 @@ def test_get_mrna_by_cds_valid_new():
 
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
 def test_get_mrna_by_cds_invalid_new():
-    inputs = ["kb|g.166819.mRNA.1", "kb|g.166819.CDS.9999999999"]
+    inputs = ["kb_g.166819.mRNA.1", "kb_g.166819.CDS.9999999999"]
     _log.debug("Input {} {}".format(genome_new, inputs))
     for t_o in [t_new, t_new_e, t_client_new]:
         mrna_t_o = t_o.get_mrna_by_cds(inputs)
@@ -517,7 +513,6 @@ def test_get_mrna_by_cds_invalid_new():
 
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
 def test_get_gene_by_mrna_valid_new():
-    #inputs = ["kb|g.166819.mRNA.0", "kb|g.166819.mRNA.238"]
     for t_o in [t_new, t_new_e, t_client_new]:
         inputs = fetch_new_mrna_ids(t_o)
         _log.debug("Input {} {}".format(genome_new, inputs))
@@ -528,7 +523,7 @@ def test_get_gene_by_mrna_valid_new():
 
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
 def test_get_gene_by_mrna_invalid_new():
-    inputs = ["kb|g.166819.mRNA.99999999999", "kb|g.166819.CDS.1"]
+    inputs = ["kb_g.166819.mRNA.99999999999", "kb_g.166819.CDS.1"]
     _log.debug("Input {} {}".format(genome_new, inputs))
     for t_o in [t_new, t_new_e, t_client_new]:
         genes_t_o = t_o.get_gene_by_mrna(inputs)
@@ -538,7 +533,6 @@ def test_get_gene_by_mrna_invalid_new():
 
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
 def test_get_cds_by_gene_valid_new():
-    #inputs = ["kb|g.166819.locus.256", "kb|g.166819.locus.112"]
     for t_o in [t_new, t_new_e, t_client_new]:
         inputs = fetch_new_gene_ids(t_o)
         _log.debug("Input {} {}".format(genome_new, inputs))
@@ -549,7 +543,7 @@ def test_get_cds_by_gene_valid_new():
 
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
 def test_get_cds_by_gene_invalid_new():
-    inputs = ["kb|g.166819.mRNA.1", "kb|g.166819.locus.999999"]
+    inputs = ["kb_g.166819.mRNA.1", "kb_g.166819.locus.999999"]
     _log.debug("Input {} {}".format(genome_new, inputs))
     for t_o in [t_new, t_new_e, t_client_new]:
         cds_t_o = t_o.get_cds_by_gene(inputs)
@@ -559,7 +553,6 @@ def test_get_cds_by_gene_invalid_new():
 
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
 def test_get_mrna_by_gene_valid_new():
-    #inputs = ["kb|g.166819.locus.256", "kb|g.166819.locus.112"]
     for t_o in [t_new, t_new_e, t_client_new]:
         inputs = fetch_new_gene_ids(t_o)
         _log.debug("Input {} {}".format(genome_new, inputs))
@@ -570,7 +563,7 @@ def test_get_mrna_by_gene_valid_new():
 
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
 def test_get_mrna_by_gene_invalid_new():
-    inputs = ["kb|g.166819.mRNA.1", "kb|g.166819.locus.999999"]
+    inputs = ["kb_g.166819.mRNA.1", "kb_g.166819.locus.999999"]
     _log.debug("Input {} {}".format(genome_new, inputs))
     for t_o in [t_new, t_new_e, t_client_new]:
         mrna_t_o = t_o.get_mrna_by_gene(inputs)
@@ -580,7 +573,6 @@ def test_get_mrna_by_gene_invalid_new():
 
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
 def test_get_gene_by_cds_valid_new():
-    #inputs = ["kb|g.166819.CDS.0", "kb|g.166819.CDS.278"]
     for t_o in [t_new, t_new_e, t_client_new]:
         inputs = fetch_new_cds_ids(t_o)
         _log.debug("Input {} {}".format(genome_new, inputs))
@@ -591,7 +583,7 @@ def test_get_gene_by_cds_valid_new():
 
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
 def test_get_gene_by_cds_invalid_new():
-    inputs = ["kb|g.166819.mRNA.1", "kb|g.166819.CDS.999999"]
+    inputs = ["kb_g.166819.mRNA.1", "kb_g.166819.CDS.999999"]
     _log.debug("Input {} {}".format(genome_new, inputs))
     for t_o in [t_new, t_new_e, t_client_new]:
         genes_t_o = t_o.get_gene_by_cds(inputs)
@@ -635,7 +627,7 @@ def test_get_gff_valid_new():
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
 def test_get_summary_new():
     # TODO fix this test, need to make sure the object references are correct in the test data
-    return  True
+    return True
 
     _log.debug("Input {}".format(genome_new))
     for t_o in [t_new, t_new_e, t_client_new]:
@@ -803,7 +795,7 @@ def test_get_feature_ids_subset_old():
 
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
 def test_get_feature_ids_invalid_filters_old():
-    invalid_filters = {"invalid_key": ["kb|g.166819.mRNA.0"]}
+    invalid_filters = {"invalid_key": ["kb_g.166819.mRNA.0"]}
     _log.debug("Input {} {}".format(genome_old, invalid_filters))
     for t_o in [t_old, t_old_e, t_client_old]:
         error_caught = False
@@ -1056,7 +1048,6 @@ def test_get_mrna_exons_one_old():
 
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
 def test_get_cds_by_mrna_old():
-    #inputs = ["kb|g.166819.mRNA.0", "kb|g.166819.mRNA.238"]
     for t_o in [t_old, t_old_e, t_client_old]:
         inputs = fetch_old_mrna_ids(t_o)
         _log.debug("Input {} {}".format(genome_old, inputs))
@@ -1072,7 +1063,6 @@ def test_get_cds_by_mrna_old():
 
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
 def test_get_mrna_by_cds_old():
-    #inputs = ["kb|g.166819.CDS.0", "kb|g.166819.CDS.278"]
     for t_o in [t_old, t_old_e, t_client_old]:
         inputs = fetch_old_cds_ids(t_o)
         _log.debug("Input {} {}".format(genome_old, inputs))
@@ -1088,7 +1078,6 @@ def test_get_mrna_by_cds_old():
 
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
 def test_get_gene_by_mrna_old():
-    #inputs = ["kb|g.166819.mRNA.99999999999", "kb|g.166819.CDS.1"]
     for t_o in [t_old, t_old_e, t_client_old]:
         inputs = fetch_old_mrna_ids(t_o)
         _log.debug("Input {} {}".format(genome_old, inputs))
@@ -1104,7 +1093,6 @@ def test_get_gene_by_mrna_old():
 
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
 def test_get_cds_by_gene_old():
-    #inputs = ["kb|g.166819.locus.256", "kb|g.166819.locus.112"]
     for t_o in [t_old, t_old_e, t_client_old]:
         inputs = fetch_old_gene_ids(t_o)
         _log.debug("Input {} {}".format(genome_old, inputs))
@@ -1120,7 +1108,6 @@ def test_get_cds_by_gene_old():
 
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
 def test_get_mrna_by_gene_old():
-    #inputs = ["kb|g.166819.mRNA.1", "kb|g.166819.locus.999999"]
     for t_o in [t_old, t_old_e, t_client_old]:
         inputs = fetch_old_gene_ids(t_o)
         _log.debug("Input {} {}".format(genome_old, inputs))
@@ -1136,7 +1123,6 @@ def test_get_mrna_by_gene_old():
 
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
 def test_get_gene_by_cds_old():
-    #inputs = ["kb|g.166819.mRNA.1", "kb|g.166819.CDS.999999"]
     for t_o in [t_old, t_old_e, t_client_old]:
         inputs = fetch_old_cds_ids(t_o)
         _log.debug("Input {} {}".format(genome_old, inputs))

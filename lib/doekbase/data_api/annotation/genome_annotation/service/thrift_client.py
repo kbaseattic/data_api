@@ -103,7 +103,7 @@ class Iface(object):
     """
     pass
 
-  def get_features(self, token, ref, feature_id_list):
+  def get_features(self, token, ref, feature_id_list, exclude_sequence):
     """
     Retrieve Feature data.
 
@@ -115,6 +115,7 @@ class Iface(object):
      - token
      - ref
      - feature_id_list
+     - exclude_sequence
     """
     pass
 
@@ -682,7 +683,7 @@ class Client(Iface):
       raise result.type_exception
     raise TApplicationException(TApplicationException.MISSING_RESULT, "get_feature_ids failed: unknown result");
 
-  def get_features(self, token, ref, feature_id_list):
+  def get_features(self, token, ref, feature_id_list, exclude_sequence):
     """
     Retrieve Feature data.
 
@@ -694,16 +695,18 @@ class Client(Iface):
      - token
      - ref
      - feature_id_list
+     - exclude_sequence
     """
-    self.send_get_features(token, ref, feature_id_list)
+    self.send_get_features(token, ref, feature_id_list, exclude_sequence)
     return self.recv_get_features()
 
-  def send_get_features(self, token, ref, feature_id_list):
+  def send_get_features(self, token, ref, feature_id_list, exclude_sequence):
     self._oprot.writeMessageBegin('get_features', TMessageType.CALL, self._seqid)
     args = get_features_args()
     args.token = token
     args.ref = ref
     args.feature_id_list = feature_id_list
+    args.exclude_sequence = exclude_sequence
     args.write(self._oprot)
     self._oprot.writeMessageEnd()
     self._oprot.trans.flush()
@@ -1780,7 +1783,7 @@ class Processor(Iface, TProcessor):
     iprot.readMessageEnd()
     result = get_features_result()
     try:
-      result.success = self._handler.get_features(args.token, args.ref, args.feature_id_list)
+      result.success = self._handler.get_features(args.token, args.ref, args.feature_id_list, args.exclude_sequence)
     except ServiceException, generic_exception:
       result.generic_exception = generic_exception
     except AuthorizationException, authorization_exception:
@@ -3669,6 +3672,7 @@ class get_features_args(object):
    - token
    - ref
    - feature_id_list
+   - exclude_sequence
   """
 
   thrift_spec = (
@@ -3676,12 +3680,14 @@ class get_features_args(object):
     (1, TType.STRING, 'token', None, None, ), # 1
     (2, TType.STRING, 'ref', None, None, ), # 2
     (3, TType.LIST, 'feature_id_list', (TType.STRING,None), None, ), # 3
+    (4, TType.BOOL, 'exclude_sequence', None, None, ), # 4
   )
 
-  def __init__(self, token=None, ref=None, feature_id_list=None,):
+  def __init__(self, token=None, ref=None, feature_id_list=None, exclude_sequence=None,):
     self.token = token
     self.ref = ref
     self.feature_id_list = feature_id_list
+    self.exclude_sequence = exclude_sequence
 
   def read(self, iprot):
     if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
@@ -3712,6 +3718,11 @@ class get_features_args(object):
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
+      elif fid == 4:
+        if ftype == TType.BOOL:
+          self.exclude_sequence = iprot.readBool();
+        else:
+          iprot.skip(ftype)
       else:
         iprot.skip(ftype)
       iprot.readFieldEnd()
@@ -3737,6 +3748,10 @@ class get_features_args(object):
         oprot.writeString(iter266)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
+    if self.exclude_sequence is not None:
+      oprot.writeFieldBegin('exclude_sequence', TType.BOOL, 4)
+      oprot.writeBool(self.exclude_sequence)
+      oprot.writeFieldEnd()
     oprot.writeFieldStop()
     oprot.writeStructEnd()
 
@@ -3753,6 +3768,7 @@ class get_features_args(object):
     value = (value * 31) ^ hash(self.token)
     value = (value * 31) ^ hash(self.ref)
     value = (value * 31) ^ hash(self.feature_id_list)
+    value = (value * 31) ^ hash(self.exclude_sequence)
     return value
 
   def __repr__(self):
