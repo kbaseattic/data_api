@@ -1683,6 +1683,7 @@ genome_annotation.thrift_service_get_features_args = function(args) {
   this.token = null;
   this.ref = null;
   this.feature_id_list = null;
+  this.exclude_sequence = null;
   if (args) {
     if (args.token !== undefined) {
       this.token = args.token;
@@ -1696,6 +1697,9 @@ genome_annotation.thrift_service_get_features_args = function(args) {
     }
     if (args.feature_id_list !== undefined) {
       this.feature_id_list = args.feature_id_list;
+    }
+    if (args.exclude_sequence !== undefined) {
+      this.exclude_sequence = args.exclude_sequence;
     }
   }
 };
@@ -1747,6 +1751,13 @@ genome_annotation.thrift_service_get_features_args.prototype.read = function(inp
         input.skip(ftype);
       }
       break;
+      case 4:
+      if (ftype == Thrift.Type.BOOL) {
+        this.exclude_sequence = input.readBool().value;
+      } else {
+        input.skip(ftype);
+      }
+      break;
       default:
         input.skip(ftype);
     }
@@ -1780,6 +1791,11 @@ genome_annotation.thrift_service_get_features_args.prototype.write = function(ou
       }
     }
     output.writeListEnd();
+    output.writeFieldEnd();
+  }
+  if (this.exclude_sequence !== null && this.exclude_sequence !== undefined) {
+    output.writeFieldBegin('exclude_sequence', Thrift.Type.BOOL, 4);
+    output.writeBool(this.exclude_sequence);
     output.writeFieldEnd();
   }
   output.writeFieldStop();
@@ -7445,23 +7461,24 @@ genome_annotation.thrift_serviceClient.prototype.recv_get_feature_ids = function
   }
   throw 'get_feature_ids failed: unknown result';
 };
-genome_annotation.thrift_serviceClient.prototype.get_features = function(token, ref, feature_id_list, callback) {
+genome_annotation.thrift_serviceClient.prototype.get_features = function(token, ref, feature_id_list, exclude_sequence, callback) {
   if (callback === undefined) {
-    this.send_get_features(token, ref, feature_id_list);
+    this.send_get_features(token, ref, feature_id_list, exclude_sequence);
     return this.recv_get_features();
   } else {
-    var postData = this.send_get_features(token, ref, feature_id_list, true);
+    var postData = this.send_get_features(token, ref, feature_id_list, exclude_sequence, true);
     return this.output.getTransport()
       .jqRequest(this, postData, arguments, this.recv_get_features);
   }
 };
 
-genome_annotation.thrift_serviceClient.prototype.send_get_features = function(token, ref, feature_id_list, callback) {
+genome_annotation.thrift_serviceClient.prototype.send_get_features = function(token, ref, feature_id_list, exclude_sequence, callback) {
   this.output.writeMessageBegin('get_features', Thrift.MessageType.CALL, this.seqid);
   var args = new genome_annotation.thrift_service_get_features_args();
   args.token = token;
   args.ref = ref;
   args.feature_id_list = feature_id_list;
+  args.exclude_sequence = exclude_sequence;
   args.write(this.output);
   this.output.writeMessageEnd();
   return this.output.getTransport().flush(callback);

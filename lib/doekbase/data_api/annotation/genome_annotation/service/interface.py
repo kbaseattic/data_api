@@ -105,9 +105,9 @@ class GenomeAnnotationService(service_core.BaseService):
         return output
 
     @server_method
-    def get_features(self, token=None, ref=None, feature_id_list=None):
+    def get_features(self, token=None, ref=None, feature_id_list=None, exclude_features=False):
         ga_api = self._get_instance(token, ref)
-        result = ga_api.get_features(feature_id_list)
+        result = ga_api.get_features(feature_id_list, exclude_features)
 
         output = dict()
         for k,v in result.items():

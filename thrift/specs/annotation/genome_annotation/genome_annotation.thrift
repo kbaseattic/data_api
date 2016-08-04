@@ -337,7 +337,8 @@ service thrift_service {
      */
     map<string, Feature_data> get_features(1:required string token,
                                            2:required ObjectReference ref,
-                                           3:list<string> feature_id_list) throws (
+                                           3:list<string> feature_id_list,
+                                           4:bool exclude_sequence) throws (
         1:ServiceException generic_exception,
         2:AuthorizationException authorization_exception,
         3:AuthenticationException authentication_exception,

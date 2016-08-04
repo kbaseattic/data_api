@@ -190,13 +190,16 @@ class GenomeAnnotationInterface(object):
         pass  # TODO: add examples in docs for function_list and alias_list
 
     @abc.abstractmethod
-    def get_features(self, feature_id_list=None):
+    def get_features(self, feature_id_list=None, exclude_sequence=False):
         """Retrieves all the available data for a genomes' Features.
 
         Args:
 
           feature_id_list (list<str>): List of Features to retrieve.
               If None, returns all Feature data.
+
+          exclude_sequence: False
+              If True, exclude DNA sequence from output.
 
         Returns:
           dict: Mapping from Feature IDs to dicts of available data.
@@ -600,8 +603,8 @@ class GenomeAnnotationAPI(ObjectAPI, GenomeAnnotationInterface):
     def get_feature_publications(self, feature_id_list=None):
         return self.proxy.get_feature_publications(feature_id_list)
 
-    def get_features(self, feature_id_list=None):
-        return self.proxy.get_features(feature_id_list)
+    def get_features(self, feature_id_list=None, exclude_sequence=False):
+        return self.proxy.get_features(feature_id_list, exclude_sequence)
 
     def get_proteins(self, cds_feature_id_list=None):
         return self.proxy.get_proteins(cds_feature_id_list)
@@ -665,7 +668,7 @@ class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
 
     def get_feature_types(self):
         feature_types = []
-        features = self.get_data()['features']
+        features = self.get_data_subset(['features/[*]/type'])['features']
 
         for x in features:
             if "type" in x and x["type"] not in feature_types:
@@ -684,8 +687,18 @@ class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
         if group_by not in self._valid_groups:
             raise ValueError("Invalid group_by {}, valid group_by values are {}".format(group_by, self._valid_groups))
 
-        # no choice but to pull all features
-        features = self.get_data()['features']
+        limited_keys = ['id']
+
+        if group_by == "type" or "type_list" in filters:
+            limited_keys.append('type')
+        elif group_by == "region" or "region_list" in filters:
+            limited_keys.append("location")
+        elif group_by == "function" or "function_list" in filters:
+            limited_keys.append("function")
+        elif group_by == "alias" or "alias_list" in filters:
+            limited_keys.append("aliases")
+
+        features = self.get_data_subset(['features/[*]/' + k for k in limited_keys])['features']
 
         # now process all filters and reduce the data
         remove_features = set()
@@ -819,7 +832,7 @@ class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
         Returns:
           dict<str>:int"""
         counts = {}
-        features = self.get_data()["features"]
+        features = self.get_data_subset(["features/[*]/type"])["features"]
 
         if type_list is None:
             for x in features:
@@ -846,7 +859,7 @@ class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
 
     def get_feature_locations(self, feature_id_list=None):
         locations = {}
-        features = self.get_data()['features']
+        features = self.get_data_subset(['features/[*]/location', 'features/[*]/id'])['features']
 
         if feature_id_list is None:
             for x in features:
@@ -885,12 +898,12 @@ class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
 
     def get_feature_dna(self, feature_id_list=None):
         sequences = {}
-        features = self.get_data()['features']
+        features = self.get_data_subset(['features/[*]/dna_sequence', 'features/[*]/id'])['features']
 
         if feature_id_list is None:
             for x in features:
-                if "sequence" in x:
-                    sequences[x['id']] = x["sequence"]
+                if "dna_sequence" in x:
+                    sequences[x['id']] = x["dna_sequence"]
                 else:
                     sequences[x['id']] = ""
         else:
@@ -904,8 +917,8 @@ class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
 
             for x in features:
                 if x['id'] in feature_id_list:
-                    if "sequence" in x:
-                        sequences[x['id']] = x["sequence"]
+                    if "dna_sequence" in x:
+                        sequences[x['id']] = x["dna_sequence"]
                     else:
                         sequences[x['id']] = ""
 
@@ -913,7 +926,7 @@ class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
 
     def get_feature_functions(self, feature_id_list=None):
         functions = {}
-        features = self.get_data()['features']
+        features = self.get_data_subset(['features/[*]/function', 'features/[*]/id'])['features']
 
         if feature_id_list is None:
             for x in features:
@@ -941,7 +954,7 @@ class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
 
     def get_feature_aliases(self, feature_id_list=None):
         aliases = {}
-        features = self.get_data()['features']
+        features = self.get_data_subset(['features/[*]/aliases', 'features/[*]/id'])['features']
 
         if feature_id_list is None:
             for x in features:
@@ -969,7 +982,7 @@ class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
     
     def get_feature_publications(self, feature_id_list=None):
         publications = {}
-        features = self.get_data()['features']
+        features = self.get_data_subset(['features/[*]/publications', 'features/[*]/id'])['features']
 
         if feature_id_list is None:
             for x in features:
@@ -995,15 +1008,25 @@ class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
 
         return publications
 
-    def get_features(self, feature_id_list=None):
+    def get_features(self, feature_id_list=None, exclude_sequence=False):
         out_features = {}
-        features = self.get_data()['features']
+
+        if exclude_sequence:
+            limited_keys = ["function", "location", "md5", "type", "id", "aliases"]
+            features = self.get_data_subset(["features/[*]/" + k for k in limited_keys])["features"]
+        else:
+            features = self.get_data()['features']
 
         def fill_out_feature(x):
-            f = {}
-            f["feature_id"] = x['id']
-            f["feature_type"] = x['type']
-            f["feature_function"] = x.get('function', '')
+            f = {
+                "feature_id": x['id'],
+                "feature_type": x['type'],
+                "feature_function": x.get('function', ''),
+                "feature_publications": [],
+                "feature_notes": "",
+                "feature_inference": "",
+                "feature_quality_warnings": []
+            }
 
             if "location" in x:
                 f["feature_locations"] = [{"contig_id": loc[0],
@@ -1029,26 +1052,15 @@ class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
             else:
                 f["feature_dna_sequence_length"] = -1
 
-            #if 'publications' in x:
-            #    f["feature_publications"] = x['publications']
-            #else:
-            #    f["feature_publications"] = []
-            f["feature_publications"] = []
-
             if 'aliases' in x:
                 f["feature_aliases"] = {k: [] for k in x['aliases']}
             else:
                 f["feature_aliases"] = {}
 
-            f["feature_notes"] = ""
-            f["feature_inference"] = ""
-
             if "feature_quality_score" in x:
                 f["feature_quality_score"] = str(x['quality'])
             else:
                 f["feature_quality_score"] = ""
-
-            f["feature_quality_warnings"] = []
 
             return f
 
@@ -1072,7 +1084,7 @@ class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
 
     def get_proteins(self, cds_feature_id_list=None):
         proteins = {}
-        features = self.get_data()['features']
+        features = self.get_data_subset(['features/[*]/protein_translation', 'features/[*]/id'])['features']
         
         for f in features:
             if "protein_translation" in f and len(f["protein_translation"]) > 0:
@@ -1094,20 +1106,18 @@ class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
                         "  This method cannot return valid results for this data type.")
 
     def get_mrna_exons(self, mrna_feature_id_list=None):
-        data = self.get_data()
-
         exons = {}
 
-        if mrna_feature_id_list is None:
-            mrna_feature_id_list = []
+        limited_keys = ['location', 'id', 'type', 'dna_sequence']
 
-        mrna_list_length = len(mrna_feature_id_list)
+        all_mrna_features = self.get_data_subset(['features/[*]/{}'.format(k) for k in limited_keys])['features']
+        data = [x for x in all_mrna_features if x['type'] == 'mRNA']
 
-        for feature_data in data["features"]:
+        if mrna_feature_id_list:
+            data = [x for x in data if x['id'] in mrna_feature_id_list]
+
+        for feature_data in data:
             if feature_data["type"] != "mRNA":
-                continue
-
-            if mrna_list_length > 0 and feature_data["id"] not in mrna_feature_id_list:
                 continue
 
             if "dna_sequence" not in feature_data or "location" not in feature_data:
@@ -1124,7 +1134,7 @@ class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
                                       "strand": exon_location[2],
                                       "length": exon_location[3]},
                     "exon_dna_sequence": feature_data["dna_sequence"][offset:offset + exon_location[3]],
-                    "exon_ordinal": i
+                    "exon_ordinal": i + 1
                 })
 
                 offset += exon_location[3]
@@ -1287,7 +1297,8 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
 
     def _get_feature_containers(self, feature_id_list=None):
         if feature_id_list is None:
-            feature_containers = self.get_data_subset(["feature_container_references"])["feature_container_references"].values()
+            feature_containers = self.get_data_subset(["feature_container_references"])\
+                ["feature_container_references"].values()
         else:
             try:
                 assert len(feature_id_list) > 0
@@ -1342,14 +1353,22 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
         if group_by not in self._valid_groups:
             raise ValueError("Invalid group_by {}, valid group_by values are {}".format(group_by, self._valid_groups))
 
-        data = self.get_data()
+        feature_container_references = self.get_data_subset(["feature_container_references"])\
+            ["feature_container_references"]
 
-        # XXX: debugging
-        #return {'by_' + group_by: []}
-        # XXX
-
-        feature_container_references = data["feature_container_references"]
         features = {}
+        limited_keys = ['feature_id']
+
+        if group_by == "type" or "type_list" in filters:
+            limited_keys.append("type")
+        elif group_by == "region" or "region_list" in filters:
+            limited_keys.append("locations")
+        elif group_by == "alias" or "alias_list" in filters:
+            limited_keys.append("aliases")
+        elif group_by == "function" or "function_list" in filters:
+            limited_keys.append("function")
+
+        paths = ['features/*/' + k for k in limited_keys]
 
         # process all filters
         if "type_list" in filters and filters["type_list"] is not None:
@@ -1359,15 +1378,17 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
                 raise TypeError("A list of strings indicating Feature types is required, received an empty list.")
 
             # only pull data for features that are in the type_list
-            for f in feature_container_references:
-                if f in filters["type_list"]:
-                    container_data = ObjectAPI(self.services, self._token, feature_container_references[f]).get_data()["features"]
-                    features.update(container_data)
+            containers = self.ws_client.get_object_subset(
+                [{'ref': feature_container_references[x], 'included': paths}
+                 for x in feature_container_references if x in filters["type_list"]])
         else:
             # pull down all features
-            for f in feature_container_references:
-                container_data = ObjectAPI(self.services, self._token, feature_container_references[f]).get_data()["features"]
-                features.update(container_data)
+            containers = self.ws_client.get_object_subset(
+                [{'ref': feature_container_references[x], 'included': paths}
+                 for x in feature_container_references])
+
+        for obj in containers:
+            features.update(obj["data"]["features"])
 
         if "region_list" in filters and filters["region_list"] is not None:
             if not isinstance(filters["region_list"], list):
@@ -1498,35 +1519,45 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
         out = {}
         feature_containers = self._get_feature_containers(feature_id_list)
 
-        if feature_id_list is not None:
-            try:
-                feature_refs = ["features/" + x for x in feature_id_list]
-                assert len(feature_refs) > 0
-            except TypeError:
-                raise TypeError("A list of strings indicating Feature " +
-                                "identifiers is required.")
-            except AssertionError:
-                raise TypeError("A list of strings indicating Feature " +
-                                "identifiers is required, " +
-                                "received an empty list.")
+        if not data:
+            raise Exception("Missing data element to _get_feature_data()!")
 
-        for ref in feature_containers:
-            # Get list of Feature IDs
-            if feature_id_list is None:
-                features = ObjectAPI(self.services, self._token, ref).get_data()["features"]
-                working_list = features
-            else:
-                container = ObjectAPI(self.services, self._token, ref)
-                features = container.get_data_subset(path_list=feature_refs)["features"]
-                working_list = feature_id_list
+        if feature_id_list:
+            subsets = []
+            for x in feature_containers:
+                subset = {}
+                subset['ref'] = x
+
+                try:
+                    subset['included'] = ["features/{}/{}".format(k, data) for k in feature_containers[x]]
+                    assert len(subset['included']) > 0
+                except TypeError:
+                    raise TypeError("A list of strings indicating Feature " +
+                                    "identifiers is required.")
+                except AssertionError:
+                    raise TypeError("A list of strings indicating Feature " +
+                                    "identifiers is required, " +
+                                    "received an empty list.")
+
+                subsets.append(subset)
+
+            containers = self.ws_client.get_object_subset(subsets)
+        else:
+            containers = self.ws_client.get_object_subset(
+                [{'ref': x, 'included': ["features/*/{}".format(data)]} for x in feature_containers])
+
+        for obj in containers:
+            features = obj["data"]["features"]
+            working_list = obj["data"]["features"]
+
             # Pull out a specific type of data from each Feature
-            if data == "aliases":
+            if "aliases" in data:
                 for feature_id in working_list:
                     if "aliases" in features[feature_id]:
                         out[feature_id] = features[feature_id]["aliases"]
                     else:
                         out[feature_id] = []
-            elif data == "locations":
+            elif "locations" in data:
                 for feature_id in working_list:
                     out[feature_id] = [
                         {"contig_id": loc[0],
@@ -1534,16 +1565,16 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
                          "start": loc[1],
                          "length": loc[3]} \
                         for loc in features[feature_id]["locations"]]
-            elif data == "dna":
+            elif "dna_sequence" in data:
                 for feature_id in working_list:
                     out[feature_id] = features[feature_id]["dna_sequence"]
-            elif data == "publications":
+            elif "publications" in data:
                 for feature_id in working_list:
                     if "publications" in features[feature_id]:
                         out[feature_id] = features[feature_id]["publications"]
                     else:
                         out[feature_id] = []
-            elif data == "functions":
+            elif "function" in data:
                 for feature_id in working_list:
                     if "function" in features[feature_id]:
                         out[feature_id] = features[feature_id]["function"]
@@ -1556,10 +1587,10 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
         return self._get_feature_data("locations", feature_id_list)
 
     def get_feature_dna(self, feature_id_list=None):
-        return self._get_feature_data("dna", feature_id_list)
+        return self._get_feature_data("dna_sequence", feature_id_list)
 
     def get_feature_functions(self, feature_id_list=None):
-        return self._get_feature_data("functions", feature_id_list)
+        return self._get_feature_data("function", feature_id_list)
 
     def get_feature_aliases(self, feature_id_list=None):
         return self._get_feature_data("aliases", feature_id_list)
@@ -1567,7 +1598,7 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
     def get_feature_publications(self, feature_id_list=None):
         return self._get_feature_data("publications", feature_id_list)
 
-    def get_features(self, feature_id_list=None):
+    def get_features(self, feature_id_list=None, exclude_sequence=False):
         out_features = {}
         feature_containers = self._get_feature_containers(feature_id_list)
 
@@ -1576,8 +1607,6 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
                 "feature_id": x['feature_id'],
                 "feature_type": x['type'],
                 "feature_md5": x['md5'],
-                "feature_dna_sequence": x['dna_sequence'],
-                "feature_dna_sequence_length": x['dna_sequence_length'],
                 "feature_locations": [{"contig_id": loc[0],
                                        "start": loc[1],
                                        "strand": loc[2],
@@ -1594,6 +1623,13 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
             #else:
             # TODO fix publications in thrift spec and code, problem with existing data
             f["feature_publications"] = []
+
+            if 'dna_sequence' in x:
+                f["feature_dna_sequence"] = x['dna_sequence']
+                f["feature_dna_sequence_length"] = x["dna_sequence_length"]
+            else:
+                f["feature_dna_sequence"] = ""
+                f["feature_dna_sequence_length"] = 0
 
             if 'aliases' in x:
                 f["feature_aliases"] = x['aliases']
@@ -1622,22 +1658,43 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
 
             return f
 
-        containers = {ref: ObjectAPI(self.services, self._token, ref) for ref in feature_containers}
+        limited_keys = ["quality_warnings", "locations", "feature_id", "md5", "type", "aliases"]
 
         if feature_id_list is None:
-            out_features = {x: fill_out_feature(v) for ref in containers \
-                            for x,v in containers[ref].get_data()["features"].items()}
+            if exclude_sequence:
+                subset_paths = ["features/*/" + k for k in limited_keys]
+                containers = self.ws_client.get_object_subset(
+                    [{'ref': x, 'included': subset_paths} for x in feature_containers])
+            else:
+                containers = self.ws_client.get_objects([{'ref': x} for x in feature_containers])
         else:
-            for ref in feature_containers:
-                path_list = ["features/" + f for f in feature_containers[ref]]
-                subset_features = containers[ref].get_data_subset(path_list)["features"].items()
-                out_features.update({x: fill_out_feature(v) for x,v in subset_features})
+            if exclude_sequence:
+                subsets = []
+                for x in feature_containers:
+                    subset = {}
+                    subset['ref'] = x
+                    subset['included'] = ["features/{}/{}".format(f, k)
+                                          for f in feature_containers[x] for k in limited_keys]
+                    subsets.append(subset)
+
+                containers = self.ws_client.get_object_subset(subsets)
+            else:
+                subsets = []
+                for x in feature_containers:
+                    subset = {}
+                    subset['ref'] = x
+                    subset['included'] = ["features/{}".format(f) for f in feature_containers[x]]
+                    subsets.append(subset)
+
+                containers = self.ws_client.get_object_subset(subsets)
+
+        out_features = {x: fill_out_feature(v) for obj in containers for x,v in obj["data"]["features"].items()}
 
         return out_features
 
     def get_proteins(self, cds_feature_id_list=None):
-        feature_container_references = self.get_data_subset(
-            path_list=["feature_container_references"])["feature_container_references"]
+        container_references = self.get_data_subset(["feature_container_references", "protein_container_ref"])
+        feature_container_references = container_references["feature_container_references"]
 
         if "CDS" in feature_container_references:
             cds_feature_container_ref = feature_container_references["CDS"]
@@ -1648,28 +1705,29 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
             raise TypeError("No CDS features are present!")
 
         if cds_feature_id_list is None:
-            cds_feature_id_list = cds_feature_container.get_data()["features"].keys()
+            cds_features = cds_feature_container.get_data_subset(["features/*/CDS_properties"])["features"]
+        else:
+            try:
+                cds_refs = ["features/{}/CDS_properties".format(x) for x in cds_feature_id_list]
+                assert len(cds_refs) > 0
+            except TypeError:
+                raise TypeError("A list of strings indicating Feature " +
+                                "identifiers is required.")
+            except AssertionError:
+                raise TypeError("A list of strings indicating Feature " +
+                                "identifiers is required, " +
+                                "received an empty list.")
 
-        try:
-            cds_refs = ["features/" + x for x in cds_feature_id_list]
-            assert len(cds_refs) > 0
-        except TypeError:
-            raise TypeError("A list of strings indicating Feature " +
-                            "identifiers is required.")
-        except AssertionError:
-            raise TypeError("A list of strings indicating Feature " +
-                            "identifiers is required, " +
-                            "received an empty list.")
+            cds_features = cds_feature_container.get_data_subset(path_list=cds_refs)["features"]
 
-        # fetch the CDS feature data
-        cds_features = cds_feature_container.get_data_subset(path_list=cds_refs)["features"]
         # map the protein id to the CDS id, if the CDS maps to a protein
         protein_cds_map = {cds_features[x]["CDS_properties"]["codes_for_protein_ref"][1]: x for x in cds_features
                            if "codes_for_protein_ref" in cds_features[x]["CDS_properties"]}
-        cds_features = None
 
         # grab the protein container and fetch the protein data
-        protein_container = ObjectAPI(self.services, self._token, self.get_data()["protein_container_ref"])
+        protein_container = ObjectAPI(self.services,
+                                      self._token,
+                                      container_references["protein_container_ref"])
         result = protein_container.get_data()["proteins"]
         # filter out any proteins that do not map to a CDS in our list
         proteins = {x: result[x] for x in result if x in protein_cds_map}
@@ -1689,22 +1747,28 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
         feature_container_references = self.get_data_subset(
             path_list=["feature_container_references"])["feature_container_references"]
 
-        if "mRNA" in feature_container_references:
-            try:
-                mrna_refs = ["features/" + x for x in mrna_feature_id_list]
-                assert len(mrna_refs) > 0
-            except TypeError:
-                raise TypeError("A list of strings indicating Feature " +
-                                "identifiers is required.")
-            except AssertionError:
-                raise TypeError("A list of strings indicating Feature " +
-                                "identifiers is required, " +
-                                "received an empty list.")
+        limited_keys = ['feature_id', 'mRNA_properties']
 
+        if "mRNA" in feature_container_references:
             mrna_feature_container_ref = feature_container_references["mRNA"]
             mrna_feature_container = ObjectAPI(self.services,
                                                self._token,
                                                mrna_feature_container_ref)
+
+            if mrna_feature_id_list:
+                try:
+                    mrna_refs = ["features/{}/{}".format(x, k) for x in mrna_feature_id_list for k in limited_keys]
+                    assert len(mrna_refs) > 0
+                except TypeError:
+                    raise TypeError("A list of strings indicating Feature " +
+                                    "identifiers is required.")
+                except AssertionError:
+                    raise TypeError("A list of strings indicating Feature " +
+                                    "identifiers is required, " +
+                                    "received an empty list.")
+            else:
+                mrna_refs = ["features/*/{}".format(k) for k in limited_keys]
+
             mrna_features = mrna_feature_container.get_data_subset(path_list=mrna_refs)["features"]
 
             for mrna_feature_key in mrna_features:
@@ -1722,22 +1786,20 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
         return out
 
     def get_mrna_utrs(self, mrna_feature_id_list=None):
-        if mrna_feature_id_list is None:
-            feature_container_references = self.get_data_subset(
-                path_list=["feature_container_references"])["feature_container_references"]
-
-            mrna_feature_container_ref = feature_container_references["mRNA"]
-            mrna_feature_container = ObjectAPI(self.services,
-                                               self._token,
-                                               mrna_feature_container_ref)
-            mrna_feature_id_list = mrna_feature_container.get_data()["features"].keys()
-
         # fetch the cds info we need
-        cds_ids_by_mrna = self.get_cds_by_mrna(mrna_feature_id_list)
+        cds_ids_by_mrna = self._get_by_mrna("cds", mrna_feature_id_list)
+
+        if len(cds_ids_by_mrna) == 0:
+            return {}
+
         # filter out any mRNA ids that do not map to a CDS, since passing None (no CDS) will throw an Exception below
         cds_ids = [cds_ids_by_mrna[mrna_id] for mrna_id in cds_ids_by_mrna if cds_ids_by_mrna[mrna_id] is not None]
         cds_locations = self._get_feature_data("locations", cds_ids)
+
         # fetch the mrna Feature data
+        if mrna_feature_id_list is None:
+            mrna_feature_id_list = self.get_feature_ids(filters={"type_list": ["mRNA"]})["by_type"]["mRNA"]
+
         mrna_data = self.get_features(mrna_feature_id_list)
 
         utrs = {}
@@ -1882,11 +1944,14 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
                                            self._token,
                                            mrna_feature_container_ref)
 
+        limited_keys = ['locations', 'dna_sequence']
+
         if mrna_feature_id_list is None:
-            mrna_data = mrna_feature_container.get_data()
+            mrna_data = mrna_feature_container.get_data_subset(
+                path_list=["features/*/{}".format(k) for k in limited_keys])
         else:
             mrna_data = mrna_feature_container.get_data_subset(
-                path_list=["features/" + x for x in mrna_feature_id_list])
+                path_list=["features/{}/{}".format(x, k) for x in mrna_feature_id_list for k in limited_keys])
 
         exons = {}
         for mrna_id in mrna_data["features"]:
@@ -1902,8 +1967,8 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
                                                         "start": exon_location[1],
                                                         "strand": exon_location[2],
                                                         "length": exon_location[3]},
-                                       "exon_dna_sequence": exon_sequence,
-                                       "exon_ordinal": i})
+                                      "exon_dna_sequence": exon_sequence,
+                                      "exon_ordinal": i + 1})
 
                 offset += exon_location[3]
 
@@ -1924,9 +1989,11 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
         feature_container_references = self.get_data_subset(
             path_list=["feature_container_references"])["feature_container_references"]
 
+        limited_keys = ['feature_id', 'CDS_properties']
+
         if "CDS" in feature_container_references:
             try:
-                cds_refs = ["features/" + x for x in cds_feature_id_list]
+                cds_refs = ["features/{}/{}".format(x, k) for x in cds_feature_id_list for k in limited_keys]
                 assert len(cds_refs) > 0
             except TypeError:
                 raise TypeError("A list of strings indicating Feature " +
@@ -1968,9 +2035,11 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
         feature_container_references = self.get_data_subset(
             path_list=["feature_container_references"])["feature_container_references"]
 
+        limited_keys = ['feature_id', 'gene_properties']
+
         if "gene" in feature_container_references:
             try:
-                gene_refs = ["features/" + x for x in gene_feature_id_list]
+                gene_refs = ["features/{}/{}".format(x, k) for x in gene_feature_id_list for k in limited_keys]
                 assert len(gene_refs) > 0
             except TypeError:
                 raise TypeError("A list of strings indicating Feature " +
@@ -2400,8 +2469,8 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
         summary_object["contig_ids"] = assembly_object.get_contig_ids()
 
         # Annotation summary information
-        annotation_info = self.get_data_subset(path_list=[
-            "external_source","external_source_origination_date","release","original_source_file_name"])
+        annotation_info = self.get_data_subset(
+            path_list=["external_source", "external_source_origination_date", "release", "original_source_file_name"])
         if annotation_info.has_key("external_source"):
             summary_object["external_source"] = annotation_info["external_source"]
         else:
@@ -2601,8 +2670,8 @@ class GenomeAnnotationClientAPI(GenomeAnnotationInterface):
 
     @logged(_ga_log)
     @client_method
-    def get_features(self, feature_id_list=None):
-        result = self.client.get_features(self._token, self.ref, feature_id_list)
+    def get_features(self, feature_id_list=None, exclude_sequence=False):
+        result = self.client.get_features(self._token, self.ref, feature_id_list, exclude_sequence)
 
         output = {x: {
             "feature_id": result[x].feature_id,

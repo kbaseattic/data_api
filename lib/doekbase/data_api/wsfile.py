@@ -12,17 +12,16 @@ try:
 except:
     import StringIO
 
-import cPickle
+import copy
 import json
 import logging
 import msgpack
 import os
 import re
 import sys
-import zlib
 from datetime import datetime
 # Third-party
-import mongomock as mm
+import dpath.util
 # Local
 from doekbase.data_api.util import get_logger, log_start, log_end
 from doekbase.workspace.client import ServerError
@@ -234,46 +233,134 @@ class WorkspaceFile(object):
     def get_object_provenance(self, prm):
         return []
 
+    #@profile
     def get_object_subset(self, prm):
         """Note: this is not efficient. It actually looks at
         the whole object.
         """
+
+        def extract_subset_glob(d, parts):
+            if isinstance(d, dict):
+                _e = {n: extract_subset(d[n], parts) for n in d}
+            elif isinstance(d, list):
+                _e = [extract_subset(d[n], parts) for n in xrange(len(d))]
+            else:
+                raise Exception("Unknown behavior for type {}".format(type(d)))
+
+            return _e
+
+        def extract_subset(d, parts, partial=False):
+            if partial:
+                extent = len(parts)
+            else:
+                extent = len(parts) - 1
+
+            subset = {}
+            _e = subset
+            _d = d
+            for i in xrange(extent):
+                if isinstance(_e, dict) and parts[i] in _e:
+                    _e = _e[parts[i]]
+                    _d = _d[parts[i]]
+                elif isinstance(_e, list) and int(parts[i]) < len(_e):
+                    _e = _e[int(parts[i])]
+                    _d = _d[int(parts[i])]
+                elif isinstance(_d, dict):
+                    if parts[i] not in _d:
+                        continue
+
+                    if isinstance(_d[parts[i]], dict):
+                        _e[parts[i]] = {}
+                    elif isinstance(_d[parts[i]], list):
+                        _e[parts[i]] = []
+                    else:
+                        _e[parts[i]] = _d[parts[i]]
+
+                    _e = _e[parts[i]]
+                    _d = _d[parts[i]]
+                elif isinstance(_d, list):
+                    if parts[i] not in _d:
+                        continue
+
+                    if isinstance(_d[parts[i]], dict):
+                        _e.append({})
+                    elif isinstance(d[parts[i]], list):
+                        _e.append([])
+                    else:
+                        _e.append(d[parts[i]])
+
+                    _e = _e[-1]
+                    _d = _d[parts[i]]
+
+            if not partial:
+                # full copy of last element
+                try:
+                    _e[parts[-1]] = _d[parts[-1]]
+                except KeyError:
+                    pass
+
+            return subset
+
         # loop over each specified subset, and add all results
         # to a single list in `result`
         result = []
         for subset in prm:
             ref, paths = subset['ref'], subset['included']
             # get matching records and data in the paths
-            records = self._find_ref(ref)
+            record = self._find_ref(ref)[0]
             # add to result
-            for r in records:
-                extracted = {} # all extracted paths
-                for p in paths:
-                    d = r['data'] # alias
-                    parts = p.split('/')
-
-                    # Look for value matching path in 'd'
-                    e = extracted
-                    for i in xrange(len(parts) - 1):
-                        if parts[i] in d:
-                            d = d[parts[i]]
-
-                            if parts[i] not in e and isinstance(d, dict):
-                                e[parts[i]] = {}
-
-                            if isinstance(e[parts[i]], dict):
-                                e = e[parts[i]]
-                        else:
-                            break
+            extracted = {}
+            for p in paths:
+                parts = p.split('/')
+                # special case where you need glob selections
+                if '*' in p:
+                    # split the path before and after the glob
+                    if '*' in parts:
+                        pivot = parts.index('*')
+                    elif '[*]' in parts:
+                        pivot = parts.index('[*]')
                     else:
-                        if parts[-1] in d:
-                            e[parts[-1]] = d[parts[-1]]
+                        raise Exception("Unrecognized syntax {}".format(p))
 
-                    _log.debug(extracted)
-                if len(extracted) > 0:
-                    #print("@@ add extracted: {}".format(extracted))
-                    obj = self._make_object(r, data=extracted)
-                    result.append(obj)
+                    pre = parts[:pivot]
+                    post = parts[pivot + 1:]
+                    # extract the non-glob portion first
+                    dpath.util.merge(extracted, extract_subset(record['data'], pre, True))
+                    # position the pointer to each object
+                    e = extracted
+                    d = record['data']
+                    for i in xrange(len(pre) - 1):
+                        d = d[pre[i]]
+                        e = e[pre[i]]
+
+                    glob_data = extract_subset_glob(d[pre[-1]], post)
+
+                    if isinstance(glob_data, list):
+                        if len(e[pre[-1]]) == len(glob_data):
+                            if isinstance(glob_data[0], dict):
+                                for i in xrange(len(glob_data)):
+                                    e[pre[-1]][i].update(glob_data[i])
+                            elif isinstance(glob_data[0], list):
+                                for i in xrange(len(glob_data)):
+                                    e[pre[-1]][i] += glob_data[i]
+                            else:
+                                raise Exception("Unexpected condition at {}, "
+                                        + "expected dict or list, found {}".format(pre[-1], type(glob_data)))
+                        elif len(e[pre[-1]]) == 0:
+                            e[pre[-1]] = glob_data
+                    else:
+                        dpath.util.merge(e[pre[-1]], glob_data)
+                elif '/' in p:
+                    dpath.util.merge(extracted, extract_subset(record['data'], parts))
+                else:
+                    if p in record['data']:
+                        extracted[p] = record['data'][p]
+
+            if len(extracted) > 0:
+                #print("@@ add extracted: {}".format(extracted))
+                obj = self._make_object(record, data=extracted)
+                result.append(obj)
+
         return result
 
     def get_objects(self, prm):
@@ -306,7 +393,6 @@ class WorkspaceFile(object):
                         record = self._get_record(r)
                         info_tuple = self._make_info_tuple(record)
                         ref_result.append(info_tuple)
-                        record = None
                     except KeyError:
                         raise IOError("Missing object data for {}".format(r))
 
@@ -425,10 +511,13 @@ class WorkspaceFile(object):
           list of records (may be an empty list)
         """
         #print("@@ looking for REF={} in KEYS={}".format(ref, self._loaded.keys()))
-        result = []
         if ref in self._mapping:
-            result.append(self._get_record(ref))
-        return result
+            return [self._get_record(ref)]
+        elif ref in self._file_map:
+            self.load(self._file_map[ref])
+            return [self._get_record(ref)]
+        else:
+            raise IOError("File for {} does not exist".format(ref))
 
     def _load_all_files(self):
         for ref in self._file_map:
