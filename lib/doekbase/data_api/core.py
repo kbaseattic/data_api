@@ -22,7 +22,7 @@ from doekbase.data_api.util import PerfCollector, collect_performance
 
 # Version
 
-DATA_API_VERSION = "0.1.0"
+DATA_API_VERSION = "0.3.0"
 
 def version():
     return DATA_API_VERSION
@@ -425,8 +425,12 @@ class ObjectAPI(object):
                                            path_list=path_list)
 
     def _get_data_subset_ws(self, path_list=None):
-        return self.ws_client.get_object_subset([{"ref": self.ref, 
-                        "included": path_list}])[0]["data"]
+        result = self.ws_client.get_object_subset([{"ref": self.ref,
+                        "included": path_list}])
+        if len(result) > 0:
+            return result[0]["data"]
+        else:
+            return {}
 
     @collect_performance(g_stats)
     def get_referrers(self, most_recent=True):
@@ -504,4 +508,3 @@ class ObjectAPI(object):
         """
         #print("@@ obj. eq called")
         return self._id == other._id
-

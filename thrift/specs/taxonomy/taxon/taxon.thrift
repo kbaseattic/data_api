@@ -4,7 +4,7 @@ namespace perl DOEKBase.DataAPI.taxonomy.taxon
 
 #%include api_shared.thriftinc
 /* Include all shared files for API */
-const string VERSION = "0.1.0"
+const string VERSION = "0.3.0"
 
 
 

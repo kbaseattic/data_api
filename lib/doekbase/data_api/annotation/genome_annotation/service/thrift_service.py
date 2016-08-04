@@ -106,7 +106,7 @@ class Iface(Interface):
     """
     pass
 
-  def get_features(token, ref, feature_id_list):
+  def get_features(token, ref, feature_id_list, exclude_sequence):
     """
     Retrieve Feature data.
 
@@ -118,6 +118,7 @@ class Iface(Interface):
      - token
      - ref
      - feature_id_list
+     - exclude_sequence
     """
     pass
 
@@ -783,7 +784,7 @@ class Client:
       return d.errback(result.type_exception)
     return d.errback(TApplicationException(TApplicationException.MISSING_RESULT, "get_feature_ids failed: unknown result"))
 
-  def get_features(self, token, ref, feature_id_list):
+  def get_features(self, token, ref, feature_id_list, exclude_sequence):
     """
     Retrieve Feature data.
 
@@ -795,11 +796,12 @@ class Client:
      - token
      - ref
      - feature_id_list
+     - exclude_sequence
     """
     seqid = self._seqid = self._seqid + 1
     self._reqs[seqid] = defer.Deferred()
 
-    d = defer.maybeDeferred(self.send_get_features, token, ref, feature_id_list)
+    d = defer.maybeDeferred(self.send_get_features, token, ref, feature_id_list, exclude_sequence)
     d.addCallbacks(
       callback=self.cb_send_get_features,
       callbackArgs=(seqid,),
@@ -815,13 +817,14 @@ class Client:
     d.errback(f)
     return d
 
-  def send_get_features(self, token, ref, feature_id_list):
+  def send_get_features(self, token, ref, feature_id_list, exclude_sequence):
     oprot = self._oprot_factory.getProtocol(self._transport)
     oprot.writeMessageBegin('get_features', TMessageType.CALL, self._seqid)
     args = get_features_args()
     args.token = token
     args.ref = ref
     args.feature_id_list = feature_id_list
+    args.exclude_sequence = exclude_sequence
     args.write(oprot)
     oprot.writeMessageEnd()
     oprot.trans.flush()
@@ -2231,7 +2234,7 @@ class Processor(TProcessor):
     args.read(iprot)
     iprot.readMessageEnd()
     result = get_features_result()
-    d = defer.maybeDeferred(self._handler.get_features, args.token, args.ref, args.feature_id_list)
+    d = defer.maybeDeferred(self._handler.get_features, args.token, args.ref, args.feature_id_list, args.exclude_sequence)
     d.addCallback(self.write_results_success_get_features, result, seqid, oprot)
     d.addErrback(self.write_results_exception_get_features, result, seqid, oprot)
     return d
@@ -4342,6 +4345,7 @@ class get_features_args:
    - token
    - ref
    - feature_id_list
+   - exclude_sequence
   """
 
   thrift_spec = (
@@ -4349,12 +4353,14 @@ class get_features_args:
     (1, TType.STRING, 'token', None, None, ), # 1
     (2, TType.STRING, 'ref', None, None, ), # 2
     (3, TType.LIST, 'feature_id_list', (TType.STRING,None), None, ), # 3
+    (4, TType.BOOL, 'exclude_sequence', None, None, ), # 4
   )
 
-  def __init__(self, token=None, ref=None, feature_id_list=None,):
+  def __init__(self, token=None, ref=None, feature_id_list=None, exclude_sequence=None,):
     self.token = token
     self.ref = ref
     self.feature_id_list = feature_id_list
+    self.exclude_sequence = exclude_sequence
 
   def read(self, iprot):
     if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
@@ -4385,6 +4391,11 @@ class get_features_args:
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
+      elif fid == 4:
+        if ftype == TType.BOOL:
+          self.exclude_sequence = iprot.readBool();
+        else:
+          iprot.skip(ftype)
       else:
         iprot.skip(ftype)
       iprot.readFieldEnd()
@@ -4410,6 +4421,10 @@ class get_features_args:
         oprot.writeString(iter266)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
+    if self.exclude_sequence is not None:
+      oprot.writeFieldBegin('exclude_sequence', TType.BOOL, 4)
+      oprot.writeBool(self.exclude_sequence)
+      oprot.writeFieldEnd()
     oprot.writeFieldStop()
     oprot.writeStructEnd()
 
@@ -4426,6 +4441,7 @@ class get_features_args:
     value = (value * 31) ^ hash(self.token)
     value = (value * 31) ^ hash(self.ref)
     value = (value * 31) ^ hash(self.feature_id_list)
+    value = (value * 31) ^ hash(self.exclude_sequence)
     return value
 
   def __repr__(self):
