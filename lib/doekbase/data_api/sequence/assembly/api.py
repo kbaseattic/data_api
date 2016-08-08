@@ -31,7 +31,7 @@ _CONTIGSET_TYPES = ['KBaseGenomes.ContigSet']
 _ASSEMBLY_TYPES = ['KBaseGenomeAnnotations.Assembly']
 TYPES = _CONTIGSET_TYPES + _ASSEMBLY_TYPES
 
-g_stats = PerfCollector('AssemblyAPI')
+#g_stats = PerfCollector('AssemblyAPI')
 
 # ============================================================================
 
@@ -362,7 +362,7 @@ class _KBaseGenomes_ContigSet(ObjectAPI, AssemblyInterface):
         contigs = self.get_data()["contigs"]
         return [c["id"] for c in contigs]
 
-    @collect_performance(g_stats, prefix='old.')
+#    @collect_performance(g_stats, prefix='old.')
     def get_contigs(self, contig_id_list=None):
         contigs = {}
 
@@ -491,7 +491,7 @@ class _Assembly(ObjectAPI, AssemblyInterface):
         contigs = self.get_data()["contigs"]
         return [contigs[c]["contig_id"] for c in contigs]
 
-    @collect_performance(g_stats, prefix='new.')
+#    @collect_performance(g_stats, prefix='new.')
     def get_contigs(self, contig_id_list=None):
         data = self.get_data()
 
