@@ -218,15 +218,15 @@ class TestCachedObjectAPI(unittest.TestCase):
         event = self.old_object.cache_stats.get_last()
         _log.info('Get old genome #2: {:.3f}'.format(event.duration))
 
-    def test_perf_stats(self):
-        g = ObjectAPI(services=shared.get_services(), ref=self.genome_old)
-        for method in ('get_schema', 'get_history', 'get_data', 'get_referrers',
-                       'copy', 'get_provenance'):
-            getattr(self.old_object, method)()
-            assert method in g.stats.get_last().event
-            _log.info('Old genome {:20s}  {:.3f} seconds'.format(
-                method, g.stats.get_last().duration))
-            getattr(self.new_object, method)()
-            assert method in g.stats.get_last().event
-            _log.info('New genome {:20s}  {:.3f} seconds'.format(
-                method, g.stats.get_last().duration))
+#    def test_perf_stats(self):
+#        g = ObjectAPI(services=shared.get_services(), ref=self.genome_old)
+#        for method in ('get_schema', 'get_history', 'get_data', 'get_referrers',
+#                       'copy', 'get_provenance'):
+#            getattr(self.old_object, method)()
+#            assert method in g.stats.get_last().event
+#            _log.info('Old genome {:20s}  {:.3f} seconds'.format(
+#                method, g.stats.get_last().duration))
+#            getattr(self.new_object, method)()
+#            assert method in g.stats.get_last().event
+#            _log.info('New genome {:20s}  {:.3f} seconds'.format(
+#                method, g.stats.get_last().duration))
