@@ -1659,7 +1659,7 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
 
             return f
 
-        limited_keys = ["quality_warnings", "locations", "feature_id", "md5", "type", "aliases"]
+        limited_keys = ["quality_warnings", "locations", "feature_id", "md5", "type", "aliases", "function"]
 
         if feature_id_list is None:
             if exclude_sequence:
