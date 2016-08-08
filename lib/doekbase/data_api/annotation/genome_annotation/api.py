@@ -1013,7 +1013,7 @@ class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
         out_features = {}
 
         if exclude_sequence:
-            limited_keys = ["function", "location", "md5", "type", "id", "aliases"]
+            limited_keys = ["function", "location", "md5", "type", "id", "aliases", "dna_sequence_length"]
             features = self.get_data_subset(["features/[*]/" + k for k in limited_keys])["features"]
         else:
             features = self.get_data()['features']
@@ -1604,6 +1604,7 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
         feature_containers = self._get_feature_containers(feature_id_list)
 
         def fill_out_feature(x):
+            # TODO fix publications in thrift spec and code, problem with existing data
             f = {
                 "feature_id": x['feature_id'],
                 "feature_type": x['type'],
@@ -1611,55 +1612,21 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
                 "feature_locations": [{"contig_id": loc[0],
                                        "start": loc[1],
                                        "strand": loc[2],
-                                       "length": loc[3]} for loc in x['locations']]
+                                       "length": loc[3]} for loc in x['locations']],
+                "feature_function": x.get("function", ""),
+                "feature_publications": [],
+                "feature_dna_sequence": x.get("dna_sequence", ""),
+                "feature_dna_sequence_length": x.get("dna_sequence_length", 0),
+                "feature_aliases": x.get("aliases", {}),
+                "feature_notes": x.get("notes", ""),
+                "feature_inference": x.get("inference", ""),
+                "feature_quality_score": x.get("quality", []),
+                "feature_quality_warnings": x.get("quality_warnings", [])
             }
-
-            if 'function' in x:
-                f["feature_function"] = x['function']
-            else:
-                f["feature_function"] = ""
-
-            #if 'publications' in x:
-            #    f["feature_publications"] = x['publications']
-            #else:
-            # TODO fix publications in thrift spec and code, problem with existing data
-            f["feature_publications"] = []
-
-            if 'dna_sequence' in x:
-                f["feature_dna_sequence"] = x['dna_sequence']
-                f["feature_dna_sequence_length"] = x["dna_sequence_length"]
-            else:
-                f["feature_dna_sequence"] = ""
-                f["feature_dna_sequence_length"] = 0
-
-            if 'aliases' in x:
-                f["feature_aliases"] = x['aliases']
-            else:
-                f["feature_aliases"] = {}
-
-            if 'notes' in x:
-                f["feature_notes"] = x['notes']
-            else:
-                f["feature_notes"] = ""
-
-            if 'inference' in x:
-                f["feature_inference"] = x['inference']
-            else:
-                f["feature_inference"] = ""
-
-            if 'quality' in x:
-                f["feature_quality_score"] = x['quality']
-            else:
-                f["feature_quality_score"] = []
-
-            if 'quality_warnings' in x:
-                f["feature_quality_warnings"] = x['quality_warnings']
-            else:
-                f["feature_quality_warnings"] = []
 
             return f
 
-        limited_keys = ["quality_warnings", "locations", "feature_id", "md5", "type", "aliases"]
+        limited_keys = ["quality_warnings", "locations", "feature_id", "md5", "type", "aliases", "function", "dna_sequence_length"]
 
         if feature_id_list is None:
             if exclude_sequence:
