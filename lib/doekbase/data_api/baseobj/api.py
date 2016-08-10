@@ -78,12 +78,12 @@ class ObjectAPI(object):
         return self._name
 
     @property
-    def data(self):
-        data_dict = json.loads(self._client.get_data())
+    def data(self, obj_ref_path=None):
+        data_dict = json.loads(self._client.get_data(obj_ref_path))
         return data_dict
 
-    def data_subset(self, path_list=None):
-        return self._client.get_data_subset(path_list)
+    def data_subset(self, obj_ref_path=None, path_list=None):
+        return self._client.get_data_subset(obj_ref_path, path_list)
 
     @property
     def schema(self):
