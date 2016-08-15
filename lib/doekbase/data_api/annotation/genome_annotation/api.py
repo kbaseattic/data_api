@@ -1379,17 +1379,19 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
                 raise TypeError("A list of strings indicating Feature types is required, received an empty list.")
 
             # only pull data for features that are in the type_list
-            containers = self.ws_client.get_object_subset(
-                [{'ref': feature_container_references[x], 'included': paths}
-                 for x in feature_container_references if x in filters["type_list"]])
+            containers = [ObjectAPI(self.services,
+                                    self._token,
+                                    feature_container_references[r]).get_data_subset(paths)["features"]
+                          for r in feature_container_references if r in filters["type_list"]]
         else:
             # pull down all features
-            containers = self.ws_client.get_object_subset(
-                [{'ref': feature_container_references[x], 'included': paths}
-                 for x in feature_container_references])
+            containers = [ObjectAPI(self.services,
+                                    self._token,
+                                    feature_container_references[r]).get_data_subset(paths)["features"]
+                          for r in feature_container_references]
 
         for obj in containers:
-            features.update(obj["data"]["features"])
+            features.update(obj)
 
         if "region_list" in filters and filters["region_list"] is not None:
             if not isinstance(filters["region_list"], list):
@@ -1600,31 +1602,7 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
         return self._get_feature_data("publications", feature_id_list)
 
     def get_features(self, feature_id_list=None, exclude_sequence=False):
-        out_features = {}
         feature_containers = self._get_feature_containers(feature_id_list)
-
-        def fill_out_feature(x):
-            # TODO fix publications in thrift spec and code, problem with existing data
-            f = {
-                "feature_id": x['feature_id'],
-                "feature_type": x['type'],
-                "feature_md5": x['md5'],
-                "feature_locations": [{"contig_id": loc[0],
-                                       "start": loc[1],
-                                       "strand": loc[2],
-                                       "length": loc[3]} for loc in x['locations']],
-                "feature_function": x.get("function", ""),
-                "feature_publications": [],
-                "feature_dna_sequence": x.get("dna_sequence", ""),
-                "feature_dna_sequence_length": x.get("dna_sequence_length", 0),
-                "feature_aliases": x.get("aliases", {}),
-                "feature_notes": x.get("notes", ""),
-                "feature_inference": x.get("inference", ""),
-                "feature_quality_score": x.get("quality", []),
-                "feature_quality_warnings": x.get("quality_warnings", [])
-            }
-
-            return f
 
         limited_keys = ["quality_warnings", "locations", "feature_id", "md5", "type", "aliases", "function", "dna_sequence_length"]
 
@@ -1656,7 +1634,27 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
 
                 containers = self.ws_client.get_object_subset(subsets)
 
-        out_features = {x: fill_out_feature(v) for obj in containers for x,v in obj["data"]["features"].items()}
+        out_features = {}
+        for obj in containers:
+            for k,v in obj["data"]["features"].items():
+                out_features[k] = {
+                    "feature_id": v['feature_id'],
+                    "feature_type": v['type'],
+                    "feature_md5": v['md5'],
+                    "feature_locations": [{"contig_id": loc[0],
+                                           "start": loc[1],
+                                           "strand": loc[2],
+                                           "length": loc[3]} for loc in v['locations']],
+                    "feature_function": v.get("function", ""),
+                    "feature_publications": [],
+                    "feature_dna_sequence": v.get("dna_sequence", ""),
+                    "feature_dna_sequence_length": v.get("dna_sequence_length", 0),
+                    "feature_aliases": v.get("aliases", {}),
+                    "feature_notes": v.get("notes", ""),
+                    "feature_inference": v.get("inference", ""),
+                    "feature_quality_score": v.get("quality", []),
+                    "feature_quality_warnings": v.get("quality_warnings", [])
+                }
 
         return out_features
 
@@ -2498,7 +2496,7 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
             })
             return True, summary_object
         except Exception, e:
-            print("WS Save Summary Error: {0}".format(e))
+            _log.debug("WS Save Summary Error: {0}".format(e))
             return False, summary_object
 
     def get_summary(self):

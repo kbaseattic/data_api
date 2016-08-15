@@ -117,6 +117,7 @@ class ObjectAPI(object):
         self._token = None
 
         ws_url = services["workspace_service_url"]
+        self._ws_cache = cache.WorkspaceCache(ref, ws_url)
         local_workspace = False
         if '://' in ws_url: # assume a real Workspace server
             if token is None or len(token.strip()) == 0:
@@ -126,38 +127,37 @@ class ObjectAPI(object):
 
             _log.debug('Connect to Workspace service at {}'.format(ws_url))
             self.ws_client = Workspace(ws_url, token=self._token)
+            wsinfo = self._get_cache_ws_info()
+            wsinfo_obj = WorkspaceInfo(*wsinfo)
+            global_read = (wsinfo_obj.globalread == 'r')
         else:
             _log.debug('Load from Workspace file at {}'.format(ws_url))
-            local_workspace = True
             self.ws_client = self._init_ws_from_files(ws_url, ref)
+            # Local file-workspace objects are public
+            global_read = True
 
-        info_values = self.ws_client.get_object_info_new({
-            "objects": [{"ref": self.ref}],
-            "includeMetadata": 0,
-            "ignoreErrors": 0})
-        if not info_values:
-            raise ValueError("Cannot find object: {}".format(self.ref))
-        oi = info_values[0]
+        all_ids = False
+        try:
+            if len([int(p) for p in ref.split('/')]) == 3:
+                all_ids = True
+        except ValueError:
+            all_ids = False
 
-        self._info = {
-            "object_id": oi[0],
-            "object_name": oi[1],
-            "object_reference": "{0}/{1}".format(oi[6],oi[0]),
-            "object_reference_versioned": "{0}/{1}/{2}".format(oi[6],oi[0],oi[4]),
-            "type_string": oi[2],
-            "save_date": oi[3],
-            "version": oi[4],
-            "saved_by": oi[5],
-            "workspace_id": oi[6],
-            "workspace_name": oi[7],
-            "object_checksum": oi[8],
-            "object_size": oi[9],
-            "object_metadata": oi[10]
-        }
+        if all_ids:
+            self._cache = cache.ObjectCache(
+                ref,
+                domain=ws_url,
+                is_public=global_read)
+        else:
+            self._cache = None
+
+        self._info = None
+        # set self._info
+        self.get_info()
+
         self._id = self._info["object_id"]
         self._name = self._info["object_name"]
-        self._typestring = self.ws_client.translate_to_MD5_types(
-            [self._info["type_string"]]).values()[0]
+        self._typestring = self._translate_typestring()
         self._version = str(self._info["version"])
         self._schema = None
         self._history = None
@@ -165,34 +165,33 @@ class ObjectAPI(object):
         self._data = None
         # Init stats
         #self._stats = g_stats
-        # Init the caching object. Pass in whether the object is
-        # publically available (which can determine whether it is cached)
-        if local_workspace:
-            global_read = True  # Local file-workspace objects are public
-        else:
-            wsinfo = self.ws_client.get_workspace_info({
-                'id': self._info['workspace_id']})
-            wsinfo_obj = WorkspaceInfo(*wsinfo)
-            global_read = (wsinfo_obj.globalread == 'r')
-        self._cache = cache.ObjectCache(
-            self._info["object_reference_versioned"],
-            domain=ws_url,
-            is_public=global_read)
+        # Init the caching object. Pass in whether the object is public.
+        if not self._cache:
+            self._cache = cache.ObjectCache(
+                self._info["object_reference_versioned"],
+                domain=ws_url,
+                is_public=global_read)
 
         # TODO always use a versioned reference to the data object
-        #self.ref = self._info["object_reference_versioned"]
+        self.ref = self._info["object_reference_versioned"]
 
 #    @property
 #    def stats(self):
 #        return self._stats
 
-    @property
-    def cache_stats(self):
-        return self._cache.stats
+#    @property
+#    def cache_stats(self):
+#        return self._cache.stats
+
+    def _translate_typestring(self):
+        return self._ws_cache.get_md5_typestring(self._translate_typestring_ws,
+                                                 self._info["type_string"])
+
+    def _translate_typestring_ws(self):
+        return self.ws_client.translate_to_MD5_types(
+            [self._info["type_string"]]).values()[0]
 
     def _init_ws_from_files(self, path, ref):
-        ext = '.msgpack'
-        extlen = len(ext)
         WorkspaceFile.use_msgpack = True
         client = workspace_file_client(path)
 
@@ -256,7 +255,54 @@ class ObjectAPI(object):
             object_size
             object_metadata"""
 
+        if self._info:
+            return self._info
+
+        if self._cache:
+            info_values = self._cache.get_info(self._get_info_object_ws)
+        else:
+            info_values = self._get_info_object_ws()
+
+        if not info_values:
+            raise ValueError("Cannot find object: {}".format(self.ref))
+        oi = info_values[0]
+
+        self._info = {
+            "object_id": oi[0],
+            "object_name": oi[1],
+            "object_reference": "{0}/{1}".format(oi[6], oi[0]),
+            "object_reference_versioned": "{0}/{1}/{2}".format(oi[6], oi[0], oi[4]),
+            "type_string": oi[2],
+            "save_date": oi[3],
+            "version": oi[4],
+            "saved_by": oi[5],
+            "workspace_id": oi[6],
+            "workspace_name": oi[7],
+            "object_checksum": oi[8],
+            "object_size": oi[9],
+            "object_metadata": oi[10]
+        }
+
         return self._info
+
+    def _get_info_object_ws(self):
+        return self.ws_client.get_object_info_new({
+            "objects": [{"ref": self.ref}],
+            "includeMetadata": 0,
+            "ignoreErrors": 0})
+
+    def _get_cache_ws_info(self):
+        return self._ws_cache.get_info(self._get_info_ws)
+
+    def _get_info_ws(self):
+        workspace_identity = self.ref.split('/')[0]
+
+        try:
+            id = int(workspace_identity)
+            return self.ws_client.get_workspace_info({'id': id})
+        except ValueError:
+            name = workspace_identity
+            return self.ws_client.get_workspace_info({'name': name})
 
 #    @collect_performance(g_stats)
     def get_history(self):
@@ -457,7 +503,8 @@ class ObjectAPI(object):
             # loop through all references and track the most recent for each unique object
             found_objects = {}
             for x in referrers:
-                typestring = self.ws_client.translate_to_MD5_types([x[2]]).values()[0]
+                versioned_ref = "{}/{}/{}".format(x[6],x[0],x[4])
+                typestring = ObjectAPI(self.services, self._token, versioned_ref).get_typestring()
 
                 if typestring not in object_refs_by_type:
                     object_refs_by_type[typestring] = []
@@ -474,7 +521,8 @@ class ObjectAPI(object):
                 object_refs_by_type[found_objects[x][0]].append(x + "/" + str(found_objects[x][1]))
         else:
             for x in referrers:
-                typestring = self.ws_client.translate_to_MD5_types([x[2]]).values()[0]
+                versioned_ref = "{}/{}/{}".format(x[6],x[0],x[4])
+                typestring = ObjectAPI(self.services, self._token, versioned_ref).get_typestring()
 
                 if typestring not in object_refs_by_type:
                     object_refs_by_type[typestring] = []
