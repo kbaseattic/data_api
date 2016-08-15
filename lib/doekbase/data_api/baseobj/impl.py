@@ -74,13 +74,13 @@ class ObjectImpl(thrift_service.Iface):
     def get_provenance(self):
         return self.ws_client.get_object_provenance([{"ref": self.ref}])
 
-    def get_data(self):
+    def get_data(self, obj_ref_path=None):
         t0 = log_start(_log, 'get_data')
         s = ''
         try:
             t1 = log_start(_log, 'get_data.query')
-            data_dict = self.ws_client.get_objects([
-                {"ref": self.ref}])[0]["data"]
+            data_dict = self.ws_client.get_objects2([
+                {"ref": self.ref,'obj_ref_path': obj_ref_path}])[0]["data"]
             log_end(_log, t1, 'get_data.query')
             t1 = log_start(_log, 'get_data.dump')
             s = json.dumps(data_dict)
@@ -90,9 +90,10 @@ class ObjectImpl(thrift_service.Iface):
         log_end(_log, t0, 'get_data')
         return s
 
-    def get_data_subset(self, path_list=None):
-        return self.ws_client.get_object_subset([{"ref": self.ref,
-                        "included": path_list}])[0]["data"]
+    def get_data_subset(self, obj_ref_path=None, path_list=None):
+        return self.ws_client.get_objects2([{"ref": self.ref,
+                                             "obj_ref_path": obj_ref_path,
+                                             "included": path_list}])[0]["data"]
     
     def get_referrers(self):
         referrers = self.ws_client.list_referencing_objects(
