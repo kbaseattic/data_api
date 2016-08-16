@@ -270,7 +270,7 @@ The inner list is to accommodate domains that are non-continuous sequence.
 What about the following?
 INTERACTIONS? ACTIVE SITE? ALLOSTERIC SITE? Folding pattern?
 
-@optional function domain_locations
+@optional function domain_locations aliases
 */
 typedef structure {
   string protein_id;
@@ -279,6 +279,7 @@ typedef structure {
   string function;
   mapping<string alias, list<string> sources> aliases;
   string md5;
+  int translation_derived;
 } protein;
 
 
