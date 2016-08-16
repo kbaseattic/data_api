@@ -12,6 +12,7 @@ import unittest
 from . import shared
 from doekbase.data_api import core, wsfile
 from doekbase.workspace import client as ws_client
+from doekbase.workspace.baseclient import ServerError
 
 _log = logging.getLogger('doekbase.tests.test_ws_client')
 
@@ -149,7 +150,7 @@ class WorkspaceTests(unittest.TestCase):
     def test_administer(self):
         try:
             self.ws.administer({})
-        except ws_client.ServerError as err:
+        except ServerError as err:
             # fail if this is NOT the "normal" error
             # caused by lack of admin. permissions
             assert 'not an admin' in str(err)

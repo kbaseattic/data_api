@@ -302,7 +302,7 @@ class ObjectAPI(object):
             return self.ws_client.get_workspace_info({'id': id})
         except ValueError:
             name = workspace_identity
-            return self.ws_client.get_workspace_info({'name': name})
+            return self.ws_client.get_workspace_info({'workspace': name})
 
 #    @collect_performance(g_stats)
     def get_history(self):

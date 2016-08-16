@@ -24,7 +24,7 @@ from datetime import datetime
 import dpath.util
 # Local
 from doekbase.data_api.util import get_logger, log_start, log_end
-from doekbase.workspace.client import ServerError
+from doekbase.workspace.baseclient import ServerError
 
 # Logging
 
