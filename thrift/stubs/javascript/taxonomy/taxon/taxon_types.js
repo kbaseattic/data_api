@@ -1319,4 +1319,4 @@ taxon.ObjectProvenanceAction.prototype.write = function(output) {
   return;
 };
 
-taxon.VERSION = '0.3.1';
+taxon.VERSION = '0.3.2';
