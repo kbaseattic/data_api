@@ -10,7 +10,7 @@ import time
 import unittest
 # Local
 from . import shared
-from doekbase.data_api import core, wsfile
+from doekbase.data_api import wsfile
 from doekbase.workspace import client as ws_client
 from doekbase.workspace.baseclient import ServerError
 
@@ -28,12 +28,14 @@ def generic_object():
 
 NOT_SUPPORTED_MSG = 'Not supported by local Workspace implementation'
 
+shared.setup()
+
 class WorkspaceTests(unittest.TestCase):
     # maximum allowable version of workspace for this
     # test suite to be valid
     MAX_WS_VERSION = (0, 999, 999)
 
-    is_local = '://' not in core.g_ws_url
+    is_local = '://' not in shared.g_ws_url
 
     def setUp(self):
         if self.is_local:

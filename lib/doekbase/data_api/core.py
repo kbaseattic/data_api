@@ -102,8 +102,6 @@ class ObjectAPI(object):
              to access.
         """
 
-        print "ObjectAPI({},{},{},{})".format(services, "token", ref, ancestor_refchain)
-
         if services is None or type(services) != type({}):
             raise TypeError("You must provide a service configuration dictionary! Found {0}".format(type(services)))
         elif not services.has_key("workspace_service_url"):
@@ -480,7 +478,6 @@ class ObjectAPI(object):
         return self._cache.get_data(self._get_data_ws)
 
     def _get_data_ws(self):
-        print "_get_data_ws() ref: {}, obj_ref_path: {}".format(self.ref, self.ancestor_refchain)
         if self.ancestor_refchain:
             data = self.ws_client.get_objects2({'objects': [
                 {"ref": self.ancestor_refchain[0],
@@ -501,14 +498,10 @@ class ObjectAPI(object):
                             ['a/bee/sea', 'd/ee/eph/gee']
         Returns:
           dict (contents according to object type and data requested)"""
-
-        print "get_data_subset({})".format(path_list)
-
         return self._cache.get_data_subset(self._get_data_subset_ws,
                                            path_list=path_list)
 
     def _get_data_subset_ws(self, path_list=None):
-        print "_get_data_subset_ws({} - ref: {}, obj_ref_path: {})".format(path_list, self.ref, self.ancestor_refchain)
         if self.ancestor_refchain:
             result = self.ws_client.get_objects2({'objects': [{"ref": self.ancestor_refchain[0],
                                                    "obj_ref_path": self.ancestor_refchain[1:],

@@ -197,7 +197,6 @@ class ObjectCache(object):
     def get_data_subset(self, parent_method, path_list=None):
         """Get data subset from cache or the callee's method.
         """
-        print "get_data_subset({}, {})".format(parent_method, path_list)
         #self._stats.start_event('cache.get_data_subset', self._key)
         # save a little time for a no-op
         if path_list is None:
@@ -227,18 +226,10 @@ class ObjectCache(object):
         Raises:
             RuntimeError: on timeout
         """
-        print "cache_get_or_create({},{})".format(key, creator)
         data, total_sleep = None, 0
         while total_sleep < self.MAX_FETCH_TIMEOUT:
             try:
-                data = self._cache.get(key)
-
-                if data:
-                    print "key exists - key: {}, data: {}".format(key, data)
-                else:
-                    data = creator()
-                    print "data - {}".format(data)
-                    self._cache.set(key, data)
+                data = self._cache.get_or_create(key, creator)
 
                 if data:
                     break

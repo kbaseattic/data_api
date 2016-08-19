@@ -237,9 +237,6 @@ class WorkspaceFile(object):
         """Note: this is not efficient. It actually looks at
         the whole object.
         """
-
-        print "get_object_subset({})".format(prm)
-
         def extract_subset_glob(d, parts):
             if isinstance(d, dict):
                 _e = {n: extract_subset(d[n], parts) for n in d}
@@ -375,7 +372,6 @@ class WorkspaceFile(object):
         return result
 
     def get_objects2(self, prm):
-        print "get_objects2({})".format(prm)
         result = []
         for refs in prm['objects']:
             ref_spec = refs.copy()

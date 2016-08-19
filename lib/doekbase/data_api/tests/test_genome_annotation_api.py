@@ -109,12 +109,44 @@ def fetch_new_gene_ids(t_o):
 
 
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
+def test_get_feature_containers_new():
+    _log.debug("Input {}".format(genome_new))
+    for t_o in [t_new_e]:
+        containers_t_o = t_o._get_feature_containers()
+        assert isinstance(containers_t_o, list)
+        _log.debug("Output {}".format(containers_t_o))
+
+
+@skipUnless(shared.can_connect, 'Cannot connect to workspace')
+def test_get_feature_containers_invalid_new():
+    _log.debug("Input {}".format(genome_new))
+    for t_o in [t_new_e]:
+        error_caught = False
+        try:
+            containers_t_o = t_o._get_feature_containers("")
+        except TypeError:
+            error_caught = True
+        assert error_caught == True
+        _log.debug("Output {}".format(error_caught))
+        error_caught = False
+        try:
+            containers_t_o = t_o._get_feature_containers([])
+        except TypeError:
+            error_caught = True
+        assert error_caught == True
+        _log.debug("Output {}".format(error_caught))
+
+
+@skipUnless(shared.can_connect, 'Cannot connect to workspace')
 def test_get_taxon_new():
     _log.debug("Input {}".format(genome_new))
     for t_o in [t_new, t_new_e]:
         taxon_t_o = t_o.get_taxon()
         assert isinstance(taxon_t_o, TaxonAPI)
         _log.debug("Output {}".format(taxon_t_o))
+        taxon_ref = t_o.get_taxon(ref_only=True)
+        assert isinstance(taxon_ref, basestring)
+        _log.debug("Output {}".format(taxon_ref))
 
 
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
@@ -124,6 +156,9 @@ def test_get_assembly_new():
         assembly_t_o = t_o.get_assembly()
         assert isinstance(assembly_t_o, AssemblyAPI)
         _log.debug("Output {}".format(assembly_t_o))
+        assembly_ref = t_o.get_assembly(ref_only=True)
+        assert isinstance(assembly_ref, basestring)
+        _log.debug("Output {}".format(assembly_ref))
 
 
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
@@ -142,6 +177,28 @@ def test_get_feature_type_descriptions_new():
         feature_type_descriptions_t_o = t_o.get_feature_type_descriptions()
         assert isinstance(feature_type_descriptions_t_o, dict)
         _log.debug("Output {}".format(len(feature_type_descriptions_t_o)))
+
+
+@skipUnless(shared.can_connect, 'Cannot connect to workspace')
+def test_get_feature_type_descriptions_valid_new():
+    _log.debug("Input {}".format(genome_new))
+    for t_o in [t_new, t_new_e]:
+        feature_type_descriptions_t_o = t_o.get_feature_type_descriptions(['gene'])
+        assert isinstance(feature_type_descriptions_t_o, dict)
+        _log.debug("Output {}".format(len(feature_type_descriptions_t_o)))
+
+
+@skipUnless(shared.can_connect, 'Cannot connect to workspace')
+def test_get_feature_type_descriptions_invalid_new():
+    _log.debug("Input {}".format(genome_new))
+    for t_o in [t_new, t_new_e]:
+        error_caught = False
+        try:
+            feature_type_descriptions_t_o = t_o.get_feature_type_descriptions([0])
+        except TypeError:
+            error_caught = True
+        assert error_caught == True
+        _log.debug("Output {}".format(error_caught))
 
 
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
@@ -222,10 +279,69 @@ def test_get_feature_ids_filter_plus_strand_by_region_new():
 
 
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
-def test_get_feature_ids_subset_new():
+def test_get_feature_ids_subset_type_new():
     _log.debug("Input {}".format(genome_new))
     for t_o in [t_new, t_new_e]:
         feature_ids_t_o = t_o.get_feature_ids(filters={"type_list": ["mRNA"]})
+        assert isinstance(feature_ids_t_o, dict)
+        _log.debug("Output {}".format(len(feature_ids_t_o)))
+
+
+@skipUnless(shared.can_connect, 'Cannot connect to workspace')
+def test_get_feature_ids_subset_type_invalid_new():
+    _log.debug("Input {}".format(genome_new))
+    for t_o in [t_new, t_new_e]:
+        error_caught = False
+        try:
+            feature_ids_t_o = t_o.get_feature_ids(filters={"type_list": "mRNA"})
+        except TypeError:
+            error_caught = True
+        assert error_caught == True
+        _log.debug("Output {}".format(error_caught))
+        error_caught = False
+        try:
+            feature_ids_t_o = t_o.get_feature_ids(filters={"type_list": []})
+        except TypeError:
+            error_caught = True
+        assert error_caught == True
+        _log.debug("Output {}".format(error_caught))
+
+
+@skipUnless(shared.can_connect, 'Cannot connect to workspace')
+def test_get_feature_ids_subset_region_invalid_new():
+    _log.debug("Input {}".format(genome_new))
+    for t_o in [t_new, t_new_e]:
+        error_caught = False
+        try:
+            feature_ids_t_o = t_o.get_feature_ids(filters={"region_list": {
+                "contig_id": "contig_0", "start": 0, "length": 1E6, "strand": "+"}})
+        except TypeError:
+            error_caught = True
+        assert error_caught == True
+        _log.debug("Output {}".format(error_caught))
+        error_caught = False
+        try:
+            feature_ids_t_o = t_o.get_feature_ids(filters={"region_list": []})
+        except TypeError:
+            error_caught = True
+        assert error_caught == True
+        _log.debug("Output {}".format(error_caught))
+
+
+@skipUnless(shared.can_connect, 'Cannot connect to workspace')
+def test_get_feature_ids_subset_function_new():
+    _log.debug("Input {}".format(genome_new))
+    for t_o in [t_new, t_new_e]:
+        feature_ids_t_o = t_o.get_feature_ids(filters={"function_list": ["poly"]})
+        assert isinstance(feature_ids_t_o, dict)
+        _log.debug("Output {}".format(len(feature_ids_t_o)))
+
+
+@skipUnless(shared.can_connect, 'Cannot connect to workspace')
+def test_get_feature_ids_subset_alias_new():
+    _log.debug("Input {}".format(genome_new))
+    for t_o in [t_new, t_new_e]:
+        feature_ids_t_o = t_o.get_feature_ids(filters={"alias_list": ["dnaA"]})
         assert isinstance(feature_ids_t_o, dict)
         _log.debug("Output {}".format(len(feature_ids_t_o)))
 
@@ -358,6 +474,11 @@ def test_get_proteins_new():
     _log.debug("Input {}".format(genome_new))
     for t_o in [t_new, t_new_e]:
         proteins_t_o = t_o.get_proteins()
+        assert isinstance(proteins_t_o, dict)
+        assert len(proteins_t_o) > 0
+        _log.debug("Output {}".format(len(proteins_t_o)))
+        inputs = t_o.get_feature_ids(filters={"type_list": ["CDS"]})["by_type"]["CDS"]
+        proteins_t_o = t_o.get_proteins(inputs)
         assert isinstance(proteins_t_o, dict)
         assert len(proteins_t_o) > 0
         _log.debug("Output {}".format(len(proteins_t_o)))
@@ -607,9 +728,6 @@ def test_get_gff_valid_new():
 
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
 def test_get_summary_new():
-    # TODO fix this test, need to make sure the object references are correct in the test data
-    return True
-
     _log.debug("Input {}".format(genome_new))
     for t_o in [t_new, t_new_e]:
         _log.debug("get_referrers: {}".format(t_o.get_referrers()))
@@ -719,6 +837,9 @@ def test_get_taxon_old():
         taxon_t_o = t_o.get_taxon()
         assert isinstance(taxon_t_o, TaxonAPI)
         _log.debug("Output {}".format(taxon_t_o))
+        taxon_ref = t_o.get_taxon(ref_only=True)
+        assert isinstance(taxon_ref, basestring)
+        _log.debug("Output {}".format(taxon_ref))
 
 
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
@@ -728,6 +849,9 @@ def test_get_assembly_old():
         assembly_t_o = t_o.get_assembly()
         assert isinstance(assembly_t_o, AssemblyAPI)
         _log.debug("Output {}".format(assembly_t_o))
+        assembly_ref = t_o.get_assembly(ref_only=True)
+        assert isinstance(assembly_ref, basestring)
+        _log.debug("Output {}".format(assembly_ref))
 
 
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
@@ -835,6 +959,65 @@ def test_get_feature_ids_filter_plus_strand_by_region_old():
 
 
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
+def test_get_feature_ids_subset_type_invalid_old():
+    _log.debug("Input {}".format(genome_old))
+    for t_o in [t_old, t_old_e]:
+        error_caught = False
+        try:
+            feature_ids_t_o = t_o.get_feature_ids(filters={"type_list": "mRNA"})
+        except TypeError:
+            error_caught = True
+        assert error_caught == True
+        _log.debug("Output {}".format(error_caught))
+        error_caught = False
+        try:
+            feature_ids_t_o = t_o.get_feature_ids(filters={"type_list": []})
+        except TypeError:
+            error_caught = True
+        assert error_caught == True
+        _log.debug("Output {}".format(error_caught))
+
+
+@skipUnless(shared.can_connect, 'Cannot connect to workspace')
+def test_get_feature_ids_subset_region_invalid_old():
+    _log.debug("Input {}".format(genome_old))
+    for t_o in [t_old, t_old_e]:
+        error_caught = False
+        try:
+            feature_ids_t_o = t_o.get_feature_ids(filters={"region_list": {
+                "contig_id": "contig_0", "start": 0, "length": 1E6, "strand": "+"}})
+        except TypeError:
+            error_caught = True
+        assert error_caught == True
+        _log.debug("Output {}".format(error_caught))
+        error_caught = False
+        try:
+            feature_ids_t_o = t_o.get_feature_ids(filters={"region_list": []})
+        except TypeError:
+            error_caught = True
+        assert error_caught == True
+        _log.debug("Output {}".format(error_caught))
+
+
+@skipUnless(shared.can_connect, 'Cannot connect to workspace')
+def test_get_feature_ids_subset_function_old():
+    _log.debug("Input {}".format(genome_old))
+    for t_o in [t_old, t_old_e]:
+        feature_ids_t_o = t_o.get_feature_ids(filters={"function_list": ["poly"]}, group_by="function")
+        assert isinstance(feature_ids_t_o, dict)
+        _log.debug("Output {}".format(len(feature_ids_t_o)))
+
+
+@skipUnless(shared.can_connect, 'Cannot connect to workspace')
+def test_get_feature_ids_subset_alias_old():
+    _log.debug("Input {}".format(genome_old))
+    for t_o in [t_old, t_old_e]:
+        feature_ids_t_o = t_o.get_feature_ids(filters={"alias_list": ["dnaA"]}, group_by="alias")
+        assert isinstance(feature_ids_t_o, dict)
+        _log.debug("Output {}".format(len(feature_ids_t_o)))
+
+
+@skipUnless(shared.can_connect, 'Cannot connect to workspace')
 def test_get_feature_type_counts_old():
     _log.debug("Input {}".format(genome_old))
     for t_o in [t_old, t_old_e]:
@@ -850,6 +1033,26 @@ def test_get_feature_type_counts_one_old():
         feature_type_counts_t_o = t_o.get_feature_type_counts(["mRNA"])
         assert isinstance(feature_type_counts_t_o, dict)
         _log.debug("Output {}".format(feature_type_counts_t_o))
+
+
+@skipUnless(shared.can_connect, 'Cannot connect to workspace')
+def test_get_feature_type_counts_invalid_old():
+    _log.debug("Input {}".format(genome_old))
+    for t_o in [t_old, t_old_e]:
+        error_caught = False
+        try:
+            feature_type_counts_t_o = t_o.get_feature_type_counts("gene")
+        except TypeError:
+            error_caught = True
+        assert error_caught == True
+        _log.debug("Output {}".format(error_caught))
+        error_caught = False
+        try:
+            feature_type_counts_t_o = t_o.get_feature_type_counts([])
+        except TypeError:
+            error_caught = True
+        assert error_caught == True
+        _log.debug("Output {}".format(error_caught))
 
 
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
@@ -872,6 +1075,26 @@ def test_get_feature_locations_one_old():
 
 
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
+def test_get_feature_locations_invalid_old():
+    _log.debug("Input {}".format(genome_old))
+    for t_o in [t_old, t_old_e]:
+        error_caught = False
+        try:
+            feature_locations_t_o = t_o.get_feature_locations("")
+        except TypeError:
+            error_caught = True
+        assert error_caught == True
+        _log.debug("Output {}".format(error_caught))
+        error_caught = False
+        try:
+            feature_locations_t_o = t_o.get_feature_locations([])
+        except TypeError:
+            error_caught = True
+        assert error_caught == True
+        _log.debug("Output {}".format(error_caught))
+
+
+@skipUnless(shared.can_connect, 'Cannot connect to workspace')
 def test_get_feature_dna_old():
     _log.debug("Input {}".format(genome_old))
     for t_o in [t_old, t_old_e]:
@@ -888,6 +1111,26 @@ def test_get_feature_dna_one_old():
         feature_dna_t_o = t_o.get_feature_dna([feature_id])
         assert isinstance(feature_dna_t_o, dict)
         _log.debug("Output {}".format(len(feature_dna_t_o)))
+
+
+@skipUnless(shared.can_connect, 'Cannot connect to workspace')
+def test_get_feature_dna_old():
+    _log.debug("Input {}".format(genome_old))
+    for t_o in [t_old, t_old_e]:
+        error_caught = False
+        try:
+            feature_dna_t_o = t_o.get_feature_dna("")
+        except TypeError:
+            error_caught = True
+        assert error_caught == True
+        _log.debug("Output {}".format(error_caught))
+        error_caught = False
+        try:
+            feature_dna_t_o = t_o.get_feature_dna([])
+        except TypeError:
+            error_caught = True
+        assert error_caught == True
+        _log.debug("Output {}".format(error_caught))
 
 
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
@@ -910,6 +1153,26 @@ def test_get_feature_functions_one_old():
 
 
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
+def test_get_feature_functions_old():
+    _log.debug("Input {}".format(genome_old))
+    for t_o in [t_old, t_old_e]:
+        error_caught = False
+        try:
+            feature_functions_t_o = t_o.get_feature_functions("")
+        except TypeError:
+            error_caught = True
+        assert error_caught == True
+        _log.debug("Output {}".format(error_caught))
+        error_caught = False
+        try:
+            feature_functions_t_o = t_o.get_feature_functions([])
+        except TypeError:
+            error_caught = True
+        assert error_caught == True
+        _log.debug("Output {}".format(error_caught))
+
+
+@skipUnless(shared.can_connect, 'Cannot connect to workspace')
 def test_get_feature_aliases_old():
     _log.debug("Input {}".format(genome_old))
     for t_o in [t_old, t_old_e]:
@@ -926,6 +1189,26 @@ def test_get_feature_aliases_one_old():
         feature_aliases_t_o = t_o.get_feature_aliases([feature_id])
         assert isinstance(feature_aliases_t_o, dict)
         _log.debug("Output {}".format(len(feature_aliases_t_o)))
+
+
+@skipUnless(shared.can_connect, 'Cannot connect to workspace')
+def test_get_feature_aliases_old():
+    _log.debug("Input {}".format(genome_old))
+    for t_o in [t_old, t_old_e]:
+        error_caught = False
+        try:
+            feature_aliases_t_o = t_o.get_feature_aliases("")
+        except TypeError:
+            error_caught = True
+        assert error_caught == True
+        _log.debug("Output {}".format(error_caught))
+        error_caught = False
+        try:
+            feature_aliases_t_o = t_o.get_feature_aliases([])
+        except TypeError:
+            error_caught = True
+        assert error_caught == True
+        _log.debug("Output {}".format(error_caught))
 
 
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')
@@ -964,6 +1247,28 @@ def test_get_features_one_old():
         features_t_o = t_o.get_features([feature_id])
         assert isinstance(features_t_o, dict)
         _log.debug("Output {}".format(len(features_t_o)))
+
+
+@skipUnless(shared.can_connect, 'Cannot connect to workspace')
+def test_get_features_exclude_sequence_old():
+    _log.debug("Input {}".format(genome_old))
+    for t_o in [t_old, t_old_e]:
+        features_t_o = t_o.get_features(exclude_sequence=True)
+        assert isinstance(features_t_o, dict)
+        _log.debug("Output {}".format(len(features_t_o)))
+
+
+@skipUnless(shared.can_connect, 'Cannot connect to workspace')
+def test_get_features_invalid_old():
+    _log.debug("Input {}".format(genome_old))
+    for t_o in [t_old, t_old_e]:
+        error_caught = False
+        try:
+            features_t_o = t_o.get_features("")
+        except TypeError:
+            error_caught = True
+        assert error_caught == True
+        _log.debug("Output {}".format(error_caught))
 
 
 @skipUnless(shared.can_connect, 'Cannot connect to workspace')

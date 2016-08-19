@@ -583,9 +583,6 @@ class GenomeAnnotationAPI(ObjectAPI, GenomeAnnotationInterface):
     def get_feature_type_counts(self, type_list=None):
         return self.proxy.get_feature_type_counts(type_list)
     
-    def get_cds_protein(self, cds_id_list=None):
-        raise NotImplementedError
-
     def get_feature_locations(self, feature_id_list=None):
         return self.proxy.get_feature_locations(feature_id_list)
     
@@ -839,6 +836,8 @@ class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
 
                 counts[x["type"]] += 1
         else:
+            if not isinstance(type_list, list):
+                raise TypeError("A list of strings indicating Feature types is required.")
             try:
                 assert len(type_list) > 0
 
@@ -1066,6 +1065,8 @@ class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
             for x in features:
                 out_features[x['id']] = fill_out_feature(x)
         else:
+            if not isinstance(feature_id_list, list):
+                raise TypeError("A list of strings indicating Feature identifiers is required.")
             try:
                 feature_refs = ["features/" + x for x in feature_id_list]
                 assert len(feature_refs) > 0
@@ -1115,9 +1116,6 @@ class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
             data = [x for x in data if x['id'] in mrna_feature_id_list]
 
         for feature_data in data:
-            if feature_data["type"] != "mRNA":
-                continue
-
             if "dna_sequence" not in feature_data or "location" not in feature_data:
                 continue
 
@@ -1368,8 +1366,6 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
 
         paths = ['features/*/' + k for k in limited_keys]
 
-        print feature_container_references
-
         # process all filters
         if "type_list" in filters and filters["type_list"] is not None:
             if not isinstance(filters["type_list"], list):
@@ -1377,10 +1373,6 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
             elif len(filters["type_list"]) == 0:
                 raise TypeError("A list of strings indicating Feature types is required, received an empty list.")
 
-            print filters["type_list"]
-            print [r for r in feature_container_references if r in filters["type_list"]]
-            print [(self.services, self._token, self.ref, [self.ref, feature_container_references[r]])
-                    for r in feature_container_references if r in filters["type_list"]]
             # only pull data for features that are in the type_list
             containers = [ObjectAPI(self.services,
                                     self._token,
@@ -1394,8 +1386,6 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
                                     feature_container_references[r],
                                     [self.ref, feature_container_references[r]]).get_data_subset(paths)["features"]
                           for r in feature_container_references]
-
-        print "get_feature_ids({},{}) - containers: {}".format(filters, group_by, containers)
 
         for obj in containers:
             features.update(obj)
@@ -1520,8 +1510,6 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
 
                         results["by_alias"][alias].append(features[x]["feature_id"])
 
-        print "get_feature_ids(): {}".format(results)
-
         return results
 
     def get_feature_type_counts(self, type_list=None):
@@ -1554,24 +1542,13 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
 
                 subsets.append(subset)
 
-            print subsets
-            print self.ws_client
             containers = self.ws_client.get_objects2({'objects': subsets})['data']
-            #print containers
         else:
-            print [{'ref': self.ref,
-                  'included': ["features/*/{}".format(data)],
-                  'obj_ref_path': [x]
-                 } for x in feature_containers]
-
             containers = self.ws_client.get_objects2({'objects':
                 [{'ref': self.ref,
                   'included': ["features/*/{}".format(data)],
                   'obj_ref_path': [x]
                  } for x in feature_containers]})['data']
-            #print containers
-
-        #print "_get_feature_data({},{}): containers {}".format(data, feature_id_list, containers)
 
         for obj in containers:
             features = obj["data"]["features"]
@@ -1627,8 +1604,6 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
 
     def get_features(self, feature_id_list=None, exclude_sequence=False):
         feature_containers = self._get_feature_containers(feature_id_list)
-        print "feature containers: {}".format(feature_containers)
-
         limited_keys = ["quality_warnings", "locations", "feature_id", "md5",
                         "type", "aliases", "function", "dna_sequence_length"]
 
@@ -1669,8 +1644,6 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
 
                 containers = self.ws_client.get_objects2({'objects': subsets})['data']
 
-        print "containers: {}".format(containers)
-
         out_features = {}
         for obj in containers:
             for k,v in obj["data"]["features"].items():
@@ -1693,7 +1666,6 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
                     "feature_quality_warnings": v.get("quality_warnings", [])
                 }
 
-        print "get_features({}): {}".format(feature_id_list, out_features)
         return out_features
 
     def get_proteins(self, cds_feature_id_list=None):

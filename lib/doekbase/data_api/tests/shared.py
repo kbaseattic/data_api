@@ -24,6 +24,9 @@ _log = None
 services = None
 
 # Globals
+g_ws_url = ""
+g_shock_url = ""
+g_handle_url = ""
 
 g_redis_bin = os.environ.get('KB_REDIS_BIN', '/usr/local/bin/redis-server')
 g_redis_conf = os.environ.get('KB_REDIS_CONF', 'redis.conf')
