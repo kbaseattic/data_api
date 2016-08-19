@@ -21,9 +21,6 @@ install:
 
 before_script:
   - printf "Build dir = $TRAVIS_BUILD_DIR\n"
-  - data_api_start_service.py --config deployment.cfg --service taxon --port 9101  >taxon.out 2>&1 &
-  - data_api_start_service.py --config deployment.cfg --service assembly --port 9102 >assembly.out 2>&1 &
-  - data_api_start_service.py --config deployment.cfg --service genome_annotation --port 9103 >ga.out 2>&1 &
 
 script:
   - coverage run `which nosetests` -c nose.cfg -c nose-local.cfg
@@ -32,16 +29,6 @@ script:
 env:
   - KB_DEPLOY_URL="dir_cache"
   - KB_DEPLOY_URL="dir_nocache"
-#  - KB_REDIS_HOST=localhost; KB_NOSE_CFG=nose-ci.cfg
-#  - KB_REDIS_HOST="";        KB_NOSE_CFG=nose-ci.cfg
 
 after_success:
   - codecov
-#  - kill $(cat taxonAPI.pid)
-#  - kill $(cat assemblyAPI.pid)
-#  - kill $(cat genome_annotationAPI.pid)
-
-after_failure:
-  - cat taxon.out
-  - cat assembly.out
-  - cat ga.out

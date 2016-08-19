@@ -233,11 +233,12 @@ class WorkspaceFile(object):
     def get_object_provenance(self, prm):
         return []
 
-    #@profile
     def get_object_subset(self, prm):
         """Note: this is not efficient. It actually looks at
         the whole object.
         """
+
+        print "get_object_subset({})".format(prm)
 
         def extract_subset_glob(d, parts):
             if isinstance(d, dict):
@@ -373,6 +374,29 @@ class WorkspaceFile(object):
             result.extend(objects)
         return result
 
+    def get_objects2(self, prm):
+        print "get_objects2({})".format(prm)
+        result = []
+        for refs in prm['objects']:
+            ref_spec = refs.copy()
+
+            if 'obj_ref_path' in refs:
+                # set ref to target object at end of reference chain
+                ref_spec['ref'] = refs['obj_ref_path'][-1]
+                del ref_spec['obj_ref_path']
+
+            else:
+                ref_spec['ref'] = refs['ref']
+
+            if 'included' in refs:
+                result.extend(self.get_object_subset([ref_spec]))
+            else:
+                records = self._find_ref(ref_spec['ref'])
+                #print("@@ GO, got records: {}".format(records))
+                objects = [self._make_object(record) for record in records]
+                result.extend(objects)
+        return {'data': result}
+
     def get_type_info(self, type_name):
         return self._make_type_info({'type': type_name})
 
@@ -472,7 +496,7 @@ class WorkspaceFile(object):
     def _make_object(self, record, data=None):
         r = {
             'data': data or record['data'],
-            'object_info': self._make_info(record),
+            'info': self._make_info(record),
             'provenance': [],
             'creator': 'Gonzo',
             'created': datetime.isoformat(datetime.now()),

@@ -5,11 +5,10 @@ __author__ = 'Dan Gunter <dkgunter@lbl.gov>'
 __date__ = '8/11/15'
 
 # Stdlib
-import logging
 import os
 
 # Local
-from doekbase.data_api.core import ObjectAPI, g_ws_url, g_shock_url
+from doekbase.data_api.core import ObjectAPI
 from doekbase.data_api.util import get_logger
 from doekbase.data_api import cache
 
@@ -49,9 +48,11 @@ def get_services(stanza='dir_nocache'):
     services["shock_service_url"] = deploy_config.get(global_stanza_name, "shock_service_url")
     services["handle_service_url"] = deploy_config.get(global_stanza_name, "handle_service_url")
     services["workspace_service_url"] = deploy_config.get(global_stanza_name, "workspace_service_url")
-    services["taxon_service_url"] = deploy_config.get(global_stanza_name, "taxon_service_url")
-    services["assembly_service_url"] = deploy_config.get(global_stanza_name, "assembly_service_url")
-    services["genome_annotation_service_url"] = deploy_config.get(global_stanza_name, "genome_annotation_service_url")
+
+    global g_ws_url, g_shock_url, g_handle_url
+    g_ws_url = services["workspace_service_url"]
+    g_shock_url = services["shock_service_url"]
+    g_handle_url = services["handle_service_url"]
 
     try:
         services["redis_host"] = deploy_config.get(global_stanza_name, "redis_host")

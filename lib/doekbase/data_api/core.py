@@ -22,7 +22,7 @@ from doekbase.data_api import cache
 
 # Version
 
-DATA_API_VERSION = "0.3.2"
+DATA_API_VERSION = "0.4.0"
 
 def version():
     return DATA_API_VERSION
@@ -86,7 +86,7 @@ class ObjectAPI(object):
     you should consider wrapping those calls in a higher-level method that is
     specific to the kind of data you want. 
     """
-    def __init__(self, services=None, token=None, ref=None):
+    def __init__(self, services=None, token=None, ref=None, ancestor_refchain=None):
         """Create new object.
  
         Args:
@@ -97,7 +97,13 @@ class ObjectAPI(object):
              format `A/B[/C]` where A is the number of the workspace, B is the
              number identifying the object, and C is the "version" number of
              the object.
+          ancestor_refchain (list<str>) : List of Object references that begin with an ancestor
+             Object you have permission to, and ends with the Object reference you would like
+             to access.
         """
+
+        print "ObjectAPI({},{},{},{})".format(services, "token", ref, ancestor_refchain)
+
         if services is None or type(services) != type({}):
             raise TypeError("You must provide a service configuration dictionary! Found {0}".format(type(services)))
         elif not services.has_key("workspace_service_url"):
@@ -112,8 +118,21 @@ class ObjectAPI(object):
             raise TypeError("Invalid workspace reference string! Found {0}"
                             .format(ref))
 
+        if ancestor_refchain and isinstance(ancestor_refchain, list):
+            for r in ancestor_refchain:
+                if type(r) != type("") and type(r) != type(unicode()):
+                    raise TypeError("Invalid reference given, expected string! "
+                                    "Found {0}".format(type(r)))
+                elif re.match(REF_PATTERN, r) is None:
+                    raise TypeError("Invalid workspace reference string! Found {0}"
+                                    .format(r))
+        elif ancestor_refchain:
+            raise TypeError("The input ancestor_refchain must be a list of strings! Found {0}"
+                            .format(type(ancestor_refchain)))
+
         self.services = services
         self.ref = ref
+        self.ancestor_refchain = ancestor_refchain
         self._token = None
 
         ws_url = services["workspace_service_url"]
@@ -286,10 +305,18 @@ class ObjectAPI(object):
         return self._info
 
     def _get_info_object_ws(self):
-        return self.ws_client.get_object_info_new({
-            "objects": [{"ref": self.ref}],
-            "includeMetadata": 0,
-            "ignoreErrors": 0})
+        if self.ancestor_refchain:
+            result = self.ws_client.get_object_info_new({
+                "objects": [{"ref": self.ancestor_refchain[0], "obj_ref_path": self.ancestor_refchain[1:]}],
+                "includeMetadata": 0,
+                "ignoreErrors": 0})
+        else:
+            result = self.ws_client.get_object_info_new({
+                "objects": [{"ref": self.ref}],
+                "includeMetadata": 0,
+                "ignoreErrors": 0})
+
+        return result
 
     def _get_cache_ws_info(self):
         return self._ws_cache.get_info(self._get_info_ws)
@@ -375,7 +402,7 @@ class ObjectAPI(object):
         """
 
         if self._provenance is None:
-            result = self.ws_client.get_object_provenance([{"ref": self.ref}])
+            result = self.ws_client.get_objects2({'objects': [{"ref": self.ref}]})['data']
 
             if len(result) > 0:
                 provenance_list = result[0]["provenance"]
@@ -453,7 +480,15 @@ class ObjectAPI(object):
         return self._cache.get_data(self._get_data_ws)
 
     def _get_data_ws(self):
-        return self.ws_client.get_objects([{"ref": self.ref}])[0]["data"]
+        print "_get_data_ws() ref: {}, obj_ref_path: {}".format(self.ref, self.ancestor_refchain)
+        if self.ancestor_refchain:
+            data = self.ws_client.get_objects2({'objects': [
+                {"ref": self.ancestor_refchain[0],
+                 "obj_ref_path": self.ancestor_refchain[1:]}]})["data"][0]["data"]
+        else:
+            data = self.ws_client.get_objects2({'objects': [{"ref": self.ref}]})["data"][0]["data"]
+
+        return data
 
 #    @collect_performance(g_stats)
     def get_data_subset(self, path_list=None):
@@ -467,12 +502,21 @@ class ObjectAPI(object):
         Returns:
           dict (contents according to object type and data requested)"""
 
+        print "get_data_subset({})".format(path_list)
+
         return self._cache.get_data_subset(self._get_data_subset_ws,
                                            path_list=path_list)
 
     def _get_data_subset_ws(self, path_list=None):
-        result = self.ws_client.get_object_subset([{"ref": self.ref,
-                        "included": path_list}])
+        print "_get_data_subset_ws({} - ref: {}, obj_ref_path: {})".format(path_list, self.ref, self.ancestor_refchain)
+        if self.ancestor_refchain:
+            result = self.ws_client.get_objects2({'objects': [{"ref": self.ancestor_refchain[0],
+                                                   "obj_ref_path": self.ancestor_refchain[1:],
+                                                   "included": path_list}]})["data"]
+        else:
+            result = self.ws_client.get_objects2({'objects': [{"ref": self.ref,
+                                                   "included": path_list}]})["data"]
+
         if len(result) > 0:
             return result[0]["data"]
         else:
