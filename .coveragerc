@@ -8,9 +8,5 @@ source =
     doekbase.data_api
     doekbase.data_api.tests
 omit =
-    /*/tests/performance/*
     /*/tests/convert/*
     /*/tests/download/*
-    /*/service/*
-    /*/converters/*
-    /*/downloaders/*

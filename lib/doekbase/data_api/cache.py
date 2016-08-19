@@ -175,8 +175,7 @@ class ObjectCache(object):
     def get_derived_data(self, parent_method, name):
         key = self._key + '::' + name  # store separately from 'raw' data
         #self._stats.start_event('cache.get_derived_data', key)
-        data = self._cache.get_or_create(key, parent_method,
-                                         should_cache_fn=self._should_cache)
+        data = self._cache.get_or_create(key, parent_method)
         #self._stats.end_event('cache.get_derived_data', key)
         return data
 
@@ -207,7 +206,8 @@ class ObjectCache(object):
         # create unique key for object + path
         key = '{}:{}'.format(self._key, self.path_hash(path_list))
         # creator function, currying path_list arg.
-        creator = lambda : parent_method(path_list=path_list)
+        def creator():
+            return parent_method(path_list=path_list)
         # get from cache, or create
         data = self.cache_get_or_create(key, creator)
         #self._stats.end_event('cache.get_data_subset', self._key)
@@ -226,16 +226,18 @@ class ObjectCache(object):
         Raises:
             RuntimeError: on timeout
         """
-        kw = dict(should_cache_fn=self._should_cache)
         data, total_sleep = None, 0
-        while data is None and total_sleep < self.MAX_FETCH_TIMEOUT:
+        while total_sleep < self.MAX_FETCH_TIMEOUT:
             try:
-                data = self._cache.get_or_create(key, creator, **kw)
+                data = self._cache.get_or_create(key, creator)
+
+                if data:
+                    break
             except redis.BusyLoadingError:
                 _log.warn('Redis is busy, sleep for 0.1s and try again')
                 time.sleep(0.1)
                 total_sleep += 0.1
-        if data is None and total_sleep >= self.MAX_FETCH_TIMEOUT:
+        else:
             raise RuntimeError('Timeout while fetching {} from cache'
                                .format(key))
         return data

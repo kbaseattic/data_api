@@ -140,6 +140,11 @@ def test_get_referrers_default():
     referrers = t.get_referrers()
     _log.info("Output {}".format(referrers))
 
+    # check for empty referrer lists
+    empty_refs = [True for k in referrers if len(referrers[k]) == 0]
+
+    assert len(empty_refs) == 0
+
     all_refs = [x for k in referrers for x in referrers[k]]
 
     found = set()
@@ -158,6 +163,11 @@ def test_get_referrers_all_versions():
     _log.info("Output {}".format(referrers))
 
     assert referrers is not None
+    # check for empty referrer lists
+    empty_refs = [True for k in referrers if len(referrers[k]) == 0]
+
+    assert len(empty_refs) == 0
+
 
 #TODO add test for copy method
 #def test_copy():

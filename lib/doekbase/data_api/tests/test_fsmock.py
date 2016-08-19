@@ -153,7 +153,7 @@ def test_get_objects():
     assert len(r) == 2
     for obj in r:
         assert 'data' in obj
-        assert 'object_info' in obj
+        assert 'info' in obj
 
 
 def test_get_type_info():
