@@ -2527,8 +2527,7 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
             latest_summary = refs[all_summary_types[-1]][0]
             summary = ObjectAPI(self.services,
                                 self._token,
-                                latest_summary,
-                                [self.ref, latest_summary]).get_data()
+                                latest_summary).get_data()
 
         out = {
             "taxonomy": {

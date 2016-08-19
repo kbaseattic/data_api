@@ -126,7 +126,7 @@ class WorkspaceFile(object):
     _canonicals = {}  # mapping from other refs to canonical ws/obj/ver refs
 
     #: Version of the workspace we are emulating
-    VERSION = '0.3.5'
+    VERSION = '0.5.0'
 
     def __init__(self, working_directory):
         """Create file-based Workspace instance, using files in

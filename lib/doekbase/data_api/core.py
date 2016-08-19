@@ -543,9 +543,6 @@ class ObjectAPI(object):
                 versioned_ref = "{}/{}/{}".format(x[6],x[0],x[4])
                 typestring = ObjectAPI(self.services, self._token, versioned_ref).get_typestring()
 
-                if typestring not in object_refs_by_type:
-                    object_refs_by_type[typestring] = []
-
                 unversioned_ref = str(x[6]) + "/" + str(x[0])
                 if unversioned_ref in found_objects:
                     if x[4] > found_objects[unversioned_ref]:
@@ -555,6 +552,9 @@ class ObjectAPI(object):
                     found_objects[unversioned_ref] = (typestring, x[4])
 
             for x in found_objects:
+                if found_objects[x][0] not in object_refs_by_type:
+                    object_refs_by_type[found_objects[x][0]] = []
+
                 object_refs_by_type[found_objects[x][0]].append(x + "/" + str(found_objects[x][1]))
         else:
             for x in referrers:
