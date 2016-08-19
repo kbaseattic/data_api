@@ -1,4 +1,5 @@
 alabaster==0.7.6
+biopython>=1.66
 blist
 codecov
 coverage

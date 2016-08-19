@@ -19,6 +19,7 @@ except ImportError:
 from doekbase.data_api.core import ObjectAPI, fix_docs
 from doekbase.data_api.util import get_logger
 from doekbase.data_api.blob import blob
+from . import create
 
 _GENOME_TYPES = ['KBaseGenomes.Genome']
 _GENOME_ANNOTATION_TYPES = ['KBaseGenomeAnnotations.GenomeAnnotation']
@@ -2557,3 +2558,22 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
         }
 
         return out
+
+def create_genome_annotation(services=None,
+                             token=None,
+                             workspace_identifier=None,
+                             genome_annotation_name=None,
+                             features=None,
+                             proteins=None,
+                             assembly_ref=None,
+                             taxon_ref=None,
+                             annotation_properties=None):
+    return create.create_genome_annotation(services,
+                                           token,
+                                           workspace_identifier,
+                                           genome_annotation_name,
+                                           features,
+                                           proteins,
+                                           assembly_ref,
+                                           taxon_ref,
+                                           annotation_properties)
