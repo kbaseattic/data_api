@@ -1,5 +1,6 @@
 # Stdlib
 import hashlib
+import logging
 
 # 3rd party
 import Bio.Seq
@@ -7,6 +8,7 @@ import Bio.Alphabet
 
 from doekbase.data_api.sequence.assembly.api import AssemblyAPI
 from doekbase.data_api.taxonomy.taxon.api import TaxonAPI
+from doekbase.workspace.client import Workspace
 
 def create_genome_annotation(services=None,
                              token=None,
@@ -35,7 +37,12 @@ def create_genome_annotation(services=None,
         raise ValueError("Missing GenomeAnnotation properties!")
 
     assembly_object = AssemblyAPI(services,token,assembly_ref)
-    taxon_object = TaxonAPI(services, token, taxon_ref)
+
+    if taxon_ref:
+        taxon_object = TaxonAPI(services, token, taxon_ref)
+    else:
+        # set to the unknown taxon
+        taxon_object = TaxonAPI(services, token, "ReferenceTaxons/unknown_taxon")
 
     # fetch the genetic code for sequence translation
     genetic_code = taxon_object.get_genetic_code()
@@ -46,25 +53,66 @@ def create_genome_annotation(services=None,
     features_locations_validator(features, contigs)
 
     feature_sequences = determine_sequences(features, contigs)
-    print "Number of feature types: " + str(len(feature_sequences))
-    feature_count = 0
-    for type in feature_sequences:
-        feature_count += len(feature_sequences[type])
-    print "Number of features: " + str(feature_count)
-    print "Number of CDS sequences : " + str(len(feature_sequences["CDS"]))
 
     protein_container, cds_warnings, cds_protein_mappings = create_protein_container(genome_annotation_name,
                                                                                      proteins,
                                                                                      feature_sequences["CDS"],
                                                                                      genetic_code)
+
     feature_containers, feature_alias_lookup, warnings = create_feature_containers(genome_annotation_name,
                                                                                    features,
                                                                                    feature_sequences,
                                                                                    cds_protein_mappings,
                                                                                    cds_warnings,
-                                                                                   "test_ws",
+                                                                                   workspace_identifier,
                                                                                    assembly_ref,
                                                                                    [])
+
+    references = {}
+
+    quality = create_quality_object(warnings)
+    annotation = create_annotation_object(annotation_properties, references)
+
+    if 0:
+        ws = Workspace(services["workspace_service_url"], token=token)
+
+        # save protein_container
+        ws.save_objects({'id': workspace_identifier,
+                         'objects': [{
+                             "type": "GenomeAnnotations.ProteinContainer",
+                             "data": protein_container,
+                             "name": "",
+                             "provenance": [],
+                             "hidden": 1}
+                         ]})
+        # save quality object
+        ws.save_objects({'id': workspace_identifier,
+                         'objects': [{
+                             "type": "GenomeAnnotations.FeatureContainer",
+                             "data": feature_containers[t],
+                             "name": "",
+                             "provenance": [],
+                             "hidden": 1
+                            } for t in feature_containers]})
+        # save quality object
+        ws.save_objects({'id': workspace_identifier,
+                         'objects': [{
+                             "type": "GenomeAnnotations.AnnotationQuality",
+                             "data": quality,
+                             "name": "",
+                             "provenance": [],
+                             "hidden": 1}]})
+
+        # save annotation object
+        ws.save_objects({'id': workspace_identifier,
+                         'objects': [{
+                             "type": "GenomeAnnotations.GenomeAnnotation",
+                             "data": annotation,
+                             "name": "",
+                             "provenance": [],
+                             "hidden": 1}]})
+
+        # save summary object
 
     return [protein_container, warnings, feature_containers, feature_alias_lookup]
 
@@ -101,21 +149,21 @@ def create_feature_containers(core_name=None,
         raise ValueError("No assembly reference was supplied")
         
     feature_types = list()
-    print "Feature sequences key : " + str(feature_sequences.keys())
+    #print "Feature sequences key : " + str(feature_sequences.keys())
     available_feature_types = feature_sequences.keys()
     if include_feature_types is not None and len(include_feature_types) > 0:
-        print "IN IF"
-        print "LENGTH OF INCLUDE FEATURES : " + str(len(include_feature_types))
+        #print "IN IF"
+        #print "LENGTH OF INCLUDE FEATURES : " + str(len(include_feature_types))
         feature_types = include_feature_types
         for temp_feature_type in feature_types:
             if temp_feature_type not in available_feature_types:
                 raise ValueError("Included Feature type {} is not the in the feature data provided".format(temp_feature_type))
     else:
-        print "IN ELSE"
+        #print "IN ELSE"
         #Do all present feature types
         feature_types = available_feature_types
 
-    print "FEATURE TYPES : " + str(feature_types)
+    #print "FEATURE TYPES : " + str(feature_types)
 
     feature_containers = dict() #dict with feature_type as top level key and then the feature container json as the value.
     feature_alias_lookup= dict() #Dict of feature alias lookups for the top level genome annotation object.
@@ -311,3 +359,11 @@ def determine_sequences(features=None, contigs=None):
         feature_sequences[feature_type][feature_id]=feature_sequence
     return feature_sequences
 
+def create_quality_object():
+    pass
+
+def create_annotation_object():
+    pass
+
+def create_summary_object():
+    pass
