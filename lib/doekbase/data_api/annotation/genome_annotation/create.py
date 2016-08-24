@@ -16,7 +16,8 @@ def create_genome_annotation(services=None,
                              proteins=None,
                              assembly_ref=None,
                              taxon_ref=None,
-                             annotation_properties=None):
+                             annotation_properties=None,
+                             provenance_properties=None):
     if not services:
         raise ValueError("Missing KBase services configuration!")
     elif not token:
@@ -33,6 +34,12 @@ def create_genome_annotation(services=None,
         raise ValueError("Missing Taxon reference!")
     elif not annotation_properties:
         raise ValueError("Missing GenomeAnnotation properties!")
+    elif not provenance_properties:
+        raise ValueError("Missing Provenance properties!")
+
+    provenance_template = [{"script": provenance_properties["script"], 
+                            "script_ver": provenance_properties["script_ver"], 
+                            "description": provenance_properties["description"]}]
 
     assembly_object = AssemblyAPI(services,token,assembly_ref)
     taxon_object = TaxonAPI(services, token, taxon_ref)
@@ -192,7 +199,7 @@ def create_feature_containers(core_name=None,
                     feature_alias_lookup[feature_alias] = list()
                 feature_alias_lookup[feature_alias].append("{}/{}".format(workspace_identifier,container_object_name,feature_id))
                 for alias_source in feature["aliases"][feature_alias]:
-                    if alias_source not in :
+                    if alias_source not in alias_source_counts_map:
                         alias_source_counts_map[alias_source] = 0
                     alias_source_counts_map[alias_source] += 1
         if feature_id not in feature_sequences[feature_type]:
