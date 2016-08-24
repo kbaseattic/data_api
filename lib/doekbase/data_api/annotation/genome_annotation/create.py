@@ -57,19 +57,60 @@ def create_genome_annotation(services=None,
                                                                                      proteins,
                                                                                      feature_sequences["CDS"],
                                                                                      genetic_code)
-    feature_containers, feature_alias_lookup, warnings = create_feature_containers(genome_annotation_name,
-                                                                                   features,
-                                                                                   feature_sequences,
-                                                                                   cds_protein_mappings,
-                                                                                   cds_warnings,
-                                                                                   "test_ws",
-                                                                                   assembly_ref,
-                                                                                   [])
+    feature_containers, feature_alias_lookup, warnings, feature_counts, alias_source_counts = create_feature_containers(genome_annotation_name,
+                                                                                                                        features,
+                                                                                                                        feature_sequences,
+                                                                                                                        cds_protein_mappings,
+                                                                                                                        cds_warnings,
+                                                                                                                        "test_ws",
+                                                                                                                        assembly_ref,
+                                                                                                                        [])
 
-    return [protein_container, warnings, feature_containers, feature_alias_lookup]
+    annotation_quality_object = create_annotation_quality(genome_annotation_name, warnings, feature_counts)
+
+    genome_annotation = dict()
+    feature_container_references = dict()
+    for feature_type in feature_counts:
+        feature_container_references[feature_type]="{}/{}_{}".format(workspace_identifier,genome_annotation_name,feature_type)
+    genome_annotation["feature_container_references"] = feature_container_references
+    genome_annotation["protein_container_ref"] = "{}/{}_protein_container".format(workspace_identifier,genome_annotation_name)
+    genome_annotation["annotation_quality_ref"] = "{}/{}_annotation_quality".format(workspace_identifier,genome_annotation_name)
+    genome_annotation["feature_lookup"] = feature_alias_lookup
+    genome_annotation["counts_map"] = feature_counts
+    genome_annotation["methodology"] = "RAST annotated"
+    genome_annotation["alias_source_counts_map"] = alias_source_counts
+    genome_annotation["taxon_ref"] = taxon_ref
+    genome_annotation["assembly_ref"] = assembly_ref
+    genome_annotation["genome_annotation_id"] = genome_annotation_name
+    genome_annotation["display_sc_name"] = taxon_object.get_scientific_name()
+
+# type
+#  string external_source;
+#  string external_source_id;
+#  string external_source_origination_date;
+#  string release;
+#  string original_source_file_name;
+#string notes;
+
+    return [protein_container, warnings, feature_containers, annotation_quality_object]
 
 
+def create_annotation_quality(core_name=None, warnings=None, feature_counts=None):
+    if core_name is None: 
+        raise ValueError("No core_name supplied") 
+ 
+    if warnings is None: 
+        warnings = list() 
 
+    annotation_quality_object = dict()
+    annotation_quality_object["metadata_completeness"] = 0
+    annotation_quality_object["metadata_completeness_warnings"] = list()
+    annotation_quality_object["data_quality"] = 0
+    annotation_quality_object["data_quality_warnings"] = warnings
+    annotation_quality_object["feature_types_present"] = len(feature_counts) 
+    annotation_quality_object["evidence_supported"] = 0
+
+    return annotation_quality_object
 
 def create_feature_containers(core_name=None, 
                               features=None, 
@@ -104,23 +145,22 @@ def create_feature_containers(core_name=None,
     print "Feature sequences key : " + str(feature_sequences.keys())
     available_feature_types = feature_sequences.keys()
     if include_feature_types is not None and len(include_feature_types) > 0:
-        print "IN IF"
-        print "LENGTH OF INCLUDE FEATURES : " + str(len(include_feature_types))
         feature_types = include_feature_types
         for temp_feature_type in feature_types:
             if temp_feature_type not in available_feature_types:
                 raise ValueError("Included Feature type {} is not the in the feature data provided".format(temp_feature_type))
     else:
-        print "IN ELSE"
         #Do all present feature types
         feature_types = available_feature_types
 
     print "FEATURE TYPES : " + str(feature_types)
 
     feature_containers = dict() #dict with feature_type as top level key and then the feature container json as the value.
-    feature_alias_lookup= dict() #Dict of feature alias lookups for the top level genome annotation object.
+    feature_alias_lookup = dict() #Dict of feature alias lookups for the top level genome annotation object.
+    alias_source_counts_map = dict() #dict of alias source and count of them present
     warnings=list() #Warnings for the annotation quality object    
     protein_container_ref = "{}/{}_protein_container".format(workspace_identifier,core_name)
+    feature_counts = dict()
 
     for feature_id in features:
         feature = dict() #feature that is being built up this iteration
@@ -138,8 +178,10 @@ def create_feature_containers(core_name=None,
                 "type" : feature_type,
                 "assembly_ref" : assembly_ref
             }
+            feature_counts[feature_type] = 0
 
         feature["feature_id"] = feature_id
+        feature_counts[feature_type] += 1
         if ("feature_function" in input_feature) and input_feature["feature_function"].strip() != "":
             feature["function"] = input_feature["feature_function"]
         if ("feature_aliases" in input_feature) and len(input_feature["feature_aliases"]) > 0 :
@@ -149,6 +191,10 @@ def create_feature_containers(core_name=None,
                 if feature_alias not in feature_alias_lookup:
                     feature_alias_lookup[feature_alias] = list()
                 feature_alias_lookup[feature_alias].append("{}/{}".format(workspace_identifier,container_object_name,feature_id))
+                for alias_source in feature["aliases"][feature_alias]:
+                    if alias_source not in :
+                        alias_source_counts_map[alias_source] = 0
+                    alias_source_counts_map[alias_source] += 1
         if feature_id not in feature_sequences[feature_type]:
             raise ValueError("There is no sequence {} in the feature_sequences dictionary".format(feature_id))
         else:
@@ -182,7 +228,7 @@ def create_feature_containers(core_name=None,
 #        print "FEATURE : " + feature
 #        exit()
 
-    return (feature_containers, feature_alias_lookup, warnings)
+    return (feature_containers, feature_alias_lookup, warnings, feature_counts, alias_source_counts)
 
 
 def create_protein_container(core_name=None, proteins=None, cds_sequences=None, genetic_code=None):
