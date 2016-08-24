@@ -53,11 +53,137 @@ def create_genome_annotation(services=None,
     print "Number of features: " + str(feature_count)
     print "Number of CDS sequences : " + str(len(feature_sequences["CDS"]))
 
-    protein_container, cds_warnings = create_protein_container(genome_annotation_name,
-                                                               proteins,
-                                                               feature_sequences["CDS"],
-                                                               genetic_code)
-    return [protein_container, cds_warnings]
+    protein_container, cds_warnings, cds_protein_mappings = create_protein_container(genome_annotation_name,
+                                                                                     proteins,
+                                                                                     feature_sequences["CDS"],
+                                                                                     genetic_code)
+    feature_containers, feature_alias_lookup, warnings = create_feature_containers(genome_annotation_name,
+                                                                                   features,
+                                                                                   feature_sequences,
+                                                                                   cds_protein_mappings,
+                                                                                   cds_warnings,
+                                                                                   "test_ws",
+                                                                                   assembly_ref,
+                                                                                   [])
+
+    return [protein_container, warnings, feature_containers, feature_alias_lookup]
+
+
+
+
+def create_feature_containers(core_name=None, 
+                              features=None, 
+                              feature_sequences=None, 
+                              cds_protein_mappings = None, 
+                              cds_warnings = None,
+                              workspace_identifier = None,
+                              assembly_ref = None,
+                              include_feature_types=None):
+    if core_name is None:
+        raise ValueError("No core_name supplied")
+
+    if features is None:
+        raise ValueError("No dictionary of features supplied")
+
+    if feature_sequences is None:
+        raise ValueError("No dictionary of feature sequences supplied")
+
+    if cds_protein_mappings is None:
+        raise ValueError("No dictionary of cds protein mappings supplied")
+
+    if cds_warnings is None:
+        cds_warnings = dict()
+
+    if workspace_identifier is None:
+        raise ValueError("No workspace indentifier was supplied")
+
+    if assembly_ref is None:
+        raise ValueError("No assembly reference was supplied")
+        
+    feature_types = list()
+    print "Feature sequences key : " + str(feature_sequences.keys())
+    available_feature_types = feature_sequences.keys()
+    if include_feature_types is not None and len(include_feature_types) > 0:
+        print "IN IF"
+        print "LENGTH OF INCLUDE FEATURES : " + str(len(include_feature_types))
+        feature_types = include_feature_types
+        for temp_feature_type in feature_types:
+            if temp_feature_type not in available_feature_types:
+                raise ValueError("Included Feature type {} is not the in the feature data provided".format(temp_feature_type))
+    else:
+        print "IN ELSE"
+        #Do all present feature types
+        feature_types = available_feature_types
+
+    print "FEATURE TYPES : " + str(feature_types)
+
+    feature_containers = dict() #dict with feature_type as top level key and then the feature container json as the value.
+    feature_alias_lookup= dict() #Dict of feature alias lookups for the top level genome annotation object.
+    warnings=list() #Warnings for the annotation quality object    
+    protein_container_ref = "{}/{}_protein_container".format(workspace_identifier,core_name)
+
+    for feature_id in features:
+        feature = dict() #feature that is being built up this iteration
+        input_feature = features[feature_id]
+        feature_type = input_feature["feature_type"]
+        if feature_type not in feature_types:
+            #Do not process this feature 
+            continue
+        feature["type"] = feature_type
+        container_object_name = "{}_{}".format(core_name,feature_type)
+        if feature_type not in feature_containers:
+            feature_containers[feature_type] = {
+                "features" : dict(),
+                "feature_container_id" : container_object_name,
+                "type" : feature_type,
+                "assembly_ref" : assembly_ref
+            }
+
+        feature["feature_id"] = feature_id
+        if ("feature_function" in input_feature) and input_feature["feature_function"].strip() != "":
+            feature["function"] = input_feature["feature_function"]
+        if ("feature_aliases" in input_feature) and len(input_feature["feature_aliases"]) > 0 :
+            feature["aliases"] = input_feature["feature_aliases"]
+            #Process each alias and add them to the feature_alias_lookup
+            for feature_alias in feature["aliases"]:
+                if feature_alias not in feature_alias_lookup:
+                    feature_alias_lookup[feature_alias] = list()
+                feature_alias_lookup[feature_alias].append("{}/{}".format(workspace_identifier,container_object_name,feature_id))
+        if feature_id not in feature_sequences[feature_type]:
+            raise ValueError("There is no sequence {} in the feature_sequences dictionary".format(feature_id))
+        else:
+            seq = feature_sequences[feature_type][feature_id]
+            feature["dna_sequence"] = seq
+            feature["md5"] = hashlib.md5(seq.upper()).hexdigest()
+            feature["dna_sequence_length"] = len(seq)
+        #process the locations
+        feature["locations"] = list()
+        for location in input_feature["feature_locations"]:
+            temp_list = [location["contig_id"], location["start"], location["strand"], location["length"]]
+            feature["locations"].append(temp_list)
+        if ("feature_inference" in input_feature) and input_feature["feature_inference"].strip() != "":
+            feature["inference"] = input_feature["feature_inference"]
+        if ("feature_notes" in input_feature) and input_feature["feature_notes"].strip() != "":
+            feature["notes"] = input_feature["feature_notes"]
+        #PUNTING ON PUBLICATIONS FOR NOW as uploader does not have feature level publications
+        if (
+            (("feature_warnings" in input_feature) and (len(input_feature["feature_warnings"]) > 0)) or 
+            (feature_id in cds_warnings)):
+            feature["quality_warnings"] = list()
+            if (("feature_warnings" in input_feature) and (len(input_feature["feature_warnings"]) > 0)):
+                for warning in input_feature["feature_warnings"]:
+                    feature["quality_warnings"].append(warning)
+                    warnings.append("{} : {}".format(feature_id, warning))
+            if (feature_id in cds_warnings):
+                warnings.append(cds_warnings[feature_id])
+        if feature_type == "CDS":
+            feature["CDS_properties"]={"codes_for_protein_ref":[protein_container_ref,cds_protein_mappings[feature_id]]}
+        feature_containers[feature_type]["features"][feature_id]=feature
+#        print "FEATURE : " + feature
+#        exit()
+
+    return (feature_containers, feature_alias_lookup, warnings)
+
 
 def create_protein_container(core_name=None, proteins=None, cds_sequences=None, genetic_code=None):
     if core_name is None:
@@ -78,6 +204,7 @@ def create_protein_container(core_name=None, proteins=None, cds_sequences=None, 
     protein_container_object_name = "{}_protein_container".format(core_name)
     protein_container['protein_container_id'] = protein_container_object_name
     protein_container['name'] = protein_container_object_name
+    cds_protein_mappings = dict()
     for cds_id in proteins:
         input_protein = proteins[cds_id]
         protein = {"protein_id": input_protein["protein_id"]}
@@ -114,8 +241,9 @@ def create_protein_container(core_name=None, proteins=None, cds_sequences=None, 
             raise ValueError("Protein_id {} is duplicated, problem with input data".format(protein["protein_id"]))
         else:
             protein_container["proteins"][protein["protein_id"]] = protein
+            cds_protein_mappings[cds_id]=protein["protein_id"]
 
-    return (protein_container, cds_warnings)
+    return (protein_container, cds_warnings, cds_protein_mappings)
 
 
 def features_locations_validator(features=None, contigs=None):
@@ -182,3 +310,4 @@ def determine_sequences(features=None, contigs=None):
             feature_sequences[feature_type] = {}
         feature_sequences[feature_type][feature_id]=feature_sequence
     return feature_sequences
+

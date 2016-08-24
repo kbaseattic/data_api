@@ -34,4 +34,12 @@ if __name__ == "__main__":
     with open(pc_filename, 'w') as pc:
         pc.write(json.dumps(protein_container))
 
-    print "CDS warnings: {}".format(results[1])
+#    print "Warnings: {}".format(results[1])
+    feature_containers = results[2]
+    for feature_type in feature_containers:
+        fc_filename = "8020_39_1_{}_fc.json".format(feature_type)
+        with open(fc_filename, 'w') as fc:
+            fc.write(json.dumps(feature_containers[feature_type]))
+#    print feature_alias_lookup
+
+    print "Finished"
