@@ -57,14 +57,15 @@ def create_genome_annotation(services=None,
                                                                                      proteins,
                                                                                      feature_sequences["CDS"],
                                                                                      genetic_code)
-    feature_containers, feature_alias_lookup, warnings = create_feature_containers(genome_annotation_name,
-                                                                                   features,
-                                                                                   feature_sequences,
-                                                                                   cds_protein_mappings,
-                                                                                   cds_warnings,
-                                                                                   "test_ws",
-                                                                                   assembly_ref,
-                                                                                   [])
+    feature_containers, feature_alias_lookup, warnings, feature_counts = create_feature_containers(genome_annotation_name,
+                                                                                                   features,
+                                                                                                   feature_sequences,
+                                                                                                   cds_protein_mappings,
+                                                                                                   cds_warnings,
+                                                                                                   "test_ws",
+                                                                                                   assembly_ref,
+                                                                                                   [])
+    print "Feature counts : {}".format(str(feature_counts))
 
     return [protein_container, warnings, feature_containers, feature_alias_lookup]
 
@@ -104,14 +105,11 @@ def create_feature_containers(core_name=None,
     print "Feature sequences key : " + str(feature_sequences.keys())
     available_feature_types = feature_sequences.keys()
     if include_feature_types is not None and len(include_feature_types) > 0:
-        print "IN IF"
-        print "LENGTH OF INCLUDE FEATURES : " + str(len(include_feature_types))
         feature_types = include_feature_types
         for temp_feature_type in feature_types:
             if temp_feature_type not in available_feature_types:
                 raise ValueError("Included Feature type {} is not the in the feature data provided".format(temp_feature_type))
     else:
-        print "IN ELSE"
         #Do all present feature types
         feature_types = available_feature_types
 
@@ -121,6 +119,7 @@ def create_feature_containers(core_name=None,
     feature_alias_lookup= dict() #Dict of feature alias lookups for the top level genome annotation object.
     warnings=list() #Warnings for the annotation quality object    
     protein_container_ref = "{}/{}_protein_container".format(workspace_identifier,core_name)
+    feature_counts = dict()
 
     for feature_id in features:
         feature = dict() #feature that is being built up this iteration
@@ -138,8 +137,10 @@ def create_feature_containers(core_name=None,
                 "type" : feature_type,
                 "assembly_ref" : assembly_ref
             }
+            feature_counts[feature_type] = 0
 
         feature["feature_id"] = feature_id
+        feature_counts[feature_type] += 1
         if ("feature_function" in input_feature) and input_feature["feature_function"].strip() != "":
             feature["function"] = input_feature["feature_function"]
         if ("feature_aliases" in input_feature) and len(input_feature["feature_aliases"]) > 0 :
@@ -182,7 +183,7 @@ def create_feature_containers(core_name=None,
 #        print "FEATURE : " + feature
 #        exit()
 
-    return (feature_containers, feature_alias_lookup, warnings)
+    return (feature_containers, feature_alias_lookup, warnings, feature_counts)
 
 
 def create_protein_container(core_name=None, proteins=None, cds_sequences=None, genetic_code=None):
