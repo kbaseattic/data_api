@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 if __name__ == "__main__":
     import os
     import json
@@ -31,34 +29,21 @@ if __name__ == "__main__":
         with open(test_organisms[t], 'r') as sample:
             data = json.loads(sample.read())
 
-        results = create_genome_annotation(services,
-                                           token,
-                                           888888,
-                                           data['annotation_properties']['genome_annotation_id'],
-                                           data['features'],
-                                           data['proteins'],
-                                           data['assembly_ref'],
-                                           data['taxon_ref'],
-                                           data['annotation_properties'])
-
-        id = test_organisms[t].split(".json")[0]
-
-        protein_container = results[0]
-        pc_filename = "{}_pc.json".format(id)
-        with open(pc_filename, 'w') as pc:
-            "creating {}".format(pc_filename)
-            pc.write(json.dumps(protein_container))
-
-        feature_containers = results[2]
-        for feature_type in feature_containers:
-            fc_filename = "{}_{}_fc.json".format(id, feature_type)
-            "creating {}".format(fc_filename)
-            with open(fc_filename, 'w') as fc:
-                fc.write(json.dumps(feature_containers[feature_type]))
+        # assumes kbasetest user
+        ref = create_genome_annotation(services,
+                                       token,
+                                       10362,
+                                       data['annotation_properties']['genome_annotation_id'],
+                                       data['features'],
+                                       data['proteins'],
+                                       data['assembly_ref'],
+                                       data['taxon_ref'],
+                                       data['annotation_properties'])
 
         end = datetime.datetime.utcnow()
         print "Input data for {} was {} MB and took {}\n".format(t,
                                                                  os.stat(test_organisms[t]).st_size/(1.0*1024*1024),
                                                                  end - start)
+        print "GenomeAnnotation reference: {}".format(ref)
 
     print "Finished"

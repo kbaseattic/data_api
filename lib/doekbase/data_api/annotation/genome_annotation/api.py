@@ -2483,9 +2483,9 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
             alias_source_dict = self.get_data_subset(path_list=["alias_source_counts_map"])["alias_source_counts_map"]
             summary_object["alias_sources"] = alias_source_dict.keys()
         except: 
-            summary_object["alias_sources"] = list() 
+            summary_object["alias_sources"] = list()
 
-        proteins = dict() 
+        proteins = dict()
         proteins = self.get_proteins()
         summary_object["cds_coding_for_proteins_count"] = len(proteins) 
 
@@ -2567,13 +2567,17 @@ def create_genome_annotation(services=None,
                              proteins=None,
                              assembly_ref=None,
                              taxon_ref=None,
-                             annotation_properties=None):
-    return create.create_genome_annotation(services,
-                                           token,
-                                           workspace_identifier,
-                                           genome_annotation_name,
-                                           features,
-                                           proteins,
-                                           assembly_ref,
-                                           taxon_ref,
-                                           annotation_properties)
+                             annotation_properties=None,
+                             provenance=None):
+    ga_ref = create.create_genome_annotation(services,
+                                             token,
+                                             workspace_identifier,
+                                             genome_annotation_name,
+                                             features,
+                                             proteins,
+                                             assembly_ref,
+                                             taxon_ref,
+                                             annotation_properties,
+                                             provenance)
+    GenomeAnnotationAPI(services, token, ga_ref).save_summary()
+    return ga_ref
