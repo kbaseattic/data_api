@@ -1,15 +1,9 @@
-#!/usr/bin/env python
-
 if __name__ == "__main__":
     import os
     import json
+    import datetime
 
     from doekbase.data_api.annotation.genome_annotation.api import create_genome_annotation
-
-    # read in exchange file
-    filename = "8020_39_1.json"
-    with open(filename, 'r') as sample:
-        data = json.loads(sample.read())
 
     services = {
         "workspace_service_url": "https://ci.kbase.us/services/ws/",
@@ -19,27 +13,37 @@ if __name__ == "__main__":
 
     token = os.environ['KB_AUTH_TOKEN']
 
-    results = create_genome_annotation(services,
+    test_organisms = {"Saccharomyces cerevisiae S288c": "8020_103_1.json",
+                      "Apple mosaic virus": "8020_69_1.json",
+                      "Red Algae 10D": "8020_39_1.json",
+                      "Arabidopsis thaliana Ensembl": "8020_11_1.json",
+                      "Arabidopsis thaliana Ensembl (chromosome 2 only)": "8020_58_1.json",
+                      "E.coli K-12 substr. MG1655": "8020_27_1.json"}
+
+    for t in test_organisms:
+        start = datetime.datetime.utcnow()
+
+        print "creating JSON files for {}".format(t)
+
+        # read in exchange file
+        with open(test_organisms[t], 'r') as sample:
+            data = json.loads(sample.read())
+
+        # assumes kbasetest user
+        ref = create_genome_annotation(services,
                                        token,
-                                       888888,
-                                       "Test",
+                                       10362,
+                                       data['annotation_properties']['genome_annotation_id'],
                                        data['features'],
                                        data['proteins'],
                                        data['assembly_ref'],
                                        data['taxon_ref'],
-                                       {"test": ""})
+                                       data['annotation_properties'])
 
-    protein_container = results[0]
-    pc_filename = "8020_39_1_pc.json"
-    with open(pc_filename, 'w') as pc:
-        pc.write(json.dumps(protein_container))
-
-#    print "Warnings: {}".format(results[1])
-    feature_containers = results[2]
-    for feature_type in feature_containers:
-        fc_filename = "8020_39_1_{}_fc.json".format(feature_type)
-        with open(fc_filename, 'w') as fc:
-            fc.write(json.dumps(feature_containers[feature_type]))
-#    print feature_alias_lookup
+        end = datetime.datetime.utcnow()
+        print "Input data for {} was {} MB and took {}\n".format(t,
+                                                                 os.stat(test_organisms[t]).st_size/(1.0*1024*1024),
+                                                                 end - start)
+        print "GenomeAnnotation reference: {}".format(ref)
 
     print "Finished"
