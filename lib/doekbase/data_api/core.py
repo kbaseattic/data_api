@@ -22,7 +22,7 @@ from doekbase.data_api import cache
 
 # Version
 
-DATA_API_VERSION = "0.4.0"
+DATA_API_VERSION = "0.4.1"
 
 def version():
     return DATA_API_VERSION
