@@ -647,10 +647,15 @@ class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
     def get_taxon(self, ref_only=False):
         from doekbase.data_api.taxonomy.taxon.api import TaxonAPI
 
+        taxon_ref = self.get_data_subset(path_list=["taxon_ref"])["taxon_ref"]
+
+        if not taxon_ref:
+            taxon_ref = self.ref
+
         if ref_only:
-            return self.ref
+            return taxon_ref
         else:
-            return TaxonAPI(self.services, token=self._token, ref=self.ref)
+            return TaxonAPI(self.services, token=self._token, ref=taxon_ref)
 
     def get_assembly(self, ref_only=False):
         from doekbase.data_api.sequence.assembly.api import AssemblyAPI
