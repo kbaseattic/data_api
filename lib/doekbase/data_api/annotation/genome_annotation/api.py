@@ -655,12 +655,19 @@ class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
     def get_assembly(self, ref_only=False):
         from doekbase.data_api.sequence.assembly.api import AssemblyAPI
 
-        contigset_ref = self.get_data_subset(path_list=["contigset_ref"])["contigset_ref"]
+        possible_refs = self.get_data_subset(path_list=["contigset_ref", "assembly_ref"])
+
+        if "contigset_ref" in possible_refs and possible_refs["contigset_ref"]:
+            assembly_ref = possible_refs["contigset_ref"]
+        elif "assembly_ref" in possible_refs and possible_refs["assembly_ref"]:
+            assembly_ref = possible_refs["assembly_ref"]
+        else:
+            raise AttributeError("No assembly reference found!")
 
         if ref_only:
-            return contigset_ref
+            return assembly_ref
         else:
-            return AssemblyAPI(self.services, self._token, ref=contigset_ref)
+            return AssemblyAPI(self.services, self._token, ref=assembly_ref)
 
     def get_feature_types(self):
         feature_types = []
