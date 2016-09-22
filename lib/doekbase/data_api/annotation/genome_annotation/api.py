@@ -1358,11 +1358,11 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
 
         if group_by == "type" or "type_list" in filters:
             limited_keys.append("type")
-        elif group_by == "region" or "region_list" in filters:
+        if group_by == "region" or "region_list" in filters:
             limited_keys.append("locations")
-        elif group_by == "alias" or "alias_list" in filters:
+        if group_by == "alias" or "alias_list" in filters:
             limited_keys.append("aliases")
-        elif group_by == "function" or "function_list" in filters:
+        if group_by == "function" or "function_list" in filters:
             limited_keys.append("function")
 
         paths = ['features/*/' + k for k in limited_keys]
