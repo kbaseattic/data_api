@@ -23,7 +23,7 @@ before_script:
   - printf "Build dir = $TRAVIS_BUILD_DIR\n"
 
 script:
-  - coverage run `which nosetests` -c nose.cfg -c nose-local.cfg
+  - coverage run `which nosetests` -c nose.cfg -c nose-local.cfg --verbosity=3
   - coverage report --skip-covered
 
 env:

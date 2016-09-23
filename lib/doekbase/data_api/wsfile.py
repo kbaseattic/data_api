@@ -380,7 +380,6 @@ class WorkspaceFile(object):
                 # set ref to target object at end of reference chain
                 ref_spec['ref'] = refs['obj_ref_path'][-1]
                 del ref_spec['obj_ref_path']
-
             else:
                 ref_spec['ref'] = refs['ref']
 

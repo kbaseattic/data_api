@@ -646,21 +646,34 @@ class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
 
     def get_taxon(self, ref_only=False):
         from doekbase.data_api.taxonomy.taxon.api import TaxonAPI
+        possible_ref = self.get_data_subset(path_list=["taxon_ref"])
+
+        if "taxon_ref" in possible_ref and possible_ref["taxon_ref"]:
+            taxon_ref = possible_ref["taxon_ref"]
+        else:
+            taxon_ref = self.ref
 
         if ref_only:
-            return self.ref
+            return taxon_ref
         else:
-            return TaxonAPI(self.services, token=self._token, ref=self.ref)
+            return TaxonAPI(self.services, token=self._token, ref=taxon_ref)
 
     def get_assembly(self, ref_only=False):
         from doekbase.data_api.sequence.assembly.api import AssemblyAPI
 
-        contigset_ref = self.get_data_subset(path_list=["contigset_ref"])["contigset_ref"]
+        possible_refs = self.get_data_subset(path_list=["contigset_ref", "assembly_ref"])
+
+        if "contigset_ref" in possible_refs and possible_refs["contigset_ref"]:
+            assembly_ref = possible_refs["contigset_ref"]
+        elif "assembly_ref" in possible_refs and possible_refs["assembly_ref"]:
+            assembly_ref = possible_refs["assembly_ref"]
+        else:
+            raise AttributeError("No assembly reference found!")
 
         if ref_only:
-            return contigset_ref
+            return assembly_ref
         else:
-            return AssemblyAPI(self.services, self._token, ref=contigset_ref)
+            return AssemblyAPI(self.services, self._token, ref=assembly_ref)
 
     def get_feature_types(self):
         feature_types = []
@@ -1358,11 +1371,11 @@ class _GenomeAnnotation(ObjectAPI, GenomeAnnotationInterface):
 
         if group_by == "type" or "type_list" in filters:
             limited_keys.append("type")
-        elif group_by == "region" or "region_list" in filters:
+        if group_by == "region" or "region_list" in filters:
             limited_keys.append("locations")
-        elif group_by == "alias" or "alias_list" in filters:
+        if group_by == "alias" or "alias_list" in filters:
             limited_keys.append("aliases")
-        elif group_by == "function" or "function_list" in filters:
+        if group_by == "function" or "function_list" in filters:
             limited_keys.append("function")
 
         paths = ['features/*/' + k for k in limited_keys]

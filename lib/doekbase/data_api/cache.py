@@ -208,8 +208,14 @@ class ObjectCache(object):
         # creator function, currying path_list arg.
         def creator():
             return parent_method(path_list=path_list)
-        # get from cache, or create
-        data = self.cache_get_or_create(key, creator)
+
+        # if there is no caching, call the creator directly
+        # NOTE: this was to avoid undesirable behavior when the result was empty
+        if self.cache_class == NullCache:
+            data = creator()
+        else:
+            # get from cache, or create
+            data = self.cache_get_or_create(key, creator)
         #self._stats.end_event('cache.get_data_subset', self._key)
         return data
 
@@ -231,7 +237,7 @@ class ObjectCache(object):
             try:
                 data = self._cache.get_or_create(key, creator)
 
-                if data:
+                if data is not None:
                     break
             except redis.BusyLoadingError:
                 _log.warn('Redis is busy, sleep for 0.1s and try again')
