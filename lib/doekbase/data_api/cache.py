@@ -237,7 +237,7 @@ class ObjectCache(object):
             try:
                 data = self._cache.get_or_create(key, creator)
 
-                if data:
+                if data is not None:
                     break
             except redis.BusyLoadingError:
                 _log.warn('Redis is busy, sleep for 0.1s and try again')
