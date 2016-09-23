@@ -646,10 +646,11 @@ class _KBaseGenomes_Genome(ObjectAPI, GenomeAnnotationInterface):
 
     def get_taxon(self, ref_only=False):
         from doekbase.data_api.taxonomy.taxon.api import TaxonAPI
+        possible_ref = self.get_data_subset(path_list=["taxon_ref"])
 
-        taxon_ref = self.get_data_subset(path_list=["taxon_ref"])["taxon_ref"]
-
-        if not taxon_ref:
+        if "taxon_ref" in possible_ref and possible_ref["taxon_ref"]:
+            taxon_ref = possible_ref["taxon_ref"]
+        else:
             taxon_ref = self.ref
 
         if ref_only:
